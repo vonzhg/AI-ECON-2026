@@ -1,0 +1,294 @@
+/* ============================================================
+   AI-ECON-2026 shared stylesheet
+   Base rules carried over from the course syllabus so every
+   page reads as one system; component classes added below.
+   ============================================================ */
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	line-height: 1.7;
+	background-color: #f8f9fa;
+	color: #343a40;
+	margin: 0;
+	padding: 0;
+}
+.container {
+	max-width: 950px;
+	margin: 30px auto;
+	padding: 30px 40px;
+	background-color: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+h1 {
+	font-size: 2.2em;
+	color: #003366;
+	border-bottom: 3px solid #0056b3;
+	padding-bottom: 15px;
+	margin-bottom: 20px;
+	font-weight: 700;
+}
+h2 {
+	font-size: 1.7em;
+	color: #003366;
+	border-bottom: 2px solid #e9ecef;
+	padding-bottom: 10px;
+	margin-top: 40px;
+	margin-bottom: 20px;
+	font-weight: 600;
+}
+h3 {
+	font-size: 1.35em;
+	color: #0056b3;
+	margin-top: 25px;
+	margin-bottom: 10px;
+	font-weight: 600;
+}
+.instructor-info {
+	background-color: #f8f9fa;
+	border-left: 5px solid #0056b3;
+	padding: 15px 25px;
+	margin-bottom: 25px;
+	border-radius: 0 8px 8px 0;
+}
+.instructor-info p { margin: 6px 0; font-size: 1.05em; }
+.instructor-info a { color: #0056b3; text-decoration: none; font-weight: 500; }
+.instructor-info a:hover { text-decoration: underline; }
+p, li { font-size: 1.05em; margin-bottom: 8px; }
+ul { list-style-type: none; padding-left: 25px; }
+li { position: relative; padding-left: 20px; margin-bottom: 6px; }
+li::before {
+	content: '\2022';
+	color: #0056b3;
+	font-weight: bold;
+	display: inline-block;
+	width: 1em;
+	margin-left: -20px;
+	position: absolute;
+	top: 0;
+}
+ul ul { margin-top: 6px; padding-left: 20px; }
+ul ul li::before { content: '\2013'; color: #555; font-weight: normal; }
+code {
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	background-color: #e9ecef;
+	padding: 2px 5px;
+	border-radius: 4px;
+	font-size: 0.93em;
+}
+.session-box {
+	background-color: #fdfdfd;
+	border: 1px solid #e0e0e0;
+	border-left: 5px solid #0056b3;
+	padding: 18px 22px;
+	margin: 18px 0;
+	border-radius: 0 8px 8px 0;
+}
+.session-box h3 { margin-top: 0; color: #003366; }
+.session-meta { font-size: 0.95em; color: #555; margin-bottom: 10px; }
+.lab-tag {
+	display: inline-block;
+	background-color: #fff3e0;
+	border: 1px solid #ff9800;
+	color: #e65100;
+	padding: 2px 8px;
+	border-radius: 4px;
+	font-size: 0.85em;
+	font-weight: 600;
+}
+.competency-box {
+	background-color: #fdfdfd;
+	border: 1px solid #e0e0e0;
+	border-left: 5px solid #17a2b8;
+	padding: 18px 22px;
+	margin: 20px 0;
+	border-radius: 0 8px 8px 0;
+}
+.competency-box h3 { margin-top: 0; color: #17a2b8; }
+.ecosystem-box {
+	background: linear-gradient(135deg, #f0f7ff 0%, #fff8f0 100%);
+	border: 1px solid #ccd;
+	border-left: 5px solid #003366;
+	padding: 18px 24px;
+	margin: 25px 0;
+	border-radius: 0 8px 8px 0;
+}
+.ecosystem-box h3 { margin-top: 0; color: #003366; font-size: 1.15em; }
+.ecosystem-box .eco-arrow { color: #0056b3; font-weight: 700; margin: 0 8px; }
+.supp-box {
+	background-color: #f0f7ff;
+	border: 1px solid #b3d4fc;
+	padding: 18px 22px;
+	margin: 18px 0;
+	border-radius: 8px;
+}
+.supp-box h3 { margin-top: 0; color: #003366; }
+a { color: #0056b3; text-decoration: none; }
+a:hover { text-decoration: underline; }
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 15px 0;
+	font-size: 0.95em;
+}
+th, td { border: 1px solid #dee2e6; padding: 10px 12px; text-align: left; }
+th { background-color: #f8f9fa; color: #003366; font-weight: 600; }
+tr:nth-child(even) { background-color: #f8f9fa; }
+
+/* ============================================================
+   Component classes — landing / slides / labs pages
+   ============================================================ */
+
+/* Top navigation bar */
+.topnav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	align-items: center;
+	font-size: 0.98em;
+	margin: -6px 0 22px;
+	padding-bottom: 14px;
+	border-bottom: 1px solid #e9ecef;
+}
+.topnav a { font-weight: 600; }
+.topnav .sep { color: #ced4da; }
+.topnav .home { color: #003366; }
+
+/* Quick-link buttons row on the landing page */
+.quicklinks {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: 14px;
+	margin: 24px 0 8px;
+}
+.quicklink {
+	display: block;
+	text-decoration: none;
+	background: #fdfdfd;
+	border: 1px solid #e0e0e0;
+	border-left: 5px solid #0056b3;
+	border-radius: 0 8px 8px 0;
+	padding: 16px 20px;
+	transition: box-shadow .15s, transform .15s;
+}
+.quicklink:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); text-decoration: none; }
+.quicklink .ql-title { font-weight: 700; color: #003366; font-size: 1.1em; }
+.quicklink .ql-sub { color: #666; font-size: 0.9em; }
+
+/* WeChat QR card */
+.qr-card {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 24px;
+	background: linear-gradient(135deg, #f0f7ff 0%, #f7fff0 100%);
+	border: 1px solid #cfe3d0;
+	border-left: 5px solid #07c160;
+	border-radius: 0 10px 10px 0;
+	padding: 20px 26px;
+	margin: 24px 0;
+}
+.qr-card img {
+	width: 190px;
+	max-width: 45vw;
+	height: auto;
+	border-radius: 8px;
+	background: #fff;
+	padding: 6px;
+	border: 1px solid #e0e0e0;
+}
+.qr-card .qr-text { flex: 1; min-width: 220px; }
+.qr-card .qr-text h3 { margin-top: 0; color: #067a3e; }
+.qr-note { font-size: 0.88em; color: #6c757d; }
+
+/* Lecture card grid */
+.lecture-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 16px;
+	margin: 18px 0;
+}
+.lecture-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 16px 18px;
+	background: #fdfdfd;
+}
+.lecture-card .lec-num {
+	font-size: 0.8em;
+	font-weight: 700;
+	color: #0056b3;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+}
+.lecture-card .lec-title { font-weight: 600; color: #003366; margin: 2px 0 10px; display: block; }
+.lecture-card .lec-links { font-size: 0.92em; }
+.lecture-card .lec-links a { margin-right: 12px; }
+
+/* Status badges */
+.badge {
+	display: inline-block;
+	padding: 1px 8px;
+	border-radius: 20px;
+	font-size: 0.78em;
+	font-weight: 600;
+	vertical-align: middle;
+}
+.badge-ready { background: #e6f4ea; border: 1px solid #34a853; color: #137333; }
+.badge-soon  { background: #f1f3f4; border: 1px solid #bdc1c6; color: #5f6368; }
+.badge-lock  { background: #fff3e0; border: 1px solid #ff9800; color: #e65100; }
+
+/* Codespaces / action button */
+.btn {
+	display: inline-block;
+	background: #0056b3;
+	color: #fff !important;
+	padding: 9px 16px;
+	border-radius: 6px;
+	font-weight: 600;
+	font-size: 0.95em;
+	text-decoration: none;
+}
+.btn:hover { background: #003f86; text-decoration: none; }
+.btn-ghost { background: #fff; color: #0056b3 !important; border: 1px solid #0056b3; }
+.btn-ghost:hover { background: #f0f7ff; }
+
+/* Download / resource list rows */
+.res-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 14px;
+	padding: 12px 0;
+	border-bottom: 1px solid #eee;
+}
+.res-row:last-child { border-bottom: none; }
+.res-row .res-name { font-weight: 600; color: #003366; flex: 1; min-width: 200px; }
+
+/* Callout / notice box */
+.notice {
+	background: #fff8e1;
+	border: 1px solid #ffe082;
+	border-left: 5px solid #ffb300;
+	border-radius: 0 8px 8px 0;
+	padding: 14px 20px;
+	margin: 18px 0;
+	font-size: 0.97em;
+}
+.notice.info { background: #f0f7ff; border-color: #b3d4fc; border-left-color: #0056b3; }
+
+/* Footer */
+.site-footer {
+	max-width: 950px;
+	margin: 0 auto 40px;
+	padding: 18px 40px;
+	color: #8a929a;
+	font-size: 0.85em;
+	text-align: center;
+}
+
+@media (max-width: 640px) {
+	.container { margin: 12px; padding: 20px 18px; }
+	h1 { font-size: 1.7em; }
+	.qr-card { gap: 16px; padding: 16px; }
+}

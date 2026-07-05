@@ -1,0 +1,12 @@
+# macOS / editor cruft
+.DS_Store
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Local-only instructor notes (passcodes, deploy secrets) — never commit
+*.local.md
+DEPLOY_NOTES.local.md

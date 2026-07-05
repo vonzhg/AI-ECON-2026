@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="robots" content="noindex, nofollow">
+	<title>AI for Economic Research: Dynamic Models, Language, and Agents</title>
+	<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+	<div class="container">
+		<nav class="topnav">
+			<a class="home" href="index.html">← Course Home</a>
+			<span class="sep">·</span>
+			<a href="syllabus.html">Syllabus</a>
+			<span class="sep">·</span>
+			<a href="slides/index.html">Slides</a>
+			<span class="sep">·</span>
+			<a href="labs/index.html">Labs</a>
+		</nav>
+		<h1>AI for Economic Research: Dynamic Models, Language, and Agents</h1>
+
+		<div class="instructor-info">
+			<p><strong>Professor:</strong> Zhigang Feng</p>
+			<p><strong>E-mail:</strong> z.feng2@gmail.com</p>
+			<p><strong>Webpage:</strong> <a href="https://sites.google.com/site/zfeng202/" target="_blank">https://sites.google.com/site/zfeng202/</a></p>
+		</div>
+
+		<div class="instructor-info" style="border-left-color:#e65100; background-color:#fff8f0;">
+			<p style="margin-top:0;"><strong>Class Meetings &mdash; Zhejiang University, Summer 2026</strong> &nbsp;&middot;&nbsp; 浙江大学上课安排</p>
+			<table>
+				<thead>
+					<tr><th>Date</th><th>Time</th><th>Location</th><th>Session</th></tr>
+				</thead>
+				<tbody>
+					<tr><td>Mon, July&nbsp;6</td><td>Morning 8:50&ndash;12:25</td><td>北1-306</td><td>Session 1 &mdash; Foundations (Lec&nbsp;1&ndash;2)</td></tr>
+					<tr><td>Tue, July&nbsp;7</td><td>Afternoon 14:00&ndash;17:00</td><td><strong>经济学院121报告厅</strong></td><td>Session 2 &mdash; ML Essentials (Lec&nbsp;3)</td></tr>
+					<tr><td>Wed, July&nbsp;8</td><td>Morning 8:50&ndash;12:25</td><td>北1-306</td><td>Session 3 &mdash; Deep Learning for Macro (Lec&nbsp;4)</td></tr>
+					<tr><td>Thu, July&nbsp;9</td><td>Morning 9:00&ndash;12:00</td><td><strong>经济学院121报告厅</strong></td><td>Session 4 &mdash; RL &amp; Heterogeneous Agents (Lec&nbsp;5&ndash;6)</td></tr>
+					<tr><td>Fri, July&nbsp;10</td><td>Morning 8:50&ndash;12:25</td><td>北1-306</td><td>Session 5 &mdash; LLMs &amp; Text (Lec&nbsp;7&ndash;8)</td></tr>
+					<tr><td>Sun, July&nbsp;12</td><td>Morning 8:50&ndash;12:25</td><td>北1-306</td><td>Session 6 &mdash; Agentic AI &amp; Case Studies (Lec&nbsp;9&ndash;10)</td></tr>
+				</tbody>
+			</table>
+			<p style="margin-bottom:0; font-size:0.93em; color:#555;">上午班 (8:50&ndash;12:25) 在 北1-306；<strong>7 月 7 日下午 (14:00&ndash;17:00)</strong> 与 <strong>7 月 9 日上午 (9:00&ndash;12:00)</strong> 两次报告在 <strong>经济学院121报告厅</strong>。</p>
+		</div>
+
+		<div class="ecosystem-box">
+			<h3>Course Ecosystem</h3>
+			<p>This course sits at the frontier of a larger body of teaching and research. A complete foundation in <strong>classical computational methods</strong> &mdash; value function iteration, perturbation, projection, EGM, and high-performance computing &mdash; is documented in companion video lecture series (free, online) from <strong><a href="https://space.bilibili.com/2142649036/lists/5800214" target="_blank">2025</a></strong> and <strong><a href="https://space.bilibili.com/2142649036/lists/7180709" target="_blank">2026</a></strong>, and in the textbook <em><a href="https://book.douban.com/subject/37885381/" target="_blank">机器学习与数量宏观经济学</a></em> by Zhigang Feng. Together they form a three-stage arc:</p>
+			<p style="text-align:center; font-size:1.05em; margin: 10px 0;">
+				<strong>Classical Methods</strong>
+				<span class="eco-arrow">&rarr;</span>
+				<strong>ML &amp; Deep Learning</strong>
+				<span class="eco-arrow">&rarr;</span>
+				<strong>Agentic AI Research</strong>
+			</p>
+			<p style="margin-bottom:0;">Students can enter at any stage. Those new to computational economics are encouraged to explore the video series alongside this course; those with classical training will find the bridge to modern AI tools immediately actionable.</p>
+		</div>
+
+		<!-- ============================================================ -->
+		<h2>Course Description</h2>
+
+		<p>Economics is being transformed. AI tools that once belonged to computer science labs are now reshaping how economists model complex behavior, extract signal from vast text corpora, and automate the entire research pipeline. This course equips students &mdash; at the upper-undergraduate through graduate level &mdash; to work at that frontier.</p>
+
+		<p>The course is organized around three interconnected pillars: (1) solving high-dimensional dynamic models with deep learning and reinforcement learning; (2) analyzing economic text &mdash; from FOMC minutes to congressional records &mdash; with large language models and retrieval-augmented generation; and (3) deploying agentic AI tools to accelerate every stage of the research workflow, from literature review to replication. Applications span macroeconomics, finance, and economic policy, and the specific topics covered will evolve as the frontier moves.</p>
+
+		<p>The course builds from foundations in dynamic programming and quantitative methods toward the cutting edge of AI research. Students arrive with economic intuition; they leave with the technical fluency and critical judgment to use AI as a genuine research partner.</p>
+
+		<div class="competency-box">
+			<h3>What You Will Build: Four Integrated Competencies</h3>
+			<ol>
+				<li><strong>Theoretical &amp; Algorithmic Mastery</strong> &mdash; Master economic theory and numerical methods on paper before touching code</li>
+				<li><strong>Technical Fluency</strong> &mdash; Working knowledge of Python, PyTorch, and the modern computational ecosystem</li>
+				<li><strong>AI-Augmented Implementation</strong> &mdash; Specification-driven development through detailed prompts to AI coding assistants</li>
+				<li><strong>Critical Validation</strong> &mdash; Shift from writing code to becoming a rigorous validator of technical correctness and economic plausibility</li>
+			</ol>
+		</div>
+
+		<p><strong>Prerequisites:</strong> Intermediate-level microeconomics and macroeconomics. Familiarity with dynamic programming or recursive methods is a plus but not required &mdash; the course builds up what it needs. No prior ML or Python experience required.</p>
+
+		<!-- ============================================================ -->
+		<h2>Session Schedule</h2>
+
+		<!-- Session 1 -->
+		<div class="session-box">
+			<h3>Session 1: Foundations</h3>
+			<p class="session-meta"><strong>Mon, July&nbsp;6 &middot; 8:50&ndash;12:25 &middot; 北1-306</strong> &mdash; 4 hours &mdash; Lectures 1 &amp; 2 + environment setup</p>
+			<ul>
+				<li><strong>Lecture 1: Introduction &mdash; AI and Economic Research</strong> (1 hr)
+					<ul>
+						<li>The state of AI as of early 2026: a rising frontier, falling costs, and historically fast adoption and diffusion</li>
+						<li>Why economists should care: AI as a general-purpose technology &mdash; and what does not qualify as one</li>
+						<li>AI as cognitive capital: task-level production, the adoption margin and S-curve, intangible non-rival capital and the measurement gap</li>
+						<li>How AI enters growth: three channels, a light growth-accounting lens, and why task-level gains don't auto-sum to macro TFP</li>
+						<li>AI as a research collaborator: compressing the theory&rarr;code loop and learning from failures (DeepRamsey illustration)</li>
+						<li>Context, not capability, is the bottleneck: four ways to give an LLM context and why naive RAG falls short for economics</li>
+						<li>A map of AI tools for economic research, concrete examples, strengths/limitations, and a task-level AI capability index</li>
+						<li>Course roadmap: the two arcs (dynamics and language), the 5-pillar &ldquo;research architect&rdquo; workflow, reproducibility discipline, tools, and capstone tracks</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/Lec01_T1_AI_and_Economics.pdf">T1 AI &amp; Economics</a> &middot;
+							<a href="slides/Lec01_T2_AI_Research_Collaborator.pdf">T2 AI as Research Collaborator</a> &middot;
+							<a href="slides/Lec01_T3_Course_Tools_Projects.pdf">T3 Course, Tools &amp; Projects</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lecture 2: What is AI?</strong> (1 hr)
+					<ul>
+						<li>AI evolution and landscape: from foundations and deep learning to generative and agentic AI</li>
+						<li>The three pillars of machine learning: supervised, unsupervised, and reinforcement learning &mdash; with economic examples</li>
+						<li>Deep learning as the engine: what a neural network is, how it learns, and why now (data, compute, algorithms, scaling)</li>
+						<li>Why predictive AI fails: COMPAS and the Fragile Families Challenge as cautionary cases; bridge to RL (Arc 1, Lec.&nbsp;4&ndash;6)</li>
+						<li>What is intelligence? The cognitive debate (stochastic parrots vs. reasoners) and the induction-vs-abduction reasoning gap</li>
+						<li>From NLP to LLMs to agents: next-word prediction, the knowledge-cutoff problem, and a five-family technique taxonomy</li>
+						<li>Using generative AI responsibly: hallucination, deepfakes, and the practitioner's discipline (what task? what data? what claim?)</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 ML &amp; the Predictive Stack</a> &middot;
+							<a href="slides/index.html">T2 Generative &amp; Agentic AI</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Setup &amp; Discussion</strong> (2 hr) &mdash; Python/PyTorch environment, introduction to classical methods video series, research interests</li>
+			</ul>
+		</div>
+
+		<!-- Session 2 -->
+		<div class="session-box">
+			<h3>Session 2: Machine Learning Essentials</h3>
+			<p class="session-meta"><strong>Tue, July&nbsp;7 &middot; 14:00&ndash;17:00 &middot; 经济学院121报告厅</strong> &mdash; 4 hours &mdash; Lecture 3 + extended lab <span class="lab-tag">Lab</span></p>
+			<ul>
+				<li><strong>Lecture 3: Machine Learning for Quantitative Macroeconomists</strong> (2 hr)
+					<ul>
+						<li>Pattern recognition as motivating illustration (handwritten digits)</li>
+						<li>Neural network architecture: layers, activation functions, universal approximation</li>
+						<li>Forward propagation and backpropagation</li>
+						<li>Gradient descent: SGD, Adam, learning rate schedules</li>
+						<li>Training process: loss functions, overfitting, regularization</li>
+						<li>Specialized architectures: CNNs, ICNNs, monotone networks</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Why ML</a> &middot;
+							<a href="slides/index.html">T2 NN Concepts</a> &middot;
+							<a href="slides/index.html">T3 Training/Backprop</a> &middot;
+							<a href="slides/index.html">T4 Specialized Networks</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lab</strong> (2 hr) &mdash; <code>Lab2A_MachineLearning_Basics.ipynb</code>: neural networks as non-parametric regression; <code>Lab2B_fomc_minutes_10y_model.ipynb</code>: yield curve prediction with real FRED data</li>
+			</ul>
+		</div>
+
+		<!-- Session 3 -->
+		<div class="session-box">
+			<h3>Session 3: Deep Learning for Macro Models</h3>
+			<p class="session-meta"><strong>Wed, July&nbsp;8 &middot; 8:50&ndash;12:25 &middot; 北1-306</strong> &mdash; 4 hours &mdash; Lecture 4 + extended lab <span class="lab-tag">Lab</span></p>
+			<ul>
+				<li><strong>Lecture 4: Solving Macro Models via Deep Learning &amp; RL</strong> (2 hr)
+					<ul>
+						<li>Motivation: curse of dimensionality and the deep learning opportunity</li>
+						<li>Running example: optimal growth model</li>
+						<li>Deep learning approach: parameterize value/policy functions with neural networks</li>
+						<li>Actor-critic algorithm applied to the growth model</li>
+						<li>Euler equation method + supervised learning</li>
+						<li>Structured neural networks: ICNNs for convexity preservation</li>
+						<li>Accuracy and validation: Euler equation errors</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Motivation &amp; Growth</a> &middot;
+							<a href="slides/index.html">T2 Deep VFI &amp; Actor-Critic</a> &middot;
+							<a href="slides/index.html">T3 Euler &amp; PyTorch</a> &middot;
+							<a href="slides/index.html">T4 Structured NNs &amp; Validation</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lab</strong> (2 hr) &mdash; <code>Lab3A_Dynamic_Models.ipynb</code>: classical VFI benchmark; <code>Lab3B_Dynamic_Models.ipynb</code>: neural network solutions (Euler equation solver, deep VFI)</li>
+			</ul>
+		</div>
+
+		<!-- Session 4 -->
+		<div class="session-box">
+			<h3>Session 4: Reinforcement Learning &amp; Heterogeneous Agents</h3>
+			<p class="session-meta"><strong>Thu, July&nbsp;9 &middot; 9:00&ndash;12:00 (morning) &middot; 经济学院121报告厅</strong> &mdash; 4 hours &mdash; Lectures 5 &amp; 6 + lab <span class="lab-tag">Lab</span></p>
+			<ul>
+				<li><strong>Lecture 5: Reinforcement Learning in a Nutshell</strong> (1.5 hr)
+					<ul>
+						<li>RL framework: agent, environment, MDP, policy/value functions</li>
+						<li>Connection to dynamic programming: Bellman, V(s) vs. Q(s,a)</li>
+						<li>Monte Carlo methods and temporal-difference learning</li>
+						<li>Exploration&ndash;exploitation: &epsilon;-greedy, Boltzmann, UCB</li>
+						<li>Actor-critic methods: A2C/A3C, DDPG, PPO, SAC</li>
+						<li>Applications: AlphaGo, AlphaManager, economics</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 RL Framework &amp; DP</a> &middot;
+							<a href="slides/index.html">T2 MC, TD, Q-Learning</a> &middot;
+							<a href="slides/index.html">T3 Actor-Critic &amp; Applications</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lecture 6: Heterogeneous Agent Models via RL</strong> (1.5 hr)
+					<ul>
+						<li>Aiyagari&ndash;Bewley&ndash;Huggett: setup, SRCE, existence</li>
+						<li>Krusell&ndash;Smith (1998): aggregate uncertainty, moment reduction</li>
+						<li>DeepHAM and Deep Equilibrium Nets (DEQN)</li>
+						<li>OLG with aggregate uncertainty and homotopy training</li>
+						<li>Mean-field games: HJB, KFE, connection to HA models</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Aiyagari &amp; Computation</a> &middot;
+							<a href="slides/index.html">T2a Why ML + Euler</a> &middot;
+							<a href="slides/index.html">T2b Global DNN</a> &middot;
+							<a href="slides/index.html">T3 KS &amp; DeepHAM</a> &middot;
+							<a href="slides/index.html">T4 DEQN &amp; OLG</a> &middot;
+							<a href="slides/index.html">T5a MFG: HJB</a> &middot;
+							<a href="slides/index.html">T5b MFG: KFE &amp; Lab</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lab</strong> (1 hr) &mdash; <code>Lab4A_KS1998_Pytorch.ipynb</code>: Krusell&ndash;Smith (1998) solved with Deep Equilibrium Nets (DEQN) in PyTorch; calibration, simulation, and Euler equation accuracy validation</li>
+			</ul>
+		</div>
+
+		<!-- Session 5 -->
+		<div class="session-box">
+			<h3>Session 5: Language Models &amp; Text as Economic Data</h3>
+			<p class="session-meta"><strong>Fri, July&nbsp;10 &middot; 8:50&ndash;12:25 &middot; 北1-306</strong> &mdash; 4 hours &mdash; Lectures 7 &amp; 8 + lab <span class="lab-tag">Lab</span></p>
+			<ul>
+				<li><strong>Lecture 7: Large Language Models &amp; Text as Economic Data</strong> (2 hr)
+					<ul>
+						<li>Tokenization: characters &rarr; subwords &rarr; tokens; BPE and WordPiece; why economic jargon is tokenized differently from everyday English</li>
+						<li>Word embeddings: TF-IDF, Word2Vec, GloVe; the geometry of meaning (analogy arithmetic: king &minus; man + woman &asymp; queen); polysemy and context-dependence</li>
+						<li>Transformer architecture deep dive: self-attention (Q, K, V matrices); scaled dot-product attention; positional encoding; multi-head attention</li>
+						<li>Full transformer layer: residual connections, layer normalization, MLP sublayer; encoder vs. decoder vs. encoder&ndash;decoder</li>
+						<li>Training paradigms: pretraining on raw text, fine-tuning for downstream tasks (full fine-tuning, LoRA, adapters), and zero-/few-shot prompting of large generative models</li>
+						<li>Limitations: knowledge cutoff, hallucination, prompt sensitivity, context-length constraints, domain mismatch</li>
+						<li>Text as economic data &mdash; frontier applications: monetary policy stance and inflation forecasting; large-scale policy document classification; LLM embeddings for asset pricing factors and portfolio analysis</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1a Why LLMs &amp; Tokenization</a> &middot;
+							<a href="slides/index.html">T1b Word Embeddings</a> &middot;
+							<a href="slides/index.html">T2a Attention (RoPE/ALiBi)</a> &middot;
+							<a href="slides/index.html">T2b Transformer Layer (Vaswani+Kim)</a> &middot;
+							<a href="slides/index.html">T3a Pretrain/Generate/Fine-tune</a> &middot;
+							<a href="slides/index.html">T3b Limits &amp; Measurement</a> &middot;
+							<a href="slides/index.html">T4 Textual Analysis (FinBERT/CBR)</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lecture 8: Retrieval Augmented Generation (RAG)</strong> (1 hr)
+					<ul>
+						<li>Motivation: extending the LLM brain beyond its training data</li>
+						<li>RAG pipeline: chunking &rarr; embedding &rarr; vector storage &rarr; augmented generation</li>
+						<li>RAG vs. fine-tuning: decision matrix</li>
+						<li>Beyond dense retrieval &mdash; vector search, hybrid retrieval, and GraphRAG, with a research-grade case study: &ldquo;wrong-by-prominence&rdquo; vs. condition-aware retrieval over the economics literature (GRAM)</li>
+						<li>Economic applications: FOMC minutes, NBER papers, Congressional Record, SEC 10-Ks</li>
+						<li>Failure modes and the RAGAS evaluation framework</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Where We Are &amp; Prompting</a> &middot;
+							<a href="slides/index.html">T2 RAG, Chunking, Embeddings</a> &middot;
+							<a href="slides/index.html">T3 Vector Retrieval &amp; GraphRAG</a> &middot;
+							<a href="slides/index.html">T4a Augmented Gen &amp; Apps</a> &middot;
+								<a href="slides/index.html">T4b Demo, Failures, Wrap</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lab</strong> (1 hr) &mdash; <code>Lab5A_LLM_TextAsData.ipynb</code>: tokenization and embedding arithmetic in action (HuggingFace/Gensim); FOMC minutes analyzed with LLM embeddings vs. TF-IDF, extending Lab 5B; text-derived policy-shift factor alongside Fama&ndash;French in a Lasso factor zoo, connecting to Lab 13; students build the pipeline manually that agentic AI will automate in Session 6</li>
+			</ul>
+		</div>
+
+		<!-- Session 6 -->
+		<div class="session-box">
+			<h3>Session 6: Agentic AI &amp; Case Studies</h3>
+			<p class="session-meta"><strong>Sun, July&nbsp;12 &middot; 8:50&ndash;12:25 &middot; 北1-306</strong> &mdash; 4 hours &mdash; Lectures 9 &amp; 10 + lab <span class="lab-tag">Lab</span></p>
+			<ul>
+				<li><strong>Lecture 9: Agentic AI for Research Workflows</strong> (1 hr)
+					<ul>
+						<li>What is agentic AI? Chatbot &rarr; RAG &rarr; Agent spectrum</li>
+						<li>The agentic-AI landscape (mid-2026): the interoperability stack (MCP, A2A &mdash; now under the Linux Foundation) and orchestration patterns (orchestrator&ndash;worker, reflection, hand-off)</li>
+						<li>Reasoning models &amp; inference-time compute; autonomous coding and computer-use agents</li>
+						<li>The 5-pillar workflow for computational economists</li>
+						<li>Tool landscape: Claude.ai, Cursor, Claude Code, Gemini, Codex</li>
+						<li>Project structure: CLAUDE.md, skills, agents, sub-agents</li>
+						<li>Tracing Aiyagari end-to-end with agentic AI</li>
+						<li>Measuring agents: benchmark validity (SWE-bench contamination, SWE-bench Pro, reliability under repetition)</li>
+						<li>Safety &amp; reproducibility: prompt injection, least-privilege sandboxing, and chain-of-custody logging for agentic research</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Framing &amp; Setup</a> &middot;
+								<a href="slides/index.html">T1b Agentic Landscape (mid-2026)</a> &middot;
+							<a href="slides/index.html">T2 Under the Hood &amp; First Session</a> &middot;
+							<a href="slides/index.html">T3 Homotopy &amp; Tools</a> &middot;
+							<a href="slides/index.html">T4 Project Organization</a> &middot;
+							<a href="slides/index.html">T5 Tracing, Mistakes, Context</a> &middot;
+							<a href="slides/index.html">T6 Preview &amp; Wrap</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lecture 10: Case Studies</strong> (2 hr)
+					<ul>
+						<li>Case 1: Literature review automation (LLM + RAG on NBER papers)</li>
+						<li>Case 2: Structured data extraction (FOMC, congressional records)</li>
+						<li>Case 3: Empty folder to figure (end-to-end empirical workflow)</li>
+						<li>Case 4: Computational macro model (agentic AI assisting solver/debugger)</li>
+						<li><strong>Topic decks:</strong>
+							<a href="slides/index.html">T1 Framing</a> &middot;
+							<a href="slides/index.html">T2 Case 1: Paper Review</a> &middot;
+							<a href="slides/index.html">T3 Case 2: MEPS</a> &middot;
+							<a href="slides/index.html">T4 Case 3: ES Fellows</a> &middot;
+							<a href="slides/index.html">T5 Case 4: Collaborator (5-stage)</a> &middot;
+							<a href="slides/index.html">T6a Case 5 Sprint: Setup</a> &middot;
+							<a href="slides/index.html">T6b Case 5 Sprint: Execution</a> &middot;
+							<a href="slides/index.html">T7 Synthesis &amp; Appendix</a>
+						</li>
+					</ul>
+				</li>
+				<li><strong>Lab</strong> (1 hr) &mdash; Guided replication of a case study end-to-end using Claude Code</li>
+			</ul>
+		</div>
+
+		<!-- ============================================================ -->
+		<h2>Supplementary Resources</h2>
+
+		<div class="supp-box">
+			<h3>Foundations: Classical Methods &mdash; Video Series &amp; Textbook</h3>
+			<p>This course is part of an integrated curriculum. Two foundational resources cover the classical side of the arc and are freely available:</p>
+			<p><strong>Video Lecture Series</strong> &mdash; complete recordings on classical computational techniques for economists, covering value function iteration, time iteration, endogenous grid method (EGM), perturbation methods, projection methods (Chebyshev), numerical optimization and interpolation, and high-performance computing (MPI, GPU):</p>
+			<p style="text-align: center; font-size: 1.1em;"><a href="https://space.bilibili.com/2142649036/lists/7180709" target="_blank">https://space.bilibili.com/2142649036/lists/7180709</a></p>
+			<p><strong>Textbook</strong> &mdash; <em><a href="https://book.douban.com/subject/37885381/" target="_blank">机器学习与数量宏观经济学</a></em> by Zhigang Feng bridges classical numerical methods and modern deep learning for dynamic economic models. It serves as the primary reference for Sessions 1&ndash;4 and connects to the AI frontier covered in Sessions 5&ndash;6:</p>
+			<p style="text-align: center; font-size: 1.1em;"><a href="https://book.douban.com/subject/37885381/" target="_blank">https://book.douban.com/subject/37885381/</a></p>
+		</div>
+
+		<!-- ============================================================ -->
+		<h2>References</h2>
+		<ul style="padding-left: 25px; list-style-type: disc;">
+			<li style="padding-left: 0;">Judd, Kenneth. <em>Numerical Methods in Economics</em>.</li>
+			<li style="padding-left: 0;">Ljungqvist, Lars, and Thomas J. Sargent. <em>Recursive Macroeconomic Theory</em>.</li>
+			<li style="padding-left: 0;">Goodfellow, Ian, Yoshua Bengio, and Aaron Courville. <em>Deep Learning</em>.</li>
+			<li style="padding-left: 0;">Bertsekas, Dimitri. <em>Reinforcement Learning and Optimal Control</em>.</li>
+			<li style="padding-left: 0;">Feng, Zhigang. <a href="https://book.douban.com/subject/37885381/"><em>机器学习与数量宏观经济学</em></a>.</li>
+			<li style="padding-left: 0;">Santos, Manuel S. <a href="https://www.sciencedirect.com/science/chapter/handbook/abs/pii/S1574004899010083"><em>Numerical Solution of Dynamic Economic Models</em></a>.</li>
+			<li style="padding-left: 0;"><a href="https://quantecon.org/lectures/" target="_blank">QuantEcon Lectures</a></li>
+		</ul>
+
+	</div>
+</body>
+</html>

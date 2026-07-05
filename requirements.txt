@@ -1,0 +1,10 @@
+# Python dependencies for the AI-ECON-2026 lab notebooks.
+# The CPU PyTorch index keeps torch to the small CPU wheel (avoids the ~2.5 GB CUDA build).
+--extra-index-url https://download.pytorch.org/whl/cpu
+numpy
+pandas
+matplotlib
+scikit-learn
+torch
+jupyter
+ipykernel
