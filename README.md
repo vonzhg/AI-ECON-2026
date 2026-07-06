@@ -1,6 +1,6 @@
 # AI for Economic Research: Dynamic Models, Language, and Agents
 
-Course website for the **July 2026 intensive** at Zhejiang University — Prof. **Zhigang Feng**.
+Course website for the **July 2026 intensive** — Prof. **Zhigang Feng**.
 
 🔗 **Live site:** https://vonzhg.github.io/AI-ECON-2026/
 
