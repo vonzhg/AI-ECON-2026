@@ -521,7 +521,7 @@ def generate_extractive_answer(
                 score += 0.5
             cand.append((score, r.chunk, s))
     if not cand:
-        return "检索到的片段中没有与问题直接匹配的句子。"
+        return "检索到的片段中没有与问题直接匹配的句子。(No retrieved sentence directly matches the question.)"
     cand.sort(key=lambda x: x[0], reverse=True)
 
     seen: set[str] = set()
@@ -535,7 +535,7 @@ def generate_extractive_answer(
         if len(out) >= 4:
             break
     bullets = "\n".join(f"- {item}" for item in out)
-    return "根据检索，最相关的证据片段是：\n" + bullets
+    return "根据检索，最相关的证据片段是 (top evidence sentences from retrieval):\n" + bullets
 
 
 def generate_llm_answer(prompt: str, model: str) -> str:
@@ -574,6 +574,8 @@ def naive_llm_answer(question: str, model: str) -> str:
 # --------------------------------------------------------------------------- #
 
 
+# Both system prompts are Chinese on purpose: the corpus, the retrieval
+# queries, and the expected answers are all Chinese.
 NAIVE_SYS_PROMPT = (
     "你是一个中文商业问答助手。回答的问题往往涉及商业战略、组织管理、科技竞争。"
     "请基于你的常识与训练知识给出回答，结构清晰、3-6 句话即可，不需要引用具体来源。"
@@ -596,8 +598,10 @@ def claude_code_auth_check(timeout: int = 30) -> tuple[bool, str]:
     if not claude_code_available():
         return False, (
             "未检测到 claude 命令。请先安装 Claude Code：\n"
+            "(claude command not found — install Claude Code first:)\n"
             "  https://docs.anthropic.com/claude-code\n"
-            "安装后在终端运行 `claude` 并执行 /login 完成订阅认证。"
+            "安装后在终端运行 `claude` 并执行 /login 完成订阅认证。\n"
+            "(After installing, run `claude` in a terminal and /login.)"
         )
     try:
         out = claude_code_answer(
@@ -607,13 +611,17 @@ def claude_code_auth_check(timeout: int = 30) -> tuple[bool, str]:
             timeout=timeout,
         )
     except subprocess.TimeoutExpired:
-        return False, "claude 命令超时，可能需要重新登录（终端运行 `claude` 然后 /login）。"
+        return False, (
+            "claude 命令超时，可能需要重新登录（终端运行 `claude` 然后 /login）。"
+            "(claude timed out — you may need to /login again.)"
+        )
     except Exception as exc:
         return False, (
             f"claude 命令存在但调用失败：{exc}\n"
-            "请在终端运行 `claude`，执行 /login 完成 OAuth 登录，然后重启本 notebook。"
+            "请在终端运行 `claude`，执行 /login 完成 OAuth 登录，然后重启本 notebook。\n"
+            "(claude exists but the call failed — run `claude`, /login, then restart this notebook.)"
         )
-    return True, f"Claude Code 已认证（探针响应：{out[:60]!r}）"
+    return True, f"Claude Code 已认证 (authenticated; probe response: {out[:60]!r})"
 
 
 def claude_code_answer(

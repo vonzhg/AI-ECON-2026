@@ -259,7 +259,13 @@
 						</li>
 					</ul>
 				</li>
-				<li><strong>Lab</strong> (1 hr) &mdash; <code>Lab5A_LLM_TextAsData.ipynb</code>: tokenization and embedding arithmetic in action (HuggingFace/Gensim); FOMC minutes analyzed with LLM embeddings vs. TF-IDF, extending Lab 5B; text-derived policy-shift factor alongside Fama&ndash;French in a Lasso factor zoo, connecting to Lab 13; students build the pipeline manually that agentic AI will automate in Session 6</li>
+				<li><strong>Labs</strong> (1 hr) &mdash; three offline notebooks over a bundled 30-year FOMC statement corpus (no GPU, no API key, no network):
+					<ul>
+						<li><code>Lab7A_Text_as_Data</code>: tokenization and a toy BPE; TF-IDF; a mini economic-policy-uncertainty index; word embeddings from co-occurrence; a hawk&ndash;dove stance score <em>validated against real rate cycles</em> &mdash; where it works and where it fails</li>
+						<li><code>Lab7B_Attention_MiniGPT</code>: scaled dot-product attention by hand, then a minimal GPT trained from scratch on the FOMC corpus (&sim;10&nbsp;min on CPU) and text generation with temperature/top-k</li>
+						<li><code>Lec08_Lab_RAG</code>: the full RAG pipeline (chunk &rarr; TF-IDF index &rarr; retrieve &rarr; audit &rarr; cited grounded answer) over a corpus of public speeches, with a minimal retriever you implement yourself</li>
+					</ul>
+				</li>
 			</ul>
 		</div>
 

@@ -37,6 +37,11 @@ python3 -c "import rag_ren, questions; \
 | 8 | *(optional)* semantic **embedding** retrieval — where keywords fail |
 | 9 | *(optional)* **naive LLM vs RAG** comparison via local Claude Code |
 
+The notebook's narration is English; the ten questions are shown **bilingually**
+(Chinese + English gloss). The Chinese question strings are kept verbatim because
+they are the *retrieval queries* against a Chinese corpus — translating them
+would break TF-IDF matching.
+
 ## Files
 
 ```text
