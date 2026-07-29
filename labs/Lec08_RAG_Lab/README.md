@@ -9,6 +9,14 @@ Built for students in **China**: the **default path uses only the Python standar
 library** — no GPU, no API key, no network, no extra packages. Optional sections
 (semantic embeddings, Claude Code) are clearly marked and skip gracefully.
 
+There are **two notebooks** in this folder:
+
+- **`Lec08_Lab_RAG.ipynb`** — the main RAG lab (Ren Zhengfei corpus), below.
+- **`Lec08_Lab_MiniGPT_RAG.ipynb`** — *Part B*: wire a **from-scratch mini-GPT**
+  (the Lab 7B model) to a RAG over the FOMC corpus and compare the answer **with vs
+  without RAG** — then *measure* why a tiny generator can't read its own context.
+  See [Part B](#part-b--your-own-mini-gpt--rag) below. Needs `torch` (Lab 7B's dep).
+
 ## Run it
 
 1. Finish `../Lec01_02_Lab_Getting_Started.ipynb` first (it sets up Python via the
@@ -42,15 +50,37 @@ The notebook's narration is English; the ten questions are shown **bilingually**
 they are the *retrieval queries* against a Chinese corpus — translating them
 would break TF-IDF matching.
 
+## Part B — your own mini-GPT + RAG
+
+`Lec08_Lab_MiniGPT_RAG.ipynb` fuses **Lab 7B** (a 0.6M-parameter GPT you train from
+scratch) with **RAG**, both over the FOMC statement corpus (bundled next door in
+`../Lec07_LLM_Lab/data/`). The point is the honest experiment behind the RAG hype:
+
+| Part | You do |
+|---|---|
+| 0 | Split the corpus: the model **trains on part**, the RAG indexes **all** of it — so held-out meetings are facts the weights never saw |
+| 1 | Train the mini-GPT (context widened 128→256 to hold evidence); watch it **hallucinate** rate numbers |
+| 2 | Build a transparent **TF-IDF** RAG over every statement; audit retrieval |
+| 3 | Compare the **answer without RAG** (fluent, fabricated, no source) vs **with RAG** (a retrieved sentence + `[date]` citation) — then **measure** whether the model can read the evidence in its context |
+| 4 | Honest limits + ✏️ exercises |
+
+**The finding students measure:** a 0.6M char-model has **no in-context copying
+(induction) ability**, so it can't lift a fact out of retrieved context — grounding
+therefore comes from *retrieval + citation*, and *using* the context is a capability
+that only appears with **scale** (ties back to Lab 7B's model-size table). Runs
+**offline on CPU**; full training ~12 min (set `FAST_MODE = True` for ~3 min). Needs
+`torch numpy matplotlib`.
+
 ## Files
 
 ```text
 Lec08_RAG_Lab/
-├── Lec08_Lab_RAG.ipynb   # the lab (start here)
-├── rag_ren.py            # corpus loading, chunking, TF-IDF + optional backends
-├── questions.py          # ten curated business-strategy discussion questions
+├── Lec08_Lab_RAG.ipynb            # the main RAG lab (start here)
+├── Lec08_Lab_MiniGPT_RAG.ipynb    # Part B: from-scratch mini-GPT + RAG (needs torch)
+├── rag_ren.py                     # corpus loading, chunking, TF-IDF + optional backends
+├── questions.py                   # ten curated business-strategy discussion questions
 ├── README.md
-└── build/                # generated diagnostics / caches (created on first run)
+└── build/                         # generated diagnostics / caches (created on first run)
 ```
 
 ## Where the corpus comes from
