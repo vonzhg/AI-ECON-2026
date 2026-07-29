@@ -1,5 +1,5 @@
 /* ============================================================
-   AI-ECON-2026 shared stylesheet
+   AI for Economic Research — shared stylesheet
    Base rules carried over from the course syllabus so every
    page reads as one system; component classes added below.
    ============================================================ */
@@ -175,32 +175,6 @@ tr:nth-child(even) { background-color: #f8f9fa; }
 .quicklink .ql-title { font-weight: 700; color: #003366; font-size: 1.1em; }
 .quicklink .ql-sub { color: #666; font-size: 0.9em; }
 
-/* WeChat QR card */
-.qr-card {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 24px;
-	background: linear-gradient(135deg, #f0f7ff 0%, #f7fff0 100%);
-	border: 1px solid #cfe3d0;
-	border-left: 5px solid #07c160;
-	border-radius: 0 10px 10px 0;
-	padding: 20px 26px;
-	margin: 24px 0;
-}
-.qr-card img {
-	width: 190px;
-	max-width: 45vw;
-	height: auto;
-	border-radius: 8px;
-	background: #fff;
-	padding: 6px;
-	border: 1px solid #e0e0e0;
-}
-.qr-card .qr-text { flex: 1; min-width: 220px; }
-.qr-card .qr-text h3 { margin-top: 0; color: #067a3e; }
-.qr-note { font-size: 0.88em; color: #6c757d; }
-
 /* Lecture card grid */
 .lecture-grid {
 	display: grid;
@@ -290,5 +264,4 @@ tr:nth-child(even) { background-color: #f8f9fa; }
 @media (max-width: 640px) {
 	.container { margin: 12px; padding: 20px 18px; }
 	h1 { font-size: 1.7em; }
-	.qr-card { gap: 16px; padding: 16px; }
 }

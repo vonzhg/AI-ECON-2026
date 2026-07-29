@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="robots" content="noindex, nofollow">
-	<title>Capstone Projects · AI for Economic Research 2026</title>
+	<title>Project Tracks · AI for Economic Research</title>
 	<link rel="stylesheet" href="assets/style.css">
 	<style>
 		/* Page-specific helpers — kept minimal; reuse the shared system elsewhere */
@@ -24,7 +24,6 @@
 
 		.track-card { border-top: 4px solid #0056b3; }
 		.track-card .lec-num { color: #0056b3; }
-		.track-card .wip { color: #e65100; font-weight: 600; }
 		.track-anchor { scroll-margin-top: 16px; }
 
 		.rule-box {
@@ -69,27 +68,30 @@
 			<span class="sep">·</span>
 			<a href="labs/index.html">Labs</a>
 			<span class="sep">·</span>
-			<a href="capstone.html">Capstone</a>
+			<a href="capstone.html">Projects</a>
 		</nav>
 
-		<h1>Capstone Projects</h1>
+		<h1>Project Tracks</h1>
 
 		<div class="instructor-info">
-			<p><strong>Instructor:</strong> Zhigang Feng &nbsp;·&nbsp; Summer 2026 (July intensive) &nbsp;·&nbsp; 24-hour graduate course</p>
-			<p>The capstone is where the four competencies you built across the ten lectures &mdash;
+			<p style="margin-top:0;">A project is where the four competencies the lectures build &mdash;
 			<em>theoretical mastery, technical fluency, AI-augmented implementation, and critical
-			validation</em> &mdash; come together on a real research problem. There are
-			<strong>four tracks</strong>; you pick <strong>one</strong>.</p>
+			validation</em> &mdash; meet a real research problem. There are <strong>four tracks</strong>;
+			pick <strong>one</strong>.</p>
+			<p style="margin-bottom:0;">Each is scoped for a few weeks of part-time work, alone or in a
+			small group, and each rests entirely on <strong>public data</strong>. Nothing here needs a
+			grader: the tracks come with their own validation checklists, so you can tell for yourself
+			whether the thing works.</p>
 		</div>
 
 		<div class="rule-box">
 			<p style="margin:0;"><strong>The one rule that governs all four tracks: <em>replicate first, explore second.</em></strong>
 			Your baseline deliverable is to faithfully <strong>reproduce and verify</strong> a known
-			result &mdash; a classical solution, a published number, or the instructor's reported
-			finding &mdash; on public data or at small scale. Finding &ldquo;something more interesting&rdquo;
-			is the <strong>stretch goal</strong>, and it only counts once the replication validates. This
-			mirrors how real research works, and it is how Lectures&nbsp;9&ndash;10 taught you to use AI:
-			build the trusted benchmark, <em>then</em> extend.</p>
+			result &mdash; a classical solution, a published number, a documented benchmark &mdash; on
+			public data or at small scale. Finding &ldquo;something more interesting&rdquo; is the
+			<strong>stretch goal</strong>, and it only counts once the replication validates. This mirrors
+			how real research works, and it is how Lectures&nbsp;9&ndash;10 teach you to use AI: build the
+			trusted benchmark, <em>then</em> extend.</p>
 		</div>
 
 		<!-- On-page navigation -->
@@ -97,21 +99,19 @@
 			<h3>On this page</h3>
 			<ol>
 				<li><a href="#choose">Choose your track</a></li>
-				<li><a href="#embody">How capstones embody the course</a></li>
-				<li><a href="#spirit">Shared guidelines &mdash; the &ldquo;spirit of the class&rdquo;</a></li>
-				<li><a href="#confidentiality">Confidentiality &amp; work-in-progress (B, C, D)</a></li>
-				<li><a href="#deliverables">Deliverables &amp; grading</a></li>
+				<li><a href="#embody">What these projects are for</a></li>
+				<li><a href="#spirit">Working practices that apply to all tracks</a></li>
+				<li><a href="#deliverables">Deliverables &amp; self-assessment</a></li>
 				<li><a href="#tracks">The four tracks in detail</a></li>
-				<li><a href="#logistics">Logistics &amp; milestones</a></li>
+				<li><a href="#pacing">Pacing &amp; milestones</a></li>
 				<li><a href="#resources">Consolidated resources</a></li>
 			</ol>
 		</div>
 
 		<!-- ============================ CHOOSE ============================ -->
 		<h2 id="choose" class="track-anchor">Choose your track</h2>
-		<p>Each track serves a different research taste, and each connects to material we covered &mdash;
-		three of them to research the instructor is actively pursuing. Click a card to jump to its full
-		description.</p>
+		<p>Each track serves a different research taste, and each connects to an active research area in
+		the field. Click a card to jump to its full description.</p>
 
 		<div class="lecture-grid">
 			<div class="lecture-card track-card">
@@ -120,11 +120,11 @@
 				<p style="margin:0 0 10px;">Solve the workhorse growth model with a neural net; verify it
 				against the classical solution.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like macro modeling,
-				dynamic programming, PyTorch. <em>Builds on Lec&nbsp;1, 3, 4, 5.</em></p>
+				dynamic programming, PyTorch. <em>Builds on Lec&nbsp;3, 4, 5.</em></p>
 				<span class="lec-links"><a href="#track-a">Read Track A →</a></span>
 			</div>
 			<div class="lecture-card track-card">
-				<span class="lec-num">Track B &nbsp;<span class="badge badge-lock">WIP</span></span>
+				<span class="lec-num">Track B</span>
 				<span class="lec-title">Building an AI-Exposure Index</span>
 				<p style="margin:0 0 10px;">Construct &amp; validate a task-level AI-exposure index from
 				public data.</p>
@@ -133,7 +133,7 @@
 				<span class="lec-links"><a href="#track-b">Read Track B →</a></span>
 			</div>
 			<div class="lecture-card track-card">
-				<span class="lec-num">Track C &nbsp;<span class="badge badge-lock">may touch WIP</span></span>
+				<span class="lec-num">Track C</span>
 				<span class="lec-title">Text as Economic Data</span>
 				<p style="margin:0 0 10px;">Turn a text corpus into a validated quantitative measure with a
 				small RAG.</p>
@@ -142,9 +142,9 @@
 				<span class="lec-links"><a href="#track-c">Read Track C →</a></span>
 			</div>
 			<div class="lecture-card track-card">
-				<span class="lec-num">Track D &nbsp;<span class="badge badge-lock">WIP</span></span>
+				<span class="lec-num">Track D</span>
 				<span class="lec-title">AI-for-Research Infrastructure</span>
-				<p style="margin:0 0 10px;">Build a small typed-retrieval system or a validated Claude Code
+				<p style="margin:0 0 10px;">Build a small typed-retrieval system or a validated agent
 				skill.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like tooling, retrieval,
 				methodology. <em>Builds on Lec&nbsp;8, 9, 10.</em></p>
@@ -153,19 +153,19 @@
 		</div>
 
 		<div class="notice">
-			Tracks <strong>B, C, and D touch ongoing, unpublished research</strong> &mdash; read
-			<a href="#confidentiality">§4 Confidentiality</a> before choosing one. Prefer no
-			confidentiality obligations? <strong>Track&nbsp;A</strong> is built purely on public/classical
-			material.
+			<strong>Not sure which?</strong> Pick by the skill you most want to own a year from now, not by
+			the topic that sounds most impressive. <strong>Track&nbsp;A</strong> is the most self-contained
+			and the easiest to validate against ground truth &mdash; a good default if this is your first
+			project of this kind.
 		</div>
 
 		<!-- ============================ EMBODY ============================ -->
-		<h2 id="embody" class="track-anchor">How capstones embody the course</h2>
-		<p>Every lecture pushed one idea: <strong>you are the Research Architect.</strong> AI handles the
+		<h2 id="embody" class="track-anchor">What these projects are for</h2>
+		<p>Every lecture pushes one idea: <strong>you are the Research Architect.</strong> AI handles the
 		bricks &mdash; syntax, boilerplate, data wrangling, refactoring &mdash; while you own the theory,
-		the validation, and the interpretation. The capstone is graded in that spirit. We are not
-		impressed by code an agent wrote; we are impressed by a correct result you can defend, a benchmark
-		you verified by hand, and a clear account of who did what.</p>
+		the validation, and the interpretation. A project succeeds in that spirit. Code an agent wrote is
+		not the achievement; a correct result you can defend, a benchmark you verified by hand, and a clear
+		account of who did what &mdash; that is.</p>
 
 		<p>The <strong>5-pillar workflow</strong> from Lecture&nbsp;9 is your scaffold on every track:</p>
 		<ul class="pillars">
@@ -182,23 +182,24 @@
 		</ul>
 
 		<!-- ============================ SPIRIT ============================ -->
-		<h2 id="spirit" class="track-anchor">Shared guidelines &mdash; the &ldquo;spirit of the class&rdquo;</h2>
-		<p>These apply to <strong>every</strong> track. The <a href="#deliverables">rubric</a> scores them
-		directly.</p>
+		<h2 id="spirit" class="track-anchor">Working practices that apply to all tracks</h2>
+		<p>These hold on <strong>every</strong> track, and the
+		<a href="#deliverables">self-assessment</a> is built directly on them.</p>
 
 		<div class="session-box">
 			<h3>AI is encouraged &mdash; as a partner, not a ghostwriter</h3>
 			<p style="margin:0;">Use Claude Code, an IDE agent, or a chat model across the whole pipeline:
-			scoping, data acquisition, coding, debugging, drafting. That is the point of the course. What is
-			<em>not</em> allowed is shipping anything you cannot read, explain, and defend.</p>
+			scoping, data acquisition, coding, debugging, drafting. That is the point of the course. What
+			does <em>not</em> count is shipping anything you cannot read, explain, and defend.</p>
 		</div>
 
 		<div class="session-box">
 			<h3>Keep an AI-collaboration log (<code>AI_LOG.md</code>)</h3>
-			<p style="margin:0;">Commit a short running log of the substantive ways you used AI: the prompts
+			<p style="margin:0;">Keep a short running log of the substantive ways you used AI: the prompts
 			that mattered, the decisions you made, where the AI was wrong and how you caught it, and an
-			honest split of human vs. AI contribution. This is a graded artifact, not busywork &mdash; it is
-			the evidence that you were the architect. A trimmed transcript export is fine as an appendix.</p>
+			honest split of human vs. AI contribution. This is the artifact that shows you were the
+			architect &mdash; and, months later, the only record of why the code looks the way it does. A
+			trimmed transcript export is fine as an appendix.</p>
 		</div>
 
 		<div class="session-box">
@@ -211,7 +212,7 @@
 				<li>Run <strong>economic sanity checks</strong> (e.g. <code>&beta; &isin; (0,1)</code>;
 					Euler-equation errors below threshold; an index's occupation ranking passes the smell
 					test; signs match theory).</li>
-				<li><strong>Never</strong> submit code you have not read end to end.</li>
+				<li><strong>Never</strong> ship code you have not read end to end.</li>
 			</ul>
 		</div>
 
@@ -226,52 +227,35 @@
 			<code>README</code> with run instructions.</p>
 		</div>
 
-		<!-- ======================= CONFIDENTIALITY ======================= -->
-		<h2 id="confidentiality" class="track-anchor">Confidentiality &amp; work-in-progress (Tracks B, C, D)</h2>
-		<p>Tracks <strong>B</strong>, <strong>C</strong>, and <strong>D</strong> build on the instructor's
-		<strong>active, unpublished research</strong> &mdash; the AI-index project and the GRAM / GraphRAG
-		project. Choosing one means agreeing to the following:</p>
-		<ul>
-			<li><strong>Treat anything the instructor shares as confidential</strong> &mdash;
-				specifications, preliminary results, intermediate data, or supervised access to the GRAM
-				infrastructure. Do not redistribute, post publicly, or use outside this course.</li>
-			<li><strong>Label your findings preliminary / work-in-progress.</strong> These are open research
-				questions; your results are a contribution to an ongoing effort, not a settled conclusion.</li>
-			<li><strong>Clear any public release first.</strong> A public GitHub repo, a poster, a blog post,
-				or a submitted abstract that draws on this work must be approved by the instructor before it
-				goes out.</li>
-			<li><strong>You run on public data by default.</strong> Everything you do independently uses the
-				public sources listed in each track. The <em>only</em> contact with private infrastructure is
-				the supervised, confidential GRAM comparison in Track&nbsp;D, and it is mediated by the
-				instructor &mdash; you are never handed the private corpus or repo.</li>
-		</ul>
-		<div class="notice info">If you prefer to avoid confidentiality obligations entirely, choose
-			<strong>Track&nbsp;A</strong>, which is built purely on public/classical material.</div>
-
 		<!-- ======================= DELIVERABLES ======================= -->
-		<h2 id="deliverables" class="track-anchor">Deliverables &amp; grading</h2>
-		<p>Capstones are done in <strong>teams</strong> (suggested 2&ndash;4). Each team produces a full
-		<strong>reproducibility package</strong>:</p>
+		<h2 id="deliverables" class="track-anchor">Deliverables &amp; self-assessment</h2>
+		<p>Aim for a complete <strong>reproducibility package</strong> &mdash; the same bundle a journal or
+		a co-author would ask for:</p>
 		<ol style="list-style:decimal; padding-left:28px;">
-			<li><strong>Research paper</strong> (~8&ndash;12&nbsp;pp): question, method, replication result,
-				validation, stretch finding (if any), limitations. Written like a short working paper.</li>
+			<li><strong>Research note or paper</strong> (~8&ndash;12&nbsp;pp): question, method, replication
+				result, validation, stretch finding (if any), limitations. Written like a short working paper.</li>
 			<li><strong>Code repository</strong> with <code>CLAUDE.md</code>, <code>README</code>, pinned
 				environment, fixed seeds, and one-command reproduction.</li>
 			<li><strong><code>AI_LOG.md</code></strong> &mdash; the AI-collaboration log.</li>
-			<li><strong>Presentation</strong> (~12&ndash;15&nbsp;min) to the class.</li>
-			<li><strong>Provenance / reproducibility package</strong> &mdash; data-acquisition scripts (no
-				manual downloads), a data dictionary, and a record of every external source with access
-				date.</li>
-			<li><strong>Referee report on another team's project</strong> &mdash; a structured,
-				confidence-gated peer review in the style of the Lecture&nbsp;10 <code>/review-paper</code>
-				skill: cite exact passages, assert only what you can support, separate &ldquo;must fix&rdquo;
-				from &ldquo;suggestions,&rdquo; and stay constructive.</li>
+			<li><strong>A talk</strong> (~12&ndash;15&nbsp;min) &mdash; to a class, a seminar, a reading
+				group, or an advisor. Explaining it out loud is where you discover what you don't yet
+				understand.</li>
+			<li><strong>Provenance package</strong> &mdash; data-acquisition scripts (no manual downloads),
+				a data dictionary, and a record of every external source with access date.</li>
+			<li><strong>Referee report on someone else's project</strong> <em>(optional, and worth it if
+				you have a partner or reading group)</em> &mdash; a structured, confidence-gated peer review
+				in the style of the Lecture&nbsp;10 <code>/review-paper</code> skill: cite exact passages,
+				assert only what you can support, separate &ldquo;must fix&rdquo; from
+				&ldquo;suggestions,&rdquo; and stay constructive. Reviewing someone else's replication is the
+				fastest way to see the holes in your own.</li>
 		</ol>
 
-		<h3>Rubric (100 pts)</h3>
+		<h3>Self-assessment &mdash; where the weight belongs</h3>
+		<p>Not a grade sheet: a way to check you spent your effort where it matters. The weights say how
+		much each dimension should shape the project, and roughly what a strong one looks like.</p>
 		<table>
 			<thead>
-				<tr><th>Dimension</th><th>Pts</th><th>What we look for</th></tr>
+				<tr><th>Dimension</th><th>Weight</th><th>What a strong project shows</th></tr>
 			</thead>
 			<tbody>
 				<tr><td>Economic framing &amp; question</td><td>15</td><td>A precise, well-motivated question; correct estimand/equilibrium concept</td></tr>
@@ -279,13 +263,13 @@
 				<tr><td>Validation rigor</td><td>20</td><td>Hand-checks, benchmarks, sanity checks; honest about what failed</td></tr>
 				<tr><td>Reproducibility &amp; provenance</td><td>15</td><td>One-command repro; clean data pipeline; pinned env</td></tr>
 				<tr><td>AI-collaboration quality</td><td>10</td><td>Architect, not consumer; informative <code>AI_LOG.md</code>; honest attribution</td></tr>
-				<tr><td>Communication</td><td>10</td><td>Clear paper &amp; talk; figures that tell the story</td></tr>
-				<tr><td>Peer review quality</td><td>10</td><td>Specific, fair, well-evidenced referee report</td></tr>
+				<tr><td>Communication</td><td>10</td><td>Clear write-up &amp; talk; figures that tell the story</td></tr>
+				<tr><td>Peer review quality</td><td>10</td><td>Specific, fair, well-evidenced referee report (if you do one)</td></tr>
 				<tr><td><strong>Stretch finding</strong></td><td><strong>+10</strong> (bonus)</td><td>A credible, validated extension beyond replication</td></tr>
 			</tbody>
 		</table>
 		<p>A project that <em>only</em> replicates &mdash; but does so correctly, with rigorous validation
-		and clean reproduction &mdash; earns a strong grade. The stretch is upside.</p>
+		and clean reproduction &mdash; is a success. The stretch is upside.</p>
 
 		<!-- ======================= TRACKS DETAIL ======================= -->
 		<h2 id="tracks" class="track-anchor">The four tracks in detail</h2>
@@ -300,11 +284,11 @@
 		<p><strong>Who it's for.</strong> Students drawn to macro modeling, dynamic programming, and
 		PyTorch; people who want to <em>understand</em> a deep-learning solver rather than treat it as a
 		black box.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;1 (Bellman, VFI vs. Euler iteration), Lecture&nbsp;3
-		(neural nets, training), Lecture&nbsp;4 (the optimal growth model is the running example;
-		Euler-equation-as-supervised-loss; actor&ndash;critic), Lecture&nbsp;5 (RL framing). The
-		Lecture&nbsp;4 dynamic-model labs (<code>Lab4A/4B_Dynamic_Models.ipynb</code>, on the
-		<a href="labs/index.html">Labs</a> page) are your starting point.</p>
+		<p><strong>Connections.</strong> Lecture&nbsp;3 (neural nets, training), Lecture&nbsp;4 (the
+		optimal growth model is the running example; Euler-equation-as-supervised-loss; actor&ndash;critic),
+		Lecture&nbsp;5 (RL framing; Bellman, VFI vs. Euler iteration). The Lecture&nbsp;4 dynamic-model labs
+		(<code>Lab4A/4B_Dynamic_Models.ipynb</code>, on the <a href="labs/index.html">Labs</a> page) are your
+		starting point.</p>
 		<p><strong>Goal.</strong> A neural solution to the deterministic (then optionally stochastic)
 		optimal growth model whose <strong>Euler-equation errors are at or below the classical
 		benchmark</strong>, with a written account of the method and its accuracy.</p>
@@ -331,12 +315,12 @@
 		capital good or a simple labor choice); or an <strong>AI-as-capital / automation</strong> twist
 		&mdash; a productivity shift that raises the return to capital, traced through the savings policy
 		(a thematic bridge to Track&nbsp;B).</p>
-		<p><strong>Data &amp; tools (all public).</strong> Course Lecture&nbsp;4 lab notebooks;
+		<p><strong>Data &amp; tools (all public).</strong> The Lecture&nbsp;4 lab notebooks;
 		<a href="https://python.quantecon.org/cass_koopmans_1.html" target="_blank" rel="noopener">QuantEcon Cass&ndash;Koopmans</a>
 		and the <a href="https://quantecon.org/lectures/" target="_blank" rel="noopener">QuantEcon lecture series</a>;
 		Maliar, Maliar &amp; Winant (2021), <em>Deep learning for solving dynamic economic models</em> (JME).
-		Python, PyTorch (autograd for Euler residuals), NumPy/SciPy, Matplotlib; Claude Code to scaffold
-		the solver and validation harness &mdash; then you read and verify every line.</p>
+		Python, PyTorch (autograd for Euler residuals), NumPy/SciPy, Matplotlib; an agentic coding tool to
+		scaffold the solver and validation harness &mdash; then you read and verify every line.</p>
 		<p><strong>AI-usage guidance.</strong> Let the agent write the boilerplate. <em>You</em> own the
 		Euler-residual loss derivation, the sampling distribution over states, and the accuracy comparison.
 		A great <code>AI_LOG.md</code> shows the agent proposing a subtly wrong loss and you catching it
@@ -352,39 +336,39 @@
 		<p class="backtop"><a href="#choose">↑ Back to track selector</a></p>
 
 		<!-- Track B -->
-		<h3 id="track-b" class="track-anchor">Track B &mdash; Building &amp; Validating an AI-Exposure Index <span class="badge badge-lock">WIP · confidential</span></h3>
-		<p><strong>Pitch.</strong> Reconstruct, on fully public data, a <strong>task-level index of AI
-		exposure across occupations</strong>, and verify it reproduces the structure the instructor finds
-		in the ongoing <em>AI-index</em> project.</p>
+		<h3 id="track-b" class="track-anchor">Track B &mdash; Building &amp; Validating an AI-Exposure Index</h3>
+		<p><strong>Pitch.</strong> Build, on fully public data, a <strong>task-level index of AI exposure
+		across occupations</strong>, and show it holds up against external benchmarks.</p>
 		<p><strong>Who it's for.</strong> Empiricists and data engineers; students interested in AI &amp;
 		labor markets, the economics of automation, and measurement.</p>
 		<p><strong>Connections.</strong> Lecture&nbsp;2 (AI as cognitive capital; measuring AI exposure via
 		task-level deployment, Anthropic Economic Index &times; O*NET), Lecture&nbsp;10 (Case&nbsp;2 MEPS
 		&mdash; the agentic empirical pipeline: discover data &rarr; harmonize &rarr; weight &rarr; validate
-		against an external benchmark). This track <em>is</em> a small, public-data version of the
-		instructor's AI-index work.</p>
+		against an external benchmark). This is measurement work of exactly the kind the AI-and-labor
+		literature is now built on.</p>
 		<p><strong>Goal.</strong> A reproducible pipeline that produces an occupation-level AI-exposure
-		index and a short validation showing it behaves sensibly and matches the reported structure.</p>
+		index, plus a short validation showing it behaves sensibly and lines up with published measures.</p>
 		<p><strong>Baseline &mdash; replicate &amp; verify.</strong></p>
 		<ol style="list-style:decimal; padding-left:28px;">
 			<li><strong>Acquire the public inputs</strong> (scripted, not by hand): the
 				<strong>Anthropic Economic Index</strong> task- and occupation-level usage; <strong>O*NET</strong>
 				task ratings and the task-to-occupation (SOC) structure.</li>
-			<li><strong>Build the index.</strong> For each occupation, combine task-level Claude-usage shares
+			<li><strong>Build the index.</strong> For each occupation, combine task-level usage shares
 				with O*NET task importance to compute a <strong>deployment-concentration</strong> measure
 				(a signed Gini-style index <code>G</code>, its magnitude <code>|G|</code>, and an effective
 				task fraction <code>1/Herfindahl</code>) and an <strong>importance-weighted usage
 				intensity</strong>.</li>
 			<li><strong>Verify the index.</strong> Rank occupations; check the extremes pass the smell test;
-				confirm the qualitative structure the instructor reports. Cross-check occupation employment
-				counts against published BLS/Census numbers so you know your crosswalks are sound.</li>
+				compare your ranking against a published exposure measure (e.g. Eloundou et&nbsp;al.) and
+				explain the disagreements. Cross-check occupation employment counts against published
+				BLS/Census numbers so you know your crosswalks are sound.</li>
 		</ol>
 		<p><strong>Stretch (pick &ge;1).</strong> <strong>Link to employment</strong> &mdash; merge with
 		IPUMS-CPS (or BLS OES) and estimate whether the index predicts employment-share change (WLS, robust
 		SEs); probe whether the effect is an interaction (usage &times; concentration), concentrated in some
 		demographic groups, or appears in the household survey but not payroll. Or <strong>improve the
-		index</strong> &mdash; add O*NET task-frequency weighting, build a time-varying version across AEI
-		releases, or test robustness to weighting and time-window choices.</p>
+		index</strong> &mdash; add O*NET task-frequency weighting, build a time-varying version across
+		index releases, or test robustness to weighting and time-window choices.</p>
 		<p><strong>Data &amp; tools (all public).</strong>
 		<a href="https://huggingface.co/datasets/Anthropic/EconomicIndex" target="_blank" rel="noopener">Anthropic Economic Index (HF)</a> ·
 		<a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener">O*NET</a> ·
@@ -392,7 +376,7 @@
 		<a href="https://www.bls.gov/oes/" target="_blank" rel="noopener">BLS OES</a> ·
 		<a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener">FRED</a> ·
 		Eloundou et al. (2023), <a href="https://arxiv.org/abs/2303.10130" target="_blank" rel="noopener"><em>GPTs are GPTs</em></a>.
-		Python, pandas, statsmodels/linearmodels (WLS, robust SEs); Claude Code for the acquisition +
+		Python, pandas, statsmodels/linearmodels (WLS, robust SEs); an agent for the acquisition +
 		harmonization pipeline &mdash; exactly the MEPS-case workflow.</p>
 		<p><strong>AI-usage guidance.</strong> This track lives or dies on <strong>crosswalk and weighting
 		correctness</strong>, precisely where agents make silent errors. Let the agent build the
@@ -404,14 +388,13 @@
 			<li>Public inputs acquired by script with recorded access dates.</li>
 			<li>Occupation employment totals match published BLS/Census within tolerance.</li>
 			<li>One occupation's index value re-derived by hand.</li>
-			<li>Index rankings pass an economic smell test.</li>
+			<li>Index rankings pass an economic smell test and are compared to a published measure.</li>
 			<li>(Stretch) Regression uses weights + robust SEs; survives a window/weighting robustness check.</li>
-			<li>Findings labeled <strong>preliminary / WIP</strong>; no private specs or numbers used.</li>
 		</ul>
 		<p class="backtop"><a href="#choose">↑ Back to track selector</a></p>
 
 		<!-- Track C -->
-		<h3 id="track-c" class="track-anchor">Track C &mdash; Text as Economic Data: A Validated Measurement Instrument <span class="badge badge-lock">may touch WIP</span></h3>
+		<h3 id="track-c" class="track-anchor">Track C &mdash; Text as Economic Data: A Validated Measurement Instrument</h3>
 		<p><strong>Pitch.</strong> Turn a corpus of economic text into a <strong>quantitative measure</strong>
 		&mdash; a policy-stance index, a firm-level exposure score, a narrative index &mdash; and prove it
 		works by validating against an external benchmark. Build a <strong>small RAG</strong> pipeline along
@@ -421,7 +404,7 @@
 		<p><strong>Connections.</strong> Lecture&nbsp;7 (tokenization, embeddings, transformers, LLMs as
 		measurement instruments; FinBERT vs. CentralBankRoBERTa; the validation checklist), Lecture&nbsp;8
 		(RAG: chunking &rarr; embeddings &rarr; vector store &rarr; retrieval; RAGAS evaluation). The
-		Session-5 FOMC/LLM lab is your starting point.</p>
+		Lecture&nbsp;7&ndash;8 FOMC labs are your starting point.</p>
 		<p><strong>Goal.</strong> A measurement instrument that reproduces a <em>known</em> text-based
 		result and is validated against an external benchmark &mdash; plus a small RAG pipeline over the
 		same corpus for question-answering / retrieval.</p>
@@ -472,20 +455,19 @@
 		<p class="backtop"><a href="#choose">↑ Back to track selector</a></p>
 
 		<!-- Track D -->
-		<h3 id="track-d" class="track-anchor">Track D &mdash; AI-for-Research Infrastructure: Typed Retrieval or a Validated Skill <span class="badge badge-lock">WIP · confidential</span></h3>
+		<h3 id="track-d" class="track-anchor">Track D &mdash; AI-for-Research Infrastructure: Typed Retrieval or a Validated Skill</h3>
 		<p><strong>Pitch.</strong> Build a piece of <em>research infrastructure</em>: either a small
 		<strong>condition-aware GraphRAG</strong> over an economics literature, or a <strong>reusable,
-		validated Claude Code skill</strong> for a recurring research task.</p>
+		validated agent skill</strong> for a recurring research task.</p>
 		<p><strong>Who it's for.</strong> Students who like tooling, retrieval systems, evaluation
 		methodology, and the meta-question of <em>how AI should be wired into research</em>.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;8 (RAG, GraphRAG, the GRAM case study &mdash;
+		<p><strong>Connections.</strong> Lecture&nbsp;8 (RAG, GraphRAG, and the GRAM case study &mdash;
 		&ldquo;wrong-by-prominence&rdquo; vs. condition-aware retrieval), Lecture&nbsp;9 (project harness;
-		skills, agents, rules; validation gates), Lecture&nbsp;10 (Case&nbsp;1 paper-review skill).
-		This track engages the instructor's <strong>GRAM / GraphRAG</strong> research.</p>
+		skills, agents, rules; validation gates), Lecture&nbsp;10 (Case&nbsp;1 paper-review skill).</p>
 		<p><strong>Goal.</strong> A small but genuinely working artifact with a measured comparison against
 		a sensible baseline. <strong>Choose one flavor:</strong></p>
 		<div class="session-box">
-			<h3>D1 &mdash; Mini-GRAM (typed retrieval)</h3>
+			<h3>D1 &mdash; Typed retrieval over a literature</h3>
 			<ol style="list-style:decimal; padding-left:28px; margin:0;">
 				<li>Assemble a <strong>public corpus of ~15&ndash;30 papers</strong> in one macro subfield
 					(e.g. Aiyagari/Bewley incomplete-markets, or RBC) from arXiv/NBER/RePEc.</li>
@@ -494,15 +476,14 @@
 					element and edge types capturing model primitives, equilibrium concept, solution method,
 					and their dependencies) and extract structured instances per paper.</li>
 				<li><strong>Ablation.</strong> On held-out modeling / code-generation questions, compare flat
-					RAG vs. typed GraphRAG. Score relevance and condition-awareness.</li>
-				<li><strong>Supervised, confidential GRAM touchpoint.</strong> With the instructor mediating,
-					run your held-out questions <strong>together with the instructor's existing GRAM
-					infrastructure</strong> as an additional comparison arm. You do <strong>not</strong>
-					receive the private corpus or repo &mdash; access is supervised and confidential (§4).</li>
+					RAG vs. typed GraphRAG. Score relevance and condition-awareness &mdash; the interesting
+					failure is a retrieval that is topically right but wrong about the model's conditions.</li>
+				<li><strong>Report honestly.</strong> Where does the typed system earn its extra complexity,
+					and where does plain dense retrieval already suffice?</li>
 			</ol>
 		</div>
 		<div class="session-box">
-			<h3>D2 &mdash; A validated Claude Code skill</h3>
+			<h3>D2 &mdash; A validated agent skill</h3>
 			<ol style="list-style:decimal; padding-left:28px; margin:0;">
 				<li>Pick a recurring research task: e.g. <code>/replicate-table</code>,
 					<code>/solve-model</code> (the 5-step model&rarr;equilibrium&rarr;algorithm&rarr;
@@ -533,44 +514,44 @@
 		<ul class="checklist">
 			<li>(D1) Both retrieval systems run on the same corpus; ablation is apples-to-apples.</li>
 			<li>(D1) Retrieval precision / condition-awareness scored on held-out questions.</li>
-			<li>(D1) Supervised GRAM comparison run with the instructor; results reported without exposing
-				private material.</li>
+			<li>(D1) The comparison reports where typed retrieval does <em>not</em> help, too.</li>
 			<li>(D2) Skill has explicit phases, confidence gates, and quote verification.</li>
 			<li>(D2) Validation harness passes on known inputs; human-vs-skill comparison reported.</li>
-			<li>Findings labeled <strong>preliminary / WIP</strong>; confidentiality respected (§4).</li>
 		</ul>
 		<p class="backtop"><a href="#choose">↑ Back to track selector</a></p>
 
-		<!-- ======================= LOGISTICS ======================= -->
-		<h2 id="logistics" class="track-anchor">Logistics &amp; milestones</h2>
-		<p><strong>Teams.</strong> 2&ndash;4 students. Mixed skill sets encouraged (one strong on theory,
-		one on data/code).</p>
+		<!-- ======================= PACING ======================= -->
+		<h2 id="pacing" class="track-anchor">Pacing &amp; milestones</h2>
+		<p><strong>Alone or in a small group.</strong> Two to four people works well, with mixed skill sets
+		(one strong on theory, one on data/code). Solo is entirely feasible &mdash; scope the stretch goal
+		down, not the validation.</p>
 
-		<h3>Suggested milestones</h3>
+		<h3>Suggested stages</h3>
 		<table>
 			<thead>
-				<tr><th>Milestone</th><th>Deliverable</th></tr>
+				<tr><th>Stage</th><th>Done when</th></tr>
 			</thead>
 			<tbody>
 				<tr><td><strong>M1 &mdash; Proposal</strong></td><td>One page: track, question, the <em>specific</em> result you will replicate, data sources, division of labor.</td></tr>
 				<tr><td><strong>M2 &mdash; Data / infra up</strong></td><td>Acquisition pipeline runs end-to-end; benchmark/ground-truth in hand; <code>CLAUDE.md</code> + repo scaffolded.</td></tr>
-				<tr><td><strong>M3 &mdash; Replication verified</strong></td><td>Baseline result reproduced <strong>and validated</strong> (the core grade). Stretch scoped.</td></tr>
-				<tr><td><strong>M4 &mdash; Paper, repo, talk, peer review</strong></td><td>Full reproducibility package submitted; referee report on another team delivered.</td></tr>
+				<tr><td><strong>M3 &mdash; Replication verified</strong></td><td>Baseline result reproduced <strong>and validated</strong> &mdash; the core of the project. Stretch scoped.</td></tr>
+				<tr><td><strong>M4 &mdash; Write-up, repo, talk</strong></td><td>Full reproducibility package assembled; peer review exchanged if you have a partner.</td></tr>
 			</tbody>
 		</table>
 
 		<h3>How to scope with AI (starter prompt)</h3>
 		<p>Use your agent to <em>plan</em>, then you decide. For example:</p>
-		<pre style="background:#e9ecef; padding:14px 18px; border-radius:8px; overflow-x:auto; font-size:0.9em; line-height:1.5;"><code style="background:none; padding:0;">I'm doing Capstone Track &lt;A/B/C/D&gt;. The result I want to replicate first is
+		<pre style="background:#e9ecef; padding:14px 18px; border-radius:8px; overflow-x:auto; font-size:0.9em; line-height:1.5;"><code style="background:none; padding:0;">I'm doing Project Track &lt;A/B/C/D&gt;. The result I want to replicate first is
 &lt;X&gt;. Help me: (1) restate it precisely (estimand or equilibrium concept);
 (2) list the exact public data/inputs and how to fetch them by script;
 (3) propose a minimal pipeline; (4) propose how I will VALIDATE the
 replication against a known benchmark before I attempt any extension.
 Do not write the full solution yet — I want the plan, and I will verify it.</code></pre>
 
-		<div class="notice info"><strong>Office hours / checkpoints.</strong> Bring your
-			<code>AI_LOG.md</code> and your validation results to each checkpoint &mdash; that is what we
-			will discuss. When unsure which track fits, talk to the instructor at the M1 checkpoint.</div>
+		<div class="notice info"><strong>Checking yourself at each stage.</strong> Reread your
+			<code>AI_LOG.md</code> and your validation results at every milestone &mdash; those two
+			documents, not the amount of code, tell you whether the project is actually progressing. If you
+			cannot name the benchmark your result is checked against, that is the next task.</div>
 
 		<!-- ======================= RESOURCES ======================= -->
 		<h2 id="resources" class="track-anchor">Consolidated resources</h2>
@@ -579,10 +560,10 @@ Do not write the full solution yet — I want the plan, and I will verify it.</c
 			<h3>Course foundations</h3>
 			<ul style="margin:0;">
 				<li><a href="syllabus.html">Full syllabus</a> and <a href="slides/index.html">lecture slides</a>;
-					<a href="labs/index.html">lab notebooks</a> (Lecture&nbsp;4 dynamic-model labs; Session-5
-					FOMC/LLM lab; Lecture&nbsp;10 MEPS lab).</li>
+					<a href="labs/index.html">lab notebooks</a> (Lecture&nbsp;4 dynamic-model labs;
+					Lecture&nbsp;5 RL lab; Lecture&nbsp;7&ndash;8 text and RAG labs).</li>
 				<li>Textbook: <a href="https://book.douban.com/subject/37885381/" target="_blank" rel="noopener"><em>机器学习与数量宏观经济学</em></a>.</li>
-				<li>Classical-methods video series: <a href="https://space.bilibili.com/2142649036/lists/7180709" target="_blank" rel="noopener">Bilibili 2026</a>.</li>
+				<li>Classical-methods video series: <a href="https://space.bilibili.com/2142649036/lists/7180709" target="_blank" rel="noopener">Bilibili</a>.</li>
 				<li>Agentic-AI guides: Paul Goldsmith-Pinkham,
 					<a href="https://paulgp.substack.com/p/getting-started-with-claude-code" target="_blank" rel="noopener">Getting Started with Claude Code</a>,
 					<a href="https://paulgp.substack.com/p/from-an-empty-folder-to-a-figure" target="_blank" rel="noopener">From an Empty Folder to a Figure</a>.</li>
@@ -632,15 +613,11 @@ Do not write the full solution yet — I want the plan, and I will verify it.</c
 				<li>Maliar, Maliar &amp; Winant (2021), <em>Deep learning for solving dynamic economic models</em>, JME.</li>
 			</ul>
 		</div>
-
-		<div class="notice info">Prefer the full source document? The complete write-up also lives in the
-			course repo at <code>Docs/Capstone_Projects_2026.md</code>.</div>
 	</div>
 
 	<div class="site-footer">
-		AI for Economic Research: Dynamic Models, Language, and Agents &middot;
-		Summer 2026 &middot; Prof. Zhigang Feng<br>
-		Private course site &mdash; please do not redistribute the slides outside the class.
+		AI for Economic Research: Dynamic Models, Language, and Agents &middot; &copy; Zhigang Feng
+		&nbsp;·&nbsp; <a href="archive/summer-2026.html">Past offering: Summer 2026</a>
 	</div>
 </body>
 </html>
