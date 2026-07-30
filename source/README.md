@@ -21,9 +21,14 @@ One folder per lecture, each holding the `.tex` files for its topic decks plus t
 | `Lec01_Quant_Macro/` | — | Earlier drafts, superseded by `Lec01_Introduction/` |
 
 `shared_preamble.tex` holds the common Beamer preamble; `build_all_topic_decks.sh` and
-`qa_page_numbers.sh` are the batch build and page-count QA helpers. `Labs/` and `Notebooks/` carry
-the lab material (the published subset is mirrored into `../labs/`), `Case_Study/` the Deep-Ramsey
-case-study package, and `Docs/` the capstone brief and lecture-script style guide.
+`qa_page_numbers.sh` are the batch build and page-count QA helpers. `Case_Study/` holds the
+Deep-Ramsey case-study package and `Docs/` the capstone brief and lecture-script style guide.
+
+**Notebooks are not here.** [`../labs/`](../labs/) is their single home and the version you edit —
+this folder is for the *deck* sources. The import originally brought in `Labs/` and `Notebooks/`
+copies, but 254 of their 261 files were byte-identical to `../labs/`, the rest were older, and 11 of
+the 14 notebooks in `Notebooks/` actually belonged to the sister course. Keeping two copies of a
+notebook is a good way to edit the wrong one, so they were removed.
 
 ## Not every master is published
 
@@ -77,3 +82,15 @@ At import, three published decks turned out to be **stale**: `Lec08_T1`, `T2` an
 rewritten on 2026-07-10 but the site was still serving the 07-08 build. Confirmed as a real content
 change, not just a recompile — the chunking-strategy slide had been reworded — and republished. All
 29 non-placeholder decks now match their masters; `tools/build_slides.py --check` verifies it.
+
+A second, worse problem surfaced in the same sweep: **`../labs/Lec01_02_Lab_Getting_Started.ipynb`
+could not run.** It loads three Stanford AI Index CSVs through a `find_data()` helper that raises
+`FileNotFoundError` when they are absent, and the files existed only under the source tree — never
+in `../labs/data/`. The first lab a new student opens crashed on its first data cell. The CSVs are
+now in `../labs/data/` and verified loadable.
+
+Dates are a poor freshness signal in this tree. Hundreds of files share an mtime of
+`2026-07-09 05:06` from a bulk copy, so compare a PDF's internal `/Info` creation date (which
+survives watermarking) or a notebook's cell contents instead. For notebooks, ignore stored outputs
+and compare only the source cells — a 751 KB difference turned out to be execution noise around
+byte-identical code.
