@@ -11,13 +11,21 @@ master each published deck came from.
     python3 tools/build_slides.py Lec08_T1 Lec08_T2   # rebuild only these
 
 Unlike the sister course, decks here are named by lecture and topic, and the master
-lives beside the .tex that produces it. DECKS is derived by scanning source/, so a
-newly added deck is picked up automatically -- but only decks already present in
-slides/ are rebuilt by default, because the site deliberately publishes a subset
-(Lec08_T4/T5 exist as masters and are intentionally not published; see commit
-2b10bbc "Lec08 site: keep T1-T3, remove T4").
+lives beside the .tex that produces it. The deck list is derived by scanning source/,
+so a newly added deck is picked up automatically -- but only decks already present in
+slides/ are rebuilt by default, because source/ holds far more masters than the site
+publishes: superseded drafts, and lectures still marked "In preparation".
 
-Use --adopt to start publishing a master that is not yet in slides/.
+Use --adopt to start publishing a master that is not yet in slides/. Two guards keep
+that from over-reaching:
+
+  * folders matching ARCHIVE_MARKERS (archive_pre_split/, _archive/, old/) are never
+    treated as masters, so a superseded draft cannot shadow or masquerade as a deck;
+  * a deck name argument matches exactly or on an underscore boundary, so "Lec08_T4"
+    selects Lec08_T4 alone and not Lec08_T4a / Lec08_T4b.
+
+Both guards exist because the first --adopt run published two archived pre-split
+drafts by accident.
 """
 from __future__ import annotations
 
@@ -47,11 +55,25 @@ def md5(path: str) -> str:
     return h.hexdigest()
 
 
+# Folders holding superseded drafts. Their PDFs are kept for reference but must
+# never be treated as masters -- otherwise an archived copy can shadow the real
+# deck, or get published by an over-broad name match.
+ARCHIVE_MARKERS = ("archive_pre_split", "_archive", "archive/", "/old/", "superseded")
+
+
+def is_archived(path: str) -> bool:
+    rel = os.path.relpath(path, SOURCE).replace(os.sep, "/")
+    return any(marker.strip("/") in rel.split("/") or marker in rel
+               for marker in ARCHIVE_MARKERS)
+
+
 def masters() -> dict[str, str]:
-    """published filename -> newest master path under source/."""
+    """published filename -> newest master path under source/, archives excluded."""
     import fitz
     out: dict[str, tuple[str, str]] = {}
     for p in glob.glob(os.path.join(SOURCE, "**", "*.pdf"), recursive=True):
+        if is_archived(p):
+            continue
         name = os.path.basename(p)
         try:
             meta = fitz.open(p).metadata or {}
@@ -114,9 +136,15 @@ def main() -> int:
     targets = sorted((published | set(src)) if args.adopt else published)
     targets = [t for t in targets if t not in PLACEHOLDERS]
     if args.decks:
-        targets = [t for t in targets if any(t.startswith(d) for d in args.decks)]
+        # match on a name boundary, so "Lec08_T4" does not also select
+        # "Lec08_T4a" and "Lec08_T4b"
+        def selected(name: str) -> bool:
+            stem = os.path.splitext(name)[0]
+            return any(stem == d or stem.startswith(d + "_") for d in args.decks)
+        targets = [t for t in targets if selected(t)]
         if not targets:
-            sys.exit(f"no published deck matches: {', '.join(args.decks)}")
+            sys.exit(f"no deck matches: {', '.join(args.decks)}\n"
+                     f"(names must match exactly or on an underscore boundary)")
 
     manifest = {}
     if os.path.exists(MANIFEST):
@@ -178,7 +206,7 @@ def main() -> int:
               f"{stale} stale, {missing} unresolved, {len(targets)} checked")
         if unpublished:
             print(f"{len(unpublished)} master(s) under source/ are deliberately not published "
-                  f"(older drafts, and Lec08_T4/T5 which were removed from the site on purpose)")
+                  f"(older drafts and superseded variants; archived folders are excluded entirely)")
         return 1 if (stale or missing) else 0
 
     workdir = tempfile.mkdtemp(prefix="wm-")

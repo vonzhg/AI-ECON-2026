@@ -119,6 +119,16 @@
     "master_md5": "ef95419acf4065e07b432cdce06429d6",
     "pages": 18
   },
+  "Lec08_T4_Grounded_Generation_vs_FineTuning.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T4_Grounded_Generation_vs_FineTuning.pdf",
+    "master_md5": "d2a95738b9460fc7a202b832a3a1a167",
+    "pages": 14
+  },
+  "Lec08_T5_Research_Applications_Demo_Eval.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T5_Research_Applications_Demo_Eval.pdf",
+    "master_md5": "4747c79446f5f884c23689edc3a2afe4",
+    "pages": 24
+  },
   "Lec09_T1_Framing_Setup.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T1_Framing_Setup.pdf",
     "master_md5": "287b9eb5365b276430bdb0c888f39e29",
