@@ -234,6 +234,65 @@ Treatment variable & A quasi-experimental input affecting behavior & Central ban
 \end{frame}
 
 %=============================================================================
+\begin{frame}{From Counting to Reading: Culture out of 23{,}000 Books}
+\textbf{EPU fixes a six-term dictionary in advance and counts. What if you ask the model what each book \emph{endorses} instead?}
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+{\footnotesize
+\begin{itemize}
+\item \textbf{Corpus:} 23{,}000$+$ books of the Western canon, read \emph{in context} --- not searched for keywords.
+\item \textbf{The judgment asked of the model:} for each of \textbf{six} cultural dimensions (adapted from Hofstede 2001), does this work \textbf{endorse}, \textbf{reject}, or \textbf{merely depict} that position? Passage-level score $x_d \in \{-1,0,+1\}$.
+\item \textbf{From flow to stock:} scores accumulate like capital, $\delta_K = 0.005$ --- a 99.5\% annual retention rate, half-life $\approx$ \textbf{138 years}. Culture is inherited, not consumed.
+\item \textbf{One summary number:} the \emph{Innovation Wedge} $=(\mathrm{PD}+\mathrm{UA})/(\mathrm{INDIV}+\mathrm{LTO})$ --- deference and fear of the untried, over autonomy and a long horizon. It \textbf{falls 51\%} between 1000 and 1920.
+\end{itemize}}
+\end{column}
+\begin{column}{0.47\textwidth}
+\centering
+\includegraphics[width=\linewidth]{stefanski_culture_dimensions_0_1920.jpeg}
+
+{\tiny\textit{Six dimensions, year 0--1920. The shaded pre-1000 band is sparser corpus coverage --- shown for direction only, not for inference.}}
+\end{column}
+\end{columns}
+\smallskip
+\textit{\footnotesize Source: Stefanski (2026), ``Cultural Capital and the Productivity of Ideas: Evidence from Historical Texts,'' Univ.\ of St Andrews Economics Discussion Paper No.~2602. Figure reproduced with attribution.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Why It Passes the T1 Bar}
+\textbf{The EPU frame set the standard: audit every step. This case meets it with a different machine.}
+{\footnotesize
+\begin{itemize}
+\item \textbf{Validation.} Experts \emph{blinded} to the scores agree with the score-implied direction in \textbf{93.0\%} of anchor comparisons among books they know; the stocks reproduce cross-country orderings from modern surveys; and an \textbf{independent 5{,}000-book archive} on a frozen pipeline reproduces the decline.
+\item \textbf{The DGP, instantiated.} In $x_i = g(s_i, a_i, c_i) + \varepsilon_i$: $s_i$ is the work's stance; $a_i$ the authorial framing --- a satire \emph{depicts} what it does not endorse, which is why the scale needs a ``depicts'' category and a dictionary cannot supply one; $c_i$ is the archive.
+\item \textbf{What it buys.} The falling wedge raises 1920 productivity to \textbf{1.78$\times$} its counterfactual level, explains \textbf{two-thirds} of the first sustained growth acceleration (1500--1700), and accounts for \textbf{38.7\%} of 1920 productivity growth --- culture as a \emph{measured series}, not a residual.
+\end{itemize}}
+\begin{cautionbox}
+{\footnotesize \textbf{$c_i$ binds here.} The corpus is \textbf{``selected twice''}: history chose what was preserved and taught; digitizers chose which survivors were scanned. The first selection is part of the object of study --- the second is not, and no amount of model quality repairs it.}
+\end{cautionbox}
+\smallskip
+\textit{\footnotesize Cost drove the architecture: Gemini~2.5~Pro runs the context pass once per book, Flash the passage stages that run hundreds of thousands of times.}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{China Parallel: The Same Method on Chinese History}
+\textbf{The method is not about the West --- it is about any canon large enough to read and dated well enough to index.}
+{\footnotesize
+\begin{itemize}
+\item \textbf{Corpora already digitized:} the Twenty-Four Histories; the \emph{Siku Quanshu}; local gazetteers (\emph{difangzhi}) --- thousands of volumes at fine geographic resolution; Ming--Qing memorials and legal archives; examination essays; clan genealogies; \emph{Shenbao} (1872--1949) for the late period.
+\item \textbf{The question it could reach.} The Needham puzzle and the Great Divergence turn on cultural claims --- attitudes to hierarchy, novelty, the long horizon --- argued narratively because no series exists. The same scoring would put a Chinese series beside the Western one and let the growth model arbitrate instead of the anecdote.
+\end{itemize}}
+\begin{cautionbox}
+{\footnotesize \textbf{What breaks --- and this is the point of the exercise.}
+\begin{itemize}
+    \item \textbf{Selection is stronger here, not weaker.} Imperial editorial projects did not merely preserve --- the \emph{Siku Quanshu} suppressed and altered as it collected. $c_i$ is partly a \emph{censorship} process, correlated with the very attitudes to authority being measured.
+    \item \textbf{Register drift.} Classical and vernacular coexist for centuries; the same characters shift meaning across them.
+    \item \textbf{Segmentation is itself a modeling decision}, before any scoring (Act~2).
+    \item \textbf{Hofstede's dimensions were built for modern survey respondents.} Porting them to an imperial canon is an assumption needing its own blinded anchor study --- the 93\% exercise, repeated with Sinologists.
+\end{itemize}}
+\end{cautionbox}
+\end{frame}
+
+%=============================================================================
 \section{Preview: The Machine Ahead}
 \sectiondivider{Preview: The Machine Ahead}{One equation will power everything in Acts 2--4}
 
