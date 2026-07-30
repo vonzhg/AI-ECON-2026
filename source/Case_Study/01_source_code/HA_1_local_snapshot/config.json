@@ -1,0 +1,79 @@
+{
+  "_README": "Configuration for Heterogeneous Agent Ramsey Model (Log Utility)",
+
+  "economic_parameters": {
+    "beta": 0.8,
+    "alpha": 0.3333,
+    "sigma": 1.0,
+    "gamma": 2.0,
+    "delta": 0.1,
+    "pi_e": 0.5,
+    "pi_u": 0.5,
+    "pi_matrix": [[0.5, 0.5], [0.5, 0.5]]
+  },
+
+  "state_bounds": {
+    "K_min": 0.5,
+    "K_max": 5.0,
+    "a_min": 0.0,
+    "a_max": 5.0,
+    "c_min": 0.05,
+    "c_max": 2.5
+  },
+
+  "control_bounds": {
+    "n_min": 0.1,
+    "n_max": 0.9,
+    "c_scale": 1.0
+  },
+
+  "training": {
+    "num_iterations": 200,
+    "batch_size": 128,
+    "batches_per_phase": 10,
+    "epochs_per_batch": 5,
+    "lr_actor": 0.0003,
+    "lr_critic": 0.0003,
+    "rollout_steps": 10,
+    "samples_per_iter": 2000,
+    "plot_frequency": 5
+  },
+
+  "fischer_burmeister": {
+    "epsilon": 0.01,
+    "lambda_initial": 1.0,
+    "lambda_max": 100.0,
+    "rho": 1.5,
+    "penalty_threshold": 0.05
+  },
+
+  "boundary": {
+    "alpha_param": 0.8,
+    "admissibility_threshold": 0.95,
+    "inner_loops": 5,
+    "n_boundary_samples": 5000,
+    "buffer_percent": 0.10
+  },
+
+  "admissibility": {
+    "power_barrier_delta": 0.1,
+    "power_barrier_power": 2.0,
+    "w_K": 0.3333,
+    "w_a": 0.3333,
+    "w_Q": 0.3334
+  },
+
+  "network_architecture": {
+    "hidden_dim": 128,
+    "layers": 3
+  },
+
+  "simulation": {
+    "run_after_training": true,
+    "num_trajectories": 100,
+    "num_periods": 50,
+    "burn_in": 10,
+    "random_seed": 42,
+    "output_dir": "results"
+  }
+}

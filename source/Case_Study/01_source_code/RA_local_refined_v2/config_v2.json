@@ -1,0 +1,116 @@
+{
+    "_comment": "Deep Ramsey Algorithm Configuration - Version 2",
+    "_comment2": "Aligned with refined document specification",
+
+    "model": {
+        "model_number_input": 61,
+        "model_number_output": 62,
+        "policy_network": {
+            "hidden_layers": [64, 64],
+            "activation": "relu"
+        },
+        "value_network": {
+            "hidden_layers": [64, 64],
+            "activation": "relu"
+        }
+    },
+
+    "economic_parameters": {
+        "beta": 0.95,
+        "gamma_l": 2.0,
+        "mu_min": 0.5,
+        "mu_max": 10.0,
+        "zagg_vec": [[0.045], [0.155]],
+        "pi_zagg": [[0.9, 0.1], [0.1, 0.9]]
+    },
+
+    "feasibility_bounds": {
+        "b_min_initial": -0.5,
+        "b_max_initial": 3.5,
+        "tau_min": 0.0,
+        "tau_max": 1.0,
+        "l_min": 0.01
+    },
+
+    "scoring": {
+        "_comment": "Power barrier function: S(x) = [1 - (dist/delta)^kappa]^+",
+        "kappa": 4,
+        "weights": {
+            "w_tau": 0.333,
+            "w_mu": 0.333,
+            "w_debt": 0.334
+        },
+        "buffer_proportions": {
+            "_comment": "Buffer widths as proportion of domain size",
+            "delta_tau_prop": 0.02,
+            "delta_mu_prop": 0.05,
+            "delta_debt_prop": 0.10
+        },
+        "thresholds": {
+            "tau_high": 0.7,
+            "tau_low": 0.3
+        }
+    },
+
+    "boundary_learning": {
+        "use_dynamic_bounds": true,
+        "method": "quantile",
+        "quantile_alpha": 0.05,
+        "n_mu_bins": 20,
+        "n_refinement_steps": 3,
+        "min_points_per_bin": 5,
+        "fallback_band": 0.1
+    },
+
+    "training": {
+        "num_iterations": 10,
+        "warmup_iterations": 3,
+        
+        "policy": {
+            "num_epochs_stage1": 10,
+            "num_epochs_stage2": 5,
+            "learning_rate": 0.001,
+            "batch_size": 256
+        },
+        "value": {
+            "num_epochs": 10,
+            "num_epochs_draw": 5,
+            "learning_rate": 0.001,
+            "batch_size": 256,
+            "n_sim_periods": 20,
+            "v_penalty": -50.0
+        },
+        "use_two_stage_training": true,
+        "lr_scheduler": {
+            "factor": 0.5,
+            "patience": 5
+        }
+    },
+
+    "sampling": {
+        "num_samples": 1000,
+        "candidate_multiplier": 10,
+        "history_size": 5,
+        "perturbation_std": 0.05,
+        "cache_update_frequency": 1,
+        "cache_grid_size": 2000
+    },
+
+    "simulation": {
+        "T_periods": 100,
+        "n_paths": 3
+    },
+
+    "soft_penalties": {
+        "_comment": "Penalty coefficients for constraint violations during simulation",
+        "l_eps": 0.01,
+        "tau_eps": 0.01,
+        "b_eps": 0.01
+    },
+
+    "diagnostics": {
+        "plot_frequency": 2,
+        "verbose": true,
+        "save_models": true
+    }
+}

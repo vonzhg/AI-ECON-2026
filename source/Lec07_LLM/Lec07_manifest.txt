@@ -1,0 +1,8 @@
+Lec07_T1_Text_as_Measurement.pdf
+Lec07_T2a_Preprocessing_BoW.pdf
+Lec07_T2b_Word_Embeddings.pdf
+Lec07_T3a_Attention.pdf
+Lec07_T3b_Transformer.pdf
+Lec07_T4_Pretraining_Alignment.pdf
+Lec07_T5a_Limits.pdf
+Lec07_T5b_Applications_Validation.pdf

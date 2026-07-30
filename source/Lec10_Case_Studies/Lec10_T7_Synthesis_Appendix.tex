@@ -1,0 +1,266 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.7: Synthesis + Appendix
+%% Source: ./archive_pre_split/Lec10_Case_Studies_v2.tex (sections 7-8)
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{./Exercise10_ES_Fellows/plots/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\lstdefinestyle{markdownstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!40},
+    backgroundcolor=\color{gray!8},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.7: Synthesis, Exercises, and Appendix}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.7 Agenda}
+\begin{enumerate}
+  \item \textbf{Synthesis and Exercises}
+  \medskip
+  \item \textbf{Appendix}
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Synthesis and Exercises}
+%===========================================================
+
+\sectiondivider{Synthesis and Exercises}{Comparing reusable skills, empirical pipelines, public-web datasets, and full-lifecycle collaboration}
+
+\begin{frame}{Compare the Case-Study Workflows}
+\scriptsize
+\begin{tabular}{p{2.3cm}p{3.0cm}p{3.2cm}p{3.1cm}}
+\toprule
+\textbf{Case} & \textbf{Artifact} & \textbf{Validation gate} & \textbf{Main failure mode} \\
+\midrule
+Paper review skill & referee-style report & quotes and section claims trace to the paper & generic criticism or hallucinated evidence \\
+MEPS pipeline & panel, weights, figures & rates match external benchmarks & wrong crosswalk or dropped survey weights \\
+ES Fellows & provenance-rich dataset & field-level source trace and missingness report & weak sources hidden by clean tables \\
+Research collaborator & model, pipeline, critique, revision & claims survive adversarial review & polished output around weak framing \\
+AI exposure measurement & rubric, JSON scores, comparison table, scatter & heuristic and reference comparison; invariant checks & construction choice silently drives coefficient sign \\
+OLG homotopy sprint & V0--V5 version ladder and tests & each version inherits a validated baseline & one-shot model generation with no rollback point \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{When to Use Which Workflow}
+\begin{columns}[T]
+\begin{column}{0.24\textwidth}
+\textbf{Build a skill}
+\begin{itemize}\small
+    \item repeated use
+    \item high QC needs
+    \item stable output format
+\end{itemize}
+\end{column}
+\begin{column}{0.24\textwidth}
+\textbf{Stay ad hoc}
+\begin{itemize}\small
+    \item one-off empirical job
+    \item fast iteration
+    \item small prompt set
+\end{itemize}
+\end{column}
+\begin{column}{0.24\textwidth}
+\textbf{Build a dataset harness}
+\begin{itemize}\small
+    \item many entities
+    \item uneven sources
+    \item provenance matters
+\end{itemize}
+\end{column}
+\begin{column}{0.24\textwidth}
+\textbf{Full-lifecycle collab.}
+\begin{itemize}\small
+    \item novel research question
+    \item theory needs operationalization
+    \item claims discipline required
+    \item adversarial review needed
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Measurement and computation cases.} Use the AI-exposure lab when the core risk is construct validity; use the OLG homotopy demo when the core risk is model complexity and rollback discipline.
+\end{frame}
+
+\begin{frame}{What Stayed Human Across All Cases}
+\small
+\begin{tabular}{p{5.9cm}p{6.0cm}}
+\toprule
+\textbf{Economist} & \textbf{Agent} \\
+\midrule
+define the question and success criteria & execute bounded tasks repeatedly \\
+set the coding and validation rules & manipulate files, prompts, and reruns \\
+spot implausible outputs & surface drafts, diagnostics, and plots \\
+interpret the economic meaning & accelerate the path from question to artifact \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{The constant:} the question, identification logic, benchmark, and interpretation remain human work.
+\end{frame}
+
+\begin{frame}{Failure Modes to Watch For}
+\begin{enumerate}
+    \item \textbf{Case 1:} confident but unsupported criticism
+    \item \textbf{Case 2:} clean-looking code with a wrong variable mapping
+    \item \textbf{Case 3:} a rich-looking dataset built on weak or forbidden sources
+    \item \textbf{Case 4:} AI validates the design instead of challenging it, or data contradicts theory without adversarial structure to surface it
+    \item \textbf{All cases:} hidden assumptions that never made it into project files
+\end{enumerate}
+
+\vspace{0.3cm}
+\textbf{The cure is the same in every case:} name the validation step, save the rules on disk, and inspect the output like a referee.
+\end{frame}
+
+\begin{frame}{Exercises and Deliverables}
+\small
+\begin{tabular}{p{2.6cm}p{4.3cm}p{5.7cm}}
+\toprule
+\textbf{Exercise} & \textbf{Artifact} & \textbf{Deliverable} \\
+\midrule
+Exercise A: MEPS lab & harmonized panel and validated figures & in-class guided run with the existing notebook \\
+Exercise B: AI-exposure lab & rubric, scores, scatter, and validation table & run the Module 3 demo notebook; compare heuristic vs reference \\
+Exercise C: OLG homotopy & V0->V1 transition or validation report & inspect the five-step demo; run one smoke test \\
+Exercise D: fellows assignment & batch-level metadata dataset with provenance & normalized CSV, four figures, and a memo \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\begin{itemize}
+    \item Exercise A teaches empirical execution and validation
+    \item Exercise B teaches LLM-as-measurement and construct validation
+    \item Exercise C teaches homotopy and rollback discipline for computational models
+    \item Exercise D teaches controlled public-web data construction
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Capstone Demo Map}
+\small
+\begin{tabular}{p{2.6cm}p{4.2cm}p{5.0cm}}
+\toprule
+\textbf{Demo} & \textbf{Where to run} & \textbf{Expected visible output} \\
+\midrule
+AI exposure & Module 3 exposure demo notebook & substitution/assistance scatter; heuristic vs reference table; coefficient-flip discussion \\
+OLG RAG & Module 4 OLG RAG terminal demo & retrieval report; top-$K$ evidence; grounded answer; refusal example \\
+OLG homotopy & Module 4 OLG five-step notebook & V0--V5 version ladder; validation gates; regenerated reports \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+{\footnotesize Full paths and commands are in \texttt{FullCourse\_Demo\_Index.md}.}
+
+\vspace{0.15cm}
+\textbf{Teaching rule:} every demo needs one launch command, one expected artifact, and one validation question students can answer from the output.
+\end{frame}
+
+\begin{frame}{Looking Back at the Course}
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.15cm,
+    block/.style={rectangle, rounded corners=3pt, draw=gray!50, fill=gray!5,
+        minimum width=4.0cm, minimum height=0.55cm, font=\footnotesize, text=DarkText},
+    current/.style={rectangle, rounded corners=3pt, draw=RedTitle, fill=blue!8,
+        minimum width=4.0cm, minimum height=0.55cm, font=\footnotesize\bfseries, text=RedTitle},
+]
+\node[block] (l12) {Lec 1--6: models + AI methods};
+\node[block, below=of l12] (l78) {Lec 7--8: LLMs + RAG};
+\node[block, below=of l78] (l9) {Lec 9: agentic workflow};
+\node[current, below=of l9] (l10) {Lec 10: case-study design};
+
+\draw[-{Stealth[length=3mm]}, thick, RedTitle!40] (l12.south) -- (l78.north);
+\draw[-{Stealth[length=3mm]}, thick, RedTitle!40] (l78.south) -- (l9.north);
+\draw[-{Stealth[length=3mm]}, thick, RedTitle!40] (l9.south) -- (l10.north);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+\textbf{Final message:} the distance from question to artifact has collapsed, but economists still own the standards for what counts as evidence.
+\end{frame}
+
+%=============================================================================
+\section{Appendix}
+%===========================================================
+
+\sectiondivider{Appendix}{Operational details moved out of the main narrative}
+
+\begin{frame}{Appendix A: Paper-Review Skill Internals}
+\small
+\begin{tabular}{lp{9.2cm}}
+\toprule
+\textbf{Component} & \textbf{Role} \\
+\midrule
+\texttt{SKILL.md} & orchestrates the 7-phase pipeline \\
+\texttt{shared-directives.md} & confidence gate, tone, quote rules \\
+\texttt{section-prompts.md} & specialized prompts by section type \\
+\texttt{editorial-prompt.md} & final quality gate before output \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{Reason this is appendix material:} students need to understand the workflow design before they need a file inventory.
+\end{frame}
+
+\begin{frame}[fragile]{Appendix B: MEPS Prompt Skeleton}
+\begin{lstlisting}[style=pythonstyle, language={}, basicstyle=\ttfamily\scriptsize, numbers=none]
+Prompt A: download + parse + harmonize + save panel
+Prompt B: compute weighted rates by year and subgroup
+Prompt C: generate annotated publication-quality figures
+\end{lstlisting}
+
+\vspace{0.25cm}
+\textbf{Operational note:} the notebook remains the handout for the in-class lab.
+\end{frame}
+
+\begin{frame}{Appendix C: Fellows Normalized Schema}
+\small
+\begin{tabular}{p{3.6cm}p{8.1cm}}
+\toprule
+\textbf{Column group} & \textbf{Examples} \\
+\midrule
+seed fields & name, affiliation, election year \\
+source fields & official profile URL, bio URL, CV URL \\
+biography fields & birth date raw, birth year, PhD year, gender explicit \\
+research fields & research fields raw, normalized field bucket \\
+audit fields & source\_birth, source\_phd, source\_gender, source\_field, notes \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Appendix D: Fellows Batching Rule}
+\begin{itemize}
+    \item official roster parsed into 18 batches of 50
+    \item students complete one batch at a time
+    \item every batch must report coverage before interpretation
+    \item if birth-year coverage stays low, use years since PhD instead of age
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Appendix E: Resources}
+\begin{itemize}
+    \item Lecture 10 MEPS notebook in this folder
+    \item \texttt{Exercise10\_ES\_Fellows/} script bundle in this folder
+    \item Official Econometric Society current fellows page, checked April 13, 2026
+    \item MEPS public-use files and external benchmark sources used in Case Study 2
+\end{itemize}
+\end{frame}
+
+\end{document}

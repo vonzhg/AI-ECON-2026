@@ -1,0 +1,528 @@
+%% FullCourse_10Lecs -- Lecture 7, Topic 7.2b: Full Transformer Layer
+%% Source: ./archive_pre_split/Lec07_LLM.tex (section 6)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module3_LLM_Text/M3_T2b_Transformer_Architecture.tex
+%%         (Vaswani 2017 + Kim et al. 10-K case study appendix)
+
+\input{../shared_preamble.tex}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,matrix,fit,backgrounds}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.2b: The Full Transformer Layer Architecture}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 7.2b Agenda}
+\begin{enumerate}
+  \item \textbf{Full Transformer Layer} --- residual + LayerNorm + FFN
+  \medskip
+  \item \textbf{Encoder, Decoder, Encoder--Decoder} --- BERT, GPT, T5; the Vaswani 2017 diagram
+  \medskip
+  \item \textbf{Appendix --- research case study} --- Kim, Muhn, Nikolaev, Zhang (2024): paragraph-level attention over 10-K filings
+\end{enumerate}
+
+\bigskip
+\footnotesize\textit{Arc: T1a Why$+$Tokens $\to$ T1b Embeddings $\to$ T2a Attention $\to$ T2b Transformer $\to$ T3a Training $\to$ T3b Limits $\to$ T4 Applications.}
+\end{frame}
+
+%=============================================================================
+\section{Full Transformer Layer}
+
+\begin{frame}{Residual Connection and Layer Normalization}
+\begin{itemize}
+\item After the attention output $\tilde{e}^{(i)}$, the layer combines it with the original input via a \emph{residual connection} and then a \emph{layer normalization}:
+\[
+   u^{(i)} \;=\; \mathrm{Norm}\bigl(e^{(i)} \;+\; \tilde{e}^{(i)}\bigr).
+\]
+
+\medskip
+\item \textbf{Why residual?}
+\begin{itemize}
+    \item Preserves the original information --- attention can only \emph{add} to it, never destroy it
+    \item Provides a clean gradient path back through dozens of layers (the trick that made deep networks trainable)
+\end{itemize}
+
+\medskip
+\item \textbf{Why layer normalization?}
+\begin{itemize}
+    \item Normalizes activations across the feature dimension to mean $0$, variance $1$
+    \item Adds learnable scale $\gamma$ and shift $\beta$
+    \item Stabilizes optimization dynamics, especially for very deep stacks
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Feed-Forward Network (MLP)}
+\begin{itemize}
+\item \textbf{Division of labor inside a layer.} Attention mixes information \emph{across} tokens; the FFN then transforms \emph{each} token individually given what it just gathered. Attention $=$ the meeting room; FFN $=$ desk work after the meeting.
+
+\medskip
+\item \textbf{Why it exists.} Attention alone is a linear map of value vectors. The FFN supplies the \emph{non-linear} transformation that lets the network represent arbitrary functions of a token's contextualized embedding. Empirically, FFN weights store most of the model's factual knowledge --- delete them and attention-only models lose world facts even if the attention pattern is intact.
+
+\medskip
+\item After attention + residual + norm, each position is passed independently through a small feed-forward network:
+\[
+   f^{(i)} \;=\; W_{2}\,\sigma\bigl(W_{1}\,u^{(i)} + b_{1}\bigr) + b_{2}.
+\]
+
+\medskip
+\item \textbf{Shape conventions:} $W_{1}\colon d \!\rightarrow\! 4d$ (expand), activation $\sigma$ (ReLU / GELU / SwiGLU), $W_{2}\colon 4d \!\rightarrow\! d$ (contract). The $4d$ expansion is where most of an LLM's parameters live --- capacity for richer non-linear transformations.
+
+\medskip
+\item Followed by another residual connection and layer normalization:
+\[
+   e'^{(i)} \;=\; \mathrm{Norm}\bigl(u^{(i)} + f^{(i)}\bigr).
+\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{One Layer --- Putting It All Together}
+\begin{itemize}
+\item A single Transformer layer can be summarized by the flow:
+\[
+   e^{(i)} \;\xrightarrow{\;\text{Self-Attention}\;}\; \tilde{e}^{(i)}
+   \;\xrightarrow{\;\text{Res+Norm}\;}\; u^{(i)}
+   \;\xrightarrow{\;\text{MLP}\;}\; f^{(i)}
+   \;\xrightarrow{\;\text{Res+Norm}\;}\; e'^{(i)}.
+\]
+
+\medskip
+\item Operationally:
+\[
+   \begin{aligned}
+       \tilde{e}^{(i)} &\;=\; W_{O}\,\sum_{j} \alpha_{j}^{(i)}\,V_{j}, \\[2pt]
+       u^{(i)} &\;=\; \mathrm{Norm}\bigl(e^{(i)} + \tilde{e}^{(i)}\bigr), \\[2pt]
+       f^{(i)} &\;=\; W_{2}\,\sigma(W_{1}\,u^{(i)} + b_{1}) + b_{2}, \\[2pt]
+       e'^{(i)} &\;=\; \mathrm{Norm}\bigl(u^{(i)} + f^{(i)}\bigr).
+   \end{aligned}
+\]
+
+\medskip
+\item Same $(\mathbb{R}^d)^n$ shape in and out: a layer is a structured non-linear update.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{After the Transformer: Where We Are}
+\begin{itemize}
+\item \textbf{What went in:} a sequence of $n$ tokens, converted to embeddings $+$ positional codes, $[e^{(1)}, \ldots, e^{(n)}]$ with each $e^{(i)} \in \mathbb{R}^{d}$.
+
+\medskip
+\item \textbf{What comes out of the top layer:} $n$ \emph{contextualized} vectors $[e'^{(1)}, \ldots, e'^{(n)}]$, same shape, same dimension. Each $e'^{(i)}$ encodes, in its $d$ coordinates,
+\begin{itemize}
+    \item (a) the identity of token $t^{(i)}$,
+    \item (b) its syntactic / semantic role in \emph{this} sequence,
+    \item (c) what every other token contributed to its meaning (causally masked in GPT-style models).
+\end{itemize}
+
+\medskip
+\item \textbf{What we have NOT yet done:} no token generated, no class assigned, no number returned. Contextualized embeddings are an \textbf{intermediate data structure}, not the final answer.
+
+\medskip
+\item \textbf{What comes next:} a small \emph{task head} on top --- a vocabulary projection (generation) or a class projection (classification) --- turns the embeddings into the output we want. The next slide is that final step.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Stacking $L$ Layers}
+\begin{itemize}
+\item The output of one layer becomes the input of the next:
+\[
+   \bigl[e^{(1)}, \ldots, e^{(n)}\bigr]_{\text{layer } \ell + 1}
+   \;\;=\;\;
+   \bigl[e'^{(1)}, \ldots, e'^{(n)}\bigr]_{\text{layer } \ell}.
+\]
+
+\medskip
+\item After $L$ layers, each token's vector has accumulated context from the entire sequence (subject to causal masking, in the autoregressive case).
+
+\medskip
+\item \textbf{Different layers learn different things} (empirically):
+\begin{itemize}
+    \item Lower layers: surface syntax, local agreement, morphology
+    \item Middle layers: phrase- and clause-level structure
+    \item Upper layers: discourse, factual associations, task-relevant abstractions
+\end{itemize}
+
+\medskip
+\item \textbf{What we do with the top layer (``task heads'').}
+\begin{itemize}
+    \item \textbf{Generation:} logits $= W_{\text{vocab}}\, e'^{(n)}$, then $P(\text{next}=w) = \mathrm{softmax}(\text{logits})_{w}$. Training loss: $\mathcal{L} = -\sum_{i} \log P(t^{(i+1)} \mid t^{(1:i)})$ --- the same cross-entropy that shaped every weight in the stack during pretraining.
+    \item \textbf{Classification:} logits $= W_{\text{class}}\, e'^{([\text{CLS}])}$, then $P(\text{class}=c) = \mathrm{softmax}(\text{logits})_{c}$. Training loss: $\mathcal{L} = -\sum \log P(y_{\text{true}} \mid x)$ on a labeled set (fine-tuned encoders: BERT, CentralBankRoBERTa, $\ldots$).
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Transformer vs.\ Word2Vec}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Property} & \textbf{Word2Vec} & \textbf{Transformer} \\
+\midrule
+Representation & 1 static vector / word & contextual vector / token \\
+Architecture & 2-layer Skip-gram / CBOW & multi-head attention + MLP, deep stack \\
+Context scope & fixed local window ($\pm5$) & full sequence, every token sees every token \\
+Position info & none & explicit positional encodings \\
+After training & lookup table; model discarded & model \emph{is} the network used downstream \\
+Typical size & $\sim10^{7}$ params (CPU OK) & $10^{8}$--$10^{12}$ params (GPU required) \\
+Best for & similarity, feature inputs & generation, classification, QA, RAG \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\textbf{The big shift:} from a frozen lookup table of meanings to a deep, dynamic model where meaning emerges from interaction with context.
+\end{frame}
+
+%=============================================================================
+\section{Encoder, Decoder, Encoder--Decoder}
+
+\begin{frame}{Three Variants of the Same Block}
+\begin{itemize}
+\item The Transformer block is generic. The \emph{masking pattern} and the \emph{stack arrangement} determine what kind of model you get.
+
+\medskip
+\item \textbf{Encoder-only (BERT, RoBERTa, FinBERT, CentralBankRoBERTa)}
+\begin{itemize}
+    \item Bidirectional attention --- every token sees every other.
+    \item Pretrained with \emph{masked language modeling}: hide tokens, predict from both sides.
+    \item Best for: classification, embedding extraction, similarity. \emph{Not} a generator.
+\end{itemize}
+
+\medskip
+\item \textbf{Decoder-only (GPT, LLaMA, Claude, Qwen)}
+\begin{itemize}
+    \item Causal mask --- each position only attends to itself and the past.
+    \item Pretrained with \emph{next-token prediction}; autoregressive at inference (Topic 7.3a).
+    \item Best for: open-ended generation, in-context learning, chat. The dominant paradigm today.
+\end{itemize}
+
+\medskip
+\item \textbf{Encoder--Decoder (T5, BART, original Vaswani 2017)}
+\begin{itemize}
+    \item Encoder reads source bidirectionally; decoder generates target with causal $+$ cross-attention to encoder.
+    \item Best for: translation, summarization --- anything where input and output are clearly separated sequences.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Picking a Variant for Your Macro Project}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\footnotesize
+\begin{tabular}{l l l l}
+\toprule
+\textbf{Task} & \textbf{Pick} & \textbf{Why} & \textbf{Example model} \\
+\midrule
+Sentiment / hawk--dove score on FOMC text & encoder & need a fixed embedding & CentralBankRoBERTa \\
+Topic / event classification              & encoder & supervised fine-tune  & FinBERT, RoBERTa \\
+Document embeddings for similarity / RAG  & encoder & pooled $e'^{([\text{CLS}])}$ & SBERT, BGE, E5 \\
+Summarize a 10-K / press release          & enc--dec & input $\neq$ output & T5, BART \\
+Generate a forecast narrative             & decoder & open-ended text      & GPT-4, Claude, LLaMA \\
+Q\&A over central-bank corpora (RAG)      & decoder $+$ retriever & generative w/ context & Lecture 8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item \textbf{Rule of thumb.} If the output is a label or a vector, use an encoder. If the output is text, use a decoder. If you need to map one sequence to another and they have different lengths and structure, use encoder--decoder.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{``Attention Is All You Need'' (Vaswani et al., 2017) --- the Architecture}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  blk/.style={draw, rounded corners=1pt, minimum width=24mm, minimum height=4.2mm, align=center},
+  enc/.style={blk, fill=blue!12},
+  dec/.style={blk, fill=orange!15},
+  io/.style={blk, fill=green!12, minimum width=20mm},
+  arr/.style={-{Latex[length=1.2mm]}}
+]
+% --- ENCODER stack (left)
+\node[io] (esrc) {source tokens $+$ pos};
+\node[enc, above=2mm of esrc] (e1) {Multi-Head Self-Attn};
+\node[enc, above=1.5mm of e1] (e2) {Add \& Norm};
+\node[enc, above=1.5mm of e2] (e3) {Feed-Forward};
+\node[enc, above=1.5mm of e3] (e4) {Add \& Norm};
+\node[above=2mm of e4, font=\scriptsize\itshape] (eN) {$\times N$};
+\draw[arr] (esrc)--(e1); \draw[arr] (e1)--(e2);
+\draw[arr] (e2)--(e3);   \draw[arr] (e3)--(e4);
+\node[draw, dashed, fit=(e1)(e4), inner sep=1.5mm, label=left:{\scriptsize\textbf{Encoder}}] {};
+
+% --- DECODER stack (right)
+\node[io, right=42mm of esrc] (dsrc) {target (shifted) $+$ pos};
+\node[dec, above=2mm of dsrc] (d1) {Masked Multi-Head Self-Attn};
+\node[dec, above=1.5mm of d1] (d2) {Add \& Norm};
+\node[dec, above=1.5mm of d2] (d3) {Cross-Attn (Q from dec, K,V from enc)};
+\node[dec, above=1.5mm of d3] (d4) {Add \& Norm};
+\node[dec, above=1.5mm of d4] (d5) {Feed-Forward};
+\node[dec, above=1.5mm of d5] (d6) {Add \& Norm};
+\node[above=2mm of d6, font=\scriptsize\itshape] (dN) {$\times N$};
+\node[blk, fill=gray!15, above=2mm of dN] (lin) {Linear $\to$ softmax};
+\node[io, above=2mm of lin] (dout) {next-token probs};
+\draw[arr] (dsrc)--(d1); \draw[arr] (d1)--(d2);
+\draw[arr] (d2)--(d3);   \draw[arr] (d3)--(d4);
+\draw[arr] (d4)--(d5);   \draw[arr] (d5)--(d6);
+\draw[arr] (d6)--(lin);  \draw[arr] (lin)--(dout);
+\node[draw, dashed, fit=(d1)(d6), inner sep=1.5mm, label=right:{\scriptsize\textbf{Decoder}}] {};
+
+% --- cross-attention link
+\draw[arr, thick, blue!60!black] (e4.east) to[out=0,in=180] node[above, font=\tiny]{K, V} (d3.west);
+\end{tikzpicture}\\[1mm]
+{\footnotesize Same block, two arrangements. Decoder-only models drop the encoder and the cross-attention.}
+\end{frame}
+
+\begin{frame}{Token Embeddings vs.\ Document Embeddings (Bridge to Lec08)}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\footnotesize
+\begin{itemize}
+\item \textbf{What the Transformer gives us directly.} For an $n$-token passage, the top layer outputs $n$ contextualized vectors $e'^{(1)}, \ldots, e'^{(n)} \in \mathbb{R}^{d}$ --- \emph{one per token}.
+
+\medskip
+\item \textbf{To compare whole passages we need one vector per passage.} Standard pooling moves:
+\begin{itemize}
+    \item \textbf{Mean-pool}: $\bar e = \tfrac{1}{n}\sum_i e'^{(i)}$ --- simple, surprisingly robust.
+    \item \textbf{\texttt{[CLS]}-pool} (BERT family): use $e'^{([\text{CLS}])}$, trained to summarize the passage.
+    \item \textbf{Learned pooling head}: a small attention head over the token sequence, trained for the downstream objective.
+\end{itemize}
+
+\medskip
+\item \textbf{Retrieval embedders} (Sentence-BERT, BGE, E5, voyage-3) take a pretrained transformer and fine-tune it with a \emph{contrastive loss} on (anchor, positive, negative) triples: pull related passages together, push unrelated ones apart. The geometry is \emph{learned for similarity}, not inherited from the next-token objective.
+
+\medskip
+\item \textbf{Lec08 needs one vector per chunk to do retrieval.} Same transformer machinery, different head and different training signal.
+\end{itemize}
+
+\column{0.42\textwidth}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  tok/.style={draw, rounded corners=0.7pt, minimum width=8mm, minimum height=4mm, fill=blue!10},
+  pool/.style={draw, rounded corners=1pt, minimum width=22mm, minimum height=4.5mm, fill=orange!15},
+  doc/.style={draw, rounded corners=1pt, minimum width=22mm, minimum height=4.5mm, fill=green!18},
+  arr/.style={-{Latex[length=1.2mm]}}
+]
+\node[font=\scriptsize\itshape] (lbl1) at (0,0) {$n$ token vectors};
+\node[tok, below=2mm of lbl1] (t1) {$e'^{(1)}$};
+\node[tok, right=1mm of t1] (t2) {$e'^{(2)}$};
+\node[tok, right=1mm of t2] (t3) {$\cdots$};
+\node[tok, right=1mm of t3] (t4) {$e'^{(n)}$};
+
+\node[pool, below=5mm of t2.south east, xshift=-2mm] (p) {pool / \texttt{[CLS]} / head};
+\draw[arr] (t1.south) -- (p.north west);
+\draw[arr] (t2.south) -- (p.north);
+\draw[arr] (t3.south) -- (p.north);
+\draw[arr] (t4.south) -- (p.north east);
+
+\node[doc, below=5mm of p] (d) {1 doc vector $\in\mathbb{R}^{d}$};
+\draw[arr] (p) -- (d);
+
+\node[below=2mm of d, font=\scriptsize\itshape, align=center] {Lec08: ranks $\cos(\text{query}, \text{doc})$};
+\end{tikzpicture}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\appendix
+
+\section{Application: Learning Fundamentals from 10-K Text}
+
+\begin{frame}{From Tokens to Paragraphs: A Research Question}
+\begin{itemize}
+\item \textbf{Question.} Which language inside a 10-K filing actually moves stock prices? Press releases, MD\&A, risk factors, governance disclosures --- which content do investors \emph{react} to?
+
+\medskip
+\item \textbf{Paper.} Kim, Muhn, Nikolaev, Zhang (Booth WP, Nov.\ 2024), \emph{Learning Fundamentals from Text}.
+
+\medskip
+\item \textbf{The move.} Same Q/K/V machinery from Topic 7.2a --- but the unit of analysis is a \textbf{paragraph}, not a word token. A 10-K is a sequence of $\sim 400$ paragraphs; treat each one as a ``token'' and let attention learn which paragraphs matter for the market.
+
+\medskip
+\item \textbf{Why this beats the standard playbook:}
+\begin{itemize}
+    \item Prior text-in-finance work collapses a 10-K to one number: sentiment (Loughran--McDonald 2011), uncertainty (Hassan et al.\ 2019). Information loss is severe.
+    \item Attention preserves \emph{paragraph-level} granularity \emph{and} learns relational importance directly from market reactions.
+    \item Trained attention weights are inspectable --- you can read off which content the market focuses on.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Architecture: Two Attention Layers + MLP Head}
+\begin{columns}[T]
+\column{0.50\textwidth}
+\footnotesize
+\textbf{Pipeline} (full universe of EDGAR 10-Ks, 1996--2023, $\sim$77K filings, $\sim$20.7M paragraphs):
+\begin{enumerate}
+\item Split filing $\to$ paragraphs $p_1, \ldots, p_n$ (cap $n{=}1000$).
+\item $e_i = \text{OpenAI \texttt{text-embedding-3-large}}(p_i)$, then truncate to first 64 dims (Matryoshka, Kusupati et al.\ 2022).
+\item Stack $X = [e_1; \ldots; e_n] \in \mathbb{R}^{n\times 64}$, add sinusoidal positional encoding.
+\item \textbf{Layer 1} --- Vaswani self-attention with residual: $\mathrm{Attention}(X)\!\in\!\mathbb{R}^{n\times 64}$.
+\item \textbf{Layer 2} --- learned softmax pool to a doc vector:
+\[
+   X^{*} = \mathrm{softmax}\!\Bigl(\tfrac{W^{\top}\mathrm{Attention}(X)^{\top}}{\sqrt{64}}\Bigr)\,\mathrm{Attention}(X)
+\]
+with $W\!\in\!\mathbb{R}^{64}$ learnable; $X^{*}\!\in\!\mathbb{R}^{64}$.
+\item MLP $(64{\to}128{\to}64{\to}1)$, ReLU, sigmoid $\to P(r_{[-1,+30]} > 0)$.
+\end{enumerate}
+
+\column{0.48\textwidth}
+\centering
+\begin{tikzpicture}[
+  node distance=2.5mm,
+  every node/.style={font=\scriptsize},
+  box/.style={draw, rounded corners=1pt, minimum width=36mm, minimum height=4.4mm, align=center},
+  io/.style={box, fill=green!12},
+  emb/.style={box, fill=gray!18},
+  attn/.style={box, fill=blue!12},
+  pool/.style={box, fill=orange!18},
+  mlp/.style={box, fill=red!12},
+  arr/.style={-{Latex[length=1.4mm]}}
+]
+\node[io] (in) {10-K filing};
+\node[emb, below=of in] (sp) {Split into paragraphs $p_i$};
+\node[emb, below=of sp] (em) {OpenAI embed (3072$\to$64)};
+\node[emb, below=of em] (pe) {$+$ sinusoidal pos.\ encoding};
+\node[attn, below=of pe] (a1) {\textbf{Layer 1}: self-attention $+$ res.};
+\node[pool, below=of a1] (a2) {\textbf{Layer 2}: softmax pool $\to X^{*}$};
+\node[mlp, below=of a2] (mp) {MLP (128, 64, 1) $+$ ReLU};
+\node[io, below=of mp] (out) {$P(r > 0)$};
+\draw[arr] (in)--(sp);  \draw[arr] (sp)--(em);
+\draw[arr] (em)--(pe);  \draw[arr] (pe)--(a1);
+\draw[arr] (a1)--(a2);  \draw[arr] (a2)--(mp);
+\draw[arr] (mp)--(out);
+\end{tikzpicture}\\[2pt]
+{\tiny Target: $\mathbb{1}\{r_{[\text{file}-1,\text{file}+30]} > 0\}$. Rolling 6/2/1-yr train/val/test.}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Every Concept from This Topic, Reused}
+\centering
+\renewcommand{\arraystretch}{1.25}
+\footnotesize
+\begin{tabular}{l l}
+\toprule
+\textbf{Slide concept (this topic)} & \textbf{Paper usage} \\
+\midrule
+$Q, K, V$ projections (7.2a)                  & Same, but over \emph{paragraphs} not tokens \\
+Scaled softmax $\mathrm{softmax}(QK^{\top}/\sqrt{d})V$ (7.2a) & Used verbatim in Layer 1 \\
+Sinusoidal positional encoding (7.2a)         & Same Vaswani formula, scaled by embedding norm \\
+Residual connection (7.2b)                    & Added to Layer 1 output (paper fn.\ 13) \\
+Cosine similarity (Topic 7.1)                 & Importance score: $\mathrm{cos}(e_i,\, X^{*})$ \\
+Encoder-style training                        & \textbf{Supervised on returns}, not next-token \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\begin{itemize}
+\item \textbf{Methodological pivot.} A standard LLM trains attention with an unsupervised objective (next-token cross-entropy). This paper trains the \emph{same} attention machinery against a \textbf{financial target} (binary positive return). The attention weights then read directly as economic importance.
+
+\medskip
+\item \textbf{Importance score for paragraph $i$ in document $t$:}
+\[
+   \boxed{\;\;\text{Importance}_{ikt} \;=\; \frac{X_{it}^{*} \cdot e_{ikt}}{\|X_{it}^{*}\|\,\|e_{ikt}\|}\;\;}
+\]
+A paragraph is important when its semantic content aligns with the document's attention-weighted representation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Empirical Findings}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\footnotesize
+\textbf{Predictive performance} (avg AUC, 20 yearly test sets, baseline $0.50$):
+\begin{center}
+\begin{tabular}{l c c}
+\toprule
+Model & AUC & $\Delta$ vs base \\
+\midrule
+Attention (paper) & \textbf{0.5599} & $+6.0$ pp \\
+MLP (no attn)     & 0.5328 & $+3.3$ pp \\
+Logit             & 0.5197 & $+2.0$ pp \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+Sharpe (1-month-ahead returns): \textbf{1.56} attention, 1.28 MLP, 1.08 logit.
+
+\medskip
+\textbf{Attention share by 10-K Item} (stylized; learned weights):
+\begin{center}
+\begin{tikzpicture}[scale=0.62]
+\begin{axis}[
+  width=7.5cm, height=4.6cm,
+  xbar,
+  bar width=4pt,
+  xmin=0, xmax=0.30,
+  symbolic y coords={I13,I12,I10,I1A,I1,I8,I7},
+  ytick=data,
+  yticklabels={Item 13,Item 12,Item 10,Item 1A,Item 1,Item 8,Item 7},
+  xlabel={Share of learned attention},
+  tick label style={font=\tiny},
+  label style={font=\tiny},
+  nodes near coords,
+  nodes near coords style={font=\tiny},
+]
+\addplot[fill=blue!55!black] coordinates {
+  (0.04,I13)
+  (0.05,I12)
+  (0.07,I10)
+  (0.13,I1A)
+  (0.14,I1)
+  (0.23,I8)
+  (0.28,I7)
+};
+\end{axis}
+\end{tikzpicture}\\
+{\scriptsize Top: Item 7 MD\&A, Item 8 Financials. Bottom: Item 13 Relations, Item 12 Ownership, Item 10 Governance.}
+\end{center}
+
+\column{0.50\textwidth}
+\footnotesize
+\textbf{Topics inside MD\&A (Item 7):}
+\begin{itemize}
+\item \emph{Most attended}: segment information, financial performance, liquidity, recent M\&A.
+\item \emph{Least attended}: forward-looking statements, accounting pronouncements, \textbf{corporate governance}, \textbf{sustainability / CSR}.
+\end{itemize}
+
+\smallskip
+\begin{tcolorbox}[colback=LightGray, colframe=RedTitle, boxrule=0.3mm, arc=1mm, left=2mm, right=2mm, top=0.8mm, bottom=0.8mm]
+\textbf{Surprise.} ESG and corporate governance --- dominant in public discourse --- rank \emph{lowest} by market reaction.
+\end{tcolorbox}
+
+\smallskip
+\textbf{Two causal results.}
+\begin{itemize}
+\item SEC \emph{Modernization of Reg S-K} (treatment) raised Item 7 vs Item 8 (control) importance --- regulation can \emph{enhance} relevance.
+\item Firms strategically place bad-news / low-profitability content \textbf{later} in MD\&A (Bloomfield 2008; Cohen et al.\ 2020).
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Take-Aways and Bridges}
+\begin{enumerate}
+\item \textbf{Same architecture, different ``token.''} Wherever an ordered sequence has context-dependent importance, the transformer is a tool. Macro/finance natural fits:
+\begin{itemize}
+    \item Paragraphs of FOMC minutes / Beige Book (monetary-policy text)
+    \item Sentences of central-bank speeches (hawk--dove decomposition)
+    \item Stocks in an investor's portfolio --- Gabaix, Koijen, Richmond, Yogo (2023), \emph{Asset Embeddings}
+    \item Country--year observations in a macro panel
+\end{itemize}
+
+\medskip
+\item \textbf{Supervised attention is a research instrument.} Once attention is trained against an economic target (returns, earnings, employment, output), the weights become inspectable measures of \emph{economic} importance --- decomposable across items, topics, time, and firm characteristics.
+
+\medskip
+\item \textbf{Bridge to Topic 7.3a.} This paper is \emph{encoder}-style supervised. Topic 7.3a covers \emph{decoder-only} generative training. The same paper actually combines both: GPT-4o (decoder LLM) discovers the topic taxonomy that the encoder then scores --- a hybrid pipeline the next topic equips you to build.
+\end{enumerate}
+\end{frame}
+
+\end{document}

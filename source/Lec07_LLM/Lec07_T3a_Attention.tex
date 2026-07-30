@@ -1,0 +1,386 @@
+%% FullCourse_10Lecs -- Lecture 7, Act 3 (ATTEND, part 1/2): The Attention Mechanism
+%% ch14 rebuild (2026-07-07); worked-example-first reorder (2026-07-09).
+%% Reorganized top-down per user request: open with a worked example + the goal,
+%% then the approach (Q/K/V roles + retrieval intuition), then WHERE the
+%% projection matrices come from (the training objective -- promoted from the
+%% old end-of-deck "How Q/K/V Are Learned" frame), then the mechanics step by
+%% step (which now carry the worked example's numbers, absorbing the old
+%% standalone "Worked Example Part 1/2"). Frame bodies reuse the ch14-rebuild
+%% content; the self-attention worked example's scores were recomputed so that
+%% softmax(scores) reproduces the 0.50/0.40 headline used by the "Q/K/V at a
+%% Glance" diagram (the old 2.3/1.9/1.1/... table softmaxed to ~0.45/0.30/0.14,
+%% not the stated 0.50/0.40/0.05 -- now internally consistent).
+%% Original ch14-rebuild frames were copied from
+%%   archive_pre_split/pre_ch14_rebuild_2026-07-07/Lec07_T2a_Attention_Mechanism.tex
+%% The Q/K/V-at-a-glance diagram keeps the corrected arrow semantics (Q-K match
+%% sets the weight, the weight applies to V).
+
+\input{../shared_preamble.tex}
+
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds}
+
+\input{lec07_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.3a: The Attention Mechanism}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 7 in One Map}
+\LecSevenMap{3}
+\medskip
+\textit{\footnotesize Route: one worked example $\to$ the goal (a context vector per token) $\to$ the approach (Q/K/V) $\to$ where the matrices come from (the training objective) $\to$ the mechanics, step by step $\to$ multi-head; part 2/2 (T3b) wraps the head into the full Transformer layer.}
+\end{frame}
+
+%=============================================================================
+\section{The Goal, Through One Example}
+\sectiondivider{The Goal, Through One Example}{One ambiguous word --- and the context-aware vector we want for it}
+
+\begin{frame}{Start Here: One Word, One Problem}
+\small
+\textbf{A sentence from a policy report:} ``The central bank raised interest rates amid rising inflation.''
+
+\smallskip
+\textbf{Tokenization} (9 word tokens, numbered left to right):
+\[
+\underbrace{\text{The}}_{1}\;\underbrace{\text{central}}_{2}\;\underbrace{\text{bank}}_{3}\;\underbrace{\text{raised}}_{4}\;\underbrace{\text{interest}}_{5}\;\underbrace{\text{rates}}_{6}\;\underbrace{\text{amid}}_{7}\;\underbrace{\text{rising}}_{8}\;\underbrace{\text{inflation}}_{9}
+\]
+
+\begin{itemize}
+\item \textbf{The problem.} In isolation, \emph{interest} (position 5) is ambiguous --- monetary-policy \emph{rates}, personal \emph{curiosity}, or a financial \emph{stake}? We want a vector $e'^{(5)}$ encoding how it is used \emph{in this sentence}.
+\item \textbf{What a reader does.} Seeing \emph{interest}, you ask ``interest in \emph{what}?'' --- your eye jumps to \emph{rates} and \emph{inflation}, the words that fix its meaning.
+\item \textbf{What attention does (previewed).} Exactly that, numerically. Of all the attention \emph{interest} pays across the sentence:
+\[
+   \text{attention on \emph{rates}} \approx 0.50, \quad
+   \text{on \emph{inflation}} \approx 0.40, \quad
+   \text{on all else} \approx 0.10,
+\]
+then it \emph{blends their content} into $e'^{(5)}$ --- landing it squarely in monetary-policy territory.
+\end{itemize}
+
+\smallskip
+\begin{takeawaybox}
+\textbf{Those weights were never hand-coded --- no dictionary said ``\emph{interest} goes with \emph{rates}.''} How the model \emph{finds} them, and what $0.50/0.40$ computes, is the rest of this deck.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{What We're Trying to Achieve}
+\begin{itemize}
+\item Zoom out from one word. A Transformer is a function
+\[
+   \mathcal{T}\colon \bigl(\mathbb{R}^{d}\bigr)^{n} \;\longrightarrow\; \bigl(\mathbb{R}^{d}\bigr)^{n},
+   \quad \bigl[e^{(1)}, \ldots, e^{(n)}\bigr] \mapsto \bigl[e'^{(1)}, \ldots, e'^{(n)}\bigr],
+\]
+mapping $n$ input vectors to $n$ contextualized outputs of the same dimension. (Inputs are token embeddings $+$ positional encodings; details in T3b.)
+\smallskip
+\item \textbf{The single conceptual jump: static $\to$ contextual.} Word2Vec gave \emph{one vector per word type} --- \emph{bank} in ``river bank'' and ``central bank'' share it. A Transformer gives \emph{one vector per token occurrence}: the two \emph{bank}s separate. Our $e'^{(5)}$ for \emph{interest} is exactly such a vector.
+\smallskip
+\item \textbf{What ``contextualized'' packs in.} Each $e'^{(i)}$ encodes at once (a) the identity of $t^{(i)}$, (b) its role in \emph{this} sequence, (c) a weighted blend of every other token's contribution.
+\smallskip
+\item \textbf{Not the final answer.} These are an \emph{intermediate representation}. A small \emph{task head} sits on top: project $e'^{(n)}$ onto the vocabulary (generation) or $e'^{(\text{[CLS]})}$ onto labels (classification).
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{The Approach: Query, Key, Value}
+\sectiondivider{The Approach: Query, Key, Value}{Score with queries and keys, read with values --- a soft database lookup}
+
+\begin{frame}{The Approach: Score, Normalize, Blend}
+\begin{itemize}
+\item For each position $i$, ask: \emph{``which other positions are most relevant to $i$?''} Then build $i$'s new representation as a \emph{weighted sum} over all positions:
+\[
+   \tilde e^{(i)} \;=\; \sum_{j} \alpha_{j}^{(i)}\,(\text{content of } j), \qquad
+   \alpha_{j}^{(i)} \ge 0, \quad \sum_{j}\alpha_{j}^{(i)} = 1.
+\]
+The weights $\alpha^{(5)} = (\ldots, 0.50, \ldots, 0.40, \ldots)$ from the previous slide are exactly these.
+
+\medskip
+\item \textbf{Crucial properties:}
+\begin{itemize}
+    \item Every token attends to every other in \emph{one} step --- no recurrence.
+    \item Weights are computed \emph{dynamically} from the input, not fixed.
+    \item All positions are processed in \emph{parallel} $\Rightarrow$ trains efficiently on GPUs.
+\end{itemize}
+
+\medskip
+\item Repeat this ``everyone looks at everyone'' operation $L$ times (e.g.\ $L=96$ in GPT-3) with different learned weights, and the model builds deeply contextualized representations.
+
+\medskip
+\item \textbf{Engineering name:} scaled dot-product self-attention. Three questions remain --- \emph{what} gets scored, \emph{how}, and \emph{where the weights come from}. The answer to the first is $Q$, $K$, $V$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Three Roles --- Query, Key, Value}
+\begin{itemize}
+\item To score and blend, each token computes \emph{three} projections of its embedding $e^{(i)} \in \mathbb{R}^{d}$:
+\begin{align*}
+   Q_{i} &\;=\; W_{Q}\, e^{(i)} & \text{(query)}\\
+   K_{i} &\;=\; W_{K}\, e^{(i)} & \text{(key)}\\
+   V_{i} &\;=\; W_{V}\, e^{(i)} & \text{(value)}
+\end{align*}
+where $W_{Q}, W_{K}, W_{V} \in \mathbb{R}^{k \times d}$ are learned matrices and typically $k \le d$.
+
+\medskip
+\item \textbf{The three roles} (information-retrieval mnemonic):
+\begin{itemize}
+    \item $Q_i$ --- the \emph{question} token $i$ asks: ``what context do I need?''
+    \item $K_j$ --- the \emph{advertisement} token $j$ posts: ``here's what I'm about.''
+    \item $V_j$ --- the \emph{content} token $j$ delivers if it is matched.
+\end{itemize}
+
+\medskip
+\item \textbf{Why three separate projections?} Separation enables \emph{asymmetric} attention: \emph{interest} can ask a question ($Q_5$) that matches \emph{rates}'s advertisement ($K_6$) without \emph{rates} having to ask the same question back. A single shared vector could not express ``$i$ needs $j$ but not vice versa.''
+
+\medskip
+\item The match $\langle Q_i, K_j\rangle$ sets \emph{how much} to read; the value $V_j$ is \emph{what} gets read. The next slide shows this split visually.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q/K/V at a Glance --- Match Sets the Weight, the Weight Reads the Value}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  qbox/.style={draw, rounded corners=1.5pt, minimum width=52mm, minimum height=10mm, align=center, fill=blue!12},
+  kbox/.style={draw, rounded corners=1.5pt, minimum width=40mm, minimum height=8mm, align=center, fill=orange!18},
+  vbox/.style={draw, rounded corners=1.5pt, minimum width=40mm, minimum height=8mm, align=center, fill=green!18},
+  outbox/.style={draw, rounded corners=1.5pt, minimum width=62mm, minimum height=9mm, align=center, fill=RedTitle!10},
+  arr/.style={-{Latex[length=1.8mm]}, thick},
+  score/.style={{Latex[length=1.5mm]}-{Latex[length=1.5mm]}, dashed, thick, blue!60!black}
+]
+\node[qbox] (Q) at (0,2.7)
+    {\textbf{Query} from \emph{interest}:\ $Q_5 = W_Q e^{(5)}$\\ ``what context fixes my meaning?''};
+\node[kbox] (K6) at (-3.1,0.7) {\textbf{Key} of \emph{rates}:\ $K_6$};
+\node[kbox] (K9) at (3.1,0.7)  {\textbf{Key} of \emph{inflation}:\ $K_9$};
+\node[vbox] (V6) at (-3.1,-0.9) {\textbf{Value} of \emph{rates}:\ $V_6$};
+\node[vbox] (V9) at (3.1,-0.9)  {\textbf{Value} of \emph{inflation}:\ $V_9$};
+\node[outbox] (O) at (0,-2.6)
+    {blend: $0.50\,V_6 + 0.40\,V_9 + \cdots \;\to\; \tilde e^{(5)}$};
+\draw[score] (Q.south west) -- node[left=1pt, font=\tiny, align=right]
+    {match $\langle Q_5, K_6\rangle$\\ $\Rightarrow \alpha_6 = 0.50$} (K6.north);
+\draw[score] (Q.south east) -- node[right=1pt, font=\tiny, align=left]
+    {match $\langle Q_5, K_9\rangle$\\ $\Rightarrow \alpha_9 = 0.40$} (K9.north);
+\draw[arr, gray!70] (K6) -- node[left, font=\tiny]{gates} (V6);
+\draw[arr, gray!70] (K9) -- node[right, font=\tiny]{gates} (V9);
+\draw[arr] (V6.south) -- node[left=2pt, font=\tiny]{$\times\, 0.50$} (O.north west);
+\draw[arr] (V9.south) -- node[right=2pt, font=\tiny]{$\times\, 0.40$} (O.north east);
+\end{tikzpicture}
+
+\medskip
+\footnotesize
+\textbf{Three roles, kept separate.} The \emph{query}--\emph{key} match (dashed) only decides \emph{how much} to read; what gets read is the \emph{value}. Asymmetry matters: \emph{interest} queries \emph{rates} without \emph{rates} querying back. $W_Q, W_K, W_V$ are all learned from the loss --- nobody hand-codes ``attend to rates.''
+\end{frame}
+
+\begin{frame}{The Retrieval Analogy: A Soft Database Lookup}
+\textbf{Attention is a search engine that returns a weighted blend instead of one hit.}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\footnotesize
+\begin{tabular}{l l l}
+\toprule
+\textbf{Retrieval system} & \textbf{Self-attention} & \textbf{At position $i$} \\
+\midrule
+search query & query vector & $Q_i = W_Q e^{(i)}$: ``what do I need?'' \\
+document tags / index & key vectors & $K_j = W_K e^{(j)}$: ``what I am about'' \\
+document contents & value vectors & $V_j = W_V e^{(j)}$: what is actually read \\
+relevance ranking & scaled dot products & $\langle Q_i, K_j\rangle/\sqrt{k}$ \\
+click the top result & softmax blend & read \emph{all} results, weighted \\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\begin{itemize}
+\item Every position plays all three roles at once: it queries the others, advertises itself, and delivers content when matched.
+\item The ``soft'' part --- a convex combination rather than a hard top-1 pick --- keeps the whole lookup differentiable, so it can be \emph{learned} end-to-end by gradient descent.
+\item Preview: the same query--key logic powers document retrieval in RAG (Lec08) --- there the ``keys'' are your corpus.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Where Do Q, K, V Come From?}
+\sectiondivider{Where Do Q, K, V Come From?}{The projection matrices are learned --- by one global objective}
+
+\begin{frame}{Where the Projection Matrices Come From}
+\small
+\textbf{The $0.50/0.40$ pattern is not in the code --- it is \emph{learned}. Here is the objective that produces it.}
+\begin{itemize}
+\item \textbf{What is trainable ($\theta$).} In every layer $W_{Q}, W_{K}, W_{V}, W_{O}$, plus the FFN, LayerNorm, token-embedding ($\mathcal{E}$) and output-head ($W_{\text{vocab}}$) weights. All start \emph{random}, updated by gradient descent on a \textbf{single global loss}.
+\smallskip
+\item \textbf{The objective} (GPT-style autoregressive LM) --- predict the next token from the past:
+\[
+   \mathcal{L}(\theta) \;=\; -\sum_{s}\sum_{i} \log P_{\theta}\bigl(t_{s}^{(i+1)} \mid t_{s}^{(1:i)}\bigr).
+\]
+(BERT-style \emph{masked} LM predicts hidden tokens from both sides; fine-tuning swaps in a task label.)
+\smallskip
+\item \textbf{How that shapes $W_Q, W_K, W_V$.} One backward pass sends gradients through softmax, the dot products, \emph{and} the projections together. They move so that $\langle Q_i, K_j\rangle$ is \emph{high exactly where attending $i\!\to\!j$ lowers the loss}. Nobody codes ``attend to neighbours'' --- the model \emph{discovers} which pairings help predict text.
+\smallskip
+\item \textbf{Back to \emph{interest}.} Reading it against \emph{rates} and \emph{inflation} helped predict the surrounding words of millions of policy sentences --- \emph{that} payoff is why $W_Q, W_K, W_V$ end up producing $\alpha_6\approx0.50,\ \alpha_9\approx0.40$. Nobody wrote the rule.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{The Mechanics, Step by Step}
+\sectiondivider{The Mechanics, Step by Step}{We have Q, K, V --- now score, normalize, blend, and project back}
+
+\begin{frame}{Mechanics I --- Scaled Dot-Product Scores}
+\textbf{We already have $Q, K, V$. Now score every candidate position against \emph{interest}'s query.}
+\begin{itemize}
+\item Query--key compatibility for pair $(i,j)$ is the scaled dot product $\;s_{j}^{(i)} = \langle Q_{i},\, K_{j}\rangle / \sqrt{k}$.
+\item \textbf{Why divide by $\sqrt{k}$?} Larger $k$ inflates dot products, pushing softmax into saturation (one term dominates, gradients vanish); dividing by $\sqrt{k}$ holds $\mathrm{Var}\bigl(s_j^{(i)}\bigr)\approx 1$.
+\end{itemize}
+
+\smallskip
+\textbf{Worked example}, $i=5$ (\emph{interest}) --- the nine scaled scores:
+\begin{center}\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l|ccccccccc}
+\toprule
+token $j$ & rates$_6$ & infl.$_9$ & raised$_4$ & int.$_5$ & bank$_3$ & rising$_8$ & central$_2$ & amid$_7$ & the$_1$\\
+\midrule
+$s_j^{(5)}$ & $2.3$ & $2.1$ & $-0.8$ & $-1.0$ & $-1.1$ & $-1.2$ & $-1.4$ & $-1.6$ & $-1.8$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Only the two policy words score high; function and distant words score low.
+
+\smallskip
+\begin{itemize}
+\item \textbf{Direction.} This illustration is \emph{bidirectional} (encoder-style: every token may see every other), so \emph{interest} can look ahead to \emph{rates} / \emph{inflation}. A generator would instead apply a \textbf{causal mask} --- next slide.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mechanics II --- Softmax to Attention Weights}
+\begin{itemize}
+\item Convert the scores into a probability distribution over positions:
+\[
+   \alpha_{j}^{(i)} \;=\; \frac{\exp\bigl(s_{j}^{(i)}\bigr)}{\sum_{r=1}^{n}\exp\bigl(s_{r}^{(i)}\bigr)},
+   \qquad \alpha_{j}^{(i)} \ge 0, \ \ \sum_{j}\alpha_{j}^{(i)} = 1.
+\]
+
+\medskip
+\item \textbf{Our example.} Exponentiate the nine scores and normalize (try it: $e^{2.3}/\sum_r e^{s_r} \approx 9.97/20.2 \approx 0.49$):
+\[
+   \alpha_{6}^{(5)} \approx 0.50\ (\text{\emph{rates}}), \qquad
+   \alpha_{9}^{(5)} \approx 0.40\ (\text{\emph{inflation}}), \qquad
+   \sum_{\text{other 7}} \alpha_{j}^{(5)} \approx 0.10.
+\]
+This is the $0.50/0.40$ split previewed on slide~1 --- now \emph{derived}, not asserted.
+\smallskip
+\item \textbf{Why softmax?} It turns any real score vector into a \emph{convex} weighting (each $\ge 0$, summing to 1) and is smooth $\Rightarrow$ differentiable end-to-end. Concentrated $\alpha \Rightarrow$ ``hard'' attention; diffuse $\alpha \Rightarrow$ ``soft.''
+\smallskip
+\item \textbf{Causal masking (decoder variant).} A generator masks $s_j^{(i)} = -\infty$ for $j>i$ before softmax (no peeking ahead) --- that would hide positions $6\text{--}9$ from \emph{interest}. Our bidirectional (encoder) reading keeps them.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mechanics III --- Weighted Sum of Values}
+\begin{itemize}
+\item Given the weights $\alpha_{j}^{(i)}$, the attention output for position $i$ is the weighted sum of \emph{value} vectors:
+\[
+   \text{AttnVec}_{i} \;=\; \sum_{j=1}^{n} \alpha_{j}^{(i)}\, V_{j} \;\in\; \mathbb{R}^{k}.
+\]
+
+\medskip
+\item \textbf{Our example:}
+\[
+   \text{AttnVec}_{5} \;\approx\; 0.50\,V_{6} \;+\; 0.40\,V_{9} \;+\; 0.10\times(\text{the rest}).
+\]
+\emph{interest} ``reads'' mostly \emph{rates}'s and \emph{inflation}'s content. Recall the split of labour: $K_j$ decided \emph{how much}; $V_j$ is \emph{what} is delivered.
+
+\medskip
+\item \textbf{Why a blend, not a hard top-1 pick?} The output mixes $V_{\text{rates}}, V_{\text{inflation}}, \ldots$ into one vector reflecting all relevant contexts at once --- richer than any single lookup, and differentiable so it can be learned.
+
+\medskip
+\item \textbf{Contextualization, made concrete.} Swap the sentence to ``The discount \emph{rates} applied to pension funds were revised'' and the \emph{same} machinery shifts its reading: \emph{discount} and \emph{pension} become the high-weight sources, and the vector lands in discounting / pensions territory instead. Same machinery, different sentence, different meaning.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mechanics IV --- Project Back, and the Full Recipe}
+\begin{itemize}
+\item AttnVec lives in $\mathbb{R}^{k}$; the next layer needs $\mathbb{R}^{d}$. Project back with a learned $W_{O} \in \mathbb{R}^{d \times k}$:
+\[
+   \tilde{e}^{(i)} \;=\; W_{O}\,\text{AttnVec}_{i}.
+\]
+For \emph{interest}, $\tilde{e}^{(5)}$ is the context-aware vector we set out to build on the very first slide.
+
+\medskip
+\item \textbf{Why project back?} In multi-head attention each head works in a smaller subspace $\mathbb{R}^{k}$ ($k = d/H$); $W_O$ restores the common dimension $d$ after concatenating heads, so the result flows into the next layer with no shape change.
+
+\medskip
+\item \textbf{The full recipe (one head):}
+\begin{enumerate}
+    \item \textbf{Project:} $Q_i, K_i, V_i = W_Q e^{(i)},\ W_K e^{(i)},\ W_V e^{(i)}$
+    \item \textbf{Score:} $s_{j}^{(i)} = \langle Q_i, K_j\rangle / \sqrt{k}$
+    \item \textbf{Softmax:} $\alpha_{j}^{(i)}$
+    \item \textbf{Blend:} $\text{AttnVec}_i = \sum_j \alpha_{j}^{(i)} V_j$
+    \item \textbf{Project back:} $\tilde{e}^{(i)} = W_O\, \text{AttnVec}_i$
+\end{enumerate}
+
+\medskip
+\item All four matrices $W_Q, W_K, W_V, W_O$ are learned by backpropagation from the task loss (previous section) --- and the whole computation runs in parallel for every position $i$ at once.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multi-Head Attention}
+\small
+\begin{itemize}
+\item One $(Q, K, V)$ trio captures only one ``view'' of the sequence. \textbf{Multi-head attention} runs $H$ such trios in parallel and concatenates their outputs.
+
+\medskip
+\item Each head $h$ has its own projection matrices $W_{Q}^{(h)}, W_{K}^{(h)}, W_{V}^{(h)}$, all of dimension $k = d/H$.
+
+\medskip
+\item After running $H$ attention computations independently, concatenate and project:
+\[
+   \text{MultiHead}_{i} \;=\; W_{O}^{*}\,\Bigl[\,\text{AttnVec}_{i}^{(1)};\,\ldots;\,\text{AttnVec}_{i}^{(H)}\Bigr].
+\]
+
+\medskip
+\item \textbf{Do heads have different objectives?} \emph{No --- all $H$ heads share the same training loss} (e.g.\ next-token cross-entropy). What differs is their random initialization. Specialization is \textbf{emergent}: under one global loss, $H$ parallel feature detectors diversify because identical copies of the same head would be redundant.
+
+\medskip
+\item \textbf{Observed specializations in financial text:}
+\begin{itemize}
+    \item Head 1: monetary-policy relations (\emph{inflation} $\leftrightarrow$ \emph{interest})
+    \item Head 2: temporal phrases (\emph{Q1}, \emph{next month}, \emph{by year-end})
+    \item Head 3: hawkish vs.\ dovish stance markers
+\end{itemize}
+Nobody told the heads what to look for --- they were not assigned separate objectives.
+
+\medskip
+\item Total parameter cost is essentially the same as a single-head attention with the full dimension $d$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Thinkbox: Attention Entropy as a Measurement Diagnostic}
+\small
+\textbf{The weight distribution itself carries information about measurement quality.}
+\begin{itemize}
+\item Position $i$'s weights $\boldsymbol\alpha^{(i)}$ form a probability distribution; its Shannon entropy $H(\boldsymbol\alpha^{(i)}) = -\sum_j \alpha_j^{(i)}\log\alpha_j^{(i)}$ measures how \emph{focused} the reading is.
+\item $H \approx 0$: meaning pinned down by a few strong context words --- 2022-style tightening statements, where \emph{inflation} attends to \emph{raised}, \emph{persistent}, \emph{mandate}.
+\item $H \approx \log n$: attention spread thin --- the contextual vector approaches a global average. 2019-style ``crosscurrents'' statements: \emph{inflation} attends diffusely to \emph{employment}, \emph{growth}, \emph{uncertainty}, \ldots
+\end{itemize}
+\begin{cautionbox}
+High-entropy passages produce noisier stance scores --- measurement-error variance that \emph{moves with the state of the economy}. If you regress on Transformer-based stance measures, attention entropy is a candidate flag for heteroskedastic measurement error. A PBOC wrinkle to discuss: boilerplate political formulas share every passage with the substantive policy words --- does that push the attention entropy of terms like ``inflation'' systematically higher in PBOC reports than in FOMC statements?
+\end{cautionbox}
+\smallskip
+\textit{\footnotesize Caveat: attention weights are intermediate computations, not structural parameters --- diagnostics and interpretation aids, never ``effects.''}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: One Head Is a Building Block}
+\textbf{We can now compute a context-aware vector --- once.}
+\begin{itemize}
+\item One attention pass mixes information \emph{across} positions. On its own it is still linear in the values, blind to word order, and single-pass.
+\item \textbf{T3b wraps the head into a layer:} positional encodings (order), residual connections $+$ LayerNorm (trainability at depth), a feed-forward network (nonlinearity --- and, it turns out, the model's stored knowledge) --- then stacks the layer $L$ times and chooses among three architectural variants, ending with a full research case on 10-K filings.
+\end{itemize}
+\bigskip
+\centering\footnotesize\textit{Arc: T1 FRAME $\to$ T2 REPRESENT $\to$ \textbf{T3 ATTEND} $\to$ T4 PRETRAIN $\to$ T5 MEASURE.}
+\end{frame}
+
+\end{document}

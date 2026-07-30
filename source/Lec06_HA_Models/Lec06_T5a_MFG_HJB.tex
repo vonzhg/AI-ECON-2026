@@ -1,0 +1,271 @@
+%% FullCourse_10Lecs -- Lecture 6, Topic 6.5a: Mean-Field Games (HJB side)
+%% Source: ./archive_pre_split/Lec06_HA_Models.tex (section 10, first half)
+%% Sub-split: original T5 (sections 10-11) exceeded 30-page ceiling at 31 pages.
+%% Split into T5a (MFG motivation + HJB) and T5b (KFE + deep MFG + lab preview).
+%% FullCourse-only content: Mean-Field Games section (not present in MiniCourse).
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module2_DL_RL_Macro/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 6.5a: Mean-Field Games --- Motivation and HJB}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 6.5a Agenda}
+\begin{enumerate}
+  \item \textbf{Mean-Field Games} --- motivation, history, two-equation system
+  \medskip
+  \item \textbf{HJB side} --- continuous-time control, Poisson income shocks
+\end{enumerate}
+\medskip
+\textit{Arc: T1 Aiyagari + computation $\to$ T2a Why ML / Euler $\to$ T2b Global DNN $\to$ T3 KS / DeepHAM $\to$ T4 DEQN / OLG $\to$ \textbf{T5a MFG HJB} $\to$ T5b MFG KFE + Lab}
+\end{frame}
+
+%=============================================================================
+\section{Mean-Field Games}
+% FullCourse-only
+
+\begin{frame}{Mean-Field Games: motivation}
+\begin{itemize}
+\item All the models we've seen so far are \emph{finite or large-but-finite} populations of agents (Aiyagari has a continuum but discretises numerically).
+\medskip
+\item \textbf{Mean-Field Games} (MFG) provide a continuous-time, continuum-of-agents formulation.
+\medskip
+\item Why care?
+  \begin{itemize}
+  \item Continuous time often \emph{simplifies} the math: PDEs replace functional equations.
+  \item Powerful new toolbox for HA models with idiosyncratic and aggregate shocks.
+  \item Tight link to optimal transport, stochastic analysis, and modern PDE theory.
+  \item Recent breakthroughs in \emph{deep learning for MFG} (Carmona--Lauri\`ere, Achdou--Lasry--Lions, Han et al.).
+  \end{itemize}
+\medskip
+\item This part is an introduction; you can think of MFG as the continuum limit of Aiyagari/KS.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The core idea: continuum + mean-field feedback}
+\begin{itemize}
+\item Imagine a \emph{continuum} of identical agents, each solving an individual control problem.
+\medskip
+\item Each agent's payoff depends on the \emph{distribution} of all other agents (the ``mean field'').
+\medskip
+\item The distribution is itself determined by the optimal behaviour of the agents.
+\medskip
+\item This circular dependence is the defining feature of MFG --- and is exactly the same fixed point as in HA models, but stated in continuous time.
+\medskip
+\item Two mathematical objects describe the equilibrium:
+  \begin{itemize}
+  \item A backward Hamilton--Jacobi--Bellman (HJB) equation for the individual value function.
+  \item A forward Kolmogorov forward / Fokker--Planck (KFE) equation for the distribution.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A brief history}
+\begin{itemize}
+\item \textbf{Engineering origins} (mid-2000s):\\
+  Huang, Malham\'e \& Caines (2006, \emph{Communications in Information and Systems} 6(3):221--252) developed ``Nash certainty equivalence'' for large-population games.
+\medskip
+\item \textbf{Mathematical formalisation}:\\
+  Lasry \& Lions (2007, \emph{Japanese Journal of Mathematics}) coined the term ``Mean-Field Games'' and developed the rigorous PDE theory.
+\medskip
+\item \textbf{Economic adoption}:\\
+  Achdou--Han--Lasry--Lions--Moll (2014, 2022 \emph{REStud}) translated the framework into HA macroeconomics --- continuous-time Aiyagari--Bewley--Huggett.
+\medskip
+\item \textbf{Deep-learning era} (2020s):\\
+  Carmona--Lauri\`ere, Han--Hu, Achdou--Pequito, $\ldots$ use deep neural networks to solve MFGs in high dimensions.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The two-equation MFG system}
+\textbf{Hamilton--Jacobi--Bellman (backward, individual)}:
+\[
+-\partial_t v(x,t) + \rho v(x,t) \;=\; H\!\big(x,\nabla v(x,t),m(\cdot,t)\big),
+\]
+where $H$ is the Hamiltonian of the individual control problem and $m(\cdot,t)$ is the population distribution at time $t$.
+\medskip
+
+\textbf{Kolmogorov forward / Fokker--Planck (forward, aggregate)}:
+\[
+\partial_t m(x,t) \;=\; -\nabla\!\cdot\!\big(s^*(x,t,m)\, m(x,t)\big) + \tfrac{1}{2}\Delta\!\big(\sigma^2(x,t)\,m(x,t)\big),
+\]
+where $s^*$ is the optimal drift derived from the HJB.
+\medskip
+\begin{itemize}
+\item HJB and KFE are \emph{coupled}: the optimal control depends on $m$, and $m$ evolves under the optimal control.
+\item In equilibrium, both equations must hold simultaneously.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why HJB is familiar, why KFE is new}
+\begin{itemize}
+\item \textbf{HJB} is the continuous-time limit of the Bellman equation. Macroeconomists have seen it many times: Merton's portfolio choice, deterministic optimal growth, $\ldots$
+\medskip
+\item \textbf{KFE / Fokker--Planck} describes the time evolution of a probability density under stochastic dynamics.
+  \begin{itemize}
+  \item Originated in physics: Fokker (1914), Planck (1917) --- diffusion of particles.
+  \item Formalised by Kolmogorov (1931).
+  \item Standard in physics and engineering, only recently mainstream in macro.
+  \end{itemize}
+\medskip
+\item Together they describe the \emph{joint dynamics of optimal individual behaviour and the cross-sectional distribution} --- exactly what HA models need.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{HJB review: deterministic optimal control}
+A generic optimal control problem:
+\[
+v(x_0) \;=\; \max_{\alpha(\cdot)} \int_0^\infty e^{-\rho t}\, r(x_t, \alpha_t)\, dt
+\quad\text{s.t.}\quad \dot x_t = f(x_t, \alpha_t),\; x_0 \text{ given}.
+\]
+\medskip
+
+The corresponding HJB equation:
+\[
+\rho\, v(x) \;=\; \max_{\alpha}\left\{r(x,\alpha) + v'(x)\,f(x,\alpha)\right\}.
+\]
+\medskip
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item LHS: ``required return'' on the value function.
+\item RHS: instantaneous payoff plus the marginal value of the state moving in the chosen direction.
+\item First-order condition over $\alpha$: $r_\alpha + v'(x) f_\alpha = 0$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From discrete-time Bellman to continuous-time HJB}
+Start with the discrete-time Bellman over a small interval $\Delta$:
+\[
+v(x) \;\approx\; \max_{\alpha}\!\left\{r(x,\alpha)\,\Delta + e^{-\rho\Delta}\, v(x + f(x,\alpha)\Delta)\right\}.
+\]
+\medskip
+Subtract $v(x)$ from both sides, divide by $\Delta$, and let $\Delta \to 0$ (using $e^{-\rho\Delta} \approx 1 - \rho\Delta$ and $v(x + f\Delta) \approx v(x) + v'(x) f\Delta$):
+\[
+0 \;=\; \max_\alpha\!\left\{r(x,\alpha) - \rho v(x) + v'(x) f(x,\alpha)\right\}.
+\]
+\medskip
+Rearrange:
+\[
+\rho v(x) \;=\; \max_\alpha\!\left\{r(x,\alpha) + v'(x) f(x,\alpha)\right\}.
+\]
+\medskip
+This is exactly the HJB.
+\end{frame}
+
+\begin{frame}{Stationary HJB and FOCs}
+For the optimal growth problem with state $k$, control $c$, return $u(c)$, and transition $\dot k = f(k) - \delta k - c$:
+\[
+\rho\, v(k) \;=\; \max_c\!\left\{u(c) + v'(k)\,\big(f(k)-\delta k - c\big)\right\}.
+\]
+\medskip
+First-order condition:
+\[
+u'(c) \;=\; v'(k) \quad\Longrightarrow\quad c^*(k) = (u')^{-1}(v'(k)).
+\]
+\medskip
+
+Substituting back:
+\[
+\rho\, v(k) \;=\; u\!\big(c^*(k)\big) + v'(k)\,\big(f(k) - \delta k - c^*(k)\big).
+\]
+\medskip
+A second-order ODE in $v$ to be solved on $k \in [0, \bar k]$ with appropriate boundary conditions.
+\end{frame}
+
+\begin{frame}{Poisson income shocks: state space}
+\begin{itemize}
+\item In the continuous-time Aiyagari, individual income $y$ jumps between two states $\{y_1, y_2\}$ at \emph{Poisson rates} $\lambda_1, \lambda_2$.
+\medskip
+\item State of an individual: $(a, y_i)$ with $i \in \{1,2\}$.
+\medskip
+\item Two value functions $v_1(a)$ and $v_2(a)$, one per income state.
+\medskip
+\item Asset evolves continuously: $\dot a = y_i + r a - c$.
+\medskip
+\item Income switches at Poisson rate; from state $i$, the agent moves to state $-i$ at rate $\lambda_i$.
+\medskip
+\item This setup is the natural continuous-time analogue of the discrete-time Aiyagari with Markov income.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deriving the HJB with jump terms \textsc{(advanced --- skip on first pass)}}
+Over a short interval $\Delta$, with probability $\lambda_i \Delta$ the agent's income jumps from $y_i$ to $y_{-i}$. The Bellman is
+\[
+v_i(a) \approx \max_c\!\left\{u(c)\Delta + e^{-\rho\Delta}\!\left[(1-\lambda_i\Delta)\, v_i(a + \dot a\Delta) + \lambda_i\Delta\, v_{-i}(a)\right]\right\}.
+\]
+\medskip
+
+Letting $\Delta \to 0$ and rearranging:
+\[
+\rho\, v_i(a) \;=\; \max_c\!\left\{u(c) + v_i'(a)\,(y_i + r a - c) + \lambda_i\,\big(v_{-i}(a) - v_i(a)\big)\right\}.
+\]
+\medskip
+\begin{itemize}
+\item Three terms: instantaneous utility, drift term (deterministic capital accumulation), jump term (Poisson income switch).
+\item This is the HJB with jumps; the system is $i \in \{1,2\}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Economic intuition of the jump term}
+\[
+\lambda_i \big(v_{-i}(a) - v_i(a)\big)
+\]
+\medskip
+\begin{itemize}
+\item This is the \emph{option value} of switching income state.
+\medskip
+\item If $v_{-i}(a) > v_i(a)$ (the other income state would yield higher continuation value at the same wealth), the jump term is \emph{positive} --- the agent enjoys an expected gain from the future income switch.
+\medskip
+\item Conversely, if $v_{-i}(a) < v_i(a)$, the jump term is a cost.
+\medskip
+\item The Poisson rate $\lambda_i$ controls the strength of this option value.
+\medskip
+\item Intuition: precautionary saving in continuous time appears partly through this jump term, in addition to the curvature of $u$ along the deterministic drift.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Continuous-time Aiyagari: setup}
+\textbf{Households.} A continuum of households indexed by current asset $a \in [\underline a, \infty)$ and income $y_i \in \{y_1, y_2\}$ with Poisson switching rates $\lambda_1, \lambda_2$.
+\medskip
+
+\textbf{Firm.} Representative firm with $Y = K^\alpha L^{1-\alpha}$ and competitive factor markets:
+\[
+r = \alpha (K/L)^{\alpha-1} - \delta, \qquad w = (1-\alpha) (K/L)^\alpha.
+\]
+\medskip
+
+\textbf{Aggregation.} Aggregate capital and labour:
+\[
+K = \sum_{i=1}^{2} \int a\, g_i(a)\, da, \qquad
+L = \sum_{i=1}^{2} y_i \int g_i(a)\, da,
+\]
+where $g_i(a)$ is the cross-sectional density in income state $i$.
+\end{frame}
+
+\begin{frame}{The aggregation loop}
+\begin{enumerate}
+\item Guess prices $(r, w)$ (or equivalently aggregate $K$).
+\medskip
+\item Solve the household HJB to get optimal consumption $c_i^*(a)$ and drift $s_i^*(a) = y_i + r a - c_i^*(a)$.
+\medskip
+\item Solve the KFE for the stationary density $g_i^*(a)$.
+\medskip
+\item Compute aggregate $K^* = \sum_i \int a\, g_i^*(a)\, da$.
+\medskip
+\item Update $(r,w)$ from the firm FOCs at $K^*$, and iterate until $K^* = K$.
+\end{enumerate}
+\medskip
+
+This is structurally identical to the discrete-time Aiyagari nested fixed point, but every step is now an ODE/PDE rather than a discrete-time DP problem.
+\medskip
+
+\emph{Next (T5b):} the KFE side --- forward equation for the density, upwind discretisation, and the lab preview.
+\end{frame}
+
+\end{document}

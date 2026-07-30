@@ -1,0 +1,92 @@
+
+For slides we need add those figures explain how people use cloud code the distribution. This is used as a motivation to show how AI has changed how we work。
+
+Also mention that this is based on those two papers.
+
+
+
+
+
+
+
+Please help to create a slides as a case study， Save the file in this folder, and make sure it is self contained./Volumes/Macintosh HD/Users/zfeng/Library/CloudStorage/OneDrive-Personal/Teachings/AI_ML/2026_New_Slides/FullCourse_10Lecs/Lec10_Case_Studies
+
+The goal are the following.
+
+1. Explain the workflow of how to leverage the power of AI to build new economic model, new algorithms to solve the model, and new code to implement the algorithm solve the model. These are based on the existence simpler model, algorithm, code we already established.
+
+/Volumes/Macintosh HD/Users/zfeng/Library/CloudStorage/OneDrive-Personal/Teachings/AI_ML/2026_New_Slides/FullCourse_10Lecs/Lec09_Agentic_AI/Lec09_T3_Homotopy_Tools.tex
+
+2. We also want to highlight and illustrate new discoveries we have found with the help of AI. This includes the concept of viability in the math literature preceding the method of admissibility developed in economics literature pioneer by the Econometrica paper of APS 1990.
+
+The design of Lyapunov function to address the stability of equilibrium dynamics.
+
+Economic insights that we have found in this model with heterogeneous agents versus the model we were based on, which is representative agents.
+
+3. These slides will base on the following sources.
+
+The md file in this folder that explain the major steps we have took to use AI to build the model algorithm and code.
+
+/Volumes/Macintosh HD/Users/zfeng/Library/CloudStorage/OneDrive-Personal/Teachings/AI_ML/2026_New_Slides/FullCourse_10Lecs/Case_Study
+
+In this folder, we also have old code and the new code.
+
+Old papers, the tex file in this folder.
+
+/Volumes/Macintosh HD/Users/zfeng/Library/CloudStorage/Dropbox/Research/Ongoing projects/Feng & Zhu/Optimal_taxation_endo_debt/Draft/Debt_ML_v24.tex
+
+New paper with Heterogeneous agent in this paper.
+
+focus on section 7 of
+/Volumes/Macintosh HD/Users/zfeng/Library/Mobile Documents/com~apple~CloudDocs/iCloud-Git-Projects/Research/Ramsey_HA_NN/paper/202603_Understanding_Ramsey_Outcome_Model_V29.tex
+
+and
+
+/Volumes/Macintosh HD/Users/zfeng/Library/Mobile Documents/com~apple~CloudDocs/iCloud-Git-Projects/Research/Ramsey_HA_NN/paper/202603_Understanding_Ramsey_Online_Appendix.tex
+
+Structure of the slides should follows
+
+1. Start the explanation of the workflow based on the slides and the syllabus here.
+
+2. Our starting point is this model in this file. we need to explain the key aspect of the model briefly, the major aspect of the algorithm and the structure of the code.
+
+3. How we start a conversation with AI based on the MD file?
+
+4. Explain each milestone throughout the process. This includes, but not limited to the following.
+
+- We first have a revised algorithm and code for the original code and algorithm.
+- Then we have the new model and the new algorithm, but those are stripped down version for simplicity at the beginning.
+- And then, so you have new code built by AI for this simplified version of the new model.
+- And then we have new code for full version of the model built upon the simpler version above.
+- And then we keep iterating with AI, and gradually we enhance by including new element, actually new discoveries. From the perspective of economists, this includes alpha-shape, viability （viability kernel in the sense of Aubin (1991): the largest set of states from which a feasible trajectory exists indefinitely.）, and Lyapnov function. see here /Volumes/Macintosh HD/Users/zfeng/Library/Mobile Documents/com~apple~CloudDocs/iCloud-Git-Projects/Research/Ramsey_HA_NN/paper/computational_Ramsey.tex
+
+and 
+
+section 7 of /Volumes/Macintosh HD/Users/zfeng/Library/Mobile Documents/com~apple~CloudDocs/iCloud-Git-Projects/Research/Ramsey_HA_NN/paper/202603_Understanding_Ramsey_Outcome_Model_V29.tex
+
+
+5. Then we explain the final model, we build the algorithm and code.
+
+6. Major findings use graphs.
+
+Here you may want to do a little bit research about the major finding in the original paper regarding quasi-linear cases.
+
+/Volumes/Macintosh HD/Users/zfeng/Library/CloudStorage/Dropbox/Research/Ongoing projects/Feng & Zhu/Optimal_taxation_endo_debt/Draft/Debt_ML_v24.tex
+
+And the major finding here in section seven regarding CRRA cases.
+focus on section 7 of
+/Volumes/Macintosh HD/Users/zfeng/Library/Mobile Documents/com~apple~CloudDocs/iCloud-Git-Projects/Research/Ramsey_HA_NN/paper/202603_Understanding_Ramsey_Outcome_Model_V29.tex
+
+
+Take two or three figures from these papers, add one or two slides, highlight the major difference and new insights by including heterogeneous agent.
+
+
+
+7. Recap lessons we have learned, this include the followings.
+
+- Apparently, this is a paradigm shift in economic research.
+- But to benefit the most, you need to have the following.
+- A good seed like a model algorithm code that's already working, and with the potential to extend to the problem you're going to solve.
+- You need have a clear vision, what are the interesting problem you want to solve, how this is related to, and can be built on the things you have.
+- You need have good judgment, and you can steering the direction of the research.
+- Overall, you can orchestrate different AI agents to work toward your goal.

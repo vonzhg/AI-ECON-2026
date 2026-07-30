@@ -1,0 +1,2076 @@
+%% Machine Learning and Agentic AI for Macroeconomic Research
+%% Lecture 6: Heterogeneous Agent Models via Reinforcement Learning
+%% Author: Zhigang Feng
+%% Sources: 11_HA_model/Lec11_ML_HA_models.tex
+%%          15-MFG/MFG.tex
+
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage{ae,aecompl}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{amsmath, amssymb, graphicx}
+\usepackage{booktabs, multirow}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+  language=Python,
+}
+
+\ifx\hypersetup\undefined
+  \AtBeginDocument{%
+    \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+      colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+  }
+\else
+  \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+    colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+\fi
+
+\makeatletter
+\newcommand\makebeamertitle{\frame{\maketitle}}%
+\AtBeginDocument{%
+  \let\origtableofcontents=\tableofcontents
+  \def\tableofcontents{\@ifnextchar[{\origtableofcontents}{\gobbletableofcontents}}
+  \def\gobbletableofcontents#1{\origtableofcontents}%
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{author}{fg=DarkText}
+\setbeamercolor{date}{fg=DarkText}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+\newcommand{\reducevspace}{\vspace{-0.5cm}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+\makeatother
+
+\graphicspath{{../../11_HA_model/}{../../15-MFG/}}
+
+\title[ML \& Agentic AI for Macro Research]{Machine Learning and Agentic AI for Macroeconomic Research\\
+6: Heterogeneous Agent Models via Reinforcement Learning\\[0.5em]}
+\author{Zhigang Feng}
+\date{Spring 2026}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+% AGENDA
+%=============================================================================
+
+\begin{frame}{Lecture Agenda}
+\begin{enumerate}
+  \item \textbf{Aiyagari--Bewley--Huggett} --- incomplete-markets HA model and stationary equilibrium
+  \medskip
+  \item \textbf{Computation of stationary equilibrium} --- the classical three-step algorithm
+  \medskip
+  \item \textbf{Why ML?} --- motivating example on optimal growth, neural-network approximation
+  \medskip
+  \item \textbf{Euler-equation methods} --- residual losses, supervised learning, actor--critic
+  \medskip
+  \item \textbf{Global solution via DNN} --- distribution as state, value/policy networks
+  \medskip
+  \item \textbf{Krusell--Smith (1998)} --- aggregate uncertainty and bounded-rationality moments
+  \medskip
+  \item \textbf{DeepHAM and DEQN} --- modern deep-learning solutions for HA models
+  \medskip
+  \item \textbf{OLG with aggregate uncertainty} --- life-cycle structure, homotopy training
+  \medskip
+  \item \textbf{Mean-Field Games} --- continuous-time HA, HJB \& KFE, link to RL
+  \medskip
+  \item \textbf{Lab preview} --- Krusell--Smith via Deep Equilibrium Nets in PyTorch
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+% PART I: AIYAGARI / BEWLEY / HUGGETT --- SETUP & EQUILIBRIUM
+%=============================================================================
+
+\section{Aiyagari--Bewley--Huggett Setup}
+
+\begin{frame}{Why heterogeneous agents?}
+\begin{itemize}
+\item The representative-agent paradigm assumes \emph{complete markets} and a single decision maker.
+\medskip
+\item Many empirically important questions require \textbf{heterogeneity}:
+  \begin{itemize}
+  \item Wealth and income inequality
+  \item Precautionary savings and the demand for insurance
+  \item Distributional consequences of monetary and fiscal policy
+  \item Heterogeneous responses to aggregate shocks
+  \end{itemize}
+\medskip
+\item HA models combine:
+  \begin{itemize}
+  \item Idiosyncratic income (or productivity, mortality, $\ldots$) shocks
+  \item Incomplete asset markets (a single risk-free bond, borrowing constraint)
+  \item General equilibrium in factor prices
+  \end{itemize}
+\medskip
+\item This lecture: Aiyagari $\to$ Krusell--Smith $\to$ deep-learning solutions $\to$ Mean-Field Games.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Aiyagari (1994, QJE): heterogeneity among households}
+\begin{itemize}
+\item A continuum of \emph{ex-ante identical}, infinitely-lived households.
+\medskip
+\item Each receives an idiosyncratic, uninsurable labour-productivity shock $\epsilon_t$ following a Markov process.
+\medskip
+\item Households self-insure by accumulating a single risk-free asset $a_t$.
+\medskip
+\item A natural or ad-hoc \textbf{borrowing constraint} $a_t \geq -\underline{a}$ keeps the asset distribution well-defined.
+\medskip
+\item Despite ex-ante symmetry, the realized history of shocks generates an \textbf{ex-post} distribution of wealth.
+\medskip
+\item Bewley (1980s, unpublished), Huggett (1993), Aiyagari (1994): the workhorse incomplete-markets HA framework.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{General equilibrium with ex-post heterogeneity}
+\begin{itemize}
+\item \textbf{Idiosyncratic shocks}: $\epsilon_t \in \mathcal{E}$, transition $\pi(\epsilon,\epsilon')$, with $\sum_{\epsilon}\epsilon\,\pi^*(\epsilon)=L$ constant.
+\item \textbf{No aggregate shocks} in Aiyagari (we add them with Krusell--Smith later).
+\item \textbf{Markets}:
+  \begin{itemize}
+  \item Risk-free bond (or capital) at price $1/(1+r)$
+  \item Labour supplied inelastically; wage $w$
+  \end{itemize}
+\item \textbf{Stationarity}: prices $(r,w)$ and the cross-sectional distribution $\lambda(a,\epsilon)$ are constant in time.
+\item \textbf{Individual state}: $(a,\epsilon) \in \mathbb{R}_+ \times \mathcal{E}$.
+\item \textbf{Aggregate state}: distribution $\lambda$ over individual states (in stationary equilibrium, $\lambda=\lambda^*$).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Household's recursive problem}
+For given prices $(r,w)$ and stationary distribution $\lambda$, each household solves
+\[
+v(a,\epsilon;\lambda) \;=\; \max_{c,\,a'}\!\left\{u(c) + \beta \sum_{\epsilon'} v(a',\epsilon';\lambda)\,\pi(\epsilon,\epsilon')\right\}
+\]
+subject to
+\[
+c + a' = (1+r)\,a + w\,\epsilon, \qquad a' \geq -\underline{a}, \qquad c \geq 0.
+\]
+\medskip
+\textbf{Objects to solve for}
+\begin{itemize}
+\item Value function $v(a,\epsilon)$
+\item Asset policy $a'(a,\epsilon)$
+\item Consumption policy $c(a,\epsilon) = (1+r)a + w\epsilon - a'(a,\epsilon)$
+\end{itemize}
+\medskip
+With CRRA utility $u(c)=c^{1-\sigma}/(1-\sigma)$ and standard assumptions on $\pi$, the value function is increasing, concave in $a$, and the policy is monotone.
+\end{frame}
+
+\begin{frame}{Budget constraint and asset structure}
+\begin{itemize}
+\item $a$ denotes a one-period risk-free claim that pays $(1+r)a$ next period.
+\medskip
+\item \textbf{Borrowing constraint}: $a' \geq -\underline{a}$.
+  \begin{itemize}
+  \item \emph{Natural} bound: $\underline{a} = w\epsilon_{\min}/r$ (largest debt repayable from minimum income).
+  \item \emph{Ad-hoc} bound: any $\underline{a} \leq$ natural bound.
+  \end{itemize}
+\medskip
+\item Without uncertainty, the household would set $\beta(1+r)=1$ and consumption-smooth perfectly. With uninsurable risk and a binding constraint, the \textbf{precautionary motive} drives extra saving.
+\medskip
+\item This precautionary saving raises aggregate capital relative to the complete-markets benchmark, and depresses $r$ below $\rho = 1/\beta - 1$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Firms}
+A representative firm operates a constant-returns technology
+\[
+Y = F(K,L) = A K^{\alpha} L^{1-\alpha}.
+\]
+Competition in factor markets gives
+\[
+r = F_K(K,L) - \delta = \alpha A (K/L)^{\alpha-1} - \delta, \qquad
+w = F_L(K,L) = (1-\alpha) A (K/L)^{\alpha}.
+\]
+\medskip
+\begin{itemize}
+\item Aggregate labour supply $L = \sum_\epsilon \epsilon\,\pi^*(\epsilon)$ is exogenous.
+\item Aggregate capital $K$ is determined endogenously by household saving.
+\item In equilibrium, $K$ and $r$ are jointly pinned down by household and firm decisions.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Stationary recursive competitive equilibrium (SRCE) --- prices}
+A \textbf{stationary recursive competitive equilibrium} consists of:
+\begin{enumerate}
+\item Factor prices $(r^*, w^*)$ derived from the firm's first-order conditions:
+\[
+r^* = \alpha A (K^*/L)^{\alpha-1} - \delta, \qquad w^* = (1-\alpha) A (K^*/L)^{\alpha}.
+\]
+\medskip
+\item Value function $v(a,\epsilon)$ and policies $(c(a,\epsilon), a'(a,\epsilon))$ that solve the household's problem given $(r^*,w^*)$.
+\medskip
+\item A stationary cross-sectional distribution $\lambda^*(a,\epsilon)$.
+\medskip
+\item Market clearing conditions (next slide).
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{SRCE --- HH problem, market clearing, stationary distribution}
+\textbf{Labour market clearing:}
+\[
+L = \sum_{\epsilon} \int \epsilon \, d\lambda^*(a,\epsilon).
+\]
+
+\textbf{Capital market clearing:}
+\[
+K^* = \sum_{\epsilon} \int a'(a,\epsilon) \, d\lambda^*(a,\epsilon).
+\]
+
+\textbf{Stationarity of the distribution:}
+\[
+\lambda^*(A',\epsilon') = \sum_{\epsilon} \pi(\epsilon,\epsilon') \int_{\{a:\,a'(a,\epsilon)\in A'\}} d\lambda^*(a,\epsilon).
+\]
+\medskip
+That is, $\lambda^*$ is invariant under the Markov operator induced by the policy $a'(\cdot)$ and the shock transition $\pi$.
+\end{frame}
+
+\begin{frame}{Stationarity and the invariant measure}
+\begin{itemize}
+\item Time-invariant prices require a time-invariant cross-sectional distribution.
+\medskip
+\item The pair $(a'(\cdot), \pi)$ defines a Markov \textbf{transition operator} $Q$ on the state space $S = \mathbb{R}_+ \times \mathcal{E}$:
+\[
+(Qf)(a,\epsilon) = \sum_{\epsilon'} \pi(\epsilon,\epsilon') f(a'(a,\epsilon),\epsilon').
+\]
+\medskip
+\item The invariant distribution $\lambda^*$ satisfies $\lambda^* = Q^* \lambda^*$ (where $Q^*$ is the adjoint).
+\medskip
+\item Existence and uniqueness of $\lambda^*$ are non-trivial: they depend on \textbf{Feller} continuity, \textbf{mixing}, and \textbf{monotonicity} of $Q$ --- the next few slides.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two markets}
+\begin{itemize}
+\item Aiyagari's equilibrium reduces to clearing in \textbf{two markets}:
+  \begin{itemize}
+  \item \emph{Labour market}: trivially satisfied because labour supply is inelastic.
+  \item \emph{Capital market}: aggregate household savings = aggregate firm demand for capital.
+  \end{itemize}
+\medskip
+\item All the action is in the capital market.
+\medskip
+\item Strategy: parametrise everything by $r$.
+  \begin{itemize}
+  \item For each candidate $r$, solve the household problem to get $a'(a,\epsilon;r)$.
+  \item Compute the implied stationary distribution $\lambda_r$.
+  \item Compute the supply of capital $A(r) = \int a\,d\lambda_r$.
+  \item Compare to the demand $K(r)$ from the firm side; iterate.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Determination of $r$: demand for capital}
+The firm's first-order condition gives a downward-sloping demand for capital:
+\[
+K(r) \;=\; L \left( \frac{r + \delta}{\alpha A} \right)^{\frac{1}{\alpha-1}}.
+\]
+\medskip
+\begin{itemize}
+\item As $r \uparrow$, capital becomes more expensive and demand falls.
+\item $K(r)$ is continuous and strictly decreasing in $r$.
+\item $K(r) \to \infty$ as $r \to -\delta$ and $K(r) \to 0$ as $r \to \infty$.
+\end{itemize}
+\medskip
+This is the standard neoclassical capital demand schedule.
+\end{frame}
+
+\begin{frame}{Determination of $r$: supply of capital}
+The household supply of capital is the cross-sectional average asset holding under the stationary distribution induced by $r$:
+\[
+A(r) \;=\; \sum_{\epsilon} \int a \, d\lambda_r(a,\epsilon).
+\]
+\medskip
+\begin{itemize}
+\item $A(r)$ is upward-sloping in $r$ (broadly).
+\item In the complete-markets benchmark $\beta(1+r)=1$, $A(r)$ has a vertical asymptote at $r = 1/\beta-1=\rho$.
+\item With incomplete markets, precautionary saving makes $A(r)$ finite \emph{below} $\rho$, so the equilibrium $r^* < \rho$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Equilibrium picture}
+\begin{center}
+\includegraphics[width=0.65\textwidth]{equilibrium}
+\end{center}
+\vspace{-0.5em}
+\begin{itemize}
+\item $K(r)$: firm demand (downward sloping).
+\item $A(r)$: household supply (upward sloping, asymptotic to $\rho$ in the complete-markets case).
+\item Equilibrium $r^*$ satisfies $K(r^*) = A(r^*)$, with $r^* < \rho$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Probability measures and the Markov operator $Q$}
+\begin{itemize}
+\item Let $\Lambda$ denote the space of probability measures on the Borel sets of $S = \mathbb{R}_+ \times \mathcal{E}$.
+\medskip
+\item Define the Markov operator $Q : \Lambda \to \Lambda$ by
+\[
+(Q\lambda)(B) = \int \mathbb{1}\{(a'(a,\epsilon),\epsilon') \in B\}\,\pi(\epsilon,d\epsilon')\,d\lambda(a,\epsilon).
+\]
+\medskip
+\item Three properties of $Q$ are essential to study the equilibrium:
+  \begin{itemize}
+  \item \textbf{Feller property} $\to$ existence of an invariant measure.
+  \item \textbf{Mixing property} $\to$ uniqueness.
+  \item \textbf{Monotonicity} $\to$ convergence.
+  \end{itemize}
+\medskip
+\item These are standard conditions in the Stokey--Lucas--Prescott (1989) framework.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Feller property $\Rightarrow$ existence}
+\textbf{Definition.} $Q$ has the \emph{Feller property} if it maps continuous bounded functions to continuous bounded functions:
+\[
+f \in C_b(S) \;\Rightarrow\; Q f \in C_b(S).
+\]
+\medskip
+\begin{itemize}
+\item Equivalently, the policy $a'(\cdot)$ is continuous in the state.
+\medskip
+\item Combined with compactness of the state space (or tightness of the orbit), Feller continuity guarantees the \textbf{existence of an invariant measure} via the Krylov--Bogolyubov theorem.
+\medskip
+\item In Aiyagari, the asset grid is bounded above by $w \epsilon_{\max}/r$ (since saving above this generates negative consumption probability), so $S$ is effectively compact.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mixing property $\Rightarrow$ uniqueness}
+\textbf{Mixing condition.} For every two states $s_1, s_2 \in S$, there exist $n_1, n_2 \in \mathbb{N}$ such that the $n$-step distributions $Q^{n_1}\delta_{s_1}$ and $Q^{n_2}\delta_{s_2}$ have overlapping support.
+\medskip
+\begin{itemize}
+\item Intuitively: starting from \emph{any} two initial states, the chain visits a common region in finite time.
+\medskip
+\item This rules out absorbing sets that would split the state space and admit multiple invariant measures.
+\medskip
+\item \textbf{Counterexample}: a deterministic policy that pushes any household with $a > a^*$ to $a \uparrow$ and any household with $a < a^*$ to $a \downarrow$ creates two disjoint absorbing sets and \emph{multiple} invariant distributions.
+\medskip
+\item In standard Aiyagari, idiosyncratic income shocks ensure mixing.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monotonicity $\Rightarrow$ convergence}
+\textbf{Monotonicity.} If $\lambda \succeq \lambda'$ in the first-order stochastic dominance sense, then $Q\lambda \succeq Q\lambda'$.
+\medskip
+\begin{itemize}
+\item Combined with Feller and mixing, monotonicity implies that iterating $Q$ from any initial distribution converges to the unique invariant measure $\lambda^*$.
+\medskip
+\item This is the foundation for \emph{simulating} the model: start from an arbitrary distribution, simulate forward many periods, and read off $\lambda^*$.
+\medskip
+\item \textbf{Counterexample}: a non-monotone policy can produce stationary distributions that are sensitive to the initial condition; iteration may cycle rather than converge.
+\medskip
+\item Concavity of the value function and convexity of the budget set yield monotone policies in Aiyagari.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART II: COMPUTATION OF STATIONARY EQUILIBRIUM
+%=============================================================================
+
+\section{Computation of Stationary Equilibrium}
+
+\begin{frame}{Aggregate precautionary savings, applications}
+\begin{itemize}
+\item Because precautionary saving raises $A(r)$, the equilibrium interest rate satisfies $r^* < \rho = 1/\beta-1$.
+\medskip
+\item Aggregate capital is \textbf{higher} than in the complete-markets benchmark.
+\medskip
+\item Standard applications of Aiyagari-style models:
+  \begin{itemize}
+  \item Wealth and income inequality (top 10\%, Gini, $\ldots$)
+  \item Welfare effects of social insurance and tax/transfer policy
+  \item Effects of inflation on wealth distribution
+  \item Idiosyncratic-risk asset pricing
+  \item Quantitative theories of entrepreneurship
+  \end{itemize}
+\medskip
+\item Krueger--Mitman--Perri (2016), Kaplan--Moll--Violante (2018) HANK, $\ldots$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Computation of SRCE: three-step algorithm}
+\textbf{Goal:} solve for $(r^*, w^*, \lambda^*, v, a', c)$ jointly.
+\medskip
+
+\begin{enumerate}
+\item \textbf{Step 1.} Fix a candidate $r$. Solve the household dynamic programming problem to obtain $v_r$ and policies $(a'_r, c_r)$.
+\medskip
+\item \textbf{Step 2.} Given $a'_r$, compute the stationary cross-sectional distribution $\lambda_r$ as the eigenvector of the Markov transition matrix.
+\medskip
+\item \textbf{Step 3.} Evaluate the excess demand for capital
+\[
+d(r) \;=\; K(r) - \int a\,d\lambda_r,
+\]
+and update $r$ via bisection (or Brent) until $|d(r)|<\text{tol}$.
+\end{enumerate}
+\medskip
+This is the \textbf{nested fixed point} that has been the workhorse of HA computation since Aiyagari (1994).
+\end{frame}
+
+\begin{frame}{Step 1: solve the household problem for fixed $r$}
+For given $(r,w)$, iterate the Bellman operator
+\[
+(T_r v)(a,\epsilon) \;=\; \max_{a' \geq -\underline{a}}\!\left\{u\big((1+r)a + w\epsilon - a'\big) + \beta \sum_{\epsilon'} v(a',\epsilon')\,\pi(\epsilon,\epsilon')\right\}
+\]
+on a grid for $a$.
+\medskip
+\begin{itemize}
+\item Standard tools: VFI with monotonicity exploitation, Howard policy iteration, endogenous-grid method (Carroll), Coleman--Reffett operator.
+\medskip
+\item Concavity of $u$ and the convex budget set guarantee a unique optimum.
+\medskip
+\item Output: $a'_r(a,\epsilon)$, $c_r(a,\epsilon)$, $v_r(a,\epsilon)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 2: stationary distribution from the transition matrix}
+Discretise $a$ on a grid; combined with $\epsilon$, this gives a finite state space of size $N = N_a \cdot N_\epsilon$.
+\medskip
+
+The policy and shock transition induce a Markov matrix $\mathbf{Q}_r \in \mathbb{R}^{N\times N}$ with
+\[
+\mathbf{Q}_r\big[(a_i,\epsilon_j) \to (a_k,\epsilon_\ell)\big]
+= \pi(\epsilon_j,\epsilon_\ell)\cdot\Pr\!\big(a'_r(a_i,\epsilon_j) = a_k\big).
+\]
+\medskip
+The stationary distribution solves
+\[
+\lambda_r = \mathbf{Q}_r^\top \lambda_r, \qquad \mathbf{1}^\top \lambda_r = 1.
+\]
+\medskip
+Computation: dominant left eigenvector of $\mathbf{Q}_r$, or simply iterate $\lambda \leftarrow \mathbf{Q}_r^\top \lambda$ until convergence (the monotonicity result above guarantees this works).
+\end{frame}
+
+\begin{frame}{Step 3: market clearing on $r$}
+With $\lambda_r$ in hand, compute the household supply of capital
+\[
+A(r) \;=\; \sum_{i,j} a_i \,\lambda_r(a_i,\epsilon_j),
+\]
+and compare to firm demand:
+\[
+d(r) \;=\; K(r) - A(r).
+\]
+\medskip
+\textbf{Update rule}:
+\begin{itemize}
+\item If $d(r) > 0$: capital is scarce, raise $r$.
+\item If $d(r) < 0$: capital is abundant, lower $r$.
+\item Bisection or Brent's method converges in $O(\log(1/\text{tol}))$ outer iterations.
+\end{itemize}
+\medskip
+Each outer iteration requires solving Steps 1 and 2 from scratch --- the dominant cost.
+\end{frame}
+
+\begin{frame}{Implementation details}
+\begin{itemize}
+\item \textbf{Asset grid}: dense near the borrowing constraint where the policy bends; sparse for high $a$. Often log-spaced.
+\medskip
+\item \textbf{Initial value function}: zero, or the closed-form complete-markets value, or the value from the previous outer iteration.
+\medskip
+\item \textbf{Multigrid}: solve on a coarse grid first, then interpolate onto a finer grid as a warm start.
+\medskip
+\item \textbf{Acceleration}: Howard's policy iteration steps, modified policy iteration, endogenous grid method (Carroll, 2006).
+\medskip
+\item \textbf{Convergence criterion}: $\|v^{(n+1)} - v^{(n)}\|_\infty < \varepsilon_v$ inside; $|d(r)| < \varepsilon_r$ outside.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Numerical challenges and the curse of dimensionality}
+\begin{itemize}
+\item For Aiyagari, the per-iteration state space is $\mathbb{R}_+ \times \mathcal{E}$ --- 2 continuous dimensions, manageable on a grid.
+\medskip
+\item Real-world quantitative HA models often have:
+  \begin{itemize}
+  \item Multiple assets (liquid + illiquid in HANK; portfolio choice).
+  \item Multidimensional idiosyncratic states (income, unemployment, family structure).
+  \item \emph{Aggregate} shocks $\to$ the cross-sectional distribution becomes part of the state (Krusell--Smith).
+  \end{itemize}
+\medskip
+\item With $d$ continuous individual states and $N_a$ grid points per dimension, total points are $N_a^d$ --- the \textbf{curse of dimensionality}.
+\medskip
+\item This is where machine learning, and in particular deep neural networks, become indispensable.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART III: WHY ML? MOTIVATING EXAMPLE ON OPTIMAL GROWTH
+%=============================================================================
+
+\section{Why ML? Motivating Example}
+
+\begin{frame}{Why approximate the value function with a neural network?}
+\begin{itemize}
+\item Grid-based methods scale exponentially: $N_a^d$ points for $d$ continuous dimensions.
+\medskip
+\item Even modest models (income $\times$ wealth $\times$ housing $\times$ aggregate) become intractable.
+\medskip
+\item \textbf{Neural networks}:
+  \begin{itemize}
+  \item Universal approximators with smooth basis functions.
+  \item Number of parameters scales (essentially) linearly in input dimension.
+  \item Compatible with stochastic gradient training and GPU hardware.
+  \end{itemize}
+\medskip
+\item Strategy: parameterise $V$ and $g$ by neural networks $\Gamma_{\gamma_v}$ and $\Gamma_{\gamma_g}$, then update $(\gamma_v,\gamma_g)$ by training.
+\medskip
+\item We illustrate first on a simple deterministic optimal growth model, then scale up.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimal growth as a toy: NN approximations of $V$ and $g$}
+The deterministic Bellman equation:
+\[
+V(k) \;=\; \max_{g}\!\left\{u(k,g(k)) + \beta\, V\!\big(f(k,g(k))\big)\right\}.
+\]
+\medskip
+Parameterise:
+\[
+V(k) \approx \Gamma_{\gamma_v}(k), \qquad g(k) \approx \Gamma_{\gamma_g}(k).
+\]
+\medskip
+\textbf{Algorithm sketch}:
+\begin{itemize}
+\item Sample states $k \sim d(k)$.
+\item Compute target values $\hat V(k)$ from the right-hand side using current networks.
+\item Update $\gamma_v$ to minimise $(\Gamma_{\gamma_v}(k) - \hat V(k))^2$.
+\item Update $\gamma_g$ by gradient ascent on the per-state objective.
+\item Iterate.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{One-step value update ($T_{\text{sim}}=1$)}
+Given current policy $g^{(n-1)}$ and value $\Gamma_{\gamma_v}^{(n-1)}$, define the bootstrap target
+\[
+\hat V(k) \;=\; u\!\big(k,\, g^{(n-1)}(k)\big) + \beta\,\Gamma_{\gamma_v}^{(n-1)}\!\big(f(k, g^{(n-1)}(k))\big).
+\]
+\medskip
+Then update by minimising the mean-squared Bellman residual:
+\[
+\gamma_v^{(n)} \;\in\; \arg\min_{\gamma_v}\; \mathbb{E}_{k\sim d}\Big[\big(\Gamma_{\gamma_v}(k) - \hat V(k)\big)^2\Big].
+\]
+\medskip
+\begin{itemize}
+\item Estimate the expectation by a Monte Carlo average over a batch $\{k_i\}_{i=1}^{B}$.
+\item One \emph{epoch} = several gradient steps on the loss.
+\item This is essentially \emph{fitted value iteration} (Bertsekas \& Tsitsiklis 1996), with a NN function class.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{One-step policy update}
+Given the just-updated value $\Gamma_{\gamma_v}^{(n)}$, improve the policy by maximising the per-state RHS over the parameters of the policy network:
+\[
+\gamma_g^{(n)} \;\in\; \arg\max_{\gamma_g}\;
+\mathbb{E}_{k\sim d}\Big[\,u\!\big(k,\Gamma_{\gamma_g}(k)\big) + \beta\,\Gamma_{\gamma_v}^{(n)}\!\big(f(k,\Gamma_{\gamma_g}(k))\big)\Big].
+\]
+\medskip
+\begin{itemize}
+\item Gradient with respect to $\gamma_g$ is computed automatically (backpropagation).
+\item One step of Adam (or any first-order optimiser) on a Monte Carlo batch.
+\item Alternating these updates is structurally identical to \textbf{actor--critic} reinforcement learning.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Choosing the sampling distribution $d(k)$}
+\textbf{Question:} on which states $k$ should we evaluate the loss?
+\medskip
+\begin{itemize}
+\item \emph{Uniform} on the bounded grid: simple but wasteful (most weight on irrelevant states).
+\medskip
+\item \emph{Stationary distribution under the current policy}: focuses learning where the model actually spends time. Computed by simulation.
+\medskip
+\item \emph{Importance sampling}: re-weight to keep the gradient unbiased while sampling from a convenient proposal $q(k)$:
+\[
+\nabla_{\gamma}\mathbb{E}_{d}[L(k;\gamma)] = \mathbb{E}_q\!\left[\frac{d(k)}{q(k)}\nabla_\gamma L(k;\gamma)\right].
+\]
+\end{itemize}
+\medskip
+The choice of $d(k)$ has \emph{first-order} implications for solution accuracy: a network trained on the wrong support generalises poorly.
+\end{frame}
+
+\begin{frame}{Bias--variance tradeoff for $T_{\text{sim}}=1$}
+\textbf{Pros of one-step bootstrapping}:
+\begin{itemize}
+\item Cheap: each evaluation costs a single network forward pass.
+\item Low variance.
+\end{itemize}
+\medskip
+\textbf{Cons}:
+\begin{itemize}
+\item High bias: the target $\hat V$ relies on the previous (imperfect) network.
+\item Errors compound across iterations if the network is far from the true $V$.
+\end{itemize}
+\medskip
+\textbf{Multi-step rollouts ($T_{\text{sim}}>1$)}:
+\[
+\hat V(k) \;=\; \sum_{t=0}^{T-1}\beta^t u(k_t, g(k_t)) + \beta^T \Gamma_{\gamma_v}\!(k_T).
+\]
+\begin{itemize}
+\item Reduces bias (less reliance on the bootstrapped tail).
+\item Increases variance and per-step cost.
+\item Choose $T$ to trade off accuracy vs.\ wall time.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Improvement: stationary-distribution sampling}
+\begin{itemize}
+\item Naive uniform sampling over a large bounded grid is wasteful: most points are never visited in equilibrium.
+\medskip
+\item Better: simulate the economy under the current policy until it converges to its (induced) stationary distribution, then sample $k$ from that distribution.
+\medskip
+\item Benefits:
+  \begin{itemize}
+  \item \emph{Sample efficiency}: training data concentrates where the model lives.
+  \item \emph{Faster convergence}: gradients informative.
+  \item \emph{LLN}: large simulation $\Rightarrow$ low-variance estimates of expectations.
+  \end{itemize}
+\medskip
+\item Caveat: the sampling distribution \emph{depends on the current policy}, which itself is being trained --- creates a moving target. Standard fix: refresh the simulation every few epochs.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{An illustration: optimal growth under stochastic productivity}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{optgrowth_sto}
+\end{center}
+\vspace{-0.5em}
+\begin{itemize}
+\item Stationary distribution of capital under the trained policy, vs.\ analytical benchmark.
+\item NN-trained policy matches the benchmark closely after a few thousand epochs of alternating updates.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What does RL/DL give us beyond grids?}
+\begin{itemize}
+\item \textbf{Function approximation that scales with data, not with grid size.} A 4-layer MLP with a few thousand parameters can represent value functions in $\mathbb{R}^{20}$ that no Cartesian grid could store.
+\medskip
+\item \textbf{Stochastic gradient training.} Each gradient step uses a small batch; we can train indefinitely on streaming Monte Carlo data.
+\medskip
+\item \textbf{Hardware acceleration.} Forward and backward passes are GPU-friendly matrix multiplications.
+\medskip
+\item \textbf{End-to-end differentiability.} Bellman residuals, Euler residuals, and even simulation steps can be differentiated through.
+\medskip
+\item These advantages compound when we move from optimal growth $\to$ Aiyagari $\to$ Krusell--Smith $\to$ HANK.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART IV: EULER-EQUATION + ML ON OPTIMAL GROWTH
+%=============================================================================
+
+\section{Euler Equation + ML}
+
+\begin{frame}{Euler equation as an alternative optimality condition}
+For the optimal growth model with $u'(c) > 0$ and the budget constraint $c + k' = f(k)$, the consumer's first-order condition is the \textbf{Euler equation}:
+\[
+u'\!\big(c(k)\big) \;=\; \beta\, u'\!\big(c(k')\big)\, f'(k').
+\]
+\medskip
+\begin{itemize}
+\item Equivalent to the Bellman equation (under standard regularity).
+\item Does not require representing $V$ explicitly: we can train only the policy network.
+\item For the stochastic case with shock $z$:
+\[
+u'(c(k,z)) = \beta\,\mathbb{E}\big[u'(c(k',z'))\,(1+r(k',z'))\,\big|\,z\big].
+\]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From Euler residual to MSE loss}
+Define the \textbf{Euler residual} at state $k$ as
+\[
+\varepsilon(k;\gamma_g) \;=\; 1 \,-\, \frac{\beta\,\mathbb{E}\!\left[u'(c'(k;\gamma_g))\,(1+r')\,\big|\,k\right]}{u'(c(k;\gamma_g))}.
+\]
+\medskip
+The optimal policy makes $\varepsilon(k)\equiv 0$. Cast as supervised learning:
+\[
+\gamma_g^{*} \;\in\; \arg\min_{\gamma_g}\; \mathbb{E}_{k\sim d}\!\left[\varepsilon(k;\gamma_g)^2\right].
+\]
+\medskip
+\begin{itemize}
+\item Loss is \emph{differentiable} with respect to $\gamma_g$ via autograd.
+\item Conditional expectation approximated by Monte Carlo over future shocks.
+\item No explicit value function required.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Minimising the Euler-residual loss}
+\textbf{Algorithm}:
+\begin{enumerate}
+\item Initialise $\gamma_g$ randomly (e.g., Xavier/Glorot).
+\item Sample a batch of states $\{k_i\}_{i=1}^B$ from $d(k)$.
+\item For each $k_i$, compute $c_i = c(k_i;\gamma_g)$ and $k'_i = f(k_i) - c_i$.
+\item Sample shocks $z'$ and compute the Monte Carlo expectation in $\varepsilon$.
+\item Compute the squared residual loss and its gradient wrt $\gamma_g$.
+\item Update $\gamma_g$ using Adam.
+\item Repeat until convergence ($\sum_i \varepsilon_i^2 < $ tol).
+\end{enumerate}
+\medskip
+\textbf{Why this is attractive}: \emph{first-order necessary conditions} are precisely what we want the policy to satisfy. The neural network is just a flexible function class.
+\end{frame}
+
+\begin{frame}[fragile]{Code 1/5: ValueNet architecture (PyTorch)}
+\begin{lstlisting}
+import torch
+import torch.nn as nn
+
+class ValueNet(nn.Module):
+    """Two-hidden-layer MLP V_gamma(k)."""
+    def __init__(self, n_hidden=64):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(1, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, n_hidden),
+            nn.ReLU(),
+            nn.Linear(n_hidden, 1),
+        )
+
+    def forward(self, k):
+        return self.net(k)
+\end{lstlisting}
+\medskip
+A \emph{policy} network has identical structure but different weights $\gamma_g$.
+\end{frame}
+
+\begin{frame}[fragile]{Code 2/5: value update step (Bellman MSE)}
+\begin{lstlisting}
+def value_update_step(value_net, policy_net, k_batch,
+                       beta, opt_v):
+    """One gradient step on the Bellman MSE loss."""
+    opt_v.zero_grad()
+    c_now   = policy_net(k_batch)
+    k_next  = production(k_batch) - c_now
+    v_next  = value_net(k_next).detach()
+    target  = utility(c_now) + beta * v_next
+    v_now   = value_net(k_batch)
+    loss    = ((v_now - target) ** 2).mean()
+    loss.backward()
+    opt_v.step()
+    return loss.item()
+\end{lstlisting}
+\medskip
+Note the \texttt{.detach()} on \texttt{v\_next}: we treat the bootstrap target as a constant.
+\end{frame}
+
+\begin{frame}[fragile]{Code 3/5: policy improvement (gradient ascent)}
+\begin{lstlisting}
+def policy_step(value_net, policy_net, k_batch,
+                 beta, opt_g):
+    """Maximise u(c) + beta V(k') with respect to policy params."""
+    opt_g.zero_grad()
+    c       = policy_net(k_batch)
+    k_next  = production(k_batch) - c
+    objective = (utility(c) + beta * value_net(k_next)).mean()
+    loss = -objective                 # gradient *ascent*
+    loss.backward()
+    opt_g.step()
+    return objective.item()
+\end{lstlisting}
+\medskip
+The budget constraint $c+k'=f(k)$ is encoded inside the function so the policy net only outputs $c$.
+\end{frame}
+
+\begin{frame}[fragile]{Code 4/5: training loop}
+\begin{lstlisting}
+def train(value_net, policy_net, n_epochs, batch_size,
+          beta, lr_v=1e-3, lr_g=1e-3):
+    opt_v = torch.optim.Adam(value_net.parameters(), lr=lr_v)
+    opt_g = torch.optim.Adam(policy_net.parameters(), lr=lr_g)
+
+    history = {"v_loss": [], "obj": []}
+    for epoch in range(n_epochs):
+        k_batch = sample_states(batch_size)        # from d(k)
+        v_loss  = value_update_step(value_net, policy_net,
+                                     k_batch, beta, opt_v)
+        obj     = policy_step(value_net, policy_net,
+                               k_batch, beta, opt_g)
+        history["v_loss"].append(v_loss)
+        history["obj"].append(obj)
+    return history
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Code 5/5: visualisation}
+\begin{lstlisting}
+import matplotlib.pyplot as plt
+
+def plot_results(value_net, policy_net):
+    k = torch.linspace(0.1, 5.0, 100).reshape(-1, 1)
+    with torch.no_grad():
+        v = value_net(k).squeeze().numpy()
+        c = policy_net(k).squeeze().numpy()
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+    ax[0].plot(k.numpy(), v); ax[0].set_title("V(k)")
+    ax[1].plot(k.numpy(), c); ax[1].set_title("c(k)")
+    plt.show()
+\end{lstlisting}
+\medskip
+A few thousand epochs of alternating value/policy updates produce policies that match the analytical benchmark to within numerical tolerance.
+\end{frame}
+
+\begin{frame}{Actor--critic perspective: this is RL}
+\begin{itemize}
+\item The two-network alternating update is exactly the structure of \textbf{actor--critic} reinforcement learning:
+\[
+\text{Critic:}\quad \Gamma_{\gamma_v} \leftarrow \arg\min \;\big\|\Gamma_{\gamma_v} - \hat V\big\|^2,
+\]
+\[
+\text{Actor:}\quad \Gamma_{\gamma_g} \leftarrow \arg\max \;\mathbb{E}\!\left[u + \beta V\right].
+\]
+\medskip
+\item Difference vs.\ classical RL: in macro the environment (the model) is \emph{known}, so we can compute targets analytically rather than by Monte Carlo over an unknown $P(s'|s,a)$.
+\medskip
+\item This makes deep-learning macro \emph{model-based RL with a known model} --- often called ``deep dynamic programming''.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART V: GLOBAL SOLUTION VIA DNN WITH FULL DISTRIBUTION DYNAMICS
+%=============================================================================
+
+\section{Global Solution via DNN}
+
+\begin{frame}{Why (deep) RL helps}
+Three reasons NN-based methods outperform grid methods on HA models:
+\medskip
+\begin{enumerate}
+\item \textbf{Flexible function approximation.}\\
+No structured Cartesian grid; networks handle high-dimensional inputs gracefully.
+\medskip
+\item \textbf{Sampling-based training.}\\
+RL methods were designed for unknown environments; here we re-use the data-generation tools (rollouts, replay, importance sampling) even though our model is known. This avoids constructing exhaustive grids or closed-form distribution evolution.
+\medskip
+\item \textbf{Hardware acceleration.}\\
+Forward/backward passes through neural networks are highly parallel matrix operations that GPUs and TPUs execute efficiently. Grid VFI is much harder to parallelise.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Global solution: full distribution as part of the state}
+\begin{itemize}
+\item In Aiyagari we exploited \emph{stationarity}: the distribution $\lambda$ was a fixed object and dropped out of the household state.
+\medskip
+\item Once we add aggregate shocks, $\lambda_t$ becomes part of the dynamic state. The household problem is
+\[
+V(a, z, \lambda) = \max_{c,a'}\!\left\{u(c) + \beta\,\mathbb{E}\!\left[V(a', z', \lambda')\,|\,z\right]\right\}.
+\]
+\item The law of motion for $\lambda$ is
+\[
+\lambda' \;=\; G(\lambda, Z, Z'),
+\]
+itself induced by the policy $a'(\cdot, \cdot, \lambda)$ and the shock kernel.
+\item $\lambda$ is an infinite-dimensional object --- this is the heart of the curse of dimensionality in HA models with aggregate shocks.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Household problem with an evolving distribution}
+At the individual level, with state $(a,z,\lambda)$:
+\[
+V(a,z,\lambda) \;=\; \max_{a'}\!\left\{u\!\big((1+r(\lambda))a + w(\lambda)z - a'\big) + \beta\,\mathbb{E}\!\left[V(a',z',\lambda')\,|\,z\right]\right\}
+\]
+with $\lambda' = G(\lambda, Z, Z')$.
+\medskip
+\begin{itemize}
+\item Two challenges:
+  \begin{enumerate}
+  \item How to represent $\lambda$ compactly enough that a NN can take it as input.
+  \item How to evolve $\lambda$ forward without simulating $\sim 10^6$ agents.
+  \end{enumerate}
+\medskip
+\item Three families of solutions:
+  \begin{itemize}
+  \item \emph{Moment approximations} (Krusell--Smith): summarise $\lambda$ by a few moments.
+  \item \emph{Generalised moments} (DeepHAM): let the network learn the right summary statistics.
+  \item \emph{Histogram transport} (DEQN): keep the full discretised distribution.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Approximating the distribution as a NN input}
+\begin{center}
+\includegraphics[width=0.55\textwidth]{app_dist}
+\end{center}
+\vspace{-0.5em}
+\begin{itemize}
+\item One option: discretise $\lambda$ on a fixed grid, feed the histogram heights to the NN.
+\item Another: pass a finite vector of moments (means, variances, percentiles).
+\item DeepHAM: \emph{learn} basis functions $Q_1,\ldots,Q_J$ and feed $\frac{1}{N}\sum_i Q_j(a_i)$ as moments.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DNN representation of $V$ and the policy}
+Parameterise
+\[
+V(S;\theta^V), \qquad c(S;\theta^c), \qquad S = (a, z, \lambda).
+\]
+\medskip
+\begin{itemize}
+\item Each network is a multilayer perceptron with parameters $\theta = (\text{weights}, \text{biases})$.
+\item Inputs: individual state $(a,z)$ + summary of $\lambda$ (moments or generalised moments).
+\item Outputs: scalar $V$, scalar consumption (or savings rate).
+\medskip
+\item Activations: ReLU, GELU, Mish --- all popular for HA-style problems.
+\item Initialisation: Xavier/Glorot or Kaiming, depending on the activation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Update value function via simulation + supervised learning}
+Given current policy $f_g^{(n)}$, generate $N_V$ initial states $\{S_{i,0}\}_{i=1}^{N_V}$ and simulate $T_V$ periods forward. Compute the empirical (truncated) discounted utility:
+\[
+\hat V(S_{i,0}) \;=\; \sum_{t=0}^{T_V-1} \beta^t \, u(c_{i,t}).
+\]
+\medskip
+Train the value network by supervised regression:
+\[
+\theta^{V,(n+1)} \;\in\; \arg\min_{\theta^V}\;
+\sum_{i=1}^{N_V} \big(V(S_{i,0};\theta^V) - \hat V(S_{i,0})\big)^2.
+\]
+\medskip
+\begin{itemize}
+\item This is sometimes called \emph{Monte Carlo value estimation}.
+\item Larger $T_V$ reduces bias but increases variance and cost.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Update policy with terminal value function}
+Given the just-updated value network $V(\cdot;\theta^{V,(n+1)})$, choose policy parameters to maximise the truncated objective with terminal value:
+\[
+\theta^{c,(n+1)} \;\in\; \arg\max_{\theta^c}\;
+\mathbb{E}\!\left[\sum_{t=0}^{T_g-1}\beta^t u(c_{i,t}) + \beta^{T_g}\, V(S_{i,T_g};\theta^{V,(n+1)})\right]
+\]
+subject to the budget constraint
+\[
+c_{i,t} = (1+r(\lambda_t))\,a_{i,t} + w(\lambda_t)\,z_{i,t} - a'_{i,t},
+\quad a'_{i,t} = c(S_{i,t};\theta^c).
+\]
+\medskip
+This is a long-horizon \emph{differentiable rollout}: gradients propagate through the simulated path.
+\end{frame}
+
+\begin{frame}{Transition function $G$ as a matrix}
+On a discretised asset grid $\{a_1,\ldots,a_{N_a}\}$, the policy $a'(\cdot)$ together with the shock kernel induces a Markov matrix
+\[
+\hat G_{i,j} \;=\; \Pr\!\big(a' \in \phi_j^a \,\big|\, a \in \phi_i^a\big),
+\]
+where $\phi_j^a$ are the discretisation cells.
+\medskip
+\begin{itemize}
+\item $\hat G$ has $O(N_a^2)$ entries; sparse if the policy moves between adjacent cells.
+\item Updating $\lambda$ one period: $\lambda^{(t+1)} = \hat G^\top \lambda^{(t)}$.
+\item The same matrix is used in classical Aiyagari computation; here we re-use it inside the differentiable training loop.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conditional and unconditional transition kernels}
+\textbf{Unconditional:}
+\[
+\lambda'(z' \in Z',\, a' \in A')
+\;=\;
+\int_{Z\times A} \mathbb{1}\!\big\{a'(a,z,\lambda)\in A',\; z'(a,z,\lambda)\in Z'\big\}\, d\lambda(z,a).
+\]
+\medskip
+\textbf{Conditional (given current $(a,z)$):}
+\[
+\lambda'(z' \in Z',\, a' \in A' \mid z\in Z, a\in A)
+=
+\int_{Z\times A}\!\!\mathbb{1}\!\{\cdots\}\, d\lambda(z,a) \;/\; \lambda(Z\times A).
+\]
+\medskip
+\begin{itemize}
+\item Both kernels live in the Wasserstein space of probability measures on $S$.
+\item The induced \emph{stochastic process on distributions} is the analytical object that DeepHAM and DEQN approximate by neural networks.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Discretised transition: i.i.d.\ shocks, monotone policy}
+When $z$ is i.i.d.\ and the policy $a'(a,z)$ is monotone in $a$ for each $z$, we can solve for transition cell boundaries explicitly:
+\[
+\hat G^{\lambda,\eta_x}_{i,j}
+\;=\; \Pr\!\big(\phi_j^a \ni a_+ \leq \bar\phi_j^a \,\big|\, a \in \phi_i^a\big)
+\;=\; F_z(\bar z_{i,j}) - F_z(\underline z_{i,j}),
+\]
+where $(\underline z_{i,j}, \bar z_{i,j})$ are the income shock thresholds that map $\phi_i^a$ to the boundaries of $\phi_j^a$ under the policy.
+\medskip
+\begin{itemize}
+\item Closed-form bin probabilities $\Rightarrow$ no Monte Carlo noise in the $\lambda$-update.
+\item Differentiability is delicate: the indicator functions inside the kernel are non-smooth, and need to be replaced by smooth approximations (e.g.\ sigmoids with sharp slopes) for gradient propagation.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART VI: KRUSELL--SMITH (1998)
+%=============================================================================
+
+\section{Krusell--Smith (1998)}
+
+\begin{frame}{Krusell--Smith (1998): aggregate uncertainty}
+\begin{itemize}
+\item Aiyagari ignores aggregate fluctuations. Krusell--Smith (\emph{JPE} 1998) adds an \textbf{aggregate TFP shock} $Z_t$ to the production technology.
+\medskip
+\item Setup:
+  \begin{itemize}
+  \item Continuum of households with idiosyncratic employment $\epsilon \in \{0,1\}$.
+  \item Aggregate state $Z_t \in \{Z_g, Z_b\}$, two-state Markov.
+  \item Joint $(\epsilon, Z)$ Markov chain (correlated unemployment and recessions).
+  \item Inelastic labour, single risk-free bond, borrowing constraint.
+  \end{itemize}
+\medskip
+\item The cross-sectional distribution $\Gamma_t$ over $(a,\epsilon)$ now \textbf{moves stochastically over time}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{KS distributions, firms, prices}
+\begin{itemize}
+\item Aggregate state: $(Z, \Gamma)$ where $\Gamma$ is the joint distribution over individual asset and employment states.
+\medskip
+\item Firm: $Y_t = Z_t F(K_t, \bar L)$ with $K_t = \int a\,d\Gamma_t$ and $\bar L$ aggregate labour.
+\medskip
+\item Factor prices:
+\[
+R_t \;=\; Z_t F_K(K_t, \bar L) - \delta, \qquad
+w_t \;=\; Z_t F_L(K_t, \bar L).
+\]
+\medskip
+\item Both $R_t$ and $w_t$ depend on the aggregate state through $(Z_t, K_t)$, which depends on the entire \emph{history} of the economy.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Household problem with the full distribution as state}
+The HH Bellman equation is now
+\[
+V(a_i, y_i, Z, \Gamma) \;=\; \max_{c_i, a'_i}
+\big\{u(c_i) + \beta\,\mathbb{E}\!\left[V(a'_i, y'_i, Z', \Gamma')\,\big|\,y_i, Z\right]\big\}
+\]
+subject to
+\[
+a'_{i} = w(Z,K)\,\bar\ell\, y_i + R(Z,K)\,a_i - c_i, \qquad K = \int a\,d\Gamma,
+\]
+and the law of motion $\Gamma' = G(\Gamma, Z, Z')$.
+\medskip
+\begin{itemize}
+\item \textbf{Curse of dimensionality}: $\Gamma$ is infinite-dimensional.
+\item Without simplification, the household must \emph{forecast the entire distribution} to make optimal decisions.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{State reduction via finite moments}
+Krusell and Smith (1998) propose: replace $\Gamma$ with a finite vector of moments
+\[
+m \;=\; (m_1, m_2, \ldots, m_J), \qquad m_j \;=\; \int a^j\, d\Gamma.
+\]
+\medskip
+\begin{itemize}
+\item Most often: $J = 1$ --- only the first moment $m_1 = K = \int a\,d\Gamma$.
+\medskip
+\item This dramatically reduces the household state from $(a,y,Z,\Gamma)$ to $(a,y,Z,K)$.
+\medskip
+\item Approximation accuracy is excellent for many calibrations: agents care primarily about \emph{average} capital because that determines $r$ and $w$.
+\medskip
+\item ``Approximate aggregation'' (KS): higher moments rarely matter for the policy.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Postulated log-linear law of motion}
+Households need to forecast $K_{t+1}$ given $(Z_t, K_t)$. Postulate
+\[
+\log K_{t+1} \;=\; A(Z_t) + B(Z_t)\,\log K_t,
+\]
+with state-dependent intercept $A(Z)$ and slope $B(Z)$.
+\medskip
+\begin{itemize}
+\item Two unknowns per aggregate state: $\{A(Z_g), B(Z_g), A(Z_b), B(Z_b)\}$.
+\item Households use this rule to compute $\mathbb{E}[V(a',y',Z',K')\,|\,y,Z]$.
+\item In equilibrium, the postulated rule must match the rule \emph{generated} by the household policy under simulation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{KS algorithm: steps 1--2}
+\textbf{Step 1.} Specify the functional form for the law of motion. Initialise $\{A(Z), B(Z)\}$.
+\medskip
+
+\textbf{Step 2.} Given the guessed law of motion, solve the household DP problem with state $(a,y,Z,K)$:
+\[
+V(a,y,Z,K) = \max_{a'}\!\big\{u(c) + \beta\,\mathbb{E}\!\left[V(a',y',Z',K'(Z))\,|\,y,Z\right]\big\}
+\]
+with $K'(Z) = \exp\!\big(A(Z) + B(Z)\log K\big)$.
+\medskip
+\begin{itemize}
+\item This is a 4-dimensional VFI problem (continuous in $a$ and $K$, discrete in $y$ and $Z$).
+\item Standard tools: tensor-product grids, multivariate interpolation, Howard improvement.\footnote{\scriptsize Classical HA computation methods are covered in detail in the video series at \url{https://space.bilibili.com/2142649036/lists/7180709}.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{KS algorithm: steps 3--5}
+\textbf{Step 3.} Simulate the economy under the household policy: $T \approx 10{,}000$ periods, $N \approx 10{,}000$ agents. Record the time series $\{K_t, Z_t\}$.
+\medskip
+
+\textbf{Step 4.} Run state-dependent OLS on the simulated $\{K_t, Z_t\}$:
+\[
+\log K_{t+1} = \hat A(Z_t) + \hat B(Z_t)\,\log K_t + e_t.
+\]
+\medskip
+
+\textbf{Step 5.} Update $\{A(Z), B(Z)\} \leftarrow \{\hat A(Z), \hat B(Z)\}$ and return to Step 2. Iterate until $|A_{\text{new}} - A_{\text{old}}| < \varepsilon$.
+\medskip
+\textbf{Convergence criterion}: in-sample $R^2$ of the regression close to $1.0$ (often $> 0.9999$ in KS!).
+\end{frame}
+
+\begin{frame}{Limitations of moment approximation}
+\begin{itemize}
+\item Although remarkably accurate \emph{on average}, the moment approximation has weaknesses:
+\medskip
+\begin{itemize}
+\item \emph{Specific functional form} for the law of motion is hard to choose ex ante.
+\item \emph{Higher-order properties} of the distribution (welfare, inequality measures) require more moments.
+\item \emph{Optimal-policy analysis} (designing fiscal/monetary intervention) needs derivatives of the value function with respect to the full distribution, not just moments.
+\end{itemize}
+\medskip
+\item \textbf{The natural alternative}: let a neural network \emph{learn} which features of $\Gamma$ matter.
+\medskip
+\item This is exactly the DeepHAM / DEQN approach.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART VII: DEEPHAM
+%=============================================================================
+
+\section{DeepHAM}
+
+\begin{frame}{DeepHAM (Han, Yang \& E, 2025)}
+\begin{itemize}
+\item DeepHAM solves the (finite-$N$, large-$N$) Krusell--Smith problem as a \textbf{Markov Nash equilibrium} among $N$ agents.
+\medskip
+\item Two neural networks:
+  \begin{itemize}
+  \item Value function $V(s;\theta^V)$ for individual states.
+  \item Policy $\mathcal{C}(s;\theta^C)$ for individual savings/consumption.
+  \end{itemize}
+\medskip
+\item Training alternates:
+  \begin{enumerate}
+  \item \textbf{Value step}: simulate under current policy, compute Monte Carlo target, do supervised regression on $\theta^V$.
+  \item \textbf{Policy step}: solve agent $i$'s problem with all other agents fixed at the previous policy --- \emph{fictitious play}.
+  \end{enumerate}
+\medskip
+\item This decomposition makes the high-dimensional joint problem tractable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DeepHAM: algorithm outline}
+\textbf{Initialisation ($k=0$).} Initial policy $\mathcal{C}^{(0)}$, networks $\theta^{V,(0)}, \theta^{C,(0)}$.
+\medskip
+
+\textbf{$k$-th iteration:}
+\begin{enumerate}
+\item Prepare the stationary distribution $\mu(\mathcal{C}^{(k-1)})$ under the previous policy.
+\medskip
+\item Update the value network by supervised learning:
+\[
+\theta^{V,(k)} \in \arg\min_{\theta^V}\;
+\mathbb{E}_\mu\!\left[\big(V(s_i;\theta^V) - \hat V_i\big)^2\right],
+\]
+with target $\hat V_i = \sum_{\tau=0}^{T_v-1}\beta^\tau u(c_\tau^i)$.
+\medskip
+\item Update the policy network by fictitious play:
+\[
+\theta^{C,(k)} \in \arg\max_{\theta^C}\;
+\mathbb{E}_\mu\!\left[\sum_{t=0}^{T-1}\beta^t u(c_{i,t}) + \beta^T V(s_{i,T};\theta^{V,(k)})\right].
+\]
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{DeepHAM: value function learning}
+\begin{itemize}
+\item Simulate the economy for $T_v$ periods under the current policy $\mathcal{C}^{(k-1)}$.
+\medskip
+\item For each sampled initial state $s_i$, record the realised consumption path and compute the discounted utility target
+\[
+\hat V_i \;=\; \sum_{\tau=0}^{T_v-1} \beta^{\tau}\, u(c_{i,\tau}).
+\]
+\medskip
+\item Train $V(\cdot;\theta^V)$ as a regression on $\{(s_i, \hat V_i)\}$.
+\medskip
+\item This is exactly fitted-value Monte Carlo: standard supervised deep learning, no special algorithms required.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DeepHAM: policy iteration via fictitious play}
+\begin{itemize}
+\item In round $\ell+1$, all agents' policies $\mathcal{C}^{(k,\ell)}$ are known. Agent $i$ improves \emph{best-responding} to the previous policy of all others:
+\[
+\mathcal{C}^{(k,\ell+1)} \in \arg\max_{\mathcal{C}}\;
+\mathbb{E}_\mu\!\left[\,\tilde U_{i,T} + \beta^T V^{(k)}(s_{i,T})\,\right].
+\]
+\medskip
+\item Optimisation is over the parameters of the policy network and runs by gradient ascent on a Monte Carlo sample of paths.
+\medskip
+\item \textbf{Why fictitious play?}
+  \begin{itemize}
+  \item Decouples the high-dimensional fixed-point problem.
+  \item Empirically robust: even in non-convex problems, alternating best response converges to a Nash equilibrium under regularity conditions.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DeepHAM: computational graph}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{KSwithDL_architecture_price_new}
+\end{center}
+\vspace{-0.4em}
+\begin{itemize}
+\item Inputs: individual state $s = (a_i, y_i, Z, \Gamma)$, with $\Gamma$ summarised by generalised moments.
+\item Layers: feedforward MLP with multiple hidden layers.
+\item Outputs: scalar consumption decision; budget constraint enforces $a' = R a + w y - c$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DL-based generalised moments}
+\begin{itemize}
+\item Instead of a fixed list of moments $\{m_1, m_2, \ldots\}$, DeepHAM lets the network \emph{learn} symmetry-preserving sufficient statistics:
+\[
+\bar Q_j(\Gamma) \;=\; \frac{1}{N} \sum_{i=1}^{N} Q_j(a_i),
+\]
+where $Q_1, \ldots, Q_J$ are basis functions parameterised by additional NN layers.
+\medskip
+\item Special case $Q_j(a) = a^j$ recovers the classical moments.
+\medskip
+\item Trained jointly with $V$ and $\mathcal C$, the learned moments adapt to the economic problem at hand.
+\medskip
+\item Symmetry across agents (the population is exchangeable) is enforced by averaging $Q_j$ across the cross section.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Interpretation of generalised moments}
+\begin{center}
+\includegraphics[width=0.85\textwidth]{KS_0fm1gm_v1_valuegmbasis_sub}
+\end{center}
+\vspace{-0.4em}
+\begin{itemize}
+\item Each panel: a learned basis function $Q_j(a)$ as a function of individual asset $a$.
+\item The first basis function looks roughly linear ($\sim$ first moment); subsequent functions capture concavities and tail behaviour.
+\item The network discovers, automatically, the features of $\Gamma$ that are relevant for forecasting.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DeepHAM output figures}
+\begin{center}
+\includegraphics[width=0.42\textwidth]{deepham}\hfill
+\includegraphics[width=0.42\textwidth]{ddp_training_metrics}\\[0.5em]
+\includegraphics[width=0.42\textwidth]{scatter_policy_c}\hfill
+\includegraphics[width=0.42\textwidth]{scatter_policy_a1}
+\end{center}
+\vspace{-0.5em}
+\begin{itemize}
+\item \emph{Top left}: simulated cross section of capital under the trained policy.
+\item \emph{Top right}: training loss curves.
+\item \emph{Bottom}: consumption and savings policies as functions of individual state, scattered across cross-section samples.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART VIII: DEEP EQUILIBRIUM NETS (DEQN)
+%=============================================================================
+
+\section{Deep Equilibrium Nets (DEQN)}
+
+\begin{frame}{Deep Equilibrium Nets (Azinovic, Gaegauf, Scheidegger 2022)}
+\begin{itemize}
+\item DEQN solves the same KS economy with a \textbf{single} neural network, no value function.
+\medskip
+\item The single network represents the policy:
+\[
+\sigma_\theta(a, e, Z, K) \in (0,1)
+\;\Rightarrow\;
+a' = \underline a + \sigma_\theta\cdot(\text{cash on hand} - \underline a).
+\]
+\medskip
+\item The training objective is the \textbf{Euler equation residual}, not a Bellman residual.
+\medskip
+\item No value network, no fictitious play; just supervised learning on the Euler condition.
+\medskip
+\item Key innovation: a \emph{cloud} of parallel economies provides a rich training distribution.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DEQN: policy network architecture}
+\begin{itemize}
+\item Single multilayer perceptron $\sigma_\theta : \mathbb{R}^4 \to (0,1)$.
+\medskip
+\item Inputs: $(a, e, Z, K)$ where $K = \int a\, d\mu$ is aggregate capital.
+\medskip
+\item Architecture used in the original paper:
+  \begin{itemize}
+  \item 3 hidden layers, 64 units each.
+  \item Mish activation function.
+  \item Sigmoid output for the savings rate.
+  \end{itemize}
+\medskip
+\item Sigmoid output enforces the budget constraint at the network level: the implied $a'$ always lies within $[\underline a, \text{cash on hand}]$.
+\medskip
+\item Contrast with DeepHAM: DeepHAM uses both $V_{\text{NN}}$ and $\mathcal C_{\text{NN}}$; DEQN uses only the policy network.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DEQN: Euler equation as the loss function}
+The household optimality condition is the Euler equation:
+\[
+u'(c_t) \;=\; \beta\,\mathbb{E}_t\!\left[(1+r_{t+1})\,u'(c_{t+1})\right].
+\]
+\medskip
+The \textbf{Euler residual}:
+\[
+\varepsilon \;=\; 1 \,-\, \frac{\beta\,\mathbb{E}\!\left[(1+r')\,u'(c')\right]}{u'(c)}.
+\]
+\medskip
+The DEQN loss aggregates squared residuals across a sample of agents:
+\[
+\mathcal{L}(\theta) \;=\; \frac{1}{M}\sum_{m=1}^{M} \varepsilon_m^2.
+\]
+\medskip
+\textbf{Why Euler equations?} They are necessary and sufficient for optimality (under regularity); driving $\varepsilon\to 0$ trains the optimal policy without ever computing $V$.
+\end{frame}
+
+\begin{frame}{DEQN: cloud simulation}
+\textbf{Problem.} To evaluate the Euler residual we need $(K, Z)$, but $K$ depends on the cross-sectional distribution $\mu$, which itself evolves endogenously under the trained policy.
+\medskip
+
+\textbf{Solution.} Simulate $N$ \emph{independent copies} of the entire economy in parallel:
+\medskip
+\begin{itemize}
+\item Epoch 0: all $N$ economies start at the steady-state distribution $\mu_{ss}$ from a sequence-Jacobian (SSJ) calibration.
+\item As training progresses, each economy evolves under its own TFP path $\{Z_n\}$, so the set $\{K_n\}$ spreads out across a realistic range.
+\item Result: an economically consistent and \emph{diverse} batch on which the Euler loss is meaningful.
+\end{itemize}
+\medskip
+Compared to DeepHAM (one economy, $N$ agents, $T_v$-step rollout), DEQN runs $N$ economies, each with its own $\mu_n$, evaluating the Euler equation directly each step.
+\end{frame}
+
+\begin{frame}{DEQN: distribution transport}
+At each epoch, $\mu_{n,t}$ is a histogram over $(a_j, e_k)$. Steps to advance one period:
+\medskip
+
+\begin{enumerate}
+\item Compute savings $a'_{j,k}$ for every grid point under the current policy.
+\item \textbf{Linear interpolation transport}: split mass $\mu(a_j, e_k)$ between the two adjacent grid points with weights $w_{\ell+1}, w_\ell$.
+\item \textbf{Markov transition for employment}: distribute mass to $(a_\ell, e')$ weighted by the transition matrix $\Pi_{e\to e'}$.
+\item Update $K_{n,t+1} = \sum_{j,k} a_j \cdot \mu_{n,t+1}(a_j, e_k)$.
+\end{enumerate}
+\medskip
+
+The transport step runs inside \texttt{torch.no\_grad()} so that gradients only propagate through the Euler residual loss, not through the simulation step itself.
+\end{frame}
+
+\begin{frame}{DEQN: algorithm outline}
+\textbf{Initialisation.} Solve the steady state via SSJ to get $K_{ss}$, asset/employment grids, $\mu_{ss}$, and the Markov transition $\Pi$.
+\medskip
+
+\textbf{For each training epoch $t \in \{1,\ldots,T\}$:}
+\begin{enumerate}
+\item Compute $K_n = \int a\,d\mu_n$ and read $Z_n$ for each cloud copy $n$.
+\item Sample $M$ random $(a, e)$ per copy.
+\item Forward pass: evaluate $\sigma_\theta \to (a', c)$.
+\item Compute Euler residuals $\varepsilon^2$ via expectations over $(Z', e')$.
+\item Backward pass: Adam update on $\theta$.
+\item Transport: $\mu_n \to \mu_n'$ inside \texttt{no\_grad()}; draw next $Z_n$.
+\end{enumerate}
+\medskip
+
+\textbf{Convergence.} Loss decreases over $\sim 2000$ epochs; Euler errors below $10^{-3}$ indicate the policy solves the model to high accuracy.
+\end{frame}
+
+\begin{frame}{DEQN vs.\ DeepHAM: comparison}
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+ & \textbf{DeepHAM} & \textbf{DEQN}\\
+\midrule
+Networks & Value $+$ policy (2) & Policy only (1)\\
+Optimality & Bellman / fictitious play & Euler residual\\
+Distribution rep.\ & Generalised moments & Full histogram\\
+Training data & $N$ agents, 1 economy & $N$ economies, cloud sim\\
+Forward sim & Yes, $T_v$ steps & Yes, 1 step / epoch\\
+Distribution evolution & Implicit via moments & Linear-interp transport\\
+Scalability & Moments fixed; NN width grows & Histogram sized to grid\\
+Differentiability & Through truncated rollout & Euler loss only\\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\begin{itemize}
+\item Both avoid the curse of dimensionality of the underlying KS problem.
+\item DeepHAM has richer distributional info via learned moments; DEQN has a simpler architecture and direct Euler-based training.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Recap: the modern HA toolbox}
+\begin{itemize}
+\item Aiyagari (1994): a non-trivial nested fixed point, classically solved by VFI + bisection on $r$.
+\medskip
+\item Krusell--Smith (1998): adds aggregate uncertainty, classically tamed by bounded-rationality moments.
+\medskip
+\item DeepHAM: replaces moments with \emph{learned} sufficient statistics; alternates supervised value learning and fictitious-play policy improvement.
+\medskip
+\item DEQN: drops the value function entirely; trains a single policy network on Euler residuals over a cloud of simulated economies.
+\medskip
+\item Both deep-learning methods generalise straightforwardly to:
+  \begin{itemize}
+  \item Multiple assets (HANK)
+  \item OLG with aggregate shocks (next part)
+  \item Mean-Field Games in continuous time (Part X)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART IX: OLG WITH AGGREGATE UNCERTAINTY
+%=============================================================================
+
+\section{OLG with Aggregate Uncertainty}
+
+\begin{frame}{From infinite-horizon to overlapping generations}
+\begin{itemize}
+\item In Aiyagari/KS, agents are infinitely lived. Many quantitative questions require finite life cycles:
+  \begin{itemize}
+  \item Social security and pension reform
+  \item Retirement savings and 401(k)
+  \item Lifecycle wealth accumulation
+  \item Education financing and student debt
+  \end{itemize}
+\medskip
+\item \textbf{OLG model} (Diamond, Auerbach--Kotlikoff): agents live $J$ periods (or cohorts), are born, age, and die.
+\medskip
+\item State vector now includes the \emph{age} of each cohort, plus its asset/income distribution.
+\medskip
+\item Standard OLG with aggregate shocks remains computationally hard --- the per-cohort distribution is itself an infinite-dimensional state.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OLG with aggregate uncertainty: state vector}
+With $J$ cohorts indexed by age $j = 1, \ldots, J$:
+\medskip
+\begin{itemize}
+\item Cohort $j$ has its own asset distribution $\Gamma_j$ over $(a_j, y_j)$.
+\medskip
+\item Aggregate state: $S = (Z, \Gamma_1, \Gamma_2, \ldots, \Gamma_J)$.
+\medskip
+\item Aggregate capital and labour:
+\[
+K_t = \sum_{j=1}^{J} \int a\,d\Gamma_{j,t}, \qquad
+L_t = \sum_{j=1}^{J} \int \bar\ell_j\, y\, d\Gamma_{j,t},
+\]
+where $\bar\ell_j$ is the cohort-specific labour endowment (often hump-shaped).
+\medskip
+\item Lifecycle Bellman: $V_j(a_j, y_j, S) = \max\,\{u(c) + \beta\, \mathbb{E}[V_{j+1}(a',y',S')]\}$, with $V_{J+1}\equiv 0$ (or a terminal bequest function).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why DL helps for OLG with aggregate shocks}
+\begin{itemize}
+\item Without aggregate shocks: standard backward induction over cohorts works.
+\medskip
+\item \textbf{With} aggregate shocks: each cohort's continuation value depends on the future joint distribution of all cohorts $\Rightarrow$ exponential state-space blow-up.
+\medskip
+\item Deep neural networks let us:
+  \begin{itemize}
+  \item Approximate $V_j(a, y, S)$ with a single MLP per cohort (or one MLP with cohort as an input).
+  \item Encode $S$ via learned summary statistics (analogous to DeepHAM moments).
+  \item Train across cohorts in parallel on a GPU.
+  \end{itemize}
+\medskip
+\item Recent reference: Brumm, Kubler \& Scheidegger (2023), ``Economics-inspired neural networks with stabilizing homotopies''.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Homotopy-stabilised training (Brumm--Kubler--Scheidegger 2023)}
+\begin{itemize}
+\item OLG with aggregate uncertainty is hard to train: borrowing constraints, occasionally-binding bond limits, and discontinuities in the policy create unstable gradients.
+\medskip
+\item \textbf{Stabilising homotopy}: introduce constraints \emph{gradually} during training.
+  \begin{itemize}
+  \item Start with a relaxed (smooth) version of the model: no binding constraint, smooth penalties.
+  \item Slowly tighten the constraints toward their true value as training progresses.
+  \item By the time the constraints are at their true level, the network is already in a good basin.
+  \end{itemize}
+\medskip
+\item Empirically, homotopy is essential for getting OLG-with-aggregate-shocks training to converge.
+\medskip
+\item Implementation often combines JAX (for automatic differentiation through long simulation rollouts) with the Adam optimiser and a multistep homotopy schedule.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lab12\_OLG.ipynb preview}
+\begin{itemize}
+\item \texttt{Notebooks/Lab12\_OLG.ipynb} is a JAX-based implementation of the Brumm--Kubler--Scheidegger OLG model with stabilising homotopies.
+\medskip
+\item Highlights:
+  \begin{itemize}
+  \item 7 cohorts spanning a 72-period life cycle, life-cycle labour endowment.
+  \item Aggregate TFP shocks following an AR(1).
+  \item Capital adjustment costs.
+  \item State-dependent depreciation (TFP-tied).
+  \item Two-stage homotopy: capital-only model first, then add bond.
+  \end{itemize}
+\medskip
+\item Use this notebook as an \textbf{optional follow-up} after Lab06: students who finish the KS lab early can explore OLG.
+\medskip
+\item In production research, the same toolkit handles multi-asset HANK and asset-pricing models.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART X: MEAN-FIELD GAMES
+%=============================================================================
+
+\section{Mean-Field Games}
+
+\begin{frame}{Mean-Field Games: motivation}
+\begin{itemize}
+\item All the models we've seen so far are \emph{finite or large-but-finite} populations of agents (Aiyagari has a continuum but discretises numerically).
+\medskip
+\item \textbf{Mean-Field Games} (MFG) provide a continuous-time, continuum-of-agents formulation.
+\medskip
+\item Why care?
+  \begin{itemize}
+  \item Continuous time often \emph{simplifies} the math: PDEs replace functional equations.
+  \item Powerful new toolbox for HA models with idiosyncratic and aggregate shocks.
+  \item Tight link to optimal transport, stochastic analysis, and modern PDE theory.
+  \item Recent breakthroughs in \emph{deep learning for MFG} (Carmona--Lauri\`ere, Achdou--Lasry--Lions, Han et al.).
+  \end{itemize}
+\medskip
+\item This part is an introduction; you can think of MFG as the continuum limit of Aiyagari/KS.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The core idea: continuum + mean-field feedback}
+\begin{itemize}
+\item Imagine a \emph{continuum} of identical agents, each solving an individual control problem.
+\medskip
+\item Each agent's payoff depends on the \emph{distribution} of all other agents (the ``mean field'').
+\medskip
+\item The distribution is itself determined by the optimal behaviour of the agents.
+\medskip
+\item This circular dependence is the defining feature of MFG --- and is exactly the same fixed point as in HA models, but stated in continuous time.
+\medskip
+\item Two mathematical objects describe the equilibrium:
+  \begin{itemize}
+  \item A backward Hamilton--Jacobi--Bellman (HJB) equation for the individual value function.
+  \item A forward Kolmogorov forward / Fokker--Planck (KFE) equation for the distribution.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A brief history}
+\begin{itemize}
+\item \textbf{Engineering origins} (mid-2000s):\\
+  Caines, Huang \& Malham\'e developed ``Nash certainty equivalence'' for large-population games.
+\medskip
+\item \textbf{Mathematical formalisation}:\\
+  Lasry \& Lions (2006--2007) coined the term ``Mean-Field Games'' and developed the rigorous PDE theory.
+\medskip
+\item \textbf{Economic adoption}:\\
+  Achdou--Han--Lasry--Lions--Moll (2014, 2022 \emph{REStud}) translated the framework into HA macroeconomics --- continuous-time Aiyagari--Bewley--Huggett.
+\medskip
+\item \textbf{Deep-learning era} (2020s):\\
+  Carmona--Lauri\`ere, Han--Hu, Achdou--Pequito, $\ldots$ use deep neural networks to solve MFGs in high dimensions.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The two-equation MFG system}
+\textbf{Hamilton--Jacobi--Bellman (backward, individual)}:
+\[
+-\partial_t v(x,t) + \rho v(x,t) \;=\; H\!\big(x,\nabla v(x,t),m(\cdot,t)\big),
+\]
+where $H$ is the Hamiltonian of the individual control problem and $m(\cdot,t)$ is the population distribution at time $t$.
+\medskip
+
+\textbf{Kolmogorov forward / Fokker--Planck (forward, aggregate)}:
+\[
+\partial_t m(x,t) \;=\; -\nabla\!\cdot\!\big(s^*(x,t,m)\, m(x,t)\big) + \tfrac{1}{2}\Delta\!\big(\sigma^2(x,t)\,m(x,t)\big),
+\]
+where $s^*$ is the optimal drift derived from the HJB.
+\medskip
+\begin{itemize}
+\item HJB and KFE are \emph{coupled}: the optimal control depends on $m$, and $m$ evolves under the optimal control.
+\item In equilibrium, both equations must hold simultaneously.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why HJB is familiar, why KFE is new}
+\begin{itemize}
+\item \textbf{HJB} is the continuous-time limit of the Bellman equation. Macroeconomists have seen it many times: Merton's portfolio choice, deterministic optimal growth, $\ldots$
+\medskip
+\item \textbf{KFE / Fokker--Planck} describes the time evolution of a probability density under stochastic dynamics.
+  \begin{itemize}
+  \item Originated in physics: Fokker (1914), Planck (1917) --- diffusion of particles.
+  \item Formalised by Kolmogorov (1931).
+  \item Standard in physics and engineering, only recently mainstream in macro.
+  \end{itemize}
+\medskip
+\item Together they describe the \emph{joint dynamics of optimal individual behaviour and the cross-sectional distribution} --- exactly what HA models need.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{HJB review: deterministic optimal control}
+A generic optimal control problem:
+\[
+v(x_0) \;=\; \max_{\alpha(\cdot)} \int_0^\infty e^{-\rho t}\, r(x_t, \alpha_t)\, dt
+\quad\text{s.t.}\quad \dot x_t = f(x_t, \alpha_t),\; x_0 \text{ given}.
+\]
+\medskip
+
+The corresponding HJB equation:
+\[
+\rho\, v(x) \;=\; \max_{\alpha}\left\{r(x,\alpha) + v'(x)\,f(x,\alpha)\right\}.
+\]
+\medskip
+
+\textbf{Interpretation}:
+\begin{itemize}
+\item LHS: ``required return'' on the value function.
+\item RHS: instantaneous payoff plus the marginal value of the state moving in the chosen direction.
+\item First-order condition over $\alpha$: $r_\alpha + v'(x) f_\alpha = 0$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From discrete-time Bellman to continuous-time HJB}
+Start with the discrete-time Bellman over a small interval $\Delta$:
+\[
+v(x) \;\approx\; \max_{\alpha}\!\left\{r(x,\alpha)\,\Delta + e^{-\rho\Delta}\, v(x + f(x,\alpha)\Delta)\right\}.
+\]
+\medskip
+Subtract $v(x)$ from both sides, divide by $\Delta$, and let $\Delta \to 0$ (using $e^{-\rho\Delta} \approx 1 - \rho\Delta$ and $v(x + f\Delta) \approx v(x) + v'(x) f\Delta$):
+\[
+0 \;=\; \max_\alpha\!\left\{r(x,\alpha) - \rho v(x) + v'(x) f(x,\alpha)\right\}.
+\]
+\medskip
+Rearrange:
+\[
+\rho v(x) \;=\; \max_\alpha\!\left\{r(x,\alpha) + v'(x) f(x,\alpha)\right\}.
+\]
+\medskip
+This is exactly the HJB.
+\end{frame}
+
+\begin{frame}{Stationary HJB and FOCs}
+For the optimal growth problem with state $k$, control $c$, return $u(c)$, and transition $\dot k = f(k) - \delta k - c$:
+\[
+\rho\, v(k) \;=\; \max_c\!\left\{u(c) + v'(k)\,\big(f(k)-\delta k - c\big)\right\}.
+\]
+\medskip
+First-order condition:
+\[
+u'(c) \;=\; v'(k) \quad\Longrightarrow\quad c^*(k) = (u')^{-1}(v'(k)).
+\]
+\medskip
+
+Substituting back:
+\[
+\rho\, v(k) \;=\; u\!\big(c^*(k)\big) + v'(k)\,\big(f(k) - \delta k - c^*(k)\big).
+\]
+\medskip
+A second-order ODE in $v$ to be solved on $k \in [0, \bar k]$ with appropriate boundary conditions.
+\end{frame}
+
+\begin{frame}{Poisson income shocks: state space}
+\begin{itemize}
+\item In the continuous-time Aiyagari, individual income $y$ jumps between two states $\{y_1, y_2\}$ at \emph{Poisson rates} $\lambda_1, \lambda_2$.
+\medskip
+\item State of an individual: $(a, y_i)$ with $i \in \{1,2\}$.
+\medskip
+\item Two value functions $v_1(a)$ and $v_2(a)$, one per income state.
+\medskip
+\item Asset evolves continuously: $\dot a = y_i + r a - c$.
+\medskip
+\item Income switches at Poisson rate; from state $i$, the agent moves to state $-i$ at rate $\lambda_i$.
+\medskip
+\item This setup is the natural continuous-time analogue of the discrete-time Aiyagari with Markov income.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deriving the HJB with jump terms}
+Over a short interval $\Delta$, with probability $\lambda_i \Delta$ the agent's income jumps from $y_i$ to $y_{-i}$. The Bellman is
+\[
+v_i(a) \approx \max_c\!\left\{u(c)\Delta + e^{-\rho\Delta}\!\left[(1-\lambda_i\Delta)\, v_i(a + \dot a\Delta) + \lambda_i\Delta\, v_{-i}(a)\right]\right\}.
+\]
+\medskip
+
+Letting $\Delta \to 0$ and rearranging:
+\[
+\rho\, v_i(a) \;=\; \max_c\!\left\{u(c) + v_i'(a)\,(y_i + r a - c) + \lambda_i\,\big(v_{-i}(a) - v_i(a)\big)\right\}.
+\]
+\medskip
+\begin{itemize}
+\item Three terms: instantaneous utility, drift term (deterministic capital accumulation), jump term (Poisson income switch).
+\item This is the HJB with jumps; the system is $i \in \{1,2\}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Economic intuition of the jump term}
+\[
+\lambda_i \big(v_{-i}(a) - v_i(a)\big)
+\]
+\medskip
+\begin{itemize}
+\item This is the \emph{option value} of switching income state.
+\medskip
+\item If $v_{-i}(a) > v_i(a)$ (the other income state would yield higher continuation value at the same wealth), the jump term is \emph{positive} --- the agent enjoys an expected gain from the future income switch.
+\medskip
+\item Conversely, if $v_{-i}(a) < v_i(a)$, the jump term is a cost.
+\medskip
+\item The Poisson rate $\lambda_i$ controls the strength of this option value.
+\medskip
+\item Intuition: precautionary saving in continuous time appears partly through this jump term, in addition to the curvature of $u$ along the deterministic drift.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Continuous-time Aiyagari: setup}
+\textbf{Households.} A continuum of households indexed by current asset $a \in [\underline a, \infty)$ and income $y_i \in \{y_1, y_2\}$ with Poisson switching rates $\lambda_1, \lambda_2$.
+\medskip
+
+\textbf{Firm.} Representative firm with $Y = K^\alpha L^{1-\alpha}$ and competitive factor markets:
+\[
+r = \alpha (K/L)^{\alpha-1} - \delta, \qquad w = (1-\alpha) (K/L)^\alpha.
+\]
+\medskip
+
+\textbf{Aggregation.} Aggregate capital and labour:
+\[
+K = \sum_{i=1}^{2} \int a\, g_i(a)\, da, \qquad
+L = \sum_{i=1}^{2} y_i \int g_i(a)\, da,
+\]
+where $g_i(a)$ is the cross-sectional density in income state $i$.
+\end{frame}
+
+\begin{frame}{The aggregation loop}
+\begin{enumerate}
+\item Guess prices $(r, w)$ (or equivalently aggregate $K$).
+\medskip
+\item Solve the household HJB to get optimal consumption $c_i^*(a)$ and drift $s_i^*(a) = y_i + r a - c_i^*(a)$.
+\medskip
+\item Solve the KFE for the stationary density $g_i^*(a)$.
+\medskip
+\item Compute aggregate $K^* = \sum_i \int a\, g_i^*(a)\, da$.
+\medskip
+\item Update $(r,w)$ from the firm FOCs at $K^*$, and iterate until $K^* = K$.
+\end{enumerate}
+\medskip
+
+This is structurally identical to the discrete-time Aiyagari nested fixed point, but every step is now an ODE/PDE rather than a discrete-time DP problem.
+\end{frame}
+
+\begin{frame}{The Kolmogorov forward (Fokker--Planck) equation}
+For the time-dependent density $g_i(a,t)$:
+\[
+\partial_t g_i(a,t) \;=\; -\partial_a\!\big(s_i(a,t)\, g_i(a,t)\big)
+- \lambda_i\, g_i(a,t) + \lambda_{-i}\, g_{-i}(a,t).
+\]
+\medskip
+
+\begin{itemize}
+\item First term: \emph{drift} --- mass moves at speed $s_i(a,t)$ along the $a$-axis.
+\item Second term: \emph{Poisson outflow} from state $i$ at rate $\lambda_i$.
+\item Third term: \emph{Poisson inflow} from the other state at rate $\lambda_{-i}$.
+\medskip
+\item Boundary: at the borrowing limit $a = \underline a$, mass cannot leak below; we impose a reflecting boundary.
+\medskip
+\item Well-posed under standard conditions (Achdou et al. 2022).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Reading the KFE: economic intuition}
+\begin{itemize}
+\item \textbf{Drift term}: the cross-section flows to the right when households are saving ($s_i > 0$) and to the left when they are dissaving.
+\medskip
+\item \textbf{Jump terms}: at every point in $a$, mass leaks from state $i$ at rate $\lambda_i$ and arrives from $-i$ at rate $\lambda_{-i}$. The two states ``trade'' agents.
+\medskip
+\item \textbf{Boundary at $\underline a$}: reflecting boundary --- mass that hits the borrowing constraint cannot continue leftward; instead it accumulates at $\underline a$ for as long as $s_i(\underline a) \leq 0$.
+\medskip
+\item \textbf{Total mass conserved}: $\int g_1 + \int g_2 = 1$ at all times.
+\medskip
+\item Analogy: water flowing through two interconnected tanks with leaks at known rates.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Stationary KFE}
+At the stationary equilibrium ($\partial_t = 0$):
+\[
+0 \;=\; -\partial_a\!\big(s_i(a)\, g_i(a)\big) - \lambda_i\, g_i(a) + \lambda_{-i}\, g_{-i}(a),
+\quad i = 1, 2.
+\]
+\medskip
+
+\begin{itemize}
+\item Two coupled ODEs in $g_1, g_2$, plus the normalisation $\int g_1 + \int g_2 = 1$.
+\medskip
+\item Reflecting boundary at $\underline a$, integrability at $a \to \infty$.
+\medskip
+\item Standard discretisation gives a sparse linear system $A^\top g = 0$ where $A$ is the discretised HJB infinitesimal generator (next slide).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Discretisation and the upwind scheme}
+\begin{center}
+\includegraphics[width=0.6\textwidth]{vp}
+\end{center}
+\vspace{-0.3em}
+\begin{itemize}
+\item Discretise $a$ on a grid $\{a_1, \ldots, a_N\}$. The HJB needs an approximation of $v_i'(a)$.
+\item \textbf{Upwind scheme}: pick the forward or backward difference depending on the \emph{sign of the optimal drift}:
+\[
+v_i'(a_j) \approx \begin{cases}
+(v_i(a_{j+1}) - v_i(a_j))/\Delta a & \text{if } s_i(a_j) > 0 \\
+(v_i(a_j) - v_i(a_{j-1}))/\Delta a & \text{if } s_i(a_j) < 0
+\end{cases}
+\]
+\item Provably stable (Barles--Souganidis 1991); without upwinding, the scheme is unstable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{HJB and KFE: $A$ vs.\ $A^\top$ duality}
+After upwind discretisation, the HJB takes the form
+\[
+\rho\, \mathbf v \;=\; \mathbf u(\mathbf c) + A(\mathbf v)\, \mathbf v,
+\]
+where $A(\mathbf v) \in \mathbb{R}^{2N\times 2N}$ is the discretised infinitesimal generator (sparse, tridiagonal-plus-jumps).
+\medskip
+
+The discretised stationary KFE is
+\[
+\mathbf 0 \;=\; A(\mathbf v)^{\top}\, \mathbf g.
+\]
+\medskip
+\begin{itemize}
+\item The \emph{same} matrix $A$ generates both equations: HJB on the right, KFE on the left (transpose).
+\medskip
+\item This duality is at the heart of the Achdou et al.\ approach: solving HJB gives you the KFE almost for free.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Putting it all together: outer fixed point on $r$}
+\begin{enumerate}
+\item Guess $r$.
+\medskip
+\item Solve HJB by iterating
+\[
+\rho \mathbf v - A(\mathbf v)\mathbf v \;=\; \mathbf u(\mathbf c)
+\]
+to find $\mathbf v^*, \mathbf c^*, A^*$.
+\medskip
+\item Solve KFE: find $\mathbf g^*$ in the null space of $A^{*\top}$, normalised to $\mathbf 1^\top \mathbf g^* = 1$.
+\medskip
+\item Aggregate: $K^* = \sum_j a_j \big(g^*_{1,j} + g^*_{2,j}\big)$.
+\medskip
+\item Update $r$ from the firm FOC at $K^*$ and iterate until convergence.
+\end{enumerate}
+\medskip
+
+This is the Achdou--Lasry--Lions--Moll algorithm for continuous-time HA models. It is fast, accurate, and (with deep learning) extends to high-dimensional state spaces.
+\end{frame}
+
+\begin{frame}{Transition dynamics: forward--backward system}
+For non-stationary problems (e.g.\ MIT shocks, business cycles), HJB and KFE become time-dependent and the system is \emph{forward--backward}:
+\[
+\begin{cases}
+-\partial_t v_i + \rho v_i \;=\; \max_c\,\{\cdots\}, & \text{(backward in time)}\\[0.4em]
+\partial_t g_i \;=\; -\partial_a(s_i g_i) - \lambda_i g_i + \lambda_{-i} g_{-i}. & \text{(forward in time)}
+\end{cases}
+\]
+\medskip
+\begin{itemize}
+\item Boundary in time: $v_i(\cdot, T) = $ terminal condition (often the stationary $v_i^*$); $g_i(\cdot, 0) = $ initial condition.
+\medskip
+\item Numerical scheme: \emph{shooting} or \emph{Newton's method} on the residuals --- iterate backward HJB given $g$, then forward KFE given $v$, until self-consistent.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Master equation: distribution as state}
+\begin{itemize}
+\item The master equation is a single equation that encodes both HJB and KFE simultaneously, with the \emph{distribution itself} as a state variable.
+\medskip
+\item Schematically:
+\[
+\rho\, U(x, m) \;=\; H\!\big(x, \nabla_x U(x,m), m\big) + \int \nabla_m U(x,m)(y)\, \mathcal L^* m(y)\, dy,
+\]
+where $U$ is the value function defined on the product space (individual state, distribution) and $\mathcal L^*$ is the dual generator on the distribution.
+\medskip
+\item This is an infinite-dimensional PDE on the Wasserstein space of probability measures.
+\medskip
+\item Practical use: linearisation around the stationary equilibrium gives a tractable system for solving HA models with aggregate shocks (Bilal 2023; Alvarez--Lippi 2022).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deep learning for MFG}
+\begin{itemize}
+\item Classical numerical schemes (upwind, finite differences) suffer in high-dimensional state spaces.
+\medskip
+\item \textbf{Deep neural networks for MFG}:
+  \begin{itemize}
+  \item Parameterise $v(x, m)$ and $m(x)$ by NNs.
+  \item Train by minimising the residual of the HJB and the KFE jointly.
+  \item Use Monte Carlo sampling instead of grids.
+  \end{itemize}
+\medskip
+\item Recent progress (Carmona--Lauri\`ere 2021, Lauri\`ere et al.\ 2022) shows that deep MFG solvers can handle 10--20 dimensional state spaces that are completely out of reach for grid methods.
+\medskip
+\item These methods unify the discrete-time RL approaches (DeepHAM, DEQN) with the continuous-time PDE perspective.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MFG $\leftrightarrow$ HA models: the link}
+\begin{itemize}
+\item Discrete-time Aiyagari is the natural \emph{discretisation} of continuous-time MFG with idiosyncratic Poisson income.
+\medskip
+\item Krusell--Smith with aggregate uncertainty corresponds to MFGs with a \emph{common noise} (the aggregate shock).
+\medskip
+\item In both formulations:
+  \begin{itemize}
+  \item Optimal individual behaviour depends on the cross-sectional distribution.
+  \item The cross-sectional distribution evolves under optimal behaviour.
+  \item Equilibrium is a fixed point of this circular dependence.
+  \end{itemize}
+\medskip
+\item MFG provides the cleanest mathematical formalism, while RL/DL provide the computational engine.
+\medskip
+\item The two approaches are now converging: deep MFG solvers borrow heavily from RL; modern deep RL borrows from continuous-time control theory.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% PART XI: LAB PREVIEW & WRAP-UP
+%=============================================================================
+
+\section{Lab Preview and Wrap-up}
+
+\begin{frame}{Lab06 preview: Krusell--Smith via Deep Equilibrium Nets}
+\begin{itemize}
+\item In the 1-hour lab you will train a Deep Equilibrium Net to solve the Krusell--Smith (1998) economy in PyTorch.
+\medskip
+\item Notebook: \texttt{Lab06\_KS\_HA.ipynb} (in this folder).
+\medskip
+\item By the end of the lab you will:
+  \begin{itemize}
+  \item Initialise the model from a steady state computed via the sequence-Jacobian (SSJ) toolbox.
+  \item Build a PyTorch policy network for the savings rate.
+  \item Run the cloud-of-economies training loop.
+  \item Visualise the trained policy and the loss curves.
+  \item Diagnose convergence and accuracy.
+  \end{itemize}
+\medskip
+\item Hardware: a single GPU (Colab T4 / V100) is comfortable; CPU also works for short runs.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lab06 step-by-step}
+\textbf{Part 1.} Initialise via sequence-Jacobian:
+\begin{itemize}
+\item Solve the steady state to get asset and employment grids, transition matrices, $K_{ss}, \mu_{ss}$.
+\end{itemize}
+\medskip
+
+\textbf{Part 2.} PyTorch implementation:
+\begin{itemize}
+\item Define the policy network (3 hidden layers, Mish, sigmoid output).
+\item Encode the budget constraint inside the network.
+\item Wrap the model physics (transition dynamics) as a class.
+\end{itemize}
+\medskip
+
+\textbf{Part 3.} The training loop (cloud simulation):
+\begin{itemize}
+\item Simulate $N$ parallel economies.
+\item Compute the Euler-residual loss.
+\item Backprop and Adam update.
+\item Transport the distribution forward (no grad).
+\end{itemize}
+\medskip
+
+\textbf{Part 4.} Analysis:
+\begin{itemize}
+\item Plot the loss history (log scale).
+\item Plot policy functions; check Euler errors.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optional follow-up: Lab12\_OLG.ipynb}
+\begin{itemize}
+\item Once you finish the KS lab, you may want to explore \texttt{Notebooks/Lab12\_OLG.ipynb}.
+\medskip
+\item This notebook implements OLG with aggregate uncertainty using JAX and stabilising homotopies (Brumm--Kubler--Scheidegger 2023).
+\medskip
+\item Highlights:
+  \begin{itemize}
+  \item Two-stage homotopy: first solve a capital-only model, then introduce bonds.
+  \item JAX \texttt{jit} compilation for fast training-simulation episodes.
+  \item Detailed pedagogical commentary inside the notebook.
+  \end{itemize}
+\medskip
+\item Useful preparation for research projects involving life-cycle, fiscal policy, or asset-pricing applications.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Recap of Lecture 6}
+\begin{itemize}
+\item \textbf{Aiyagari--Bewley--Huggett}: incomplete-markets HA model and stationary equilibrium; existence/uniqueness via Feller, mixing, monotonicity.
+\medskip
+\item \textbf{Classical computation}: nested fixed-point on $r$; VFI on the household, eigenvector for the distribution, bisection on the price.
+\medskip
+\item \textbf{Why ML?} Curse of dimensionality once we add aggregate shocks, multiple assets, or life-cycle structure.
+\medskip
+\item \textbf{Deep dynamic programming}: policy/value networks, Euler residual losses, actor--critic.
+\medskip
+\item \textbf{DeepHAM and DEQN}: two leading deep-learning solutions for KS.
+\medskip
+\item \textbf{OLG with aggregate uncertainty}: homotopy-stabilised JAX training.
+\medskip
+\item \textbf{Mean-Field Games}: continuous-time formulation, HJB+KFE, deep MFG solvers as the unifying frontier.
+\medskip
+\item \textbf{Next lecture}: Large Language Models --- a different but equally fast-moving deep-learning frontier.
+\end{itemize}
+\end{frame}
+
+\end{document}

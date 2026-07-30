@@ -1,0 +1,76 @@
+%% Lec05 shared MAP slide: "one backbone, three acts" recurring diagram.
+%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray,
+%% DarkText) and AFTER \usetikzlibrary{positioning,arrows.meta,shapes,calc}.
+%% Call \LecFiveMap{k} inside a frame, where k in {1,2,3} highlights the current
+%% act ("you are here") and k = 0 renders the closing reprise with all three
+%% acts checked green (used by T3's closing synthesis frame).
+%% Filename deliberately does NOT match the build glob Lec*_T*.tex, so the build
+%% script never tries to compile it standalone.
+%%
+%% The three acts double as the lecture's spine: MODEL -> SAMPLE -> SCALE, i.e.
+%% the three ways RL fills the Bellman expectation --- full backup (needs P,R),
+%% sample backup (model-free), then sampled + function-approximated (deep RL).
+
+\newcommand{\LecFiveMap}[1]{%
+% Precompute per-box style selectors; TikZ option lists are comma-split before
+% TeX conditionals run, so \ifnum must not sit inside a [...] options list.
+\ifnum#1=0
+  \tikzset{lmapa/.style={lmapdone}, lmapb/.style={lmapdone},
+           lmapc/.style={lmapdone}}%
+\else
+  \tikzset{lmapa/.style={}, lmapb/.style={}, lmapc/.style={}}%
+  \ifnum#1=1 \tikzset{lmapa/.style={lmapcur}}\fi
+  \ifnum#1=2 \tikzset{lmapb/.style={lmapcur}}\fi
+  \ifnum#1=3 \tikzset{lmapc/.style={lmapcur}}\fi
+\fi
+\begin{center}
+\begin{tikzpicture}[
+    act/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=3.4cm, minimum height=1.0cm, text width=3.25cm,
+        align=center, font=\small, text=DarkText},
+    lmapcur/.style={draw=RedTitle, very thick, fill=orange!20},
+    lmapdone/.style={draw=green!45!black, thick, fill=green!10},
+    q/.style={font=\tiny\itshape, text width=3.4cm, align=center, text=black!70},
+    barlab/.style={font=\tiny\bfseries, text=black!65},
+    sat/.style={rectangle, rounded corners, draw=black!45, dashed, fill=white,
+        text width=4.3cm, align=center, font=\tiny, text=black!70,
+        minimum height=0.5cm},
+    arr/.style={-{Stealth[length=2.4mm]}, thick, gray!60}
+]
+    % --- three act boxes ---
+    \node[act, lmapa] (a1) at (0,0)
+        {\textbf{5.1\ \ MODEL}\\[1pt] \tiny MDP \& the DP bridge};
+    \node[act, lmapb] (a2) at (4.5,0)
+        {\textbf{5.2\ \ SAMPLE}\\[1pt] \tiny MC $\cdot$ TD $\cdot$ Q-learning};
+    \node[act, lmapc] (a3) at (9.0,0)
+        {\textbf{5.3\ \ SCALE}\\[1pt] \tiny actor--critic $\cdot$ deep RL};
+    \draw[arr] (a1) -- (a2);
+    \draw[arr] (a2) -- (a3);
+    % --- the student question each act answers ---
+    \node[q] at (0,-0.98)   {what is RL, and how does it\\ relate to the DP I know?};
+    \node[q] at (4.5,-0.98) {how do I learn a policy with\\ no model of the world?};
+    \node[q] at (9.0,-0.98) {how does it scale --- and\\ where has it worked?};
+    % --- "you are here" marker above the current act ---
+    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (4.5,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (9.0,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (4.5,1.02)
+        {all three acts complete};\fi
+    % --- bottom band: the backup taxonomy (the technical spine of the lecture) ---
+    \fill[blue!10]   (-1.6,-1.78) rectangle (1.6,-1.45);
+    \fill[green!12]  (2.9,-1.78)  rectangle (6.1,-1.45);
+    \fill[orange!16] (7.4,-1.78)  rectangle (10.6,-1.45);
+    \node[barlab] at (0,-1.615)   {FULL BACKUP\ (needs $P,R$)};
+    \node[barlab] at (4.5,-1.615) {SAMPLE BACKUP\ (model-free)};
+    \node[barlab] at (9.0,-1.615) {SAMPLED $+$ APPROXIMATED};
+    % --- dashed satellites: where this lecture sits in the course flow ---
+    \node[sat] at (0,-2.45)
+        {\textit{upstream:} Lec02 (RL = 3rd ML pillar), Lec04 T2 (RL as a Bellman solver)};
+    \node[sat] at (9.0,-2.45)
+        {\textit{downstream:} Lec06 --- HA models at scale (Aiyagari, Krusell--Smith, DeepHAM)};
+\end{tikzpicture}
+\end{center}
+}

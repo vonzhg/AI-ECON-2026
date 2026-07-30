@@ -1,0 +1,1174 @@
+%% Machine Learning and Agentic AI for Macroeconomic Research
+%% Lecture 3: Machine Learning for Quantitative Macroeconomists
+%% Author: Zhigang Feng
+%% Source: 5-machine_learning/Lec_2026_5_Machine_learning.tex
+
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage{ae,aecompl}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{amsmath, amssymb, amsthm, graphicx}
+\usepackage{booktabs, multirow}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\tiny\color{gray},
+}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue!80!black}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{orange!80!black},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numbersep=5pt,
+    numberstyle=\tiny\color{gray},
+    backgroundcolor=\color{gray!8},
+    rulecolor=\color{gray!40}
+}
+
+\ifx\hypersetup\undefined
+  \AtBeginDocument{%
+    \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+      colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+  }
+\else
+  \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+    colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+\fi
+
+\makeatletter
+\newcommand\makebeamertitle{\frame{\maketitle}}%
+\AtBeginDocument{%
+  \let\origtableofcontents=\tableofcontents
+  \def\tableofcontents{\@ifnextchar[{\origtableofcontents}{\gobbletableofcontents}}
+  \def\gobbletableofcontents#1{\origtableofcontents}%
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{author}{fg=DarkText}
+\setbeamercolor{date}{fg=DarkText}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+\newcommand{\reducevspace}{\vspace{-0.5cm}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+\makeatother
+
+\graphicspath{{../../5-machine_learning/}}
+
+\title[ML \& Agentic AI for Macro Research]{Machine Learning and Agentic AI for Macroeconomic Research\\
+3: Machine Learning for Quantitative Macroeconomists\\[0.5em]}
+\author{Zhigang Feng}
+\date{Spring 2026}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+% AGENDA
+%=============================================================================
+
+\begin{frame}{Lecture Agenda}
+\begin{enumerate}
+  \item \textbf{Why ML for Economists?} --- unstructured data, forecasting, solving macro models
+  \medskip
+  \item \textbf{Pattern Recognition} --- handwritten digits as a motivating illustration
+  \medskip
+  \item \textbf{Neural Networks} --- architecture, activation functions, universal approximation
+  \medskip
+  \item \textbf{Forward Propagation} --- computing outputs layer by layer
+  \medskip
+  \item \textbf{Backpropagation \& Gradient Descent} --- learning from errors
+  \medskip
+  \item \textbf{Training Process} --- loss functions, overfitting, regularization
+  \medskip
+  \item \textbf{Specialized Architectures} --- CNNs, convexity- \& monotonicity-preserving networks
+  \medskip
+  \item \textbf{Lab Preview} --- curve fitting with \texttt{Lab5A} and \texttt{Lab5B}
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+% SECTION 1: WHY ML FOR ECONOMISTS
+%=============================================================================
+\section{Why ML for Economists?}
+
+\begin{frame}{Harnessing the Power of Unstructured Data}
+\begin{itemize}
+\item Economics has traditionally relied on structured, tabular data. However, a wealth of economic information is locked in unstructured formats: text, images, satellite imagery.
+\item ML algorithms, particularly deep learning, provide tools to systematically process and quantify this unstructured data into economic indicators.
+\item \textbf{Applications:}
+\begin{itemize}
+\item Measuring economic sentiment and uncertainty from financial news and social media
+\item Analyzing satellite images to track economic activity (nighttime lights $\approx$ GDP proxy, ships in ports $\approx$ trade flows)
+\item Using image recognition on product pictures to understand non-standardized product features
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Extracting Insights from Textual Data}
+\begin{itemize}
+\item Natural Language Processing (NLP) offers powerful techniques to analyze large volumes of text --- going beyond simple word counts.
+\item \textbf{Applications:}
+\begin{itemize}
+\item Gauging dovish or hawkish stance of central bankers from public communications
+\item Identifying key risk factors from corporate annual reports
+\item Quantifying the evolution of economic policy uncertainty from news articles
+\end{itemize}
+
+\medskip
+\item \textbf{For macro:} FOMC minutes, Beige Books, and congressional records contain rich information that traditional econometrics cannot easily exploit.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Enhancing Causal Inference and Forecasting}
+\begin{itemize}
+\item \textbf{Causal Inference:}
+\begin{itemize}
+\item ``Double Machine Learning'' allows flexible inclusion of high-dimensional controls, reducing omitted variable bias
+\item ML identifies \emph{heterogeneous treatment effects}: how does a policy impact vary across subgroups?
+\end{itemize}
+
+\medskip
+\item \textbf{Forecasting \& Nowcasting:}
+\begin{itemize}
+\item ML captures complex, non-linear relationships that time-series models miss
+\item Regularization (e.g., LASSO) enables ``kitchen sink'' regression without overfitting
+\item Nowcasting: real-time economic indicators from credit card transactions, web searches, satellite imagery
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solving Large-Scale Macro and Finance Models}
+\begin{itemize}
+\item Cutting-edge models (heterogeneous agents, portfolio choice) feature:
+\begin{itemize}
+\item High dimensionality and complex non-linear dynamics
+\item Traditional grid-based methods hit the \textbf{curse of dimensionality}
+\end{itemize}
+
+\medskip
+\item ML techniques provide powerful new numerical methods:
+\begin{itemize}
+\item \textbf{Deep learning:} parameterize policy/value functions with neural networks
+\item \textbf{Reinforcement learning:} solve sequential decision problems via simulation
+\end{itemize}
+
+\medskip
+\item \textbf{Examples:}
+\begin{itemize}
+\item Optimal fiscal/monetary policy in heterogeneous agent models
+\item Life-cycle portfolio choice with realistic income uncertainty
+\item Krusell--Smith (1998) with neural network approximation of the law of motion
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ML and the Curse of Dimensionality in Macro}
+\begin{itemize}
+\item \textbf{CoD \#1: Dimension of the state space}
+\begin{itemize}
+\item $k\rightarrow\{k,a,h,\ldots\}$; the distribution $\Gamma$ is infinite-dimensional
+\item \textit{Traditional:} sparse grids, local approximation --- scale poorly
+\item \textit{ML:} neural networks are \textbf{grid-free}; recover equilibrium functions via Monte Carlo sampling
+\end{itemize}
+
+\medskip
+\item \textbf{CoD \#2: Unfolding of uncertainty}
+\begin{itemize}
+\item $\mathbb{E}$ over future contingencies; the space for $\Gamma$ is unknown
+\item \textit{Traditional:} discretize shocks, impose Markov structure
+\item \textit{ML:} focus on the ergodic distribution; direct simulation Monte Carlo
+\end{itemize}
+
+\medskip
+\item \textbf{Key insight:} ML shifts the computational bottleneck from \emph{grid construction} to \emph{function representation} --- a much more scalable paradigm.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 2: PATTERN RECOGNITION
+%=============================================================================
+\section{Pattern Recognition as Motivating Illustration}
+
+\begin{frame}{Example: Handwritten Digit Recognition}
+\begin{center}
+\includegraphics[width=12cm,height=7cm]{3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Digit Recognition as a Mathematical Problem}
+\begin{itemize}
+  \item \textbf{Dataset:}
+        $\bigl\{(\mathbf{x}_i, y_i)\bigr\}_{i=1}^N$ with images $\mathbf{x}_i \in [0,1]^{784}$
+        and labels $y_i \in \{0,\dots,9\}$
+
+  \item \textbf{Input--Output Mapping:}
+        \[
+          f_{\theta} \colon \mathbf{x} \longmapsto \hat{\mathbf{p}} \in \Delta^{9},
+          \qquad
+          \hat{y} = \arg\max_{k} \hat{p}_k
+        \]
+        where $\Delta^{9}$ is the 10-dimensional probability simplex
+
+  \item \textbf{Learning Objective (Empirical Risk + Regularization):}
+        \[
+          \min_{\theta} \;
+          \frac{1}{N}\sum_{i=1}^{N}
+          \underbrace{\mathcal{L}\bigl(f_{\theta}(\mathbf{x}_i), y_i\bigr)}_{\text{cross-entropy}}
+          + \lambda \lVert\theta\rVert_{p}
+        \]
+
+  \item \textbf{Search Strategy:} Stochastic gradient descent \& variants (Adam, RMSProp)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Constraints and Structure in Handwritten Digits}
+\begin{itemize}
+\item \textbf{Anatomical constraints:} Muscles, tendons, and joints dictate possible strokes --- leading to systematic patterns in how digits are formed.
+
+\medskip
+\item \textbf{Geometric properties:} Each digit has defining features --- `0' has a closed loop, `1' a vertical stroke, `8' two stacked loops.
+
+\medskip
+\item \textbf{Spatial relationships:} Relative positions, sizes, and orientations of components maintain digit identity even with individual variation.
+
+\medskip
+\item \textbf{Lesson for economists:} Just as economic theory constrains the space of plausible models, structural constraints on handwriting reduce the effective dimensionality of the recognition problem.
+
+\medskip
+\item ML algorithms can \textbf{learn} these constraints from data --- data augmentation, regularization, and architecture choices all exploit this structure.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From 784 Pixels to a Low-Dimensional Manifold}
+\begin{itemize}
+  \item \textbf{Manifold Hypothesis:}
+        Natural digit images occupy a smooth, $d$-dimensional manifold
+        $\mathcal{M}\subset\mathbb{R}^{784}$ with $d\ll784$.
+
+  \item \textbf{Two-Stage Model:}
+        \[
+          \mathbf{x}
+          \xrightarrow{\;\pi\,:\;\mathbb{R}^{784}\!\!\to\mathbb{R}^{d}\;}
+          \mathbf{z}
+          \xrightarrow{\;g_{\phi}\,:\;\mathbb{R}^{d}\!\!\to\Delta^{9}\;}
+          \hat{\mathbf{p}}
+          ,\qquad
+          \hat y=\arg\max_k\hat p_k
+        \]
+        \begin{itemize}
+          \item $\pi$: \textit{encoder} --- flattens the manifold to a latent code $\mathbf z\in\mathbb{R}^{d}$
+          \item $g_{\phi}$: \textit{classifier head} --- 1--2 FC layers + softmax $\to$ class probabilities
+        \end{itemize}
+
+  \item \textbf{Choices for $\pi$:}
+        \begin{itemize}
+          \item \textbf{Linear:} PCA, SVD, random projections
+          \item \textbf{Non-linear:} Auto-encoder, t-SNE, UMAP, first layers of a CNN
+        \end{itemize}
+
+  \item \textbf{Macro analogy:} Finding a low-dimensional state in a high-dimensional model is the same problem --- sufficient statistics for prediction.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Defining a Deep Neural Network for Digit Recognition}
+\begin{itemize}
+\item \textbf{Network Architecture:}
+\begin{itemize}
+\item Input Layer: 784 neurons corresponding to pixel intensities
+\item Hidden Layers: Multiple layers applying nonlinear transformations to learn complex patterns
+\item Output Layer: 10 neurons, each representing one digit class (0--9)
+\end{itemize}
+
+\medskip
+\item \textbf{Activation Functions:}
+\begin{itemize}
+\item Nonlinear functions (ReLU, sigmoid) between layers
+\item Customizable depth and width based on task complexity
+\end{itemize}
+
+\medskip
+\item \textbf{Economic parallel:} The network structure mirrors the recursive structure in macro models --- state variables are transformed layer by layer into decisions, just as $k_t \to c_t, l_t$ through policy functions.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 3: NEURAL NETWORKS
+%=============================================================================
+\section{Neural Networks: Architecture and Activation Functions}
+
+\begin{frame}{Neural Networks: The Basic Building Block}
+\begin{itemize}
+\item Artificial neural networks are:
+\begin{itemize}
+\item Inspired by biological neural networks
+\item Composed of interconnected neurons organized in layers
+\item Trained by adjusting weights based on data
+\end{itemize}
+
+\medskip
+\item \textbf{Key components:}
+\begin{itemize}
+\item \textbf{Neuron:} Receives inputs, applies an activation function, produces output
+\item \textbf{Activation function:} Nonlinear map applied by each neuron (sigmoid, tanh, ReLU)
+\item \textbf{Loss function:} Measures how well predictions match true values --- the objective to minimize
+\end{itemize}
+\end{itemize}
+
+\begin{center}
+\includegraphics[scale=0.5]{neuron.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Single Hidden Layer Network}
+\begin{itemize}
+\item Input $x\in\mathbb{R}^{M}$, output $y\in\mathbb{R}^{N}$.
+
+\item The $j$-th hidden unit:
+\begin{equation}
+h_{j}^{(1)} = f_{j}^{(1)}(x) = \sigma\!\left(b_{j}^{(1)}+\sum_{m=1}^{M}w_{j,m}^{(1)}x_{m}\right),\quad j=1,\dots,U_{1} \label{eq:hidden1}
+\end{equation}
+
+\item The $i$-th output:
+\begin{equation}
+y_{i} = \sum_{j=1}^{U_{1}}\tilde{w}_{i,j}\,h_{j}^{(1)}+\tilde{b}_{i},\quad i=1,\dots,N \label{eq:output1}
+\end{equation}
+
+\item $\sigma$ is a nonlinear activation function.
+
+\medskip
+\item Common choices: $\sigma(x)=\tanh(x)$, $\sigma(x)=\max(0,x)$ (ReLU), $\sigma(x)=\frac{1}{1+e^{-x}}$ (sigmoid).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Hidden Layer Network}
+\begin{itemize}
+\item Take the linear combination of $h^{(1)}$ and pass through another activation:
+\begin{equation}
+h_{j}^{(2)} = \sigma\!\left(b_{j}^{(2)}+\sum_{k=1}^{U_{1}}w_{j,k}^{(2)}\,f_{k}^{(1)}(x)\right),\quad j=1,\dots,U_{2} \label{eq:hidden2}
+\end{equation}
+\begin{equation}
+y_{i} = \sum_{j=1}^{U_{2}}\tilde{w}_{i,j}\,h_{j}^{(2)}+\tilde{b}_{i},\quad i=1,\dots,N \label{eq:output2}
+\end{equation}
+
+\medskip
+\item \textbf{Pattern:} Each layer performs a linear transformation followed by a nonlinear activation. Depth adds representational power.
+
+\medskip
+\item \textbf{Macro analogy:} Successive layers are like successive time steps in a dynamic program --- each transforms the ``state'' into a richer representation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hidden Layers: Visual}
+\begin{center}
+\includegraphics[width=12cm]{dnn}
+\end{center}
+\end{frame}
+
+\begin{frame}{Activation Functions}
+\begin{center}
+\includegraphics[width=12cm]{activation}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Sigmoid:} $\sigma(x) = \frac{1}{1+e^{-x}}$ --- outputs in $(0,1)$, used for probabilities
+\item \textbf{Tanh:} $\tanh(x)$ --- outputs in $(-1,1)$, zero-centered
+\item \textbf{ReLU:} $\max(0,x)$ --- simple, sparse activation, dominant in modern networks
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Function Approximation with ReLU}
+\begin{itemize}
+    \item \textbf{Goal:} Approximate arbitrary nonlinear functions using simple building blocks.
+    \item \textbf{Key Idea:} Linear combination of shifted ReLU functions:
+    \[
+    \hat{y}(x) = a_0 + \sum_{i=1}^{N} a_i\,\text{ReLU}(x-b_i)
+    \]
+    \item \textbf{Shifts $b_i$:} Define the ``kink'' points where marginal slope changes.
+    \item \textbf{Coefficients $a_i$:} Scale each ReLU's contribution to match local slope.
+
+    \medskip
+    \item \textbf{Example:} Approximating $\sin(x)$ on $[-\pi, \pi]$:
+    \begin{itemize}
+        \item Choose shifts $b_i$ evenly over the domain
+        \item Form design matrix with columns $\text{ReLU}(x-b_i)$ and a bias
+        \item Solve a least-squares problem for coefficients $a_i$
+    \end{itemize}
+
+    \medskip
+    \item \textbf{Economist's take:} ReLU kinks are piecewise-linear splines --- the network \emph{learns} the knot locations, unlike a fixed Chebyshev grid.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: Increasing Complexity}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm]{relu1}
+\end{center}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: More Kink Points}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm]{relu2}
+\end{center}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: High Fidelity}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm]{relu3}
+\end{center}
+\end{frame}
+
+\begin{frame}{Why Neural Networks Work: Theoretical Guarantees}
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!40, title={Universal Approximation Theorem (Cybenko, 1989)}]
+If $\sigma$ is sigmoidal (i.e., $\lim_{z\to-\infty}\sigma(z)=0$, $\lim_{z\to+\infty}\sigma(z)=1$), then any continuous function on $[0,1]^d$ can be approximated uniformly by a two-layer neural network.
+\end{tcolorbox}
+
+\medskip
+
+\begin{tcolorbox}[colback=green!3, colframe=green!40, title={Breaking the Curse of Dimensionality (Barron, 1993)}]
+A one-layer neural network achieves integrated squared error of order $O(1/M)$, where $M$ is the number of nodes. In contrast, series approximations (polynomials, splines) achieve $O(1/M^{2/N})$ where $N$ is the input dimension --- exponentially worse.
+\end{tcolorbox}
+
+\medskip
+\begin{itemize}
+\item \textbf{For economists:} Barron's result explains why neural networks scale to high-dimensional state spaces where Chebyshev polynomials break down.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DNN = Linear Transformation + Nonlinear Activation}
+\begin{itemize}
+\item \textbf{Linear Transformation:}
+\begin{itemize}
+\item Each neuron performs a weighted sum of inputs: projects data onto a new axis
+\item The set of transformations across a layer creates a \emph{new representation}
+\item Enables: flexible feature representation, information compression, interaction capture
+\end{itemize}
+
+\medskip
+\item \textbf{Nonlinear Activation:}
+\begin{itemize}
+\item Allows the network to capture nonlinearity and complex patterns
+\item Creates curved decision boundaries in the feature space
+\item \textbf{Essential} for the universal approximation property
+\end{itemize}
+
+\medskip
+\item \textbf{Together:} Each layer applies an affine map $Wx+b$ then a pointwise nonlinearity $\sigma(\cdot)$. Stacking layers composes these maps:
+\[
+f(x) = \sigma_L \circ A_L \circ \cdots \circ \sigma_1 \circ A_1 (x)
+\]
+where $A_\ell(x) = W_\ell x + b_\ell$.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 4: FORWARD PROPAGATION
+%=============================================================================
+\section{Forward Propagation}
+
+\begin{frame}{Feedforward: Computing Outputs Layer by Layer}
+\begin{itemize}
+\item \textbf{Forward propagation} (feedforward): compute the network output given an input by passing through layers sequentially.
+
+\medskip
+\item For a network with $L$ hidden layers:
+\[
+\mathbf{h}^{(0)} = \mathbf{x}, \qquad
+\mathbf{h}^{(\ell)} = \sigma\!\left(W^{(\ell)}\mathbf{h}^{(\ell-1)} + \mathbf{b}^{(\ell)}\right), \quad \ell = 1,\ldots,L
+\]
+\[
+\hat{\mathbf{y}} = W^{(L+1)}\mathbf{h}^{(L)} + \mathbf{b}^{(L+1)}
+\]
+
+\medskip
+\item Each layer: (1) multiply by weight matrix, (2) add bias, (3) apply activation.
+
+\medskip
+\item \textbf{Analogy:} Forward propagation is like solving a recursive model forward in time --- given initial state $x$, compute successive transformations to arrive at the output.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Forward Pass: Visual}
+\begin{center}
+\includegraphics[width=12cm]{nn_working1}
+\end{center}
+\end{frame}
+
+\begin{frame}{Toy Example: Forward Pass with Numbers}
+Consider a tiny network: input $x=1.0$, one hidden neuron (sigmoid), one output neuron (sigmoid).
+
+\medskip
+Parameters: $w_1 = 0.5,\; b_1 = 0,\; w_2 = 2.0,\; b_2 = 0$
+
+\medskip
+\textbf{Step 1: Hidden layer}
+\[
+z_1 = w_1 \cdot x + b_1 = 0.5 \quad\Rightarrow\quad h = \sigma(0.5) \approx 0.62
+\]
+
+\textbf{Step 2: Output layer}
+\[
+z_2 = w_2 \cdot h + b_2 = 2.0 \times 0.62 \approx 1.24 \quad\Rightarrow\quad \hat{y} = \sigma(1.24) \approx 0.78
+\]
+
+\textbf{Step 3: Loss} (target $t=0.0$)
+\[
+L = \tfrac{1}{2}(\hat{y} - t)^2 = \tfrac{1}{2}(0.78)^2 \approx 0.30
+\]
+
+\medskip
+This is a complete forward pass: from $x$ to $\hat{y}$ to loss $L$.
+\end{frame}
+
+%=============================================================================
+% SECTION 5: BACKPROPAGATION AND GRADIENT DESCENT
+%=============================================================================
+\section{Backpropagation and Gradient Descent}
+
+\begin{frame}{Backpropagation: Learning from Errors}
+\begin{itemize}
+\item \textbf{Goal:} Compute $\frac{\partial L}{\partial \theta}$ for every parameter $\theta$ in the network.
+
+\medskip
+\item \textbf{Method:} Apply the \textbf{chain rule} backwards through the network layers.
+
+\medskip
+\item \textbf{Steps:}
+\begin{enumerate}
+\item Forward pass: compute all activations and the loss
+\item Backward pass: propagate error signal from output to input
+\item Compute gradient of loss w.r.t.\ each weight and bias
+\item Update parameters: $\theta \leftarrow \theta - \eta \cdot \nabla_\theta L$
+\end{enumerate}
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=10cm]{nn_working3}
+\end{center}
+\end{frame}
+
+\begin{frame}{Toy Example: Backpropagation --- Output Layer}
+
+Continuing our numerical example ($\hat{y} \approx 0.78$, $h \approx 0.62$, target $t=0$):
+
+\medskip
+\textbf{Output layer gradients:}
+\[
+\frac{\partial L}{\partial \hat{y}} = \hat{y} - t \approx 0.78
+\]
+\[
+\frac{\partial \hat{y}}{\partial z_2} = \hat{y}(1-\hat{y})
+\approx 0.78 \times 0.22 \approx 0.17
+\]
+\[
+\frac{\partial L}{\partial z_2}
+= \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_2}
+\approx 0.78 \times 0.17 \approx 0.13
+\]
+\[
+\frac{\partial L}{\partial w_2}
+= \frac{\partial L}{\partial z_2} \cdot \frac{\partial z_2}{\partial w_2}
+= 0.13 \times h \approx 0.13 \times 0.62 \approx 0.08
+\]
+
+\medskip
+\textbf{Interpretation:} The gradient $0.08$ tells us: to reduce the loss, decrease $w_2$ (the output overshot the target of $0$).
+\end{frame}
+
+\begin{frame}{Toy Example: Backpropagation --- Hidden Layer \& Update}
+
+\textbf{Hidden layer gradients:}
+\[
+\frac{\partial L}{\partial h}
+= \frac{\partial L}{\partial z_2} \cdot w_2
+= 0.13 \times 2.0 \approx 0.26
+\]
+\[
+\frac{\partial h}{\partial z_1} = h(1-h)
+\approx 0.62 \times 0.38 \approx 0.24
+\]
+\[
+\frac{\partial L}{\partial w_1}
+= \frac{\partial L}{\partial h} \cdot \frac{\partial h}{\partial z_1} \cdot x
+= 0.26 \times 0.24 \times 1.0 \approx 0.06
+\]
+
+\medskip
+\textbf{Parameter update} (learning rate $\eta = 0.1$):
+\[
+w_2^{\text{new}} \approx 2.0 - 0.1 \times 0.08 = 1.992, \qquad
+w_1^{\text{new}} \approx 0.5 - 0.1 \times 0.06 = 0.494
+\]
+
+\medskip
+\textbf{Key point:} This is exactly what PyTorch's \texttt{.backward()} and the optimizer do --- just at massive scale with millions of parameters.
+\end{frame}
+
+\begin{frame}{Gradient Descent: The Optimization Engine}
+
+\begin{itemize}
+\item \textbf{Core update rule:}
+$\theta_{n+1} \leftarrow \theta_n - \lambda_n \, g(b_n; \theta_n)$
+
+\medskip
+\item \textbf{Variants by batch size $n$:}
+\begin{itemize}
+\item $n=1$: \textbf{Stochastic Gradient Descent (SGD)} --- one random sample per step
+\item $n=N$: \textbf{Full Gradient Descent (GD)} --- all data per step
+\item $1 < n < N$: \textbf{Mini-batch GD} --- the practical sweet spot
+\end{itemize}
+
+\medskip
+\item \textbf{Stochastic gradient approximation:}
+\[
+\frac{d\mathcal{L}(\Gamma_{\gamma})}{d\gamma} \approx \frac{1}{n}\sum_{i=1}^{n} \frac{d\mathcal{L}(\Gamma_{\gamma}; b_i)}{d\gamma}
+\]
+
+\medskip
+\item \textbf{Algorithm:}
+\begin{enumerate}
+\item Initialize parameters randomly
+\item Draw random mini-batch $b_n$; compute stochastic gradient $g(b_n; \theta_n)$
+\item Choose learning rate $\lambda_n > 0$; update $\theta_{n+1} \leftarrow \theta_n - \lambda_n \, g(b_n; \theta_n)$
+\item Repeat until convergence
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Gradient Descent: Visual}
+\begin{center}
+\includegraphics[width=12cm]{nn_working6}
+\end{center}
+\end{frame}
+
+\begin{frame}{Adaptive Learning Rates: RMSProp and Adam}
+\begin{itemize}
+\item \textbf{RMSProp:} Adjust learning rates individually by parameter:
+\begin{align*}
+g_{k} &\leftarrow \frac{1}{n}\sum_{i=1}^{n}\nabla\mathcal{L}(\Gamma_{\gamma}; b_i) \\
+r_{k+1} &\leftarrow \rho\, r_k + (1-\rho)\, g_k \odot g_k \\
+\Delta\theta_{k+1} &= -\frac{\lambda}{\sqrt{\delta + r_{k+1}}} \odot g_k
+\end{align*}
+Divides by running average of squared gradients --- normalizes step size.
+
+\medskip
+\item \textbf{Adam} (Adaptive Moments): Combines momentum + RMSProp.
+\begin{itemize}
+\item Tracks exponential moving average of gradient (1st moment) and squared gradient (2nd moment)
+\item Parameters $\rho_1, \rho_2$ control decay rates
+\item Default choice in most deep learning applications
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Batch vs.\ Stochastic vs.\ Mini-Batch}
+\begin{center}
+\includegraphics[width=12cm]{batch_1}
+\end{center}
+{\small \textbf{Batch GD:} Smooth convergence path, but each step is expensive (uses all data).}
+\end{frame}
+
+\begin{frame}{Stochastic Gradient Descent}
+\begin{center}
+\includegraphics[width=12cm]{batch_2}
+\end{center}
+{\small \textbf{SGD:} Noisy path with high variance, but each step is cheap and can escape local minima.}
+\end{frame}
+
+\begin{frame}{Mini-Batch Gradient Descent}
+\begin{center}
+\includegraphics[width=12cm]{minibatch}
+\end{center}
+{\small \textbf{Mini-batch:} Balances speed (parallelizable) and stability (averaged gradients). The practical standard.}
+\end{frame}
+
+\begin{frame}{Why Mini-Batch? Four Reasons}
+\begin{enumerate}
+\item \textbf{Computational efficiency:} More frequent parameter updates than full GD; faster convergence in wall-clock time.
+
+\medskip
+\item \textbf{Memory constraints:} Large datasets may not fit in GPU memory. Mini-batches process manageable subsets.
+
+\medskip
+\item \textbf{Implicit regularization:} The stochasticity in gradient estimates helps escape local minima and saddle points --- acts as a form of regularization.
+
+\medskip
+\item \textbf{Parallelization:} Each mini-batch can be processed across multiple GPUs simultaneously.
+\end{enumerate}
+
+\medskip
+\textbf{Economist's note:} Mini-batch SGD is the computational analogue of sampling-based estimation in econometrics --- trade exactness for speed, and the noise is actually helpful.
+\end{frame}
+
+\begin{frame}{Convergence Theory (For the Technically Inclined)}
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!40, title=Convergence with Diminishing Learning Rate]
+Under standard assumptions (Lipschitz gradient, bounded variance), if the learning rate sequence satisfies
+\[
+\sum_{n=1}^{N}\lambda_n = \infty, \qquad \sum_{n=1}^{N}\lambda_n^2 < \infty
+\]
+then the expected average squared gradient converges:
+\[
+\mathbb{E}\!\left[\frac{1}{\Delta_N}\sum_{n=1}^{N}\lambda_n \|\nabla F(\theta_n)\|^2\right] \xrightarrow{N\to\infty} 0
+\]
+where $\Delta_N = \sum_{n=1}^N \lambda_n$.
+
+\medskip
+{\small --- Bottou, Curtis, Nocedal (2018). \textit{Optimization Methods for Large-Scale ML}.}
+\end{tcolorbox}
+
+\medskip
+\begin{itemize}
+\item The conditions $\sum \lambda_n = \infty$ (keep exploring) and $\sum \lambda_n^2 < \infty$ (shrink steps) mirror Robbins--Monro conditions familiar from stochastic approximation in econometrics.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 6: TRAINING PROCESS
+%=============================================================================
+\section{Training Process: Loss Functions, Overfitting, Regularization}
+
+\begin{frame}{Loss Functions}
+\begin{itemize}
+\item \textbf{Mean Squared Error (regression):}
+\[
+\mathcal{L}_{\text{MSE}} = \frac{1}{N}\sum_{i=1}^N (\hat{y}_i - y_i)^2
+\]
+Equivalent to maximum likelihood under Gaussian errors.
+
+\medskip
+\item \textbf{Cross-Entropy (classification):}
+\[
+\mathcal{L}_{\text{CE}} = -\sum_{k=0}^{K-1} y_k \log(\hat{y}_k)
+\]
+where $y_k$ is the one-hot ground truth and $\hat{y}_k = \text{softmax}(z)_k = \frac{\exp(z_k)}{\sum_j \exp(z_j)}$.
+
+\medskip
+\item \textbf{Intuition:} Cross-entropy is small when confident \emph{and correct}, large when confident \emph{but wrong}.
+
+\medskip
+\item \textbf{For economists:} MSE loss $\Leftrightarrow$ OLS objective. Cross-entropy $\Leftrightarrow$ multinomial logit likelihood.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Training Terminology}
+\begin{itemize}
+\item \textbf{Epoch:} One complete pass through the entire training dataset.
+
+\medskip
+\item \textbf{Mini-batch:} A small subset of training data used for one gradient update.
+
+\medskip
+\item \textbf{Iteration:} One parameter update (= one mini-batch processed).
+\begin{itemize}
+\item If dataset has 10,000 samples and batch size is 100, one epoch = 100 iterations.
+\end{itemize}
+
+\medskip
+\item \textbf{Automatic Differentiation:} Computational technique for exact gradient computation --- the engine behind \texttt{loss.backward()} in PyTorch.
+
+\medskip
+\item \textbf{Episode:} (Reinforcement learning context) One sequence of steps from initial state to terminal state --- analogous to one simulated life-cycle path.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Overfitting and Stopping Criteria}
+\begin{itemize}
+\item \textbf{The fundamental tension:}
+\begin{itemize}
+\item Training loss: always decreasing with more epochs
+\item Validation loss: decreases, then \textbf{increases} $\to$ overfitting
+\end{itemize}
+
+\medskip
+\item \textbf{Stopping criteria:}
+\begin{enumerate}
+\item Fixed number of epochs (simple but suboptimal)
+\item Monitor validation loss --- stop when it stops improving
+\item \textbf{Early stopping:} halt training when validation loss increases for $k$ consecutive epochs
+\end{enumerate}
+
+\medskip
+\item \textbf{Model selection:} Choose the model (epoch checkpoint) with best validation performance.
+
+\medskip
+\item \textbf{Economist's analogy:} Overfitting is the ML version of data mining --- the model memorizes noise in the training sample rather than learning the true data-generating process. Out-of-sample validation is the discipline.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Local Optima vs.\ Global Optimum}
+\begin{itemize}
+\item \textbf{Non-convex loss landscape:}
+\begin{itemize}
+\item Neural network loss functions are \emph{not} convex --- many local optima and saddle points
+\item Global optimum exists but is generally unreachable in practice
+\end{itemize}
+
+\medskip
+\item \textbf{Mitigation strategies:}
+\begin{itemize}
+\item Random initialization of weights (different starting points)
+\item Momentum and adaptive learning rates (escape shallow minima)
+\item Mini-batch stochasticity (natural exploration of the loss surface)
+\end{itemize}
+
+\medskip
+\item \textbf{Practical reality:} Finding the global optimum is neither necessary nor desirable. A \emph{good local optimum} that generalizes well is sufficient.
+
+\medskip
+\item \textbf{Research frontier:} ``Loss landscape'' analysis shows that in over-parameterized networks, most local minima achieve similar performance --- the landscape is ``benign'' (Choromanska et al., 2015).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Regularization: Preventing Overfitting}
+\begin{itemize}
+\item \textbf{L1 / L2 Regularization (weight decay):}
+\[
+\mathcal{L}_{\text{reg}} = \mathcal{L}_{\text{data}} + \lambda \|\theta\|_p, \quad p \in \{1, 2\}
+\]
+\begin{itemize}
+\item L1 ($p=1$): promotes sparsity (like LASSO in econometrics)
+\item L2 ($p=2$): shrinks weights toward zero (like Ridge regression)
+\end{itemize}
+
+\medskip
+\item \textbf{Dropout:} Randomly set a fraction of neurons to zero during each training step.
+\begin{itemize}
+\item Forces the network to learn redundant representations
+\item Equivalent to training an ensemble of sub-networks
+\end{itemize}
+
+\medskip
+\item \textbf{Batch Normalization:} Normalize activations within each layer across the mini-batch. Stabilizes and accelerates training.
+
+\medskip
+\item \textbf{Data Augmentation:} Expand the training set with transformed copies (rotation, scaling, noise injection).
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 7: SPECIALIZED NEURAL NETWORKS
+%=============================================================================
+\section{Specialized Architectures}
+
+\begin{frame}{Convolutional Neural Networks (CNNs): Learned Manifold Maps}
+\begin{itemize}
+\item Recall the two-stage model: $\mathbf{x} \xrightarrow{\;\pi\;} \mathbf{z} \xrightarrow{\;g_\phi\;} \hat{\mathbf{p}}$
+
+\medskip
+\item \textbf{In a CNN:}
+\begin{itemize}
+\item Stacked \textbf{convolution + nonlinearity + pooling} layers implement a \emph{learned} $\pi$
+\item Each filter detects a local pattern (edges, curves, textures)
+\item \textbf{Convolution:} $Y(i,j) = \sum_m \sum_n X(i-m, j-n)\, W(m,n)$
+\item \textbf{Pooling:} $\text{MaxPool}(i,j) = \max_{(m,n) \in R} X(m,n)$ --- spatial summarization
+\end{itemize}
+
+\medskip
+\item The fully connected ``classifier head'' is the $g_\phi$ map turning features into predictions.
+
+\medskip
+\item \textbf{Economic analogy:} CNN layers learn a \emph{sufficient statistic} for prediction --- like finding a low-dimensional state in a high-dimensional macro model.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{AlexNet: A Landmark CNN Architecture}
+\begin{center}
+\includegraphics[width=15cm]{alexnet}
+\end{center}
+
+{\small Krizhevsky, Sutskever, Hinton (2012). Won ImageNet with 15.3\% top-5 error (vs.\ 26.2\% for non-DL methods). This result launched the deep learning revolution.}
+\end{frame}
+
+\begin{frame}{Input Convex Neural Networks (ICNNs)}
+\begin{itemize}
+\item \textbf{Motivation:} In economics, many functions are known to be convex or concave: cost functions, duality mappings, value functions (after sign change).
+
+\medskip
+\item \textbf{ICNN architecture} (Amos, Xu, Kolter, 2017): ensure $f(x;\theta)$ is convex in $x$ by construction:
+\begin{align*}
+\mathbf{z}^{(0)} &= x \\
+\mathbf{z}^{(\ell+1)} &= \sigma\!\left(\underbrace{W^{(\ell)}}_{\geq 0} \mathbf{z}^{(\ell)} + A^{(\ell)} x + b^{(\ell)}\right), \quad \ell = 1,\ldots,L-1
+\end{align*}
+
+\item \textbf{Key constraints:}
+\begin{itemize}
+\item Weights $W^{(\ell)} \geq 0$ (element-wise non-negative) for $\ell \geq 1$
+\item Activation $\sigma$ must be convex and non-decreasing (ReLU, softplus)
+\item ``Pass-through'' connections $A^{(\ell)} x$ can have unconstrained weights
+\end{itemize}
+
+\medskip
+\item \textbf{Result:} The composition of convex, non-decreasing functions with non-negative weights preserves convexity.
+
+\medskip
+\item \textbf{For concavity:} Use $g(x) = -f(x;\theta)$ where $f$ is an ICNN.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monotone Neural Networks}
+\begin{itemize}
+\item \textbf{Motivation:} Economic theory often implies monotonicity:
+\begin{itemize}
+\item Demand is non-increasing in price (law of demand)
+\item Consumption is non-decreasing in wealth (normal goods)
+\item Value functions are non-decreasing in the state
+\end{itemize}
+
+\medskip
+\item \textbf{Architecture for monotonicity in input $x_j$:}
+\begin{itemize}
+\item Constrain all weights connecting from $x_j$ through the network to be \textbf{non-negative}
+\item Use \textbf{non-decreasing} activation functions (ReLU, sigmoid, softplus)
+\item Composition of non-decreasing functions is non-decreasing
+\end{itemize}
+
+\medskip
+\item \textbf{Partial monotonicity:} Can enforce monotonicity w.r.t.\ \emph{some} inputs while leaving others unconstrained --- matching economic theory that demand is monotone in price but non-monotone in income (Giffen goods aside).
+
+\medskip
+\item \textbf{Practical enforcement:} After each gradient step, project weights to $\mathbb{R}_+$ via $w \leftarrow \max(w, 0)$ or use $w = \exp(\tilde{w})$ reparameterization.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Economic Applications of Constrained Architectures}
+\begin{itemize}
+\item \textbf{ICNN for optimal transport / Wasserstein distance:}
+\begin{itemize}
+\item Kantorovich duality: $W_1(\mu,\nu) = \sup_{f \text{ 1-Lipschitz}} \mathbb{E}_\mu[f] - \mathbb{E}_\nu[f]$
+\item ICNNs parameterize the convex conjugate --- used in generative models and distributional analysis
+\end{itemize}
+
+\medskip
+\item \textbf{Concave value functions:}
+\begin{itemize}
+\item In many macro models, $V(k)$ is concave in capital
+\item Approximate $V$ with $-\text{ICNN}(k)$ to enforce concavity \emph{by construction}
+\item Eliminates spurious non-concavities from unconstrained approximation
+\end{itemize}
+
+\medskip
+\item \textbf{Monotone policy functions:}
+\begin{itemize}
+\item Savings policy $a'(a,z)$ is typically increasing in current assets $a$
+\item Monotone networks guarantee this without post-hoc corrections
+\end{itemize}
+
+\medskip
+\item \textbf{General principle:} Encoding economic structure into the network architecture reduces the hypothesis space, improves sample efficiency, and produces economically interpretable solutions.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% SECTION 8: CASE STUDY AND PYTORCH
+%=============================================================================
+\section{Case Study: Curve Fitting and PyTorch}
+
+\begin{frame}{Case Study: DNN vs.\ Polynomial vs.\ Chebyshev}
+\begin{itemize}
+\item \textbf{Objective:} Approximate a ``kinked'' function using three methods:
+\begin{itemize}
+    \item Deep Neural Network (DNN)
+    \item Traditional polynomial approximation (\texttt{np.polyfit})
+    \item Chebyshev polynomial approximation
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters for economists:}
+\begin{itemize}
+    \item Many economic models feature kinks: borrowing constraints, tax brackets, occasionally binding constraints
+    \item Polynomials suffer from \textbf{Gibbs phenomenon} near discontinuities
+    \item DNNs with ReLU activations handle kinks naturally (piecewise linear)
+\end{itemize}
+
+\medskip
+\item \textbf{Test function:}
+\[
+y(x) = \begin{cases} \alpha\beta\, x^\alpha & x \leq 0.5 \\ 2\alpha\beta\, x^\alpha & x > 0.5 \end{cases}
+\]
+A power function with a discrete jump at $x=0.5$ --- like a policy threshold.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Example: GDP Forecasting with a Tiny MLP}
+\begin{itemize}
+\item \textbf{Objective:} Predict next-quarter real GDP growth $g_t$ from four lags.
+
+\item \textbf{Input:} $\mathbf{x}_t = (g_{t-1}, g_{t-2}, g_{t-3}, g_{t-4}) \in \mathbb{R}^4$
+
+\item \textbf{Architecture:}
+\[
+\text{Input (4)} \xrightarrow{\text{ReLU}} \text{Hidden (16)} \xrightarrow{\text{ReLU}} \text{Hidden (8)} \xrightarrow{\text{Linear}} \text{Output (1)}
+\]
+
+\item \textbf{Why a neural network?}
+\begin{itemize}
+    \item Standard AR models assume linear persistence
+    \item GDP dynamics are often \emph{state-dependent}: shocks have different persistence in recessions vs.\ expansions
+    \item The MLP allows coefficients to vary non-linearly with the lag structure
+\end{itemize}
+
+\item \textbf{Loss function:} MSE $\equiv$ Gaussian MLE:
+$\mathcal{L}(\theta) = \frac{1}{N}\sum_t (\hat{g}_t - g_t)^2$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{PyTorch: Defining and Training the Model}
+
+\begin{lstlisting}[style=pythonstyle]
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+class GDPNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(4, 16), nn.ReLU(),
+            nn.Linear(16, 8), nn.ReLU(),
+            nn.Linear(8, 1)
+        )
+    def forward(self, x):
+        return self.net(x)
+
+model = GDPNet()
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+for epoch in range(1000):
+    optimizer.zero_grad()          # 1. Reset gradients
+    y_hat = model(X_batch)         # 2. Forward pass
+    loss = criterion(y_hat, y_batch) # 3. Compute loss
+    loss.backward()                # 4. Backpropagation
+    optimizer.step()               # 5. Update weights
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{PyTorch: Class-Based Network with Batch Normalization}
+
+\begin{lstlisting}[style=pythonstyle]
+class KinkNet(nn.Module):
+    """Network for approximating kinked functions."""
+    def __init__(self, input_dim, hidden_dim1,
+                 hidden_dim2, output_dim=1):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim1),
+            nn.BatchNorm1d(hidden_dim1),
+            nn.ReLU(),
+            nn.Linear(hidden_dim1, hidden_dim2),
+            nn.BatchNorm1d(hidden_dim2),
+            nn.ReLU(),
+            nn.Linear(hidden_dim2, output_dim)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+\end{lstlisting}
+
+\medskip
+\textbf{Key additions:} \texttt{BatchNorm1d} normalizes activations within each mini-batch --- stabilizes training and acts as light regularization.
+\end{frame}
+
+%=============================================================================
+% SECTION 9: LAB PREVIEW
+%=============================================================================
+\section{Lab Preview}
+
+\begin{frame}{Lab: Machine Learning Basics and Applications}
+
+\begin{tcolorbox}[colback=green!3, colframe=green!40, title=Lab 5A: Machine Learning Basics]
+\textbf{Notebook:} \texttt{Lab5A\_MachineLearning\_Basics.ipynb}
+\begin{itemize}
+\item Build and train neural networks from scratch in PyTorch
+\item Compare DNN, polynomial, and Chebyshev approximation on kinked functions
+\item Visualize the training process: loss curves, learned function shapes
+\item Experiment with architecture choices: depth, width, activation functions
+\end{itemize}
+\end{tcolorbox}
+
+\medskip
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!40, title=Lab 5B: FOMC Minutes and 10-Year Yield Model]
+\textbf{Notebook:} \texttt{Lab5B\_fomc\_minutes\_10y\_model.ipynb}
+\begin{itemize}
+\item Apply ML to a real economic forecasting task
+\item Extract features from FOMC meeting minutes (text $\to$ numerical features)
+\item Train an MLP to predict 10-year Treasury yield movements
+\item Evaluate: out-of-sample performance, feature importance
+\end{itemize}
+\end{tcolorbox}
+\end{frame}
+
+%=============================================================================
+% SUMMARY
+%=============================================================================
+
+\begin{frame}{Summary}
+\begin{enumerate}
+\item \textbf{Why ML:} Unstructured data, high-dimensional models, and non-linear dynamics make ML essential for modern macro research.
+
+\medskip
+\item \textbf{Neural Networks:} Universal approximators that compose linear transformations with nonlinear activations. Barron (1993): break the curse of dimensionality.
+
+\medskip
+\item \textbf{Training:} Forward pass $\to$ loss $\to$ backpropagation $\to$ gradient descent. Mini-batch SGD with Adam is the practical standard.
+
+\medskip
+\item \textbf{Regularization:} Weight decay, dropout, early stopping, batch normalization prevent overfitting --- the ML analogue of avoiding data mining.
+
+\medskip
+\item \textbf{Constrained Architectures:} ICNNs enforce convexity; monotone networks enforce monotonicity. Encoding economic theory into network design improves both accuracy and interpretability.
+
+\medskip
+\item \textbf{Next:} Lec.\ 4 applies these tools to \emph{solve} macro models --- deep learning meets the Bellman equation.
+\end{enumerate}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,8 @@
+Year,Model,Benchmark,AI_Score,Human_Expert_Baseline,Source
+2020,GPT-3,MMLU,43.9,89.8,Hendrycks et al. 2021 (MMLU); Stanford AI Index 2025
+2021,Gopher,MMLU,60.0,89.8,DeepMind 2021; Stanford AI Index 2025
+2022,Chinchilla,MMLU,67.6,89.8,DeepMind 2022; Stanford AI Index 2025
+2022,PaLM,MMLU,69.3,89.8,Google 2022; Stanford AI Index 2025
+2023,GPT-4,MMLU,86.4,89.8,OpenAI 2023 (GPT-4 report); Stanford AI Index 2025
+2024,Claude 3.5 Sonnet,MMLU,88.7,89.8,Anthropic 2024; Stanford AI Index 2025
+2024,Gemini Ultra,MMLU,90.0,89.8,Google 2024 (CoT@32); Stanford AI Index 2025

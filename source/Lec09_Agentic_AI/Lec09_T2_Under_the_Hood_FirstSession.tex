@@ -1,0 +1,759 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.2: Under the Hood + First Session + 5-Pillar Workflow
+%% Source: ./archive_pre_split/Lec09_Agentic_AI_v3.tex (sections 3-5)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T4_Claude_Code_Operating_Model.tex
+%% Rewritten 2026-07-06: Act 2 "Machine" of the five-act structure. Adds install/init
+%%         in main flow, CLI anatomy, context-window + compaction mechanics; first
+%%         session retargeted to the ES Fellows roster (Lec10 T4 thread). Tool
+%%         mechanics fact-checked against code.claude.com docs (2026-07).
+%%         See Lec09_Rewrite_Plan_2026-07-06.md.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.2: Under the Hood --- How It Works and How to Start}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{The Map: Act 2 --- The Machine}
+\textbf{This deck answers the second question: how does it actually work, and how do I start?}
+
+\LecNineMap{2}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: the three physical components and the tool-call loop $\to$ install and initialize $\to$ the shape of the CLI $\to$ your first session (on the fellows roster) $\to$ tokens, the context window, and the pillars that keep you honest.}
+\end{frame}
+
+%=============================================================================
+\section{The Machine}
+%===========================================================
+
+\sectiondivider{The Machine}{Harness, model, files --- and the loop that joins them}
+
+\begin{frame}{Three Components: Harness, LLM, Your Files}
+
+A terminal agent has three physically distinct parts --- the same anatomy in Claude Code, Codex CLI, Gemini CLI, or Aider:
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{enumerate}
+    \item \textbf{The Harness} (lives on your machine)\\
+    \small CLI software you install. Reads your files, runs shell commands, manages the conversation loop.
+
+    \vspace{0.2cm}
+
+    \item \textbf{The LLM} (lives on the provider's servers)\\
+    \small Every message is bundled with conversation history and sent via HTTPS to the API. The ``thinking'' happens in the cloud.
+
+    \vspace{0.2cm}
+
+    \item \textbf{Your Files} (live on your machine)\\
+    \small Python scripts, data CSVs, LaTeX---all on your disk. Code executes on your hardware with your packages.
+\end{enumerate}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    macbox/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners,
+                   minimum width=3.2cm, minimum height=1.0cm,
+                   text width=3.0cm, align=center, font=\small},
+    cloudbox/.style={rectangle, draw=orange!70, fill=orange!10, rounded corners,
+                     minimum width=3.2cm, minimum height=1.0cm,
+                     text width=3.0cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick, gray}
+]
+    \node[macbox] (harness) {Harness + Files\\{\footnotesize Your machine}};
+    \node[cloudbox, below=1.4cm of harness] (llm) {LLM\\{\footnotesize Anthropic API}};
+    \draw[arrow, bend left=15] (harness) to node[right,font=\tiny] {prompt + context} (llm);
+    \draw[arrow, bend left=15] (llm) to node[left,font=\tiny] {tool calls + text} (harness);
+\end{tikzpicture}
+\end{center}
+\vspace{0.15cm}
+\footnotesize
+\textbf{Key:} code can run locally and many project files stay on your machine. That does \textit{not} mean the whole workflow is automatically private.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{The Loop in Machine Language: JSON Tool Calls}
+\textbf{Lec07 T3a explained that an LLM can emit structured JSON via schema-constrained decoding. In a terminal agent, every tool call uses that mechanism.}
+
+\textbf{Example.} When the agent decides to read a file, it emits:
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+{"tool": "Read", "args": {"file_path": "fellows_seed.csv"}}
+\end{lstlisting}
+
+The harness parses the JSON, executes \texttt{Read}, and feeds the file content back as the next message; the agent reads it and decides the next action.
+
+\begin{itemize}
+    \item \textbf{Loop.} Model output (JSON) $\rightarrow$ harness execution $\rightarrow$ tool result $\rightarrow$ next model turn. Continues until the model emits a ``done'' signal or hits a stop condition.
+    \item \textbf{Schema is the contract.} Each tool advertises an argument schema; outputs that fail the schema are rejected.
+    \item \textbf{Same brain.} There is no separate ``planner'' --- the same transformer that writes code also decides to call tools.
+    \item \textbf{Key implication.} Every action the agent takes is a \emph{next-token prediction} constrained by the available tool schema.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Privacy Boundary: Local Execution Is Not the Same as Local Processing}
+\begin{itemize}
+    \item code may execute locally on your machine
+    \item many project files may stay on disk locally
+    \item if file contents, prompts, or tool outputs are sent back in the conversation, those contents may still traverse the network
+    \item only a fully local or institutionally private deployment changes that boundary
+\end{itemize}
+
+\vspace{0.25cm}
+\textbf{Practical rule:} running code locally does not make it safe to put restricted data into the conversation --- treat everything you type or attach as leaving your machine.
+\end{frame}
+
+% MiniCourse refinement: terminal-workflow vocabulary from M4_T4
+\begin{frame}{Terminal Vocabulary in 60 Seconds}
+\small
+\begin{center}
+\begin{tabular}{|p{2.7cm}|p{8.5cm}|}
+\hline
+\textbf{Term} & \textbf{Meaning} \\ \hline
+\textbf{Terminal} & The text window where you type commands instead of clicking buttons. \\ \hline
+\textbf{Shell} & The program that interprets commands. macOS often uses \texttt{zsh}; many examples are written in \texttt{bash}. \\ \hline
+\textbf{Bash} & A common shell language. When Claude Code says it will use \texttt{Bash}, it means ``run this command in the terminal.'' \\ \hline
+\textbf{Working directory} & The folder commands run from. \texttt{cd my-project} changes it; \texttt{pwd} prints it. \\ \hline
+\textbf{PATH} & The list of folders your shell searches when you type a command such as \texttt{python} or \texttt{claude}. \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\textbf{Why this matters:} terminal agents act through shell commands. If the working directory or \texttt{PATH} is wrong, the agent may be competent but operating in the wrong place.
+\end{frame}
+
+\begin{frame}{How the Terminal Pieces Fit Together}
+\textbf{One picture for the five words: you type into the terminal; the shell finds the program via PATH and runs it in the working directory.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    tb/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=2.6cm, minimum height=1.05cm, text width=2.5cm,
+        align=center, font=\scriptsize},
+    side/.style={rectangle, rounded corners, draw=RedTitle!60, fill=blue!5,
+        minimum width=3.4cm, minimum height=0.85cm, text width=3.3cm,
+        align=center, font=\scriptsize},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60},
+    lab/.style={font=\tiny\ttfamily, text=black!60}
+]
+    \node[tb] (you) at (0,0) {\textbf{You}\\ type a command:\\ \texttt{claude}};
+    \node[tb] (term) at (3.3,0) {\textbf{Terminal}\\ the window that carries text in and out};
+    \node[tb] (shell) at (6.6,0) {\textbf{Shell} (\texttt{zsh}/\texttt{bash})\\ interprets the line};
+    \node[tb] (prog) at (9.9,0) {\textbf{Program runs}\\ \texttt{claude}, \texttt{python}, \texttt{git}};
+    \node[side] (path) at (6.6,1.35) {\textbf{PATH:} the list of folders searched to \emph{find} the program};
+    \node[side] (wd) at (9.9,-1.35) {\textbf{Working directory:} the folder the program runs \emph{in} (reads/writes here)};
+    \draw[arr] (you) -- (term);
+    \draw[arr] (term) -- (shell);
+    \draw[arr] (shell) -- node[lab, above] {found it} (prog);
+    \draw[arr, dashed] (path) -- (shell);
+    \draw[arr, dashed] (wd) -- (prog);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item When you type \texttt{claude}, the shell finds it via \texttt{PATH} and starts it \emph{in your current folder} --- that is why \texttt{cd my-project} comes first
+    \item The agent's \texttt{Bash} tool is this same picture one level down: the agent typing into the same shell, in the same working directory
+\end{itemize}
+\end{frame}
+
+%===========================================================
+%=============================================================================
+\section{Start Here}
+%===========================================================
+
+\sectiondivider{Start Here}{Install, initialize, and the shape of the CLI}
+
+\begin{frame}[fragile]{Install Once: Three Durable Steps}
+\textbf{Setup has exactly three steps, and only the first command ever changes.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Install the CLI} --- one installer command for your OS (native installer script; Homebrew and \texttt{npm} also work):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+curl -fsSL https://claude.ai/install.sh | bash
+\end{lstlisting}
+    \item \textbf{Authenticate once} --- run \texttt{claude}; a browser window opens; log in with your account or API key
+    \item \textbf{Work from the project} --- every session starts the same way:
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+cd my-project
+claude
+\end{lstlisting}
+\end{enumerate}
+
+\vspace{0.15cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{Install once per machine. Authenticate once per account. Initialize every session per project --- automatically (next frames).}
+\end{takeawaybox}
+
+\vspace{0.1cm}
+\footnotesize\textit{Durable vs.\ dated: this 3-step shape survives every product update; exact commands, subscription tiers, and the Windows/OneDrive caveats are dated detail $\to$ T6 Appendix A and the official docs.}
+\end{frame}
+
+\begin{frame}{Files First: Global vs.\ Local}
+
+Two layers of configuration. \textbf{Local overrides global.}
+
+\vspace{0.2cm}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|l|p{4.9cm}|}
+\hline
+\textbf{Path (Claude Code example)} & \textbf{Scope} & \textbf{What lives here} \\ \hline
+\texttt{\textasciitilde/.claude/settings.json} & Global & Default permissions, model preference \\ \hline
+\texttt{\textasciitilde/.claude/CLAUDE.md} & Global & Your cross-project preferences \\ \hline
+\texttt{\textasciitilde/.claude/skills/} & Global & Skills available in every project \\ \hline
+\texttt{\textasciitilde/.claude/projects/\ldots/memory/} & Global & Auto memory: the tool's own per-project notes \\ \hline
+\hline
+\texttt{<project>/CLAUDE.md} & Local & Project brain, read every session \\ \hline
+\texttt{<project>/.claude/settings.json} & Local & Project permissions (overrides global) \\ \hline
+\texttt{<project>/.claude/skills/} & Local & This project's slash commands \\ \hline
+\texttt{<project>/.claude/agents/} & Local & Specialized reviewer roles \\ \hline
+\texttt{<project>/.claude/rules/} & Local & Always-on guardrails \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+
+\footnotesize\textbf{Other agents follow analogous layouts.} Codex CLI uses \texttt{AGENTS.md}; Gemini CLI uses \texttt{GEMINI.md}. The pattern --- global defaults plus a project-specific system prompt --- is durable across products.
+
+\vspace{0.05cm}
+
+\textbf{Rule:} global dotfolder $=$ your personal defaults (apply everywhere). Local dotfolder $=$ the project's rules (apply only here). T4 fills the local layer with research content.
+\end{frame}
+
+\begin{frame}{Initialization: What Happens When You Type \texttt{claude}}
+
+Five steps run \textbf{before you type your first message} --- each one loads a file from the previous frame:
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Read global config} --- \texttt{\textasciitilde/.claude/settings.json}: permission defaults, model preference
+
+    \vspace{0.1cm}
+
+    \item \textbf{Detect project context} --- searches current directory (and parents) for \texttt{CLAUDE.md} and \texttt{.claude/}
+
+    \vspace{0.1cm}
+
+    \item \textbf{Load project memory} --- reads \texttt{CLAUDE.md} (and the tool's auto memory for this project) into the context window
+
+    \vspace{0.1cm}
+
+    \item \textbf{Auto-load all rules} --- every \texttt{.claude/rules/*.md} file is loaded silently
+
+    \vspace{0.1cm}
+
+    \item \textbf{Ready} --- context window pre-populated before you say anything
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\textbf{Analogy:} steps 3--4 are a professor re-reading lecture notes before class. Students arrive; context is already loaded.
+
+\vspace{0.1cm}
+
+\textbf{Cost warning:} steps 3--4 consume tokens before you type anything. Keep \texttt{CLAUDE.md} and rules files concise.
+\end{frame}
+
+\begin{frame}{The CLI at a Glance: One Screen, Four Zones}
+\textbf{Everything you will ever look at in a terminal-agent session is one screen with four zones.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    zone/.style={rectangle, draw=black!50, align=left, font=\ttfamily\tiny, inner sep=3pt},
+    lab/.style={font=\scriptsize, text=RedTitle, align=left},
+    larr/.style={-{Stealth[length=1.6mm]}, thin, RedTitle!70}
+]
+    % terminal window
+    \node[zone, fill=white, minimum width=8.6cm, minimum height=2.15cm, text width=8.3cm] (tr) at (0,0)
+        {You> Parse the roster page into a seed CSV\\[1pt]
+         claude> {[Read sources/fellows\_page.html]}\\
+         \phantom{claude>} {[Write data/fellows\_seed.csv]}\\
+         \phantom{claude>} Parsed 882 rows; flagged 2 unparseable\\
+         \phantom{claude>} election years in notes/batch\_log.md};
+    \node[zone, fill=orange!10, draw=orange!70, minimum width=8.6cm, minimum height=0.55cm, text width=8.3cm, below=0.06cm of tr] (perm)
+        {Allow Bash(python scripts/parse\_roster.py)?\ \ [y]es / [n]o / always};
+    \node[zone, fill=blue!4, minimum width=8.6cm, minimum height=0.5cm, text width=8.3cm, below=0.06cm of perm] (inp)
+        {> \_};
+    \node[zone, fill=VeryLightGray, minimum width=8.6cm, minimum height=0.45cm, text width=8.3cm, below=0.06cm of inp] (stat)
+        {mode: plan\ \ $\cdot$\ \ context used: 34\%\ \ $\cdot$\ \ session cost so far: /cost};
+    % labels
+    \node[lab, right=0.45cm of tr.east, text width=3.2cm] (l1)
+        {\textbf{1 Transcript}\\ \scriptsize dialogue + bracketed tool traces (the JSON calls, printed)};
+    \node[lab, right=0.45cm of perm.east, text width=3.2cm] (l2)
+        {\textbf{2 Permission prompt}\\ \scriptsize approve actions one by one};
+    \node[lab, right=0.45cm of inp.east, text width=3.2cm] (l3)
+        {\textbf{3 Your input}\\ \scriptsize questions, commands, /slash};
+    \node[lab, right=0.45cm of stat.east, text width=3.2cm] (l4)
+        {\textbf{4 Status line}\\ \scriptsize mode, context usage, cost};
+    \draw[larr] (l1.west) -- (tr.east);
+    \draw[larr] (l2.west) -- (perm.east);
+    \draw[larr] (l3.west) -- (inp.east);
+    \draw[larr] (l4.west) -- (stat.east);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+\footnotesize\textit{Zone 1's \texttt{[Read ...]} traces are the JSON tool calls of the earlier frame, printed for you --- the audit trail is on screen by default. Layout details differ across products and versions; the four zones are durable.}
+\end{frame}
+
+\begin{frame}{Commands, Modes, Keys: The Control Surface}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|p{5.0cm}|p{3.3cm}|}
+\hline
+\textbf{Control} & \textbf{What it does} & \textbf{When to use} \\ \hline
+\multicolumn{3}{|l|}{\textbf{Modes} (cycle with \texttt{Shift+Tab})} \\ \hline
+Plan mode & Read-only: the agent explores and drafts a plan, executes \textbf{nothing} until you approve & Start every non-trivial task here \\ \hline
+Accept-edits & Auto-approves routine file edits & Only after trust is earned \\ \hline
+\multicolumn{3}{|l|}{\textbf{Slash commands}} \\ \hline
+\texttt{/effort max} & Maximum reasoning depth: best quality, slower, costlier & Novel problems, economic correctness \\ \hline
+\texttt{/effort default} & Balanced quality and speed & Routine work \\ \hline
+\texttt{/cost} & Tokens used + estimated USD this session & Budget check before long tasks \\ \hline
+\texttt{/compact}, \texttt{/clear} & Manage the context window & Next section of this deck \\ \hline
+\multicolumn{3}{|l|}{\textbf{Keys}} \\ \hline
+\texttt{Esc} & Interrupt the agent mid-task immediately & When it's going the wrong way \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+
+\textbf{The effort--cost tradeoff:} maximum-effort modes plus long context can be an order of magnitude more expensive than default. Spend effort on \textit{decisions}; save it on \textit{execution}.
+\end{frame}
+
+\begin{frame}[fragile]{Permissions: The Blast-Radius Dial}
+
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}
+\textbf{The agent's toolbox:}
+
+\vspace{0.15cm}
+\footnotesize
+\begin{tabular}{|l|p{2.8cm}|}
+\hline
+\textbf{Tool} & \textbf{What it does} \\ \hline
+\texttt{Bash} & Run any shell command \\ \hline
+\texttt{Read}/\texttt{Grep} & Read and search files \\ \hline
+\texttt{Write} & Create or overwrite a file \\ \hline
+\texttt{Agent} & Spawn a child instance \\ \hline
+\end{tabular}
+
+\vspace{0.15cm}
+\textbf{``Which Python ran this?''}
+\begin{itemize}
+    \item \scriptsize the agent's \texttt{Bash} inherits your shell's \texttt{\$PATH}: if you ran \texttt{conda activate myenv} before \texttt{claude}, \textit{that} Python runs
+    \item \scriptsize add a \texttt{which python} check to \texttt{CLAUDE.md}
+\end{itemize}
+\end{column}
+\begin{column}{0.53\textwidth}
+\textbf{The permission model:}
+
+\vspace{0.1cm}
+\footnotesize
+\begin{itemize}
+    \item \textbf{Default: ask.} You see the exact command before it runs
+    \item \textbf{Allowlist} trusted patterns in \texttt{.claude/settings.json}:
+\end{itemize}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+"permissions": {
+  "allow": ["Bash(python *)",
+            "Bash(git *)"],
+  "deny":  ["Read(.env)",
+            "Bash(rm -rf *)"] }
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Bypass-permissions} skips all prompts: isolated sandboxes only
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.08cm}
+\begin{conceptbox}
+\footnotesize
+\textbf{Think of authorizing a new RA.} Default $=$ every action needs your signature; allowlist $=$ standing approval for routine work; deny $=$ never allowed; bypass $=$ handing over your own login. \emph{``Blast radius''} $=$ how much damage one wrong action could do before you notice.
+\end{conceptbox}
+\end{frame}
+
+%===========================================================
+%=============================================================================
+\section{Your First Session}
+%===========================================================
+
+\sectiondivider{Your First Session}{A real walkthrough on the fellows roster}
+
+\begin{frame}[fragile]{First Session (1): Launch on a Real Project}
+\textbf{Initialization in the abstract $\to$ what it actually looks like, on the fellows project from T1.}
+
+\vspace{0.08cm}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,numbers=none]
+$ cd ~/research/es-fellows
+$ claude
+[reads ~/.claude/settings.json]
+[reads ./CLAUDE.md]
+[loads .claude/rules/provenance.md]
+[ready]
+
+You> Parse sources/fellows_page.html into data/fellows_seed.csv
+     with columns: name, affiliation, election_year, profile_url.
+
+claude> [Read sources/fellows_page.html]
+        [Write data/fellows_seed.csv]
+        Parsed 882 rows. Two election years did not parse
+        (flagged in notes/batch_log.md). Spot-check 5 rows?
+\end{lstlisting}
+
+\vspace{0.05cm}
+\footnotesize
+\begin{enumerate}
+    \item Initialization is automatic; no flags needed for the first session
+    \item The agent reads context (rules, references) \emph{before} acting --- visible as bracketed \texttt{[Read ...]} traces
+    \item Each trace is a JSON tool call that the harness translated into a real disk operation
+    \item Note the agent's last line: a competent session \emph{ends turns with a checkable claim}, not just ``done''
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{First Session (2): Pen and Paper, Then Plan Mode}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+\begin{enumerate}
+    \item[\textbf{0.}] \textbf{Before the agent---pen~+~paper}\\
+    Write one sentence: \textit{``I want to compute X using method Y for question Z.''}\\
+    {\footnotesize Fellows version: ``a provenance-aware seed roster of all current ES Fellows, from the official page only.''}
+
+    \vspace{0.1cm}
+
+    \item[\textbf{1.}] \textbf{Enter plan mode (\texttt{Shift+Tab})}\\
+    Describe your goal. The agent drafts a plan. \textit{Nothing runs yet.}
+
+    \vspace{0.1cm}
+
+    \item[\textbf{2.}] \textbf{Review and approve}\\
+    Read the plan. Ask questions. Revise. Then approve it.
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\footnotesize
+\textbf{Why this matters:} plan review is the cheapest place to catch a wrong task definition.
+\end{tcolorbox}
+\vspace{0.2cm}
+\footnotesize
+\textbf{Common beginner mistake:} skipping Step~0. Without a clear goal, the agent will confidently build the wrong thing.
+
+\vspace{0.15cm}
+\textit{What exactly to check before approving a plan: T3 gives the five criteria.}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{First Session (3): Implement, Review, Iterate}
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\small
+\begin{enumerate}
+    \item[\textbf{3.}] \textbf{Implement}\\
+    The agent executes the approved plan. Press \texttt{Esc} to stop if wrong.
+
+    \vspace{0.1cm}
+
+    \item[\textbf{4.}] \textbf{Review output}\\
+    Does it make economic sense? Re-derive one number by hand.\\
+    {\footnotesize Fellows version: open 5 random rows; follow each source URL.}
+
+    \vspace{0.1cm}
+
+    \item[\textbf{5.}] \textbf{Iterate}\\
+    Fix, extend one feature, compact context, and return to step~1.
+\end{enumerate}
+\end{column}
+\begin{column}{0.44\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    stagebox/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+                 minimum width=2.8cm, minimum height=0.65cm,
+                 text width=2.6cm, align=center, font=\footnotesize},
+    arrow/.style={-{Stealth[length=2mm]}, thick}
+]
+    \node[stagebox] (s0) {0.\ Pen + paper};
+    \node[stagebox, below=0.22cm of s0] (s1) {1.\ Plan mode};
+    \node[stagebox, below=0.22cm of s1] (s2) {2.\ Approve};
+    \node[stagebox, below=0.22cm of s2] (s3) {3.\ Implement};
+    \node[stagebox, below=0.22cm of s3] (s4) {4.\ Review};
+    \draw[arrow] (s0) -- (s1);
+    \draw[arrow] (s1) -- (s2);
+    \draw[arrow] (s2) -- (s3);
+    \draw[arrow] (s3) -- (s4);
+    \draw[arrow] (s4.east) -- ++(0.6,0) -- ++(0,2.95) -- (s1.east);
+    \node[right=0.4cm of s3, font=\tiny, rotate=90] {iterate};
+\end{tikzpicture}
+\end{center}
+\vspace{0.2cm}
+\footnotesize
+\textbf{Practical takeaway:} after each implementation pass, force one human check before you ask for the next extension.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{What the First Session Leaves Behind}
+\textbf{Close the terminal. What survives is not the conversation --- it is the project state on disk.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{In the folder now:}
+\footnotesize
+\begin{itemize}
+    \item \texttt{data/fellows\_seed.csv} --- the artifact (882 rows)
+    \item \texttt{notes/batch\_log.md} --- what parsed, what was flagged
+    \item \texttt{CLAUDE.md} --- two new lines: the parse rules you settled on
+    \item \texttt{.claude/rules/provenance.md} --- the source rule, now always-on
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\textbf{Why this is the whole game:}
+\footnotesize
+\begin{itemize}
+    \item chat history is session-bound (resumable, but do not rely on it); \textbf{files persist and compose}
+    \item next session, initialization reloads all of this \emph{automatically} --- batch 2 starts where batch 1 ended
+    \item ``the project files hold the rules and state across sessions'' --- the public-web analog of \texttt{CLAUDE.md} (Lec10 T4)
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{A session is good when it improves the project state, not when the conversation felt smart.}
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Close the Loop: Reflect, Save, Shrink}
+\textbf{The last five minutes of a session are worth more than the next fifty. Three habits.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Reflect.} End with a two-minute review: what worked, what you corrected, what surprised you. Ask the agent itself to summarize the session's decisions --- it is cheap and surprisingly useful
+    \medskip
+    \item \textbf{Save.} Write that summary into the plan or progress file, and update \texttt{CLAUDE.md} while it is fresh. The next session then starts from the updated plan, not from anyone's memory
+    \medskip
+    \item \textbf{Shrink.} Prefer several small, focused sessions over one giant thread: a small context is cheaper, and the model's recall is sharper (mechanics in the next section). Break the big project into bounded sessions --- \emph{one intermediate product per session}
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{A big project is a sequence of small sessions, each ending with an updated plan.} T4 turns this rhythm into a management system.
+\end{takeawaybox}
+\end{frame}
+
+%===========================================================
+%=============================================================================
+\section{Budget and Discipline}
+%===========================================================
+
+\sectiondivider{Budget and Discipline}{Tokens, cost, the context window --- and the pillars that keep you honest}
+
+\begin{frame}{Tokens and Cost on the Radar}
+\textbf{Every agent turn is a model API call. Cost scales with input and output tokens.}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item \textbf{Input tokens.} Your prompt, conversation history, \texttt{CLAUDE.md}, rules, retrieved chunks. Every step that adds context adds cost.
+    \item \textbf{Output tokens.} Generated code, JSON tool calls, prose explanations. Reasoning-heavy modes also produce many internal tokens.
+    \item \textbf{Long sessions accumulate context.} Watch the status line; check \texttt{/cost} before long tasks.
+    \item \textbf{Pin for reproducibility.} Record the model version, prompt template, and seed when applicable; AEA disclosure (Oct 2024) extends to AI-assisted analysis.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{The Context Window Is the Agent's Working Memory}
+\textbf{Everything the model ``knows'' during a turn sits in one finite window (Lec07 T3b). Here is what fills it in an agent session:}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    seg/.style={draw=black!55, minimum height=0.72cm, font=\tiny, align=center, inner sep=1.5pt},
+    wcap/.style={font=\tiny\itshape, text=black!65, align=center}
+]
+    \node[seg, fill=blue!12,  minimum width=1.9cm, text width=1.8cm] (s1) at (0,0) {system prompt + tool schemas};
+    \node[seg, fill=blue!7,   minimum width=2.1cm, text width=2.0cm, right=0cm of s1] (s2) {\texttt{CLAUDE.md} + rules + auto memory};
+    \node[seg, fill=blue!4,   minimum width=1.3cm, text width=1.2cm, right=0cm of s2] (s3) {skill index};
+    \node[seg, fill=green!8,  minimum width=2.6cm, text width=2.5cm, right=0cm of s3] (s4) {conversation so far};
+    \node[seg, fill=orange!12, minimum width=3.6cm, text width=3.5cm, right=0cm of s4] (s5) {tool outputs: file contents, command results, errors};
+    \node[wcap] at ($(s1.south)!0.5!(s3.south)+(0,-0.32)$) {loaded at initialization (the frame before)};
+    \node[wcap] at ($(s4.south)!0.5!(s5.south)+(0,-0.32)$) {grows every turn $\longrightarrow$ dominates long sessions};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item The window is a \textbf{finite budget}: model-dependent, but always exhaustible by a long session
+    \item Recall is not uniform --- material buried mid-window is recalled worst (``lost in the middle,'' Lec07 T3b); we do not reteach it, we \emph{manage around} it
+    \item Consequence: \textbf{long sessions degrade} --- the agent slowly forgets early decisions and corrections
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Compaction: What \texttt{/compact} Keeps and What It Drops}
+\textbf{When the window fills, the harness summarizes: that is compaction. It is a lossy operation, and you should treat it as one.}
+
+\vspace{0.1cm}
+
+\begin{itemize}
+    \item \texttt{/compact} = \textbf{summarize and clear}: older tool outputs are dropped first, the dialogue is condensed into a summary, and \texttt{CLAUDE.md} + rules are re-read from disk
+    \item \textbf{What survives:} the decisions, the current task, key snippets. \textbf{What often does not:} the \emph{reasoning} behind decisions, rejected alternatives, small corrections you made in passing
+    \item \textbf{Auto-compaction:} by default the harness compacts on its own as the window fills --- convenient, but the same information loss applies whether you triggered it or not
+    \item \texttt{/clear} = \textbf{full reset}: conversation gone, files and memory remain; right choice when switching to an unrelated task
+\end{itemize}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{Rule: state belongs in files, not in the conversation.} If a decision matters tomorrow, write it to \texttt{CLAUDE.md} or a progress note \emph{before} the window fills --- then compaction costs you nothing.
+\end{takeawaybox}
+
+\vspace{0.05cm}
+\footnotesize\textit{That is the mechanics. T5 returns to what this trade-off costs research integrity --- and why more context is not always better.}
+\end{frame}
+
+\begin{frame}{The 5-Pillar Spine, One More Time}
+\textbf{The five pillars (introduced in Lec01, exercised throughout Lec06) reappear here as the agent-era research workflow.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.34\textwidth}
+\footnotesize
+\begin{enumerate}
+    \item \textbf{Theory}
+    \item \textbf{Algorithm}
+    \item \textbf{Numerics}
+    \item \textbf{Advanced}
+    \item \textbf{Code literacy}
+\end{enumerate}
+\vspace{0.1cm}
+\scriptsize\textit{The agent accelerates each pillar; it replaces none of them.}
+\end{column}
+\begin{column}{0.63\textwidth}
+\footnotesize
+\begin{tabular}{|p{2.1cm}|p{5.7cm}|}
+\hline
+\textbf{Rendering} & \textbf{One-line discipline} \\ \hline
+1. Question design & Economic language; define the evidence; limiting cases first \\ \hline
+2. Procedure design & The right procedure \emph{and} its acceptance criterion, before code \\ \hline
+3. Data/numerical discipline & Grids, weights, crosswalks, missingness --- saved, not implicit \\ \hline
+4. Domain constraints & Know when the agent's convenient default is wrong \\ \hline
+5. Code literacy & Read what was built; verify it is what you meant \\ \hline
+\end{tabular}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+\textbf{The throughline:} pillars 1--4 decide \emph{what should be built and what counts as success}; the machine only decides how fast. Weak pillars $=$ faster nonsense.
+\end{frame}
+
+\begin{frame}{Division of Labor: You Provide, the Agent Provides}
+\begin{center}
+\small
+\begin{tabular}{|p{5.5cm}|p{5.9cm}|}
+\hline
+\textbf{You provide} & \textbf{Agent provides} \\ \hline
+Question, identification logic, and source rules & Fast code generation and refactoring \\ \hline
+Workflow choice and benchmark design & Boilerplate implementation and debugging \\ \hline
+Knowledge of the data, model, and institutions & File edits, script writing, and test runs \\ \hline
+Economic interpretation and seminar defense & Iteration on visible errors and outputs \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Research version of the slogan:} the agent can be a strong RA, but you still have to be the principal investigator.
+
+\end{frame}
+
+\begin{frame}{Validation Is Your Referee Checklist}
+\textbf{Every iteration needs both workflow checks and economic checks.}
+
+\vspace{0.25cm}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Workflow checks}
+\begin{itemize}
+    \item Convergence achieved
+    \item No NaN or Inf values
+    \item Mappings, weights, or source logs saved where expected
+    \item Diagnostics, residuals, or quote checks pass
+    \item Script reproduces the same output twice
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Economic checks}
+\begin{itemize}
+    \item Limiting cases recover known results
+    \item Comparative statics, subgroup patterns, or review claims make sense
+    \item Magnitudes and source coverage are plausible
+    \item Inference uses the right standard errors, sample, and restrictions
+    \item You can explain the result in plain economic language
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+
+\textbf{If you cannot defend the output in a seminar, you are not done.}
+\end{frame}
+
+\begin{frame}{Bridge: The Machine Needs a Method}
+\textbf{You can now install the tool, launch it, steer it, budget it, and read its screen. What you cannot yet do is structure a week of research with it.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Act 2 covered the \emph{mechanism}: components, tool calls, install, initialization, the CLI, permissions, the context window
+    \item The next question: \emph{``how do I structure real work?''} --- what to ask for first, how big a step to take, when to trust a result
+    \item Act 3's answer is the \textbf{homotopy workflow}: build the easy version, validate, then extend one margin at a time --- the exact discipline behind HA-Ramsey
+\end{itemize}
+
+\vspace{0.3cm}
+\footnotesize\textit{Arc: T1 Framing $\to$ \textbf{T2 Under the Hood} $\to$ T3 Homotopy $\to$ T4 Project Org $\to$ T5 Mistakes/Context $\to$ T6 Wrap.}
+\end{frame}
+
+%===========================================================
+\end{document}

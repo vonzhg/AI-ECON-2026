@@ -1,0 +1,293 @@
+% !TEX program = lualatex
+%% FullCourse_10Lecs -- Lecture 7, Act 2 (REPRESENT, part 1/2): Preprocessing & Bag-of-Words
+%% NOTE: build with lualatex (renders the Chinese segmentation examples via luatexja+Fandol);
+%% under pdflatex it still compiles, substituting the romanized fallbacks.
+%% ch14 rebuild (2026-07-07), per Lec07_ch14_Rebuild_Plan_2026-07-07.md.
+%% Reused frames copied verbatim (with renumbered cross-references) from
+%%   archive_pre_split/pre_ch14_rebuild_2026-07-07/Lec07_T1a_Why_LLMs_Tokenization.tex (tokenization/preprocessing)
+%%   archive_pre_split/pre_ch14_rebuild_2026-07-07/Lec07_T1b_Word_Embeddings.tex (TF/IDF/TF-IDF trio, relocated & condensed)
+%% New frames follow chapter14 sec. 14.2-14.3.1: Chinese segmentation, DTM
+%% sparsity/orthogonality, boundary + translate-vs-native thinkboxes, when-BoW-wins.
+
+\input{../shared_preamble.tex}
+
+% --- CJK: real characters under Lua/XeLaTeX; romanized fallback under pdfLaTeX ---
+\usepackage{iftex}
+\ifluatex
+  \usepackage{luatexja-fontspec}
+  \setmainfont{Latin Modern Roman}%
+  \setsansfont{Latin Modern Sans}%
+  \setmonofont{Latin Modern Mono}%
+  \setmainjfont{FandolSong-Regular.otf}[BoldFont=FandolHei-Regular.otf]%
+  \newcommand{\zhterm}[2]{#1}%
+\else\ifxetex
+  \usepackage{fontspec}
+  \setmainfont{Latin Modern Roman}%
+  \setsansfont{Latin Modern Sans}%
+  \setmonofont{Latin Modern Mono}%
+  \usepackage{xeCJK}
+  \setCJKmainfont{FandolSong-Regular.otf}[BoldFont=FandolHei-Regular.otf]%
+  \newcommand{\zhterm}[2]{#1}%
+\else
+  \newcommand{\zhterm}[2]{#2}% pdflatex: romanized fallback
+\fi\fi
+
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds}
+
+\input{lec07_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.2a: Preprocessing and Bag-of-Words}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 7 in One Map}
+\LecSevenMap{2}
+\medskip
+\textit{\footnotesize Route: raw strings $\to$ clean text $\to$ tokens $\to$ counts (part 1/2 of REPRESENT --- this deck builds the transparent count-based representations; part 2/2 turns counts into dense vectors).}
+\end{frame}
+
+%=============================================================================
+\section{From Strings to Tokens}
+\sectiondivider{From Strings to Tokens}{Tokenization, subwords --- and the Chinese special case}
+
+\begin{frame}{Tokenization: The First Step}
+\begin{itemize}
+\item \textbf{Goal:} convert raw character sequences into discrete \emph{tokens} that a neural network can consume.
+
+\medskip
+\item \textbf{Why not just split by spaces?}
+\begin{itemize}
+    \item Many economically relevant terms combine words, numbers, and symbols (e.g.\ \texttt{S\&P500}, \texttt{CO2}, \texttt{Q4\_2025}, \texttt{stagflation})
+    \item Punctuation and formatting carry meaning (`\$1.2B' vs `1.2 billion')
+    \item Different languages have different word boundaries (or none at all)
+\end{itemize}
+
+\medskip
+\item \textbf{What is a token?} A flexible unit:
+\begin{itemize}
+    \item A whole word (`inflation')
+    \item A subword (`infl', `ation')
+    \item A single character or byte
+    \item A special marker (\texttt{<EOS>}, \texttt{<PAD>}, \texttt{<USER>})
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Vocabulary and the Tokenization Map}
+\begin{itemize}
+\item Let $A$ be the alphabet (Unicode characters). A tokenizer is a function:
+\[
+   \mathcal{K}\colon A^{*} \;\longrightarrow\; \{1, 2, \ldots, M\}^{*}
+\]
+mapping any text string into a sequence of \textbf{numbers} --- each number is a positive integer that serves as an index into a lookup table of size $M$. The fact that the index is an integer is incidental; what matters is that it \emph{uniquely identifies} each token, the same way a ZIP code uniquely identifies a location.
+
+\medskip
+\item \textbf{Why integers?} Neural networks need numeric inputs; each token ID will index into an embedding lookup table.
+
+\medskip
+\item \textbf{Practical constraint --- context length:}
+\begin{itemize}
+    \item Models have a maximum input size $n$ (typically $2{,}048$ to $128{,}000$ tokens; some $1$M)
+    \item Long policy documents, FOMC transcripts, or 10-K filings often exceed $n$
+    \item Forces \emph{chunking}, \emph{summarization}, or \emph{retrieval} (a hint at Lec08)
+\end{itemize}
+
+\medskip
+\item Vocabulary sizes are typically $30{,}000$--$100{,}000$ subword tokens. \textbf{To put this in perspective:} Merriam-Webster Unabridged lists $\approx470{,}000$ entries; a college-educated native speaker actively uses roughly 20{,}000--40{,}000 words. A subword vocabulary of $M=50{,}000$ therefore spans roughly the active vocabulary of a well-read person --- but because it tokenizes \emph{sub}words (stems, suffixes, common fragments), it effectively covers far more word forms and technical terms than a same-size word-level vocabulary would.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Illustrative Example: ``GDP rose by 2\%''}
+\begin{itemize}
+\item A simple tokenization might produce
+\[
+   \text{(GDP},\; \text{rose},\; \text{by},\; \text{2},\; \%\text{)}
+\]
+mapping to integer IDs, e.g.\ $(541,\; 823,\; 71,\; 312,\; 49)$.
+
+\medskip
+\item \textbf{Why integer mapping matters:}
+\begin{itemize}
+    \item Each ID becomes the index of a learned embedding vector
+    \item Numeric tokens (`2', `3', `5') get \emph{their own} embeddings
+\end{itemize}
+
+\medskip
+\item \textbf{Injectivity matters for forecasting:} a well-designed tokenizer maps
+\begin{itemize}
+    \item ``inflation rate is 3.5\%''
+    \item ``inflation rate is 3.6\%''
+\end{itemize}
+to \emph{different} token sequences. Otherwise small but economically meaningful differences would collapse into the same input.
+
+\medskip
+\item \textbf{Tokenizer/model coupling:} the tokenizer is part of the model. If you swap the tokenizer, all the embedding rows are meaningless --- this is why every published LLM ships with its tokenizer.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Chinese Word Segmentation: Boundaries Must Be Inferred}
+\small
+\textbf{English gets word boundaries for free; Chinese does not --- so segmentation is itself a model.}
+\begin{itemize}
+\item Chinese runs characters together; word boundaries must be \emph{inferred}. Segmentation is a sequence-labeling problem: character by character, where does a word end?
+\item The classic ambiguity --- \zhterm{研究生命科学}{yanjiu-sheng-ming-ke-xue} splits as
+\begin{itemize}
+    \item \zhterm{研究\,$\vert$\,生命科学}{yanjiu $\vert$ shengming-kexue} --- ``research \emph{on} life science'', or
+    \item \zhterm{研究生\,$\vert$\,命科学}{yanjiusheng $\vert$ ming-kexue} --- ``graduate student'' $+$ a nonsense remainder.
+\end{itemize}
+Economic text has its own: \zhterm{行业政策支持}{hangye zhengce zhichi} parses as \zhterm{行业政策\,$\vert$\,支持}{hangye-zhengce $\vert$ zhichi} (``industry-policy'' $+$ ``support'') or \zhterm{行业\,$\vert$\,政策支持}{hangye $\vert$ zhengce-zhichi} (``industry'' $+$ ``policy-support'') --- different head word, different meaning.
+\item \textbf{Tools:} Jieba, THULAC, LTP --- each a dictionary plus a statistical/neural sequence labeler, trading speed against accuracy.
+\item \textbf{The economist's trap --- domain compounds:} terms like ``monetary policy committee'', ``macro-prudential framework'', ``aggregate financing to the real economy'' (\zhterm{社会融资规模}{shehui rongzi guimo}) are not in general-purpose dictionaries; one mis-split changes the head word.
+\item \textbf{Fix:} load your domain glossary into the tool's \textbf{user dictionary} so policy terms survive as whole tokens. Stopwords differ too: drop structural particles (\zhterm{的}{de}, \zhterm{了}{le}, \zhterm{是}{shi}); keep logical connectives (\zhterm{因此}{yinci} ``therefore'', \zhterm{然而}{ran'er} ``however'') for information-extraction tasks.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Preprocessing Is a Modeling Decision}
+\sectiondivider{Preprocessing Is a Modeling Decision}{Every cleaning switch changes the downstream estimate}
+
+\begin{frame}{Tokenization Is a Preprocessing Choice}
+\begin{itemize}
+\item Tokenization sits inside a larger \textbf{preprocessing pipeline}:
+\[
+   x^{\text{raw}} \;\xrightarrow{\;\text{clean}\;}\; x^{\text{clean}}
+   \;\xrightarrow{\;\text{tokenize}\;}\; \{t_{ij}\}
+   \;\xrightarrow{\;\text{represent}\;}\; z_i,
+\]
+from raw scraped text $\to$ normalized text $\to$ integer token IDs $\to$ downstream numeric representation (TF-IDF, embedding, $\ldots$).
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Seven Preprocessing Choices}
+\small
+\begin{itemize}
+\item \textbf{Lowercasing} --- map \texttt{Fed} and \texttt{fed} to the same token. Compresses vocabulary, but erases proper-noun signal.
+\item \textbf{Stemming / lemmatization} --- cut suffixes so \emph{banking/banks/banked} collapse to \emph{bank}. Can erase tense, plurality, policy-language nuance.
+\item \textbf{Stop-word removal} --- drop high-frequency function words. Reduces noise; but negation (\emph{not}) and modality (\emph{may, will}) can matter for central-bank text.
+\item \textbf{Punctuation handling} --- keep, strip, or tokenize separately. Percent signs, decimals, sentence boundaries all matter.
+\item \textbf{$n$-gram inclusion} --- treat \emph{``yield curve''} as one token rather than two. Captures multi-word economic concepts at the cost of a larger vocabulary.
+\item \textbf{Frequency cutoffs} --- drop terms in $<k$ or $>K$ documents. Removes typos and boilerplate; can also remove rare-but-informative events.
+\item \textbf{Language filtering} --- restrict to English or apply per-language pipelines. Crucial for multilingual corpora like ECB speeches.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{One Token Boundary Can Flip the Sign}
+\textbf{Where you draw token boundaries can reverse an economic conclusion.}
+\begin{cautionbox}
+FOMC-style sentence: \emph{``\ldots growth is \textbf{not sufficient} to warrant further tightening.''}
+\begin{itemize}
+\item \textbf{Strategy A (unigrams):} \texttt{not} and \texttt{sufficient} are separate features. If \texttt{sufficient} loads positively in training, a bag-of-words model can extract a \emph{positive} signal from a negation.
+\item \textbf{Strategy B (bigrams):} \texttt{not\_sufficient} is one feature --- the negation survives as a unit.
+\end{itemize}
+\end{cautionbox}
+\medskip
+\begin{itemize}
+\item Does the choice still matter under BERT-class models, whose attention can connect \texttt{not} to \texttt{sufficient} across positions? (Preview: mostly no --- one reason Acts 3--4 exist.)
+\item Either way: the tokenizer version and configuration belong in the replication package --- they are part of the measurement instrument.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Bag-of-Words and TF-IDF}
+\sectiondivider{Bag-of-Words and TF-IDF}{The transparent baseline: count, weight, audit}
+
+\begin{frame}{Bag-of-Words: The Document--Term Matrix}
+\textbf{The simplest representation: count words, forget order.}
+\begin{itemize}
+\item Toy corpus --- doc 1: \emph{``central bank cuts rates to support growth''}; doc 2: \emph{``central bank raises rates to curb inflation''}.
+\end{itemize}
+\begin{center}
+\footnotesize
+\begin{tabular}{l c c c c c c c c c}
+\toprule
+ & central & bank & cuts & raises & rates & support & curb & growth & inflation \\
+\midrule
+doc 1 & 1 & 1 & 1 & 0 & 1 & 1 & 0 & 1 & 0 \\
+doc 2 & 1 & 1 & 0 & 1 & 1 & 0 & 1 & 0 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item In general: $D$ documents $\times$ vocabulary of size $V$ (typically $V \gg 10^4$); entry $X_{d,v}$ is binary, a raw count, or a TF-IDF weight (two slides ahead).
+\item \textbf{The assumption you buy:} ``central bank cuts rates to support growth'' $=$ ``growth supports central bank rate cuts''. Harmless when counting topic words (EPU); fatal for direction, causation, negation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bag-of-Words: Two Built-in Consequences}
+\textbf{Counting words and forgetting order leaves two statistical fingerprints on the matrix.}
+\begin{itemize}
+\item \textbf{Sparsity:} a document uses only 1--2\% of the vocabulary $\Rightarrow$ the matrix is $>$99\% zeros; with $D \ll V$, OLS on raw counts is not even identified --- dimension reduction (PCA, topic models) or regularization (Lasso) is mandatory.
+\item \textbf{Orthogonality:} every word is its own perpendicular axis. \emph{Unemployment} $\perp$ \emph{joblessness}: two articles about the same phenomenon in different vocabulary register as \emph{unrelated}.
+\end{itemize}
+\medskip
+\textit{\footnotesize Orthogonality is the recall problem behind every dictionary method --- and the motivation for the dense embeddings of T2b.}
+\end{frame}
+
+\begin{frame}{Term Frequency and Inverse Document Frequency}
+\textbf{Weight words by how much they distinguish a document --- not by how often they appear.}
+\begin{columns}[T]
+\column{0.46\textwidth}
+\textbf{TF} --- share of document $d$ that is word $w$:
+\[ \mathrm{TF}(w,d) = \frac{\mathrm{count}(w,d)}{\text{total words in } d} \]
+{\footnotesize \emph{``the Fed raised rates because inflation persisted''} (7 words): every word gets TF $=1/7\approx 0.14$ --- \texttt{the} scores as high as \texttt{inflation}.\\[3pt]
+\textbf{Limitation:} TF alone rewards frequency, not information. We need a counterweight.}
+\column{0.50\textwidth}
+\textbf{IDF} --- rarity of $w$ across $N$ documents:
+\[ \mathrm{IDF}(w) = \log\!\left(\frac{N}{\#\{\text{docs containing } w\}}\right) \]
+{\footnotesize Corpus of $N=100$ FOMC speeches:
+\begin{center}
+\begin{tabular}{l c c}
+\toprule
+word & docs & IDF \\
+\midrule
+\emph{the} & 100 & $0$ \\
+\emph{inflation} & 60 & $0.51$ \\
+\emph{yield curve} & 5 & $3.00$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Rare $\Rightarrow$ informative $\Rightarrow$ up-weighted. \emph{the} zeroes out automatically --- no stop-word list needed.}
+\end{columns}
+\end{frame}
+
+\begin{frame}{TF-IDF --- and When Counting Still Wins}
+\textbf{Multiply term frequency by inverse document frequency; each document becomes a sparse vector in $\mathbb{R}^{|V|}$.}
+\[
+   \text{TF-IDF}(w, d) \;=\; \text{TF}(w, d)\,\cdot\,\text{IDF}(w)
+\]
+\smallskip
+Orthogonality remains a real defect --- yet counts win whole classes of research problems:
+\begin{itemize}
+\item \textbf{When the target is ``how often do well-defined words appear'':} EPU (Thread A), the Loughran--McDonald finance dictionary, Hassan et al.'s bigram political risk --- all count-based \emph{by design}.
+\item \textbf{The killer feature is auditability:} you can list exactly which article and which phrase triggered the index --- line-by-line external validation. No embedding offers that evidence chain.
+\item \textbf{Also the sensible default when:} the corpus is small ($D < 1{,}000$); compute is tight; or the measure must plug into a standard econometric pipeline with transparent features.
+\end{itemize}
+\smallskip
+\begin{takeawaybox}
+Choose the representation for the \emph{role} the text plays (T1's three roles): measurement wants transparency first; behavior and nuance want context --- exactly where T2b and Act 3 head next.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: Counts Cannot See Synonyms}
+\textbf{The bag of words has taken us as far as orthogonal axes can go.}
+\begin{itemize}
+\item In the document--term matrix, \emph{hawkish} and \emph{tightening} are perpendicular; \emph{unemployment} and \emph{joblessness} share nothing. Every count-based measure inherits this blindness --- the recall problem behind all dictionary methods.
+\item \textbf{Next deck:} learn coordinates \emph{from co-occurrence}, so related words end up near each other --- Word2Vec, GloVe, and the geometry that lets us do arithmetic with meaning.
+\item The DGP lens carries over unchanged: an embedding is just a richer $m(\cdot)$; the hazards $a_i$, $c_i$ do not vanish because the vectors get denser.
+\end{itemize}
+\bigskip
+\centering\footnotesize\textit{Arc: T1 FRAME $\to$ \textbf{T2 REPRESENT} $\to$ T3 ATTEND $\to$ T4 PRETRAIN $\to$ T5 MEASURE.}
+\end{frame}
+
+\end{document}

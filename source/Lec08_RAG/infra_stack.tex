@@ -1,0 +1,39 @@
+% OLG pilot — the five-stage pipeline instantiated end-to-end.
+% v2 (2026-05-30): rewritten to match the slides_v2 Stage 1–5 / Step 1–5 /
+% Phase 1–3 vocabulary. Replaces the earlier "Step 1..6 + Lens A/B"
+% framing used through May 2026.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  stage/.style    ={draw,rounded corners=2pt,inner sep=4pt,minimum width=70mm,minimum height=10mm,align=center,font=\footnotesize\bfseries},
+  s1/.style       ={stage,fill=blue!12},
+  s2/.style       ={stage,fill=green!14},
+  s3/.style       ={stage,fill=yellow!18},
+  s4/.style       ={stage,fill=orange!18},
+  s5/.style       ={stage,fill=red!12},
+  inputblk/.style ={draw,rounded corners=1pt,fill=gray!10,inner sep=3pt,minimum width=70mm,minimum height=7mm,align=center,font=\scriptsize},
+  outblk/.style   ={draw,rounded corners=1pt,fill=gray!10,inner sep=3pt,minimum width=70mm,minimum height=7mm,align=center,font=\scriptsize},
+  arr/.style      ={-{Latex[length=1.5mm]},semithick,gray!70!black},
+  side/.style     ={font=\scriptsize\itshape,text=gray!50!black,align=left,text width=48mm},
+]
+\node[inputblk] (in)  at (0, 0.9) {Field survey + curated paper list};
+\node[s1]       (s1)  at (0,-0.6) {Stage 1 --- Build corpus};
+\node[s2]       (s2)  at (0,-2.0) {Stage 2 --- Extract (PromptEcon)};
+\node[s3]       (s3)  at (0,-3.4) {Stage 3 --- Build RAG};
+\node[s4]       (s4)  at (0,-4.8) {Stage 4 --- Build GraphRAG};
+\node[s5]       (s5)  at (0,-6.2) {Stage 5 --- Query interface};
+\node[outblk]   (out) at (0,-7.6) {Cited, condition-aware answer};
+
+\foreach \x/\y in {in/s1, s1/s2, s2/s3, s3/s4, s4/s5, s5/out} \draw[arr] (\x) -- (\y);
+
+% Side annotations — what each stage produces, in current numbers
+\node[side,right=4mm of s1] {158 \OLG{} PDFs $+$ MinerU Markdown\\
+  internal passes: curation, acquisition, text-extraction};
+\node[side,right=4mm of s2] {per-paper JSON: 9 categories, 51 elements\\
+  internal steps: Parse $\to$ Extract $\to$ Edit $\to$ Citation graph $\to$ Embed};
+\node[side,right=4mm of s3] {one Qwen3-Embedding-8B vector per element\\
+  index: \texttt{vectors.npy} $+$ \texttt{metadata.jsonl}};
+\node[side,right=4mm of s4] {per-paper trees merged by \texttt{canonical\_name}\\
+  citation edges from Step 4 layered on top};
+\node[side,right=4mm of s5] {\texttt{/graph-query} slash command\\
+  cite-or-decline by construction};
+\end{tikzpicture}

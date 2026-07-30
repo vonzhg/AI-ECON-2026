@@ -1,0 +1,5 @@
+Lec08_T1_The_Wall_Naive_Prompting.pdf
+Lec08_T2_Index_Chunking_Embeddings.pdf
+Lec08_T3_Retrieval_Vector_GraphRAG.pdf
+Lec08_T4_Grounded_Generation_vs_FineTuning.pdf
+Lec08_T5_Research_Applications_Demo_Eval.pdf

@@ -1,12 +1,41 @@
 # macOS / editor cruft
 .DS_Store
+.AppleDouble
+.LSOverride
 .vscode/
+.idea/
+*.swp
+*~
 
 # Python
 __pycache__/
+**/__pycache__/
 *.pyc
+*.pyo
 .ipynb_checkpoints/
+**/.ipynb_checkpoints/
+.venv
+**/.venv/
+venv/
+.env
+
+# LaTeX build artifacts — source/ keeps .tex/.lyx, never the derived files
+*.aux
+*.log
+*.nav
+*.snm
+*.toc
+*.out
+*.vrb
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
 
 # Local-only instructor notes (passcodes, deploy secrets) — never commit
 *.local.md
 DEPLOY_NOTES.local.md
+
+# Misc
+*.bak

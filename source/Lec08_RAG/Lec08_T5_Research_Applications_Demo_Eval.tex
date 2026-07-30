@@ -1,0 +1,523 @@
+%% FullCourse_10Lecs -- Lecture 8, Act 8.5 (APPLY): Research Applications, Demo, and Evaluation.
+%% Rebuilt 2026-07-08 per Lec08_Rewrite_Plan_2026-07-08.md ("one map, five acts").
+%% Sources: archive_pre_split/pre_map_rebuild_2026-07-08/Lec08_T4a_Augmented_Gen_Apps.tex
+%%   (f11-f18: six economic use cases, three-roles taxonomy, workflow-patterns synthesis)
+%%   + Lec08_T4b_Demo_Failures_Wrap.tex (OLG demo, six failure modes + mitigations, RAGAS,
+%%   Cohen's kappa + disclosure, agentic-RAG bridge, closing reprise).
+
+\input{../shared_preamble.tex}
+\metroset{sectionpage=none}
+
+\usetikzlibrary{arrows.meta, positioning, shapes, shapes.geometric, fit, calc, backgrounds}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\input{lec08_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 8.5: Apply --- Research Applications, Demo, and Evaluation}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Map: Act 8.5 --- What This Changes for Your Research}
+\textbf{The pipeline is built; this act spends it: six research corpora, a demo you run offline, the evaluation that makes it citable, and the bridge to agents.}
+\LecEightMap{5}
+\textit{\footnotesize Route this deck: six corpora (same plumbing, six research designs) $\to$ a classroom OLG demo you run offline $\to$ six failure modes + RAGAS + Cohen's $\kappa$ $\to$ retrieval becomes one agent tool.
+Thread A (FOMC) is Use Case 1 and 6; Thread B (OLG literature) is the live demo.}
+\end{frame}
+
+%=============================================================================
+\section{Six Research Corpora}
+\sectiondivider{Six Research Corpora}{The same pipeline, six research designs}
+
+\begin{frame}{Use Case 1: FOMC Minutes \& Press Conferences}
+\begin{itemize}
+\item \textbf{Corpus.} The Federal Reserve publishes statements (post-meeting), minutes (3-week lag), press conference transcripts, and (5-year lag) full meeting transcripts. Available 1993--present at \texttt{federalreserve.gov}.
+
+\medskip
+\item \textbf{Index pipeline:}
+\begin{enumerate}
+    \item Scrape PDFs / HTML from the Fed archive.
+    \item Parse into speaker turns (minutes) or Q\&A pairs (press conferences).
+    \item Chunk with rich metadata: \texttt{meeting\_date}, \texttt{doc\_type}, \texttt{speaker}, \texttt{topic\_section}.
+    \item Embed with \texttt{bge-large-en-v1.5}.
+    \item Store in Chroma; run BM25 in parallel for hybrid retrieval.
+\end{enumerate}
+
+\medskip
+\item \textbf{Example research queries:}
+\begin{itemize}
+    \item \emph{``How did the Committee's framing of inflation expectations evolve from 2021 to 2024?''}
+    \item \emph{``Find every appearance of `transitory' in FOMC minutes between 2020 and 2022.''}
+    \item \emph{``Which participants most often dissented on rate decisions, 2017--2024?''}
+\end{itemize}
+
+\medskip
+\item \textbf{Reference:} Hansen, McMahon \& Prat (2018), \emph{QJE}, ``Transparency and Deliberation Within the FOMC: A Computational Linguistics Approach.''
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case 2: NBER Working Papers}
+\begin{itemize}
+\item \textbf{Corpus.} $\sim$32{,}000 NBER working papers, 1973--present, available at \texttt{nber.org}. Each has metadata: title, abstract, authors, JEL codes, full PDF.
+
+\medskip
+\item \textbf{Use case: literature review automation.} Instead of typing keywords into Google Scholar and reading 50 abstracts, ask:
+\begin{quote}
+\small\itshape
+``Find all NBER working papers from 2019 onwards that estimate the slope of the Phillips curve. Return title, authors, year, the central estimate, and the data source.''
+\end{quote}
+
+\medskip
+\item \textbf{Pipeline:}
+\begin{enumerate}
+    \item Index titles + abstracts as one collection (cheap, fast, good for keyword screening).
+    \item Index full-paper chunks as a second collection (richer evidence for follow-up questions).
+    \item Hybrid retrieval over both. Filter on \texttt{year}, \texttt{JEL\_code}, \texttt{author}.
+    \item Generator outputs a structured table from retrieved papers.
+\end{enumerate}
+
+\medskip
+\item \textbf{Caveat:} Always verify citations against the actual NBER record. Even with RAG, models occasionally garble author lists or year fields.
+
+\medskip
+\item \textbf{This is one of the highest-value RAG applications for an active researcher.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case 3: Congressional Record \& Legislative Text}
+\begin{itemize}
+\item \textbf{Corpus.} The Congressional Record contains every speech delivered on the House and Senate floors since 1873. Daily editions are available at \texttt{congress.gov}.
+
+\medskip
+\item \textbf{Use case: tracking how policy debates frame economic issues over time.}
+\begin{itemize}
+    \item ``How has the rhetoric around `inflation' shifted in House Banking Committee testimony from 2008 to 2024?''
+    \item ``Which Senators most frequently cite Federal Reserve research in floor speeches?''
+\end{itemize}
+
+\medskip
+\item \textbf{The structural challenge.} Congressional Record has a deep hierarchy --- Congress / session / chamber / date / speaker / bill / section. \textbf{The Act 8.2 chunking gotcha applies in full force.} A naive chunker that ignores this hierarchy will produce essentially un-citable retrieval results.
+
+\medskip
+\item \textbf{Practical fix:} Use a Congress-specific parser (e.g.\ \texttt{congress-api-python}) to extract clean speaker turns with all metadata, then feed those into the chunker.
+
+\medskip
+\item \textbf{Reference:} Gentzkow, Shapiro \& Taddy (2019), \emph{Econometrica}, ``Measuring Group Differences in High-Dimensional Choices: Method and Application to Congressional Speech.''
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case 4: SEC 10-K Filings (Item 1A Risk Factors)}
+\begin{itemize}
+\item \textbf{Corpus.} EDGAR hosts $\sim$5{,}000{,}000 SEC filings, including the annual 10-K reports of every public US firm. Each 10-K has a standardized ``Item 1A: Risk Factors'' section disclosing material risks.
+
+\medskip
+\item \textbf{Use case: cross-firm comparison of disclosed risks.}
+\begin{itemize}
+    \item \emph{``Compare how the four largest US banks discussed interest-rate risk in their 2022 vs.\ 2023 10-K filings.''}
+    \item \emph{``Find all 10-K filings from energy firms in 2024 that mention transition risk from climate policy.''}
+\end{itemize}
+
+\medskip
+\item \textbf{Pipeline:}
+\begin{enumerate}
+    \item Use \texttt{sec-edgar-downloader} to pull 10-Ks.
+    \item Run a section-aware parser to extract Item 1A only.
+    \item Chunk \emph{within} Item 1A, preserving \texttt{cik}, \texttt{ticker}, \texttt{filing\_date}, \texttt{fiscal\_year}.
+    \item Store in Chroma. Hybrid retrieval with metadata filter on \texttt{ticker} for cross-firm queries.
+\end{enumerate}
+
+\medskip
+\item \textbf{References:} Loughran \& McDonald (2011), \emph{JF}, ``When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks.''
+Lopez-Lira (2023), \emph{working paper}, ``Risk Factors That Matter.''
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case 5: Cross-Country Central Bank Speeches}
+\begin{itemize}
+\item \textbf{Corpus.} The Bank for International Settlements maintains a unified archive of central bank speeches from $\sim$60 institutions, 1997--present, at \texttt{bis.org/cbspeeches}. Other primary sources: ECB, BoE, BoJ, RBA, BoC, RBI, PBoC.
+
+\medskip
+\item \textbf{Use case: comparative monetary policy analysis.}
+\begin{itemize}
+    \item \emph{``How did major central banks frame the post-COVID inflation surge in 2022 speeches? Compare the Fed, ECB, BoE, and BoJ.''}
+    \item \emph{``Which central banks most often cite financial-stability concerns alongside inflation, 2010--2024?''}
+\end{itemize}
+
+\medskip
+\item \textbf{Pipeline notes:}
+\begin{itemize}
+    \item Add \texttt{country}, \texttt{institution}, \texttt{speaker\_role}, \texttt{language} as metadata.
+    \item For non-English speeches, either use a multilingual embedder (\texttt{multilingual-e5-large}) or translate first.
+    \item Hybrid retrieval is critical --- many speeches use country-specific institutional jargon a generic embedder won't recognize.
+\end{itemize}
+
+\medskip
+\item \textbf{This use case is essentially impossible without RAG --- no human can read $\sim$10{,}000 speeches across $\sim$60 institutions per year.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Use Case 6: Combining Structured + Unstructured}
+\begin{itemize}
+\item RAG isn't only for unstructured text. The most powerful pattern combines a \textbf{structured database} (e.g.\ FRED time series, BEA NIPA tables) with an \textbf{unstructured text store} (Fed speeches, FOMC minutes).
+
+\medskip
+\item \textbf{Example query:}
+\begin{quote}
+\small\itshape
+``In months when the unemployment rate fell below 4\%, what did the Fed publicly say about labor markets?''
+\end{quote}
+
+\medskip
+\item \textbf{Pipeline:}
+\begin{enumerate}
+    \item \emph{Structured side:} SQL on FRED data. \texttt{SELECT date FROM unrate WHERE value < 4.0;}
+    \item \emph{Unstructured side:} retrieve speeches and FOMC minutes whose \texttt{date} falls within those months.
+    \item Pass the joined evidence to the LLM with a prompt that says ``summarize how Fed officials characterized the labor market in these specific months.''
+\end{enumerate}
+
+\medskip
+\item \textbf{This pattern} --- structured SQL filter $\to$ semantic retrieval $\to$ generation --- is uniquely useful for empirical economists. It bridges what economists already know how to do (data) with what they couldn't do before (text at scale).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Three Roles for RAG Evidence: Signal, Outcome, Instrument}
+\small
+\begin{center}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{|p{2.7cm}|p{2.9cm}|p{2.9cm}|p{2.9cm}|}
+\hline
+\textbf{Use case} & \textbf{Signal} & \textbf{Outcome} & \textbf{Instrument} \\
+\hline
+FOMC minutes & FOMC stance over time & asset prices, expectations & communication shocks \\
+\hline
+NBER papers & methodological frontier & citation counts & field-maturity proxy \\
+\hline
+Congressional Record & policy rhetoric & bill passage, vote share & constituent preferences \\
+\hline
+SEC 10-K & firm-disclosed risk & stock returns, default & risk-disclosure rule shock \\
+\hline
+Central-bank speeches & cross-country stance & exchange rates & comparative monetary shock \\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\textbf{Reading the table.} RAG returns \emph{evidence}; the role you assign it --- \textbf{signal} (text-as-variable), \textbf{outcome} (text-as-target), or \textbf{instrument} (text-as-IV) --- decides how you use it. Lec.\ 7 T1 introduced these three roles of text; they transfer one-to-one to RAG outputs (companion: Lec.\ 7 T5b's Application Zoo).
+
+\smallskip
+\textit{Same plumbing, different research design. Pick the role before you write the prompt.}
+\end{frame}
+
+\begin{frame}{Synthesis: Three Workflow Patterns}
+\begin{enumerate}
+\item \textbf{Literature review.} Index a paper repository (NBER, SSRN, RePEc). Query: ``find work on X, summarize, return citations.'' Saves days per project.
+
+\medskip
+\item \textbf{Policy-text monitoring over time.} Index an institutional corpus (FOMC, Congress, central banks). Query: ``how did the framing of Y evolve from year A to year B?'' Turns institutional text into a longitudinal research instrument.
+
+\medskip
+\item \textbf{Cross-sectional comparative analysis.} Index a corpus where the unit of analysis is a firm or country (10-Ks, central bank speeches). Query: ``compare how entity-1, entity-2, \dots\ discussed Z in year Y.'' Enables cross-firm and cross-country comparisons that were previously infeasible at scale.
+\end{enumerate}
+
+\bigskip
+\textbf{Methodological punchline.} RAG turns institutional text from \emph{background reading} into a \emph{queryable research instrument}. That is the new capability. Everything else --- chunking, embeddings, vector stores --- is plumbing.
+\end{frame}
+
+%=============================================================================
+\section{Classroom Demo: OLG RAG}
+\sectiondivider{Classroom Demo: OLG RAG}{A pipeline you can run offline today}
+
+\begin{frame}[fragile]{Demo: One Question Through the Whole Pipeline}
+\textbf{Classroom question:} \emph{What did Diamond (1965) add to the OLG approach?} --- answerable from the source paper \emph{iff} retrieval finds the right paragraph. \textbf{Offline by default} (no API key, no network, no vector-DB service); source \texttt{./demos/M4\_rag\_olg\_demo}.
+
+\vspace{0.06cm}
+\begin{center}
+\begin{tikzpicture}[
+  font=\scriptsize,
+  node distance=0.3cm and 0.4cm,
+  box/.style={draw, rounded corners=2pt, minimum width=1.95cm, minimum height=0.65cm, align=center, fill=VeryLightGray},
+  arr/.style={-{Latex[length=1.8mm]}, thick}
+]
+\node[box] (source) {source paper\\markdown};
+\node[box, right=of source] (chunks) {line-addressable\\chunks};
+\node[box, right=of chunks] (index) {local TF-IDF\\index};
+\node[box, right=of index] (retrieve) {top-$K$\\evidence};
+\node[box, right=of retrieve] (answer) {grounded\\answer};
+\draw[arr] (source) -- (chunks);
+\draw[arr] (chunks) -- (index);
+\draw[arr] (index) -- (retrieve);
+\draw[arr] (retrieve) -- (answer);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, numbers=none]
+cd demos/M4_rag_olg_demo
+/usr/bin/python3 run_demo.py
+/usr/bin/python3 run.py ask "What did Diamond 1965 add to the OLG approach?"
+PYTHONPATH=src /usr/bin/python3 -m unittest discover -s tests
+\end{lstlisting}
+
+\vspace{0.05cm}
+{\footnotesize
+\begin{tabular}{@{}p{3.0cm}p{8.3cm}@{}}
+\toprule
+\textbf{Artifact} & \textbf{What to inspect} \\
+\midrule
+chunk file & boundaries and line references \\
+retrieval report & top-$K$ evidence, scores, and anchor checks \\
+extractive answer & whether every claim is supported by retrieved text \\
+unsupported query & whether the system refuses rather than improvises \\
+\bottomrule
+\end{tabular}}
+
+\vspace{0.02cm}
+{\scriptsize Files land under the demo's \texttt{build/} folder, including \texttt{chunks.json} and a retrieval-report CSV.}
+\end{frame}
+
+\begin{frame}{Demo: Audit the Corpus Before You Index}
+\begin{itemize}
+\item Before chunking, \emph{look at the corpus}. The OLG demo's \texttt{run\_demo.py} prints a Step-1 audit:
+\begin{itemize}\small
+    \item character count, line count, heading count
+    \item the first $\sim$5 headings (sections of Spear--Young's paper)
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters.} If the audit shows zero headings, your chunker will be flying blind: no section boundaries, no metadata to filter on later. The corpus audit is the cheapest sanity check in the entire RAG pipeline.
+
+\medskip
+\item \textbf{Practical rule.} If you cannot describe your corpus in two minutes from an audit print-out, you are not ready to index it.
+
+\medskip
+\item \textbf{Output to inspect:} \texttt{build/chunks.json} after Step 2 of \texttt{run\_demo.py}. Each chunk carries \texttt{chunk\_id}, \texttt{citation}, and \texttt{section} --- the metadata that makes retrieval auditable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Demo: Read the Retrieval Report First}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{What the demo prints (per question)}
+\begin{itemize}\small
+\item top-$K$ chunks with \texttt{score}
+\item \texttt{citation} (file + line range)
+\item \texttt{section} heading
+\item \emph{anchor hits} --- did retrieval surface the gold-standard phrases the instructor expected?
+\item \texttt{PASS/FAIL} verdict per question
+\end{itemize}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{Why anchor checks matter}
+\begin{itemize}\small
+\item Score thresholds alone can lie --- a low-quality chunk can still rank highest.
+\item Anchors are \emph{specific phrases} that must appear in a correct retrieval.
+\item Anchor hit rate is the simplest cousin of context-recall (the RAGAS metric two acts down).
+\item Watching the PASS/FAIL trail tells you which question types your index handles --- and which it doesn't.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\centering\textit{Rule restated: read the retrieval report \emph{before} the generated answer. The diagnostic is the publication-grade artifact.}
+\end{frame}
+
+\begin{frame}{Demo: Extractive Answer vs.\ Refusal}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{Supported query} (Q3 in demo)
+\begin{itemize}\small
+\item Top retrieved chunks discuss Diamond's production-side extension of Samuelson OLG.
+\item Extractive answer quotes those chunks verbatim, with line citations.
+\item Anchor hits $\geq 1$; \texttt{PASS}.
+\item This is what a publication-grade RAG should look like.
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\textbf{Unsupported query} (refusal test)
+\begin{itemize}\small
+\item E.g.\ ``What is the demo author's email address?''
+\item Top retrieved chunks have low score and no anchor coverage.
+\item Extractive answer returns: \emph{``I do not have enough retrieved evidence in the provided source to answer.''}
+\item This is the \emph{feature}, not the bug.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+\begin{takeawaybox}
+\textbf{The two behaviors are inseparable.} A system that can answer ``Diamond 1965'' correctly \emph{and} refuses to invent an email address is the minimum bar for using RAG in published research.
+\end{takeawaybox}
+
+\vspace{0.08cm}
+{\footnotesize The grounded prompt behind this is exactly Act 8.4's template, with line-range citations \texttt{[file:La-b]}. Artifact: \texttt{build/terminal\_retrieval\_report.csv} --- archive it next to your paper draft.}
+\end{frame}
+
+%=============================================================================
+\section{Failure Modes and Evaluation}
+\sectiondivider{Failure Modes and Evaluation}{When it breaks --- and how to prove it works}
+
+\begin{frame}{When RAG Fails: Six Failure Modes}
+\begin{enumerate}
+\item \textbf{Retriever miss.} Relevant document exists but the embedder ranks it outside top-$K$. Often caused by terminology mismatch.
+
+\medskip
+\item \textbf{Re-ranker promotes the wrong context.} Cross-encoder mis-scores; the LLM gets a confident-but-irrelevant chunk.
+
+\medskip
+\item \textbf{Generator ignores the retrieved context.} The LLM falls back on its parametric memory and answers from training data --- often confidently and incorrectly.
+
+\medskip
+\item \textbf{Chunk boundary cuts critical information.} The fact spans the boundary between two chunks; neither chunk alone contains the answer.
+
+\medskip
+\item \textbf{Outdated index.} The corpus has been updated, but the index hasn't been re-run. The retriever returns stale chunks.
+
+\medskip
+\item \textbf{Ambiguous query.} ``Inflation'' could mean CPI, PCE, expectations, or asset prices. The retriever picks one interpretation; the user wanted another.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Mitigations --- One per Failure Mode}
+\begin{itemize}
+\item \textbf{Retriever miss} $\Rightarrow$ \emph{query expansion} and \emph{HyDE} (hypothetical document embeddings: ask the LLM to draft a fake answer, embed \emph{that}, retrieve nearest documents). Also: hybrid sparse + dense retrieval.
+
+\smallskip
+\item \textbf{Re-ranker mis-scores} $\Rightarrow$ try a stronger re-ranker (\texttt{bge-reranker-v2}); train a domain-specific re-ranker on labeled query-document pairs.
+
+\smallskip
+\item \textbf{Generator ignores context} $\Rightarrow$ stricter system prompt (``Answer ONLY from the context''); lower temperature; faithfulness check in post-processing.
+
+\smallskip
+\item \textbf{Chunk boundary cuts information} $\Rightarrow$ semantic chunking; larger chunk overlap; or use a parent-document retriever (retrieve a chunk, return its parent paragraph).
+
+\smallskip
+\item \textbf{Outdated index} $\Rightarrow$ incremental ingestion pipeline triggered when source documents change; nightly re-embed for high-churn corpora.
+
+\smallskip
+\item \textbf{Ambiguous query} $\Rightarrow$ query rewriting (ask the LLM to clarify or expand the query before retrieval); multi-query retrieval (generate $N$ paraphrases, retrieve for each, fuse).
+\end{itemize}
+
+\smallskip
+\centering\textit{\footnotesize Evaluation at scale stays expensive --- hence the next step is a small, curated gold set, not exhaustive automatic scoring.}
+\end{frame}
+
+\begin{frame}{Evaluation: The RAGAS Framework}
+\begin{itemize}
+\item Es, James, Espinosa-Anke \& Schockaert (2023), \emph{EACL}, ``RAGAS: Automated Evaluation of Retrieval Augmented Generation.'' Now the standard.
+
+\medskip
+\item \textbf{Four metrics, two for retrieval and two for generation:}
+\begin{itemize}
+    \item \textbf{Context precision.} Of the retrieved chunks, how many are actually relevant to the query? \emph{(Retriever quality.)}
+    \medskip
+    \item \textbf{Context recall.} Of the chunks that should have been retrieved, how many did we get? \emph{(Retriever coverage.)}
+    \medskip
+    \item \textbf{Faithfulness.} Are all the claims in the answer supported by the retrieved context? \emph{(Generator anti-hallucination.)}
+    \medskip
+    \item \textbf{Answer relevance.} Does the answer actually address the query? \emph{(Generator on-topic.)}
+\end{itemize}
+
+\medskip
+\item RAGAS computes all four automatically using an LLM-as-judge. Cost: a few cents per query.
+
+\medskip
+\item \textbf{The right way to use it:} build a small ($\sim$50-question) eval set for your specific corpus, run RAGAS each time you change a pipeline component, and only ship a change when the metrics improve.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Validate Like an Economist: Cohen's $\kappa$ and Disclosure}
+\textbf{RAGAS uses an LLM as the judge} --- fast for iteration, but it inherits the drift, sycophancy, and version-instability documented in Lec.\ 7 T5b (Yin, Vu \& Persico, NBER 35110, 2026: $\kappa = 0.36$ across frontier LLMs on the same rubric).
+
+\smallskip
+\textbf{For publication-grade research, layer a human-anchored audit on top:}
+\begin{enumerate}\small
+\item Build a 100--200-item \textbf{gold standard}: queries paired with ideal retrievals \emph{and} answers, curated by a domain expert.
+\item Have a \emph{second annotator} score retrieval relevance independently; compute \textbf{Cohen's $\kappa$} (target $\geq 0.75$).
+\item Treat RAGAS as the fast inner loop, the gold-standard $\kappa$ audit as the slow outer loop --- publish only the latter.
+\end{enumerate}
+
+\smallskip
+{\footnotesize\textbf{Disclose (AEA, Oct 2024, extends to RAG):} embedding + vector-DB + retrieval-$K$ + re-ranker; prompt template + generator + temperature; evaluator model + version; gold-set size + second-annotator $\kappa$; archive the retrieval report with the draft.\par}
+
+\smallskip
+\begin{takeawaybox}
+RAGAS tells you whether the pipeline got \emph{better}; Cohen's $\kappa$ tells you whether it is \emph{good enough to cite}.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{From RAG to Agents}
+\sectiondivider{From RAG to Agents}{Retrieval becomes one tool}
+
+\begin{frame}{From RAG to Agentic RAG: Retrieval Becomes One Tool}
+\begin{itemize}\small
+\item \textbf{Single-shot RAG} (today's pipeline): fixed plumbing --- query $\to$ retrieve $\to$ augment $\to$ generate. One round; the developer wires the steps.
+
+\smallskip
+\item \textbf{Agentic RAG:} the LLM \emph{decides} whether, when, and what to retrieve, via the \emph{JSON tool calls} introduced in Lec.\ 7 T4 (``Structured Output''). The loop continues until the model signals \texttt{done}.
+
+\smallskip
+\item \textbf{Patterns this unlocks:} multi-hop retrieval (one query begets the next); \emph{query rewriting} (the agent reformulates an ambiguous user question before retrieving); and \emph{cross-tool composition} --- RAG \emph{plus} code execution \emph{plus} web fetch \emph{plus} structured-data queries.
+
+\smallskip
+\item \textbf{Inherited failure modes (Lec.\ 7 T4/T5a):} the agent's context still drifts; sycophancy still bites. Worse: an agent can retrieve confirming evidence \emph{and ignore disconfirming evidence} unless the loop is designed to penalize that.
+\end{itemize}
+
+\vspace{-0.1cm}
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.32cm and 0.42cm,
+  box/.style={draw, rounded corners=2pt, minimum width=1.4cm, minimum height=0.6cm, align=center, fill=VeryLightGray},
+  llm/.style={draw, rounded corners=2pt, minimum width=1.6cm, minimum height=0.6cm, align=center, fill=orange!12},
+  tool/.style={draw, rounded corners=1pt, minimum width=1.5cm, minimum height=0.5cm, align=center, fill=blue!8, font=\scriptsize},
+  arr/.style={-{Latex[length=1.8mm]}}
+]
+  \node[box] (user) {User};
+  \node[llm, right=of user] (agent) {Agent (LLM)};
+  \node[tool, above right=0.15cm and 0.6cm of agent] (rag) {Tool: RAG};
+  \node[tool, right=of agent] (py) {Tool: Python};
+  \node[tool, below right=0.15cm and 0.6cm of agent] (web) {Tool: Web};
+  \node[box, right=1.4cm of py] (out) {Cited\\Answer};
+  \draw[arr] (user) -- (agent);
+  \draw[arr] (agent) -- (rag);
+  \draw[arr] (agent) -- (py);
+  \draw[arr] (agent) -- (web);
+  \draw[arr, dashed] (rag.east) .. controls +(0.5,0) and +(0.5,0.5) .. (agent.north east);
+  \draw[arr, dashed] (web.east) .. controls +(0.5,0) and +(0.5,-0.5) .. (agent.south east);
+  \draw[arr] (py) -- (out);
+\end{tikzpicture}
+\end{center}
+
+\vspace{-0.1cm}
+\centering\textit{Lec.\ 9 details the harness, the safety boundary, and a working terminal-agent walkthrough.}
+\end{frame}
+
+\begin{frame}{Close: One Map, Complete --- Pick the Right Tool}
+\LecEightMap{0}
+
+\vspace{-0.38cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}p{2.5cm}p{8.7cm}@{}}
+\toprule
+\textbf{Pick\dots} & \textbf{when\dots} \\
+\midrule
+RAG (today) & facts from a corpus the LLM never saw, with citations the reader can verify. \\
+Fine-tuning & \emph{style}, \emph{format}, or rare \emph{tokens} --- not facts. (Pair with RAG; don't substitute.) \\
+Agentic RAG (Lec.\ 9) & multi-hop retrieval, query rewriting, or cross-tool composition (RAG + code + web). \\
+None of the above & the corpus fits one context window \emph{and} the question is single-shot --- long-context suffices. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.04cm}
+{\centering\scriptsize\emph{Reasoner (LLM) $+$ memory (index) $+$ librarian (retriever) --- RAG turns institutional text into a queryable research instrument.} \textbf{Next: Lecture 9 (Session 6)} --- a terminal agent that uses RAG as one tool among many. \textbf{Questions?}\par}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,380 @@
+%% FullCourse_10Lecs -- Lecture 7, Topic 7.1a: Why LLMs + Tokenization
+%% Source: split from Lec07_T1_Tokenization_Embeddings.tex sections 1-2
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module3_LLM_Text/M3_T1_Tokenization_Embeddings.tex
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.1a: Why LLMs and Tokenization}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 7.1a Agenda}
+\begin{enumerate}
+  \item \textbf{Why LLMs? Motivation and History}
+  \medskip
+  \item \textbf{Tokenization} --- BPE, WordPiece, SentencePiece
+\end{enumerate}
+
+\bigskip
+\textit{Topic 7.1b continues with word embeddings (TF-IDF, Word2Vec, GloVe), geometry of meaning, and the bridge to contextual embeddings.}
+
+\medskip
+\footnotesize\textit{Arc: T1a Why$+$Tokens $\to$ T1b Embeddings $\to$ T2a Attention $\to$ T2b Transformer $\to$ T3a Training $\to$ T3b Limits $\to$ T4 Applications.}
+\end{frame}
+
+%=============================================================================
+\section{Why LLMs? Motivation and History}
+
+\begin{frame}{Text as Economic Data --- The Big Picture}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  src/.style={draw, rounded corners=1pt, minimum width=28mm, minimum height=6mm, fill=blue!12, align=center},
+  rep/.style={draw, rounded corners=1pt, minimum width=30mm, minimum height=6mm, fill=orange!18, align=center},
+  outcome/.style={draw, rounded corners=1pt, minimum width=30mm, minimum height=6mm, fill=green!18, align=center},
+  arr/.style={-{Latex[length=1.5mm]}, thick}
+]
+% Sources column
+\node[font=\small\bfseries] (h1) at (0,2.6) {Raw text sources};
+\node[src] (s1) at (0,1.8)  {FOMC minutes \& speeches};
+\node[src] (s2) at (0,0.9)  {SEC EDGAR 10-K, MD\&A};
+\node[src] (s3) at (0,0.0)  {News, earnings calls};
+\node[src] (s4) at (0,-0.9) {Patents, congressional records};
+
+% Representation column
+\node[font=\small\bfseries] (h2) at (5.5,2.6) {Representation};
+\node[rep] (r1) at (5.5,1.4) {Counts (TF-IDF, dictionaries)};
+\node[rep] (r2) at (5.5,0.5) {Static embeddings (W2V, GloVe)};
+\node[rep] (r3) at (5.5,-0.4) {Contextual (BERT, GPT, Claude)};
+
+% Outcome column
+\node[font=\small\bfseries] (h3) at (11,2.6) {Economic / business variables};
+\node[outcome] (o1) at (11,1.7) {Uncertainty / sentiment indices};
+\node[outcome] (o2) at (11,0.8) {Firm risk, exposure, similarity};
+\node[outcome] (o3) at (11,-0.1) {Stance, narrative shifts};
+\node[outcome] (o4) at (11,-1.0) {Forecasts / nowcasts};
+
+% Arrows source -> rep
+\foreach \s in {s1,s2,s3,s4}{ \draw[arr, gray!60] (\s.east) -- ($(r2.west)+(-0.1,0)$); }
+% Arrows rep -> outcome
+\foreach \r in {r1,r2,r3}{ \draw[arr, gray!60] (\r.east) -- ($(o2.west)+(-0.1,0)$); }
+\end{tikzpicture}
+
+\medskip
+{\footnotesize\textit{This lecture builds the middle column. T1b: counts $\to$ static embeddings. T2a/T2b: contextual embeddings. T3a: how those models are trained. T3b: when not to trust them. T4: the right-hand column.}}
+\end{frame}
+
+\begin{frame}{Why Economists Care About LLMs}
+\begin{itemize}
+\item \textbf{Text as data} --- modern economic research increasingly leverages textual sources:
+\begin{itemize}
+    \item Corporate filings (10-K, 10-Q, MD\&A)
+    \item Central bank speeches, FOMC minutes, ECB statements
+    \item Earnings calls, analyst reports, regulatory filings
+    \item News, social media, congressional records
+\end{itemize}
+
+\medskip
+\item \textbf{Applications:}
+\begin{itemize}
+    \item Sentiment analysis for financial forecasting
+    \item Policy stance detection and uncertainty indices
+    \item New text-derived macroeconomic indicators
+    \item Summarization of long, technical documents
+\end{itemize}
+
+\medskip
+\item \textbf{Why LLMs in particular:}
+\begin{itemize}
+    \item Capture nuanced language and domain-specific jargon
+    \item Handle long-range context (sentences, paragraphs, whole documents)
+    \item Provide a unified architecture for many tasks
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Three Roles of Text in Economic Research}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{l p{4cm} p{6cm}}
+\toprule
+\textbf{Role} & \textbf{What text is} & \textbf{Example} \\
+\midrule
+Measurement tool & A way to construct previously unobserved variables & Baker--Bloom--Davis (2016) Economic Policy Uncertainty index from newspapers \\
+Behavioral outcome & A response variable revealing decisions or institutional change & Hansen, McMahon \& Prat (2018): how FOMC transparency reform changed committee speech \\
+Treatment variable & A quasi-experimental input affecting behavior & Central bank communication shocks and inflation expectations \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\textbf{Take-away:} the same text can play very different econometric roles. Choose your representation method to match the role---transparency matters for measurement, while subtle context matters for behavior modeling.
+\end{frame}
+
+\begin{frame}{A Brief History: RNN $\rightarrow$ Transformer $\rightarrow$ GPT}
+\begin{itemize}
+\item \textbf{2003:} Bengio et al. neural language model --- continuous word vectors
+\medskip
+\item \textbf{2013:} Mikolov et al. \emph{Word2Vec} --- dense word embeddings at scale
+\medskip
+\item \textbf{2014:} Pennington et al. \emph{GloVe} --- global co-occurrence matrices
+\medskip
+\item \textbf{2017:} Vaswani et al. \emph{``Attention Is All You Need''} --- the Transformer replaces RNNs/LSTMs
+\medskip
+\item \textbf{2018:} Devlin et al. \emph{BERT} (encoder); Radford et al. \emph{GPT} (decoder)
+\medskip
+\item \textbf{2020--2022:} GPT-3, instruction tuning, RLHF $\rightarrow$ ChatGPT moment
+\medskip
+\item \textbf{2023--2026:} GPT-4/4o, Claude (3, 4), Gemini, LLaMA-3, DeepSeek; long-context (100k--1M tokens), open-weights ecosystem, agentic systems
+\end{itemize}
+
+\medskip
+\textbf{Driver of the shift:} attention scales better than recurrence, both in compute (parallel) and in quality (long-range dependencies).
+\end{frame}
+
+\begin{frame}{The Autoregressive Principle}
+\begin{itemize}
+\item An LLM is fundamentally a \textbf{next-token predictor}:
+\[
+   p\bigl(t^{(n+1)} \mid t^{(1)}, t^{(2)}, \ldots, t^{(n)}\bigr).
+\]
+
+\medskip
+\item \textbf{Generation:} sample $t^{(n+1)}$ from this distribution, append to the context, and repeat.
+
+\medskip
+\item \textbf{What this single equation enables} (we preview the intuition on the next two slides; a full revisit comes after we understand pretraining and fine-tuning):
+\begin{itemize}
+    \item \textbf{Summarizing 10-K filings or FOMC minutes} --- prompt with document + instruction; the model predicts summary tokens one by one
+    \item \textbf{Generating narrative forecasts} conditional on macro state --- condition on data in the prompt; next tokens extend the narrative
+    \item \textbf{Producing scenario analyses in plain language} --- the scenario is the context; prediction fills in the implications
+    \item \textbf{Writing and debugging code} for empirical work --- same objective over a code corpus yields code completions
+\end{itemize}
+
+\medskip
+\item \textbf{Key insight:} ``everything is next-token prediction'' is mathematically tiny but pedagogically and practically enormous.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Intuition: Summarizing a 10-K Filing}
+\begin{itemize}
+\item \textbf{Task:} condense 50 pages of an SEC 10-K risk section into 3 readable bullets.
+
+\medskip
+\item \textbf{How the autoregressive equation achieves this:}
+\begin{enumerate}
+    \item Concatenate the instruction and document into the prompt:
+    \begin{center}
+    \small\texttt{``Summarize the following 10-K risk section in 3 bullets:\textbackslash n\textbackslash n[text]\textbackslash n\textbackslash nSummary:''}
+    \end{center}
+    \item The model predicts token $t^{(n+1)}$ from the full prompt; this becomes the first word of the summary
+    \item Each subsequent token is predicted given everything before it (including the already-generated summary words)
+    \item Generation stops at a period or end-of-sequence marker
+\end{enumerate}
+
+\medskip
+\item \textbf{Why does it work?} During pretraining the model read millions of (long document, short summary) pairs. The next-token distribution has implicitly learned: \emph{``after an instruction like this, produce a concise factual summary.''}
+
+\medskip
+\item \textbf{Economic punchline:} a 50-page MD\&A section is compressed into 3 bullets in under one second --- and the same pipeline scales across thousands of filings.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Intuition: Extracting Stance from FOMC Minutes}
+\begin{itemize}
+\item \textbf{Task:} classify each sentence in FOMC minutes as \emph{hawkish}, \emph{dovish}, or \emph{neutral}.
+
+\medskip
+\item \textbf{How the autoregressive equation achieves this:}
+\begin{enumerate}
+    \item Prompt: \texttt{``Sentence: [sentence]\textbackslash nStance (hawkish/dovish/neutral):''}
+    \item The model predicts the next token; because the vocabulary contains these exact words, the top-probability token \emph{is} the label
+    \item With fine-tuning on labeled FOMC data, the next-token distribution concentrates on monetary-policy-relevant labels
+\end{enumerate}
+
+\medskip
+\item \textbf{What fine-tuning changes:} the base model already understands ``hawkish'' and ``dovish''. Fine-tuning shifts the distribution so that, after a central-bank sentence, stance-label tokens are consistently most probable.
+
+\medskip
+\item \textbf{Economic application:} automated stance extraction across decades of FOMC minutes --- enabling the kind of large-scale communication analysis in Hansen, McMahon \& Prat (2018) without manual coding.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{An Identification-First View of Text}
+\begin{itemize}
+\item \textbf{Engineering perspective first:} to a machine, a document is just a character string. But every string was \emph{produced} --- by a person, in a situation, for an audience. Before any econometrics, ask: what generated this string?
+
+\medskip
+\item \textbf{The data-generating process (DGP):}
+\[
+   x_i \;=\; g\bigl(s_i,\; a_i,\; c_i\bigr) \;+\; \varepsilon_i
+\]
+\begin{itemize}
+    \item $s_i$: the latent \textbf{economic state} we want to measure (policy stance, sentiment, firm risk)
+    \item $a_i$: the speaker's \textbf{strategic framing} --- audience management, spin, emphasis, tone chosen for effect
+    \item $c_i$: \textbf{institutional context} --- venue, legal disclosure requirements, format conventions
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters for a downstream regression} $y_i = \beta\,m(x_i) + \gamma z_i + u_i$:
+\begin{itemize}
+    \item If framing $a_i$ is correlated with the error $u_i$, the text feature $m(x_i)$ is \emph{endogenous} --- the same omitted-variable problem as always, but hidden inside the language
+    \item Measurement error is non-classical: it correlates with the true state $s_i$, biasing $\hat\beta$
+\end{itemize}
+
+\medskip
+\item \textbf{Two research uses:} (a)~\textbf{Measuring} $s_i$ --- choose representations that filter out $a_i$; (b)~\textbf{Studying strategic communication} --- $a_i$ is your outcome variable (e.g.\ Hansen, McMahon \& Prat 2018).
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Tokenization}
+
+\begin{frame}{Tokenization: The First Step}
+\begin{itemize}
+\item \textbf{Goal:} convert raw character sequences into discrete \emph{tokens} that a neural network can consume.
+
+\medskip
+\item \textbf{Why not just split by spaces?}
+\begin{itemize}
+    \item Many economically relevant terms combine words, numbers, and symbols (e.g.\ \texttt{S\&P500}, \texttt{CO2}, \texttt{Q4\_2025}, \texttt{stagflation})
+    \item Punctuation and formatting carry meaning (`\$1.2B' vs `1.2 billion')
+    \item Different languages have different word boundaries (or none at all)
+\end{itemize}
+
+\medskip
+\item \textbf{What is a token?} A flexible unit:
+\begin{itemize}
+    \item A whole word (`inflation')
+    \item A subword (`infl', `ation')
+    \item A single character or byte
+    \item A special marker (\texttt{<EOS>}, \texttt{<PAD>}, \texttt{<USER>})
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Vocabulary and the Tokenization Map}
+\begin{itemize}
+\item Let $A$ be the alphabet (Unicode characters). A tokenizer is a function:
+\[
+   \mathcal{K}\colon A^{*} \;\longrightarrow\; \{1, 2, \ldots, M\}^{*}
+\]
+mapping any text string into a sequence of \textbf{numbers} --- each number is a positive integer that serves as an index into a lookup table of size $M$. The fact that the index is an integer is incidental; what matters is that it \emph{uniquely identifies} each token, the same way a ZIP code uniquely identifies a location.
+
+\medskip
+\item \textbf{Why integers?} Neural networks need numeric inputs; each token ID will index into an embedding lookup table.
+
+\medskip
+\item \textbf{Practical constraint --- context length:}
+\begin{itemize}
+    \item Models have a maximum input size $n$ (typically $2{,}048$ to $128{,}000$ tokens; some $1$M)
+    \item Long policy documents, FOMC transcripts, or 10-K filings often exceed $n$
+    \item Forces \emph{chunking}, \emph{summarization}, or \emph{retrieval} (a hint at Lec08)
+\end{itemize}
+
+\medskip
+\item Vocabulary sizes are typically $30{,}000$--$100{,}000$ subword tokens. \textbf{To put this in perspective:} Merriam-Webster Unabridged lists $\approx470{,}000$ entries; a college-educated native speaker actively uses roughly 20{,}000--40{,}000 words. A subword vocabulary of $M=50{,}000$ therefore spans roughly the active vocabulary of a well-read person --- but because it tokenizes \emph{sub}words (stems, suffixes, common fragments), it effectively covers far more word forms and technical terms than a same-size word-level vocabulary would.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Illustrative Example: ``GDP rose by 2\%''}
+\begin{itemize}
+\item A simple tokenization might produce
+\[
+   \text{(GDP},\; \text{rose},\; \text{by},\; \text{2},\; \%\text{)}
+\]
+mapping to integer IDs, e.g.\ $(541,\; 823,\; 71,\; 312,\; 49)$.
+
+\medskip
+\item \textbf{Why integer mapping matters:}
+\begin{itemize}
+    \item Each ID becomes the index of a learned embedding vector
+    \item Numeric tokens (`2', `3', `5') get \emph{their own} embeddings
+\end{itemize}
+
+\medskip
+\item \textbf{Injectivity matters for forecasting:} a well-designed tokenizer maps
+\begin{itemize}
+    \item ``inflation rate is 3.5\%''
+    \item ``inflation rate is 3.6\%''
+\end{itemize}
+to \emph{different} token sequences. Otherwise small but economically meaningful differences would collapse into the same input.
+
+\medskip
+\item \textbf{Tokenizer/model coupling:} the tokenizer is part of the model. If you swap the tokenizer, all the embedding rows are meaningless --- this is why every published LLM ships with its tokenizer.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Subword Tokenization: BPE, WordPiece, SentencePiece}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\footnotesize
+\begin{tabular}{|p{2.4cm}|p{4.0cm}|p{4.0cm}|p{3.0cm}|}
+\hline
+\textbf{Algorithm} & \textbf{How it learns the vocabulary} & \textbf{Where you see it} & \textbf{Notable feature} \\
+\hline
+\textbf{Byte-Pair Encoding (BPE)} & Start from chars; greedily merge the most frequent adjacent pair until vocab cap is reached & GPT-2/3/4, LLaMA, Mistral & Byte-level variant handles any Unicode \\
+\hline
+\textbf{WordPiece} & Like BPE, but merge the pair maximizing corpus likelihood instead of raw frequency & BERT, DistilBERT & \texttt{\#\#} prefix marks subword continuations \\
+\hline
+\textbf{SentencePiece} & Trains directly on raw text (no whitespace presplit); unigram or BPE objective & T5, mT5, LLaMA, XLM-R & Multilingual; treats space as a normal character \\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\textbf{Why subwords?} OOV handling (\texttt{QuantitativeEasing} $\to$ \texttt{Quant}+\texttt{itative}+\texttt{Easing}); one token for common words, splits for rare/compound; one vocab across languages.
+
+\smallskip
+\textbf{Cost:} \texttt{nowcasting} may split into 3 tokens; \texttt{1.2345} into several digit-tokens --- making numerical reasoning fragile.
+\end{frame}
+
+\begin{frame}{Tokenization Is a Preprocessing Choice}
+\begin{itemize}
+\item Tokenization sits inside a larger \textbf{preprocessing pipeline}:
+\[
+   x^{\text{raw}} \;\xrightarrow{\;\text{clean}\;}\; x^{\text{clean}}
+   \;\xrightarrow{\;\text{tokenize}\;}\; \{t_{ij}\}
+   \;\xrightarrow{\;\text{represent}\;}\; z_i,
+\]
+from raw scraped text $\to$ normalized text $\to$ integer token IDs $\to$ downstream numeric representation (TF-IDF, embedding, $\ldots$).
+
+\medskip
+\item \textbf{Specification curve problem} (Denny \& Spirling, 2018): just as economists report results under alternative lag orders, control sets, and sample restrictions, NLP results should be reported under alternative preprocessing pipelines.
+\begin{itemize}
+    \item LDA topics under different pipelines vary substantially --- often by as much as the substantive variation of interest
+    \item Stemming and punctuation handling have the largest individual effects
+    \item \textbf{Lesson:} the pipeline is a modeling decision; report the full range as you would a VAR robustness table
+\end{itemize}
+
+\medskip
+\item \textbf{Lesson for empirical economists:} report the \emph{universe} of preprocessing choices. The ``convenient'' specification is not a result --- it is a choice. This applies equally to tokenizer choice and vocabulary size.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Seven Preprocessing Choices}
+\small
+\begin{itemize}
+\item \textbf{Lowercasing} --- map \texttt{Fed} and \texttt{fed} to the same token. Compresses vocabulary, but erases proper-noun signal.
+\item \textbf{Stemming / lemmatization} --- cut suffixes so \emph{banking/banks/banked} collapse to \emph{bank}. Can erase tense, plurality, policy-language nuance.
+\item \textbf{Stop-word removal} --- drop high-frequency function words. Reduces noise; but negation (\emph{not}) and modality (\emph{may, will}) can matter for central-bank text.
+\item \textbf{Punctuation handling} --- keep, strip, or tokenize separately. Percent signs, decimals, sentence boundaries all matter.
+\item \textbf{$n$-gram inclusion} --- treat \emph{``yield curve''} as one token rather than two. Captures multi-word economic concepts at the cost of a larger vocabulary.
+\item \textbf{Frequency cutoffs} --- drop terms in $<k$ or $>K$ documents. Removes typos and boilerplate; can also remove rare-but-informative events.
+\item \textbf{Language filtering} --- restrict to English or apply per-language pipelines. Crucial for multilingual corpora like ECB speeches.
+\end{itemize}
+
+\smallskip
+Each choice is an independent on/off switch $\Rightarrow$ $2^{7} = 128$ pipelines $\Rightarrow$ report a \emph{specification curve}, not a single run.
+\end{frame}
+
+\end{document}

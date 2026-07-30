@@ -1,0 +1,112 @@
+{
+  "_README": "Configuration for Heterogeneous Agent Ramsey Model",
+
+  "random_seed": 42,
+  "_random_seed_note": "Global seed for reproducibility. Set to null to disable.",
+
+  "debug": {
+    "anomaly_detection": false,
+    "_anomaly_detection_note": "Enable PyTorch autograd anomaly detection. Useful for debugging NaN gradients but slows training ~2-3x."
+  },
+
+  "versioning": {
+    "input_version": "1.0.0",
+    "output_version": "1.0.2",
+    "_comment_1": "Set input_version to load existing model (e.g., '1.0.0'), null starts fresh.",
+    "_comment_2": "Both ha_model_v{version}.pth and boundary_v{version}.pkl will be loaded/saved."
+  },
+
+  "economic_parameters": {
+    "beta": 0.8,
+    "alpha": 0.3333,
+    "sigma": 2.0,
+    "gamma": 2.0,
+    "delta": 0.1,
+    "pi_e": 0.5,
+    "pi_u": 0.5,
+    "pi_matrix": [[0.5, 0.5], [0.5, 0.5]]
+  },
+
+  "state_bounds": {
+    "K_min": 0.01,
+    "K_max": 1.50,
+    "a_min": 0.0,
+    "a_max": 2.0,
+    "c_min": 0.005,
+    "c_max": 1.2
+  },
+
+  "control_bounds": {
+    "n_min": 0.1,
+    "n_max": 1.5,
+    "c_scale": 1.0
+  },
+
+  "training": {
+    "num_iterations": 2,
+    "batch_size": 512,
+    "batches_per_phase": 20,
+    "epochs_per_batch": 100,
+    "min_admissible_samples": 1000,
+    "batch_sample_size": 10000,
+    "_adaptive_sampling_note": "Keep sampling batch_sample_size candidates until min_admissible_samples valid points are accumulated",
+    "lr_actor": 0.0003,
+    "lr_critic": 0.0003,
+    "rollout_steps": 10,
+    "plot_frequency": 1,
+    "lambda_boundary": 10.0,
+    "lambda_shape": 5.0,
+    "_lambda_comment": "lambda_boundary: hypercube penalty (fixed), lambda_shape: alpha-shape projection penalty (fixed), lambda_fb: adaptive (see fischer_burmeister section)",
+    "target_update_freq": 1,
+    "tau": 0.005,
+    "checkpoint_frequency": 5,
+    "_checkpoint_frequency_note": "Save checkpoint every N iterations. Set to 0 to disable."
+  },
+
+  "fischer_burmeister": {
+    "epsilon": 0.0001,
+    "lambda_initial": 1.0,
+    "lambda_max": 100.0,
+    "rho": 1.05,
+    "penalty_threshold": 0.01
+  },
+
+  "boundary": {
+    "alpha_param": 1.5,
+    "admissibility_threshold": 0.8,
+    "inner_loop_steps": 1,
+    "min_boundary_samples": 1000,
+    "_min_boundary_samples_note": "Target number of valid points to collect for α-shape boundary update",
+    "batch_boundary_sample_size": 10000,
+    "buffer_percent": 0.10,
+
+    "sampling_method": "uniform",
+    "_sampling_method_options": "uniform | expanded_shape | gaussian",
+    "_sampling_method_note": "uniform=full hypercube, expanded_shape=α-shape expanded from centroid, gaussian=admissible points + noise",
+
+    "expansion_percent": 0.20,
+    "_expansion_percent_note": "For expanded_shape: how much to expand outward (0.20=20%). For gaussian: σ = expansion_percent × range"
+  },
+
+  "admissibility": {
+    "w_geo": 0.5,
+    "w_Q": 0.5,
+    "Q_min": 0.8,
+    "Q_max": 0.995,
+    "barrier_delta": 0.05
+  },
+
+  "network_architecture": {
+    "hidden_dim": 128,
+    "layers": 3
+  },
+
+  "simulation": {
+    "run_after_training": true,
+    "num_trajectories": 100,
+    "num_periods": 50,
+    "burn_in": 10,
+    "random_seed": 42,
+    "output_dir": "output/simulations"
+  }
+}

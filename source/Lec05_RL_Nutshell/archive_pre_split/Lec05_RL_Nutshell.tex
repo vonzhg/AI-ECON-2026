@@ -1,0 +1,1395 @@
+%% Machine Learning and Agentic AI for Macroeconomic Research
+%% Lecture 5: Reinforcement Learning in a Nutshell
+%% Author: Zhigang Feng
+%% Sources: 14_RL/Lec10_RL.tex
+%%          Book: 面向经济学家的人工智能 (chapter 12)
+
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage{ae,aecompl}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{amsmath, amssymb, graphicx}
+\usepackage{booktabs, multirow}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+}
+
+\ifx\hypersetup\undefined
+  \AtBeginDocument{%
+    \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+      colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+  }
+\else
+  \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},
+    colorlinks=true,linkcolor=DarkText,urlcolor=RedTitle}%
+\fi
+
+\makeatletter
+\newcommand\makebeamertitle{\frame{\maketitle}}%
+\AtBeginDocument{%
+  \let\origtableofcontents=\tableofcontents
+  \def\tableofcontents{\@ifnextchar[{\origtableofcontents}{\gobbletableofcontents}}
+  \def\gobbletableofcontents#1{\origtableofcontents}%
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{author}{fg=DarkText}
+\setbeamercolor{date}{fg=DarkText}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+\newcommand{\reducevspace}{\vspace{-0.5cm}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+\makeatother
+
+% Point figure includes back to original RL folder
+\graphicspath{{../../14_RL/}}
+
+\title[ML \& Agentic AI for Macro Research]{Machine Learning and Agentic AI for Macroeconomic Research\\
+5: Reinforcement Learning in a Nutshell\\[0.5em]}
+\author{Zhigang Feng}
+\date{Spring 2026}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+% AGENDA
+%=============================================================================
+
+\begin{frame}{Lecture Agenda}
+\begin{enumerate}
+  \item \textbf{RL Framework} --- agent, environment, state, action, reward
+  \medskip
+  \item \textbf{Connection to Dynamic Programming} --- Bellman equation, principle of optimality
+  \medskip
+  \item \textbf{Limitations of Classical DP} --- curse of dimensionality, unknown environments
+  \medskip
+  \item \textbf{A Motivating Example} --- 3$\times$3 macroeconomic grid
+  \medskip
+  \item \textbf{Monte Carlo Methods} --- learning from full episodes
+  \medskip
+  \item \textbf{Exploration--Exploitation} --- $\epsilon$-greedy, Boltzmann, UCB
+  \medskip
+  \item \textbf{Temporal-Difference Learning \& Q-Learning} --- incremental, model-free updates
+  \medskip
+  \item \textbf{Actor-Critic Methods} --- policy gradient meets value estimation
+  \medskip
+  \item \textbf{Advanced Algorithms} --- A2C, DDPG, PPO, SAC
+  \medskip
+  \item \textbf{Case Study: AlphaManager} --- offline RL for corporate finance
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+% PART 1: RL FRAMEWORK
+%=============================================================================
+\section{The Reinforcement Learning Framework}
+
+\begin{frame}{From Static to Dynamic: Why RL?}
+\begin{itemize}
+    \item Previous lectures covered \textbf{static} tasks: prediction, classification, curve fitting.
+    \item Many core economic problems are \textbf{sequential}:
+    \begin{itemize}
+        \item Consumption--saving decisions
+        \item Firm investment and pricing
+        \item Monetary and fiscal policy
+    \end{itemize}
+    \item Three features distinguish dynamic problems:
+    \begin{enumerate}
+        \item \textbf{Sequential}: decisions at every period, not once-and-for-all.
+        \item \textbf{Intertemporal coupling}: today's consumption $\Rightarrow$ tomorrow's capital.
+        \item \textbf{Uncertainty}: future shocks $z_{t+1}$ unknown at time $t$.
+    \end{enumerate}
+    \item Economists traditionally use \textbf{Dynamic Programming} (DP) to solve these.
+    \item \textbf{Reinforcement Learning} extends DP to handle high dimensions and unknown environments.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Reinforcement Learning in Economics}
+    \begin{itemize}
+        \item RL is designed for \textbf{sequential decision-making under uncertainty}.
+        \item Agents maximize long-term objectives: utility, profit, welfare.
+        \item RL differs from supervised/unsupervised learning by \textbf{interacting with an environment} to learn optimal policies.
+        \item Natural fit for economic models involving dynamic optimization.
+    \end{itemize}
+
+    \vspace{0.4cm}
+    \begin{tcolorbox}[colback=VeryLightGray,colframe=RedTitle!60,title=Key Insight]
+    DP says: ``\textit{First model everything, then solve.}'' (map before travel)\\
+    RL says: ``\textit{Interact and learn.}'' (explore, then update your map)
+    \end{tcolorbox}
+\end{frame}
+
+\begin{frame}{Markov Decision Process (MDP) Formulation}
+\begin{itemize}
+  \item An RL problem is formalized as a \textbf{Markov Decision Process (MDP)}:
+  \[
+    \mathcal{M} = \langle \mathcal{S}, \mathcal{A}, P, R, \gamma \rangle.
+  \]
+  \item $\mathcal{S}$: set of \textbf{states} (e.g., capital $k$, shock $z$, wealth distribution $\Phi$).
+  \item $\mathcal{A}$: set of \textbf{actions} (e.g., consumption $c$, investment $i$).
+  \item $P(s'|s,a)$: \textbf{transition probability} --- how the state evolves.
+  \item $R(s,a)$: \textbf{reward} for taking action $a$ in state $s$ (= instantaneous utility $u(c)$).
+  \item $\gamma \in [0,1)$: \textbf{discount factor} ($= \beta$ in econ notation).
+  \item \textbf{Objective:} Find an optimal policy $\pi^*$ that maximizes
+  \[
+    \mathbb{E}_\pi\!\left[\sum_{t=0}^\infty \gamma^t R(s_t, a_t)\right].
+  \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MDP Meets the Growth Model}
+Consider the \textbf{optimal growth model}:
+\[
+\max_{\{c_t, k_{t+1}\}} \; \mathbb{E}_0 \sum_{t=0}^{\infty} \beta^t \, u(c_t)
+\quad \text{s.t.} \quad
+c_t + k_{t+1} = z_t f(k_t) + (1-\delta) k_t
+\]
+
+\vspace{0.3cm}
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{MDP element} & \textbf{Growth model} \\
+\midrule
+State $s$ & $(k_t, z_t)$ \\
+Action $a$ & $c_t$ or $k_{t+1}$ \\
+Transition $P(s'|s,a)$ & Capital law of motion + shock process \\
+Reward $R(s,a)$ & $u(c_t)$ \\
+Discount $\gamma$ & $\beta$ \\
+Policy $\pi(s)$ & Consumption rule $c^*(k,z)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+The Bellman equation and MDP are two views of the \textbf{same} problem.
+\end{frame}
+
+\begin{frame}{Agent--Environment Interaction Loop}
+At each time step, the agent observes state $S_t$, chooses action $A_t$.
+The environment returns reward $R_{t+1}$ and transitions to $S_{t+1}$.
+\vfill
+\centering
+\includegraphics[width=7cm]{agent_env_loop.png}
+\vfill
+\small
+\textbf{Trajectory:} $s_0, a_0, r_1, s_1, a_1, r_2, s_2, \ldots$
+\quad The \textbf{return} from time $t$: $G_t = \sum_{k=0}^{\infty} \gamma^k r_{t+k+1}$.
+\end{frame}
+
+\begin{frame}{Policy and Value Functions}
+\begin{itemize}
+    \item \textbf{Policy} $\pi$: a mapping from states to actions.
+    \begin{itemize}
+        \item Deterministic: $a = \pi(s)$ \quad (e.g., $c^*(k,z)$ in econ).
+        \item Stochastic: $a \sim \pi(a|s)$ \quad (useful for exploration).
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \item \textbf{State-value function} --- expected return from state $s$ under $\pi$:
+    \[
+    V^\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s]
+    = \mathbb{E}_\pi\!\left[\sum_{k=0}^{\infty} \gamma^k r_{t+k+1} \;\Big|\; s_t = s\right].
+    \]
+
+    \item \textbf{Action-value function} --- expected return for action $a$ in state $s$:
+    \[
+    Q^\pi(s,a) = \mathbb{E}_\pi[G_t \mid s_t = s, a_t = a].
+    \]
+
+    \item \textbf{Relationship:} $V^\pi(s) = \sum_{a} \pi(a|s)\, Q^\pi(s,a)$.
+\end{itemize}
+\end{frame}
+
+
+%=============================================================================
+% PART 2: CONNECTION TO DYNAMIC PROGRAMMING
+%=============================================================================
+\section{Connection to Dynamic Programming}
+
+\begin{frame}{The Bellman Equation --- Economists' Old Friend}
+\begin{itemize}
+    \item Economists compute the value function $V(s)$ via the Bellman equation:
+    \[
+        V(s) = \max_{a}\Bigl\{ R(s,a) + \gamma \,\mathbb{E}[V(s') \mid s,a] \Bigr\}.
+    \]
+    \item Define the \textbf{Bellman operator} $T$:
+    \[
+    (TV)(s) = \max_{a} \left\{ R(s,a) + \gamma \sum_{s'} P(s'|s,a)\, V(s') \right\}.
+    \]
+    \item The value function is the \textbf{fixed point}: $V^* = TV^*$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Theoretical Foundations of DP}
+Three pillars guarantee that DP ``works'':
+
+\begin{enumerate}
+    \item \textbf{Principle of Optimality} (Bellman):
+    \begin{itemize}
+        \item Any tail of an optimal plan is itself optimal from the state it reaches.
+        \item Guarantees \textbf{equivalence} between the sequence problem and the recursive formulation.
+    \end{itemize}
+
+    \item \textbf{Contraction Mapping Theorem} (Banach):
+    \begin{itemize}
+        \item $\|TV_1 - TV_2\|_\infty \leq \gamma \|V_1 - V_2\|_\infty$ for any $V_1, V_2$.
+        \item Guarantees \textbf{existence}, \textbf{uniqueness}, and \textbf{convergence} of VFI.
+    \end{itemize}
+
+    \item \textbf{Blackwell's Sufficient Conditions}:
+    \begin{itemize}
+        \item \textbf{Monotonicity:} $V_1 \leq V_2 \Rightarrow TV_1 \leq TV_2$.
+        \item \textbf{Discounting:} $T(V+c) \leq TV + \gamma c$ for $c \geq 0$.
+        \item Easy-to-check conditions that imply contraction.
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Full Expectation Backup --- DP's Core Computation}
+The heart of Value Function Iteration (VFI):
+\[
+(TV)(k,z) = \max_{k'} \left\{ u(c) + \beta \sum_{z' \in \mathcal{Z}} P(z'|z) \, V(k',z') \right\}
+\]
+
+\vspace{0.3cm}
+\textbf{Two prerequisites:}
+\begin{enumerate}
+    \item Must know the \textbf{law of motion}: how $(k', z')$ is determined by $(k, z, a)$.
+    \item Must know the \textbf{transition probabilities} $P(z'|z)$.
+\end{enumerate}
+
+\vspace{0.3cm}
+This is a \textbf{full expectation backup}: to update $V$ at one state, sum over \textbf{all possible next states} weighted by their probabilities.
+
+\vspace{0.3cm}
+\begin{tcolorbox}[colback=VeryLightGray,colframe=RedTitle!60]
+If either the law of motion or the transition probabilities are unknown (or too expensive to compute), DP cannot proceed. $\Rightarrow$ \textbf{RL replaces full expectation backup with sample backup.}
+\end{tcolorbox}
+\end{frame}
+
+
+\begin{frame}{$V(s)$ vs.\ $Q(s,a)$: Economics vs.\ Engineering}
+\begin{columns}
+\column{0.48\textwidth}
+\textbf{Economics: Focus on $V(s)$}
+\begin{itemize}
+    \item Emphasis on \textbf{welfare/utility} from a given state.
+    \item Optimal policies derived from planner's problem or equilibrium.
+    \item DP solves for $V^\pi(s)$ directly.
+    \item Rational agents optimize implicitly.
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{RL / Engineering: Focus on $Q(s,a)$}
+\begin{itemize}
+    \item Emphasis on \textbf{real-time action selection}.
+    \item Learning $Q(s,a)$ allows decision-making \textbf{without a model}.
+    \item $\pi^*(s) = \arg\max_a Q^*(s,a)$.
+    \item Works in unknown environments.
+\end{itemize}
+\end{columns}
+
+\vspace{0.5cm}
+\textbf{Growing convergence:} As economists tackle complex, partially-known environments (heterogeneous agents, financial markets), the Q-function approach becomes increasingly valuable.
+\end{frame}
+
+%=============================================================================
+% PART 3: LIMITATIONS OF CLASSICAL DP
+%=============================================================================
+\section{Limitations of Classical DP}
+
+\begin{frame}{Challenge 1: The Curse of Dimensionality}
+\begin{itemize}
+    \item VFI requires a \textbf{grid} over the state space.
+    \item 2D model $(k, z)$: $100 \times 100 = 10{,}000$ points --- easy.
+    \item Multi-sector model with $d$ state variables, $m$ grid points each: $m^d$ points.
+    \begin{itemize}
+        \item $d = 5,\; m = 100$: $10^{10}$ points.
+        \item $d = 8,\; m = 100$: $10^{16}$ points --- \textbf{completely infeasible}.
+    \end{itemize}
+    \item Sparse grids (Smolyak) and projection methods (Chebyshev) partially mitigate this, but break down beyond $\sim$5--8 dimensions.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Heterogeneous agent models} make it worse:
+\begin{itemize}
+    \item The wealth \textbf{distribution} $\Phi$ is itself a state variable --- an infinite-dimensional object.
+    \item Krusell--Smith (1998) approximates $\Phi$ by its mean $K$, but accuracy degrades in complex models.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Challenge 2: Unknown or Intractable Environments}
+\begin{itemize}
+    \item In a representative-agent model: agent knows own state $\Rightarrow$ knows prices $\Rightarrow$ environment is \textbf{transparent}.
+    \item In a heterogeneous-agent model:
+    \begin{itemize}
+        \item Prices depend on aggregate capital $K = \int a\, d\Phi(a,z)$.
+        \item Individual agent does \textbf{not observe} $\Phi$ directly.
+        \item The distribution's law of motion $\Phi' = \mathcal{T}(\Phi)$ has no closed form in general.
+    \end{itemize}
+    \item The ``environment'' (price dynamics) that an agent faces is \textbf{endogenous} and \textbf{unknown}.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{tcolorbox}[colback=VeryLightGray,colframe=RedTitle!60]
+\textbf{The core issue for economists:} prices are the environment. When prices depend on distributions you cannot track, the environment becomes something you must \textit{learn} rather than \textit{specify}.
+\end{tcolorbox}
+\end{frame}
+
+
+\begin{frame}{Why (Deep) Reinforcement Learning Helps}
+\begin{enumerate}
+    \item \textbf{Flexible Function Approximation (Neural Networks):}
+    \begin{itemize}
+        \item Traditional DP uses structured grids (Chebyshev, splines) that scale exponentially.
+        \item Neural networks approximate $V(s)$ or $\pi(s)$ \textbf{without a grid}; parameters scale gracefully with dimension.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \item \textbf{Sample-Based Learning (No Full Expectation Backup):}
+    \begin{itemize}
+        \item RL uses \textbf{simulated trajectories} instead of summing over all $s'$.
+        \item Targets \textbf{relevant regions} of the state space via experience.
+        \item Especially valuable when $\Phi$'s law of motion lacks a closed form.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \item \textbf{Hardware Acceleration (GPUs/TPUs):}
+    \begin{itemize}
+        \item NN training = large-scale matrix multiplication $\Rightarrow$ GPU-friendly.
+        \item Traditional grid-based DP does not map as naturally onto GPU architectures.
+    \end{itemize}
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{RL: Beyond Classical DP --- Summary}
+    \begin{itemize}
+        \item RL algorithms (Q-learning, SARSA, actor-critic) extend DP to:
+        \begin{itemize}
+            \item Handle \textbf{unknown} transition models (model-free).
+            \item Address \textbf{exploration--exploitation} directly.
+            \item \textbf{Scale up} through function approximation.
+        \end{itemize}
+        \item Two pathways:
+        \begin{itemize}
+            \item \textbf{Model-free RL:} learn policies purely from observed data without explicit transition models.
+            \item \textbf{Model-based RL:} combine simulation from approximate structural models with learning.
+        \end{itemize}
+        \item Economic applications:
+        \begin{itemize}
+            \item High-dimensional macroeconomic models.
+            \item Dynamic games in IO (pricing, capacity).
+            \item Finance (portfolio allocation, hedging).
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+%=============================================================================
+% PART 4: A MOTIVATING EXAMPLE
+%=============================================================================
+\section{A Motivating Example}
+
+\begin{frame}{A 3$\times$3 Economic Grid}
+\begin{itemize}
+    \item A \textbf{policymaker} navigates macroeconomic conditions (inflation $\times$ unemployment).
+    \item Goal: reach and maintain the optimal state (low inflation, low unemployment).
+\end{itemize}
+
+\begin{columns}
+\column{0.55\textwidth}
+\begin{itemize}
+    \item Top-left ($S_{0,0}$): High inflation \& unemployment.
+    \item Bottom-right ($G \equiv S_{2,2}$): Low inflation \& unemployment (\textbf{goal}).
+    \item Episode ends upon reaching the goal.
+\end{itemize}
+
+\column{0.42\textwidth}
+\centering
+\footnotesize
+\begin{tabular}{|c|c|c|}
+\hline
+$S_{0,0}$ & $S_{0,1}$ & $S_{0,2}$ \\[2pt]
+\scriptsize (High inf., & & \\[-2pt]
+\scriptsize High unemp.) & & \\
+\hline
+$S_{1,0}$ & $S_{1,1}$ & $S_{1,2}$ \\
+\hline
+$S_{2,0}$ & $S_{2,1}$ & $G\equiv S_{2,2}$ \\[2pt]
+& & \scriptsize (Low inf., Low unemp.)\\
+\hline
+\end{tabular}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Actions and Rewards on the Grid}
+\textbf{Actions (Policy Interventions):}
+\begin{itemize}
+    \item \textbf{Up}: Contractionary policy (reduces inflation, may raise unemployment).
+    \item \textbf{Down}: Expansionary policy (reduces unemployment, may raise inflation).
+    \item \textbf{Left/Right}: Fiscal or structural interventions.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Reward Structure:}
+\[
+R(s,a)=
+\begin{cases}
++1 & \text{if next state = Goal state } G,\\[3pt]
+0 & \text{otherwise.}
+\end{cases}
+\]
+
+\vspace{0.3cm}
+\textbf{MDP on the grid:}
+$\langle \mathcal{S}, \mathcal{A}, P, R, \gamma \rangle$ where $\mathcal{S} = \{S_{i,j}\}$, $\mathcal{A} = \{\text{Up, Down, Left, Right}\}$.
+\end{frame}
+
+\begin{frame}{Illustrative Episode}
+Example trajectory:
+\[
+S_{0,0}\xrightarrow{\text{Down}}S_{1,0}\xrightarrow{\text{Right}}S_{1,1}\xrightarrow{\text{Down}}S_{2,1}\xrightarrow{\text{Right}}G
+\]
+
+\begin{itemize}
+    \item At episode's end, compute cumulative return for each state--action visited.
+    \item Update $Q(s,a)$ by averaging returns over multiple episodes.
+    \item Repeated simulation converges to a stable policy guiding the economy toward the goal.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Now: how exactly do we compute these updates?} Three families of methods:
+\begin{enumerate}
+    \item \textbf{Monte Carlo} --- wait for the full episode, then average.
+    \item \textbf{Temporal Difference} --- update after every single step.
+    \item \textbf{Actor-Critic} --- combine policy learning with value estimation.
+\end{enumerate}
+\end{frame}
+
+
+%=============================================================================
+% PART 5: MONTE CARLO METHODS
+%=============================================================================
+\section{Monte Carlo Methods}
+
+\begin{frame}{Model-Based DP vs.\ Monte Carlo}
+\textbf{Model-Based Policy Iteration (Classical DP):}
+\begin{enumerate}
+    \item \textbf{Policy evaluation:} Solve the Bellman equation:
+    $v^\pi(s) = \sum_{a} \pi(a|s) \bigl[r(s,a) + \gamma \sum_{s'} p(s'|s,a) v^\pi(s')\bigr]$.
+    \item \textbf{Policy improvement:}
+    $\pi'(s) = \arg\max_a q^\pi(s,a)$.
+\end{enumerate}
+\textbf{Requirement:} Must know $p(s'|s,a)$ and $r(s,a)$.
+
+\vspace{0.3cm}
+\textbf{Monte Carlo (MC):}
+\begin{itemize}
+    \item Learn through \textbf{simulated episodes} without requiring explicit transition models.
+    \item Estimate $Q(s,a)$ from \textbf{observed returns} instead of computing expectations.
+    \item Like running a randomized policy experiment many times and averaging the outcomes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Basic Monte Carlo: Key Idea}
+\textbf{Simulate full episodes, then average the returns.}
+
+\begin{itemize}
+    \item Simulate multiple \textbf{full episodes} from each $(s,a)$.
+    \item Collect total discounted return:
+    \[
+        G_t = \sum_{k=0}^{T-1} \gamma^k r_{t+k+1}.
+    \]
+    \item Update rule:
+    \[
+        Q(s,a) \leftarrow \frac{1}{N} \sum_{i=1}^{N} G_0^{(i)},
+    \]
+    where $N$ = number of episodes, $G_0^{(i)}$ = return from episode $i$.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Why full episodes?}
+\begin{itemize}
+    \item Captures \textbf{long-run consequences} of actions.
+    \item Avoids dependence on explicit transition models.
+    \item By the Law of Large Numbers, estimates converge.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monte Carlo Applied to the Growth Model}
+\textbf{Environment:} State $(k_t, z_t)$, action $c_t$, reward $u(c_t)$, transition $k_{t+1} = F(k_t,z_t) - c_t$.
+
+\vspace{0.3cm}
+\textbf{MC Episode:}
+\begin{enumerate}
+    \item Initialize $k_0$, $z_0$.
+    \item For $t = 0, 1, \ldots, T-1$:
+    \begin{itemize}
+        \item Choose $c_t$ from current (or exploratory) policy.
+        \item Observe $r_t = u(c_t)$, transition to $(k_{t+1}, z_{t+1})$.
+    \end{itemize}
+    \item Compute $G_0 = \sum_{t=0}^{T-1} \gamma^t r_t$.
+\end{enumerate}
+
+\vspace{0.2cm}
+\textbf{Key difference from VFI:}
+\begin{itemize}
+    \item VFI: evaluate $V$ at \textbf{every grid point}, using known $P(z'|z)$.
+    \item MC: evaluate $V$ along \textbf{sampled trajectories}, no need for explicit $P$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Challenges of Basic Monte Carlo}
+\textbf{Full-Episode Dependence:}
+\begin{itemize}
+    \item Updates only after \textbf{entire episodes} are completed.
+    \item Inefficient for long-horizon or continuing (non-terminating) problems.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Exploration Dilemma:}
+\begin{itemize}
+    \item Infrequent visits to rare but important states (e.g., financial crises).
+    \item Theory requires every $(s,a)$ visited infinitely often.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{High Variance:}
+\begin{itemize}
+    \item Returns from full episodes vary significantly.
+    \item Slow convergence $\Rightarrow$ many episodes needed.
+\end{itemize}
+
+\vspace{0.3cm}
+These limitations motivate:
+\begin{enumerate}
+    \item \textbf{Exploring starts / subepisodes} --- better coverage.
+    \item \textbf{Explicit exploration strategies} --- $\epsilon$-greedy, Boltzmann, UCB.
+    \item \textbf{Incremental updates} --- Temporal Difference methods.
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{Subepisodes and Exploring Starts}
+\textbf{Subepisodes (First-Visit vs.\ Every-Visit MC):}
+\begin{itemize}
+    \item \textbf{First-Visit MC}: Update $Q(s,a)$ only on the \textbf{first} occurrence per episode.
+    \item \textbf{Every-Visit MC}: Update $Q(s,a)$ on \textbf{every} occurrence.
+    \item Both speed up convergence by leveraging all data within an episode.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Exploring Starts:}
+\begin{itemize}
+    \item Each episode starts from a randomly chosen $(s_0, a_0)$ with nonzero probability.
+    \item Ensures every $(s,a)$ pair receives enough visits.
+    \item \textbf{Problem:} often unrealistic in practice (can't arbitrarily reset the economy).
+\end{itemize}
+
+\vspace{0.3cm}
+$\Rightarrow$ We need a more practical exploration mechanism: \textbf{$\epsilon$-greedy}.
+\end{frame}
+
+
+%=============================================================================
+% PART 6: EXPLORATION--EXPLOITATION
+%=============================================================================
+\section{Exploration--Exploitation}
+
+\begin{frame}{The Exploration--Exploitation Tradeoff}
+    \textbf{Key Challenge in RL:}
+    \begin{itemize}
+        \item \textbf{Exploitation:} Choose the best-known action to maximize \emph{immediate} reward.
+        \item \textbf{Exploration:} Try actions that may seem suboptimal now but could yield better \emph{long-term} rewards.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic Analogies:}
+    \begin{itemize}
+        \item \textbf{Dynamic Pricing:} Use the current best-known price, or test new prices?
+        \item \textbf{Portfolio Management:} Stick to blue-chip stocks, or diversify into unknowns?
+        \item \textbf{R\&D Investment:} Exploit existing technology, or explore new innovations?
+        \item \textbf{Monetary Policy:} Follow the Taylor rule, or experiment with novel instruments?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{$\epsilon$-Greedy Exploration}
+  \begin{itemize}
+    \item With probability $1 - \epsilon$: select the \textbf{best-known action} (greedy).
+    \item With probability $\epsilon$: select an action \textbf{at random} (explore).
+    \[
+        \pi(a|s) =
+        \begin{cases}
+            1 - \epsilon + \frac{\epsilon}{|\mathcal{A}(s)|}, & \text{if } a = \arg\max_{a'} Q(s,a') \\[4pt]
+            \frac{\epsilon}{|\mathcal{A}(s)|}, & \text{otherwise}.
+        \end{cases}
+    \]
+    \item Ensures all actions have \textbf{nonzero probability} $\Rightarrow$ every $(s,a)$ visited eventually.
+    \item Simple, practical, widely used.
+    \item Limitation: explores \textbf{uniformly} among non-greedy actions (doesn't favor promising ones).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Boltzmann (Softmax) Exploration}
+    \textbf{Idea:} Actions chosen \textbf{probabilistically}, weighted by estimated value.
+    \[
+       \Pr(a \mid s) = \frac{\exp\!\bigl(Q(s,a)/\tau\bigr)}{\sum_{a'} \exp\!\bigl(Q(s,a')/\tau\bigr)},
+    \]
+    where $\tau > 0$ is the \textbf{temperature}:
+    \begin{itemize}
+        \item $\tau$ \textbf{high} $\Rightarrow$ near-uniform exploration.
+        \item $\tau$ \textbf{low} $\Rightarrow$ near-greedy selection.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Connection to LLMs:} Large Language Models use the same ``temperature'' parameter to balance creativity (exploration) and consistency (exploitation) in text generation.
+
+    \vspace{0.3cm}
+    \textbf{Economic example:} Online advertising allocates budget to ads $\propto \exp(\text{estimated ROI}/\tau)$.
+\end{frame}
+
+\begin{frame}{Upper Confidence Bounds (UCB)}
+    \textbf{Key idea:} Give an \textbf{exploration bonus} to less-tried actions.
+    \[
+        a^* = \arg\max_a \left[\hat{Q}(a) + \alpha \sqrt{\frac{\ln t}{N(a)}}\right],
+    \]
+    where $\hat{Q}(a)$ = average reward, $N(a)$ = number of trials of action $a$.
+
+    \begin{itemize}
+        \item As $N(a)$ grows, the bonus shrinks $\Rightarrow$ converges to exploitation.
+        \item Actions with \textbf{fewer trials} get more chances $\Rightarrow$ principled exploration.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic example:} A firm evaluating new markets. Early data is sparse, so a confidence bonus encourages trying each region enough to reduce uncertainty.
+\end{frame}
+
+\begin{frame}{Comparison of Exploration Approaches}
+    \small
+    \begin{center}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Method} & \textbf{Mechanism} & \textbf{Strength} & \textbf{Econ Example} \\
+        \midrule
+        $\epsilon$-Greedy
+        & Random with prob.\ $\epsilon$
+        & Simple
+        & Test discount rates \\
+        Boltzmann
+        & Weighted by $\exp(Q/\tau)$
+        & Favors good actions
+        & Ad budget by ROI \\
+        Optimistic Init
+        & Start $Q$ large
+        & Guaranteed coverage
+        & Startup tries all products \\
+        UCB
+        & Uncertainty bonus
+        & Principled
+        & Firm explores new markets \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.3cm}
+    \textbf{No single approach is universally best.} The choice depends on:
+    \begin{itemize}
+        \item Cost of exploration (is a bad action very costly?).
+        \item Size of the action space.
+        \item Whether you can quantify uncertainty.
+    \end{itemize}
+\end{frame}
+
+
+%=============================================================================
+% PART 7: TEMPORAL DIFFERENCE LEARNING & Q-LEARNING
+%=============================================================================
+\section{Temporal-Difference Learning and Q-Learning}
+
+\begin{frame}{From MC to TD: The Key Innovation}
+    \textbf{Monte Carlo:} waits until the \textbf{end of an episode} to update.
+    \begin{itemize}
+        \item Analogy: estimate a mean by collecting a \textbf{full batch} of data, then averaging.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Temporal Difference (TD):} updates \textbf{after every single step}.
+    \begin{itemize}
+        \item Analogy: \textbf{incremental mean update} after each new data point.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{From statistics:}
+    \begin{itemize}
+        \item Non-incremental: $\hat{\mu}_n = \frac{1}{n}\sum_{i=1}^n X_i$
+        \quad $\rightarrow$ collect $n$ samples, then compute.
+        \item Incremental: $\hat{\mu}_{k+1} = \hat{\mu}_k + \alpha_{k+1}(X_{k+1} - \hat{\mu}_k)$
+        \quad $\rightarrow$ update after each sample.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    TD applies this incremental logic to \textbf{value function estimation}.
+\end{frame}
+
+\begin{frame}{TD(0): The Simplest TD Method}
+    \textbf{MC update:}
+    \[
+        V(s_t) \leftarrow V(s_t) + \alpha \bigl(\underbrace{G_t}_{\text{full return}} - V(s_t)\bigr).
+    \]
+
+    \textbf{TD(0) update:}
+    \[
+        V(s_t) \leftarrow V(s_t) + \alpha \Bigl(\underbrace{r_{t+1} + \gamma\,V(s_{t+1})}_{\text{one-step target}} - V(s_t)\Bigr).
+    \]
+
+    \vspace{0.3cm}
+    \textbf{Key difference:}
+    \begin{itemize}
+        \item MC uses the \textbf{actual full return} $G_t$ (unbiased, high variance).
+        \item TD uses a \textbf{bootstrapped target} $r_{t+1} + \gamma V(s_{t+1})$ (biased, lower variance).
+        \item TD learns \textbf{online} --- no need to wait for episode termination.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \textbf{TD Error:} $\delta_t = r_{t+1} + \gamma V(s_{t+1}) - V(s_t)$ \quad (the ``surprise'' signal).
+\end{frame}
+
+
+\begin{frame}{TD(0) Applied to the Growth Model}
+  \textbf{Setup:} State $s_t = (k_t, z_t)$, policy $\pi$ chooses $c_t$, reward $r_{t+1} = u(c_t)$.
+
+  \vspace{0.3cm}
+  \textbf{Each time step:}
+  \begin{enumerate}
+      \item Observe state $(k_t, z_t)$, choose $c_t$ via policy $\pi$.
+      \item Receive reward $r_{t+1} = u(c_t)$.
+      \item Observe next state $(k_{t+1}, z_{t+1})$.
+      \item Update:
+      \[
+        V(k_t, z_t) \leftarrow V(k_t, z_t) + \alpha \Bigl[u(c_t) + \beta\, V(k_{t+1}, z_{t+1}) - V(k_t, z_t)\Bigr].
+      \]
+  \end{enumerate}
+
+  \vspace{0.3cm}
+  \textbf{Advantage over VFI:} no need to sum over all possible $z'$. Just use the \textbf{realized} transition.
+
+  \textbf{Advantage over MC:} no need to simulate an entire lifetime. Update \textbf{every period}.
+\end{frame}
+
+
+\begin{frame}{MC vs.\ TD(0) vs.\ DP: Comparison}
+\footnotesize
+\begin{center}
+    \begin{tabular}{p{2.4cm} p{3.2cm} p{3.2cm} p{3.2cm}}
+    \toprule
+    \textbf{Feature} & \textbf{Monte Carlo} & \textbf{TD(0)} & \textbf{Dynamic Prog.} \\
+    \midrule
+    Update type & Sample-based & Sample-based & Full expectation \\
+    When to update & End of episode & After each step & Every iteration \\
+    Requires model? & No & No & Yes ($P(s'|s,a)$) \\
+    Bootstrapping? & No & Yes & Yes \\
+    Bias / Variance & Unbiased, high var. & Biased, lower var. & Exact (no sampling) \\
+    Applicability & Episodic only & Episodic \& continuing & Model-based only \\
+    \bottomrule
+    \end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\normalsize
+\textbf{Key insight:} TD sits between MC and DP. It uses \textbf{sampling} (like MC) and \textbf{bootstrapping} (like DP), combining the best of both worlds.
+\end{frame}
+
+
+\begin{frame}{On-Policy vs.\ Off-Policy Learning}
+    \begin{itemize}
+        \item \textbf{On-Policy (SARSA):}
+        \begin{itemize}
+            \item The \emph{behavior policy} (collects data) $=$ the \emph{target policy} (being improved).
+            \item Updates based on the \textbf{action actually taken}:
+            \[
+              Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \bigl[r_{t+1} + \gamma\,Q(s_{t+1}, a_{t+1}) - Q(s_t,a_t)\bigr].
+            \]
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \item \textbf{Off-Policy (Q-Learning):}
+        \begin{itemize}
+            \item The behavior policy can \textbf{differ} from the target policy.
+            \item Updates assume \textbf{greedy} next action, regardless of what was actually done:
+            \[
+              Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \bigl[r_{t+1} + \gamma\,\max_{a'} Q(s_{t+1}, a') - Q(s_t,a_t)\bigr].
+            \]
+        \end{itemize}
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic insight:} Off-policy $=$ learn about the \textbf{optimal} strategy while exploring with a different behavior. Like studying the best possible portfolio allocation while actually holding a diversified ``safe'' portfolio.
+\end{frame}
+
+\begin{frame}{Comparing SARSA and Q-Learning}
+    \begin{center}
+    \small
+    \begin{tabular}{lcc}
+    \toprule
+    \textbf{Feature} & \textbf{SARSA (On-Policy)} & \textbf{Q-Learning (Off-Policy)} \\
+    \midrule
+    Update target
+        & $r + \gamma Q(s', a')$
+        & $r + \gamma \max_{a'} Q(s', a')$ \\
+    Behavior $=$ target?
+        & Yes
+        & No (can differ) \\
+    Converges to
+        & $Q^\pi$ (of \emph{actual} behavior)
+        & $Q^*$ (optimal) \\
+    Risk awareness
+        & Reflects real actions
+        & Plans for ``ideal'' actions \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.4cm}
+    \textbf{Which to choose?}
+    \begin{itemize}
+        \item \textbf{SARSA}: when \textbf{safety} matters --- learning matches actual behavior (e.g., autonomous driving).
+        \item \textbf{Q-Learning}: when you want the \textbf{optimal} policy directly and can tolerate off-policy mismatch.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Q-Learning in the Growth Model}
+  \begin{itemize}
+    \item \textbf{Action-value function:}
+      $Q(k,c) = u(c) + \beta \,\mathbb{E}[V(k') \mid k,c]$.
+    \item \textbf{Optimal policy:}
+      $\pi^*(k) = \arg\max_c Q^*(k,c)$.
+    \item \textbf{Q-Learning update (online, model-free):}
+      \[
+        Q_{m+1}(k_t,c_t)
+        = Q_m(k_t,c_t)
+        + \alpha \Bigl[u(c_t) + \beta \max_{c'} Q_m(k_{t+1},c')
+        - Q_m(k_t,c_t)\Bigr].
+      \]
+    \item \textbf{Advantages:}
+      \begin{itemize}
+        \item Works with stochastic or \textbf{unknown} transitions (sample-based).
+        \item Can approximate $Q(\cdot)$ with neural networks for continuous state/action spaces.
+        \item Converges to $Q^*$ under standard conditions.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Multi-Step Methods: TD($\lambda$)}
+    \textbf{Idea:} Combine partial returns over $n$ steps with bootstrapping.
+    \begin{itemize}
+        \item $n = 1$: recovers TD(0).
+        \item $n = T - t$: recovers MC.
+        \item Intermediate $n$: balances bias and variance.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{TD($\lambda$) --- eligibility traces:}
+    \begin{itemize}
+        \item Blends all $n$-step returns using exponential weighting parameter $\lambda \in [0,1]$.
+        \item $\lambda = 0$: pure TD(0). \quad $\lambda = 1$: pure MC.
+        \item Often improves convergence in practice.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{For large-scale economic models:} multi-step or eligibility trace methods can substantially improve convergence times compared to pure one-step TD.
+\end{frame}
+
+
+%=============================================================================
+% PART 8: ACTOR-CRITIC METHODS
+%=============================================================================
+\section{Actor-Critic Methods}
+
+\begin{frame}{Motivation: Beyond Tabular Methods}
+    \textbf{Tabular RL:}
+    \begin{itemize}
+        \item Stores a value for each \emph{discrete} state (or state--action) pair.
+        \item Infeasible in \textbf{large or continuous} state spaces.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Function Approximation:}
+    \begin{itemize}
+        \item Replace tables with \textbf{parameterized models} (e.g., neural networks).
+        \item Generalize from observed states to unseen states.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Continuous Action Spaces:}
+    \begin{itemize}
+        \item Economic decisions are typically \textbf{continuous}: how much to consume, invest, price.
+        \item Cannot enumerate all actions $\Rightarrow$ need a \textbf{continuous policy} $\pi_\theta(a|s)$.
+        \item Actor-critic methods handle this naturally.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Actor-Critic: The Architecture}
+    Two sets of parameters, trained jointly:
+
+    \vspace{0.3cm}
+    \textbf{Actor (Policy $\pi_\theta$):}
+    \begin{itemize}
+        \item Parameterized by $\theta$ (e.g., neural network weights).
+        \item Produces actions: $a \sim \pi_\theta(a|s)$.
+        \item Updated via \textbf{policy gradient}.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Critic (Value Function $V_\phi$ or $Q_\phi$):}
+    \begin{itemize}
+        \item Parameterized by $\phi$.
+        \item Estimates expected return: $V^\pi(s;\phi)$ or $Q^\pi(s,a;\phi)$.
+        \item Provides feedback (``critique'') to guide the actor.
+        \item Updated via \textbf{TD learning}.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Why combine?} Policy methods handle continuous actions; value methods reduce variance. Actor-critic merges both for efficient learning.
+\end{frame}
+
+
+\begin{frame}{Policy Gradient Theorem}
+    \textbf{Objective:}
+    $J(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^{\infty} \gamma^t r_t\right]$.
+
+    \vspace{0.3cm}
+    \textbf{Policy Gradient Theorem:}
+    \[
+      \nabla_\theta J(\theta)
+      =
+      \mathbb{E}_{s \sim d^{\pi_\theta},\, a \sim \pi_\theta}
+      \Bigl[
+         \nabla_\theta \log\pi_\theta(a | s)\,Q^{\pi_\theta}(s,a)
+      \Bigr].
+    \]
+
+    \begin{itemize}
+        \item The \textbf{log-derivative trick}: we only differentiate $\log \pi_\theta(a|s)$.
+        \item Multiplying by $Q^{\pi_\theta}(s,a)$ emphasizes actions with higher returns.
+        \item In practice, the \textbf{critic} approximates $Q$ (or $V$) with parameters $\phi$.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Variance reduction:} Replace $Q^\pi(s,a)$ with the \textbf{advantage}:
+    \[
+    A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s).
+    \]
+    Subtracting the baseline $V^\pi(s)$ keeps the estimate unbiased but lowers variance.
+\end{frame}
+
+
+\begin{frame}{Actor-Critic Algorithm}
+\textbf{At each time step:}
+\begin{enumerate}
+    \item \textbf{Actor} selects action: $a_t \sim \pi_\theta(\cdot | s_t)$.
+    \item Environment returns $(r_{t+1}, s_{t+1})$.
+    \item \textbf{Critic update} (TD learning on $\phi$):
+    \[
+        \delta_t = r_{t+1} + \gamma V(s_{t+1};\phi) - V(s_t;\phi)
+    \]
+    \[
+       \phi \gets \phi + \alpha\,\delta_t\,\nabla_\phi V(s_t;\phi)
+    \]
+    \item \textbf{Actor update} (policy gradient on $\theta$):
+    \[
+       \theta \gets \theta + \beta\,\delta_t\,\nabla_\theta \log \pi_\theta(a_t | s_t)
+    \]
+\end{enumerate}
+
+\vspace{0.2cm}
+\textbf{Intuition:}
+\begin{itemize}
+    \item $\delta_t > 0$: outcome was \textbf{better} than expected $\Rightarrow$ increase probability of $a_t$.
+    \item $\delta_t < 0$: outcome was \textbf{worse} than expected $\Rightarrow$ decrease probability of $a_t$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Why Actor-Critic for Economics?}
+    \textbf{Large / Continuous State Spaces:}
+    \begin{itemize}
+        \item Capital stocks, prices, wealth distributions --- high-dimensional and continuous.
+        \item Function approximation with neural networks is essential.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \textbf{Continuous Action Spaces:}
+    \begin{itemize}
+        \item Monetary policy rates, consumption levels, investment amounts.
+        \item Actor-critic handles continuous actions via a learned policy $\pi_\theta(a|s)$.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \textbf{Efficiency and Stability:}
+    \begin{itemize}
+        \item Critic reduces variance in policy updates.
+        \item More data-efficient than pure policy gradient or pure value-based methods.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \textbf{Already seen in Lec04:} The simple actor-critic applied to the optimal growth model (policy NN + value NN trained jointly).
+\end{frame}
+
+
+%=============================================================================
+% PART 9: ADVANCED ALGORITHMS
+%=============================================================================
+\section{Advanced Actor-Critic Algorithms}
+
+\begin{frame}{A2C / A3C: Advantage Actor-Critic}
+    \textbf{Key idea:} Use the advantage function $A_t = r_t + \gamma V(s_{t+1}) - V(s_t)$
+    in the policy gradient:
+    \[
+      \nabla_\theta J(\theta) \approx \sum_t A_t \, \nabla_\theta \log \pi_\theta(a_t | s_t).
+    \]
+
+    \vspace{0.3cm}
+    \textbf{A2C (Synchronous):}
+    \begin{itemize}
+        \item Multiple \textbf{workers} run parallel environment instances.
+        \item Synchronously send gradients to a central learner.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    \textbf{A3C (Asynchronous):}
+    \begin{itemize}
+        \item Workers update \textbf{asynchronously} --- faster but gradients may become stale.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{For economists:} parallel workers $=$ running multiple economy simulations simultaneously, each feeding back to improve a shared policy.
+\end{frame}
+
+
+\begin{frame}{DDPG: Deep Deterministic Policy Gradient}
+    \textbf{For continuous action spaces with a deterministic policy $\mu_\theta(s)$:}
+    \begin{itemize}
+        \item \textbf{Actor:} $a = \mu_\theta(s)$ --- deterministic mapping from state to action.
+        \item \textbf{Critic:} $Q_\phi(s,a)$ --- approximates expected return for $(s,a)$.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Policy gradient (chain rule through the critic):}
+    \[
+      \nabla_\theta J \approx \frac{1}{N}\sum_i
+      \nabla_a Q_\phi(s_i,a)\big|_{a=\mu_\theta(s_i)}
+      \cdot \nabla_\theta \mu_\theta(s_i).
+    \]
+
+    \vspace{0.2cm}
+    \textbf{Exploration:} Add noise to actions: $a_t = \mu_\theta(s_t) + \text{noise}$.
+
+    \vspace{0.3cm}
+    \textbf{Economic applications:}
+    \begin{itemize}
+        \item Continuous portfolio allocation adjustments.
+        \item Optimal consumption/investment with continuous controls.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}{PPO: Proximal Policy Optimization}
+    \textbf{Problem:} Large policy updates can destabilize learning.
+
+    \vspace{0.2cm}
+    \textbf{Solution:} Clip the policy ratio to prevent drastic changes:
+    \[
+      L^{\text{clip}}(\theta) = \mathbb{E}_t\!\left[
+        \min\!\left(
+          \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)} A_t,\;
+          \text{clip}\!\left(\frac{\pi_\theta}{\pi_{\theta_{\text{old}}}},\, 1{-}\epsilon,\, 1{+}\epsilon\right) A_t
+        \right)
+      \right].
+    \]
+
+    \begin{itemize}
+        \item $\epsilon \approx 0.2$: bounds how much the policy can change per update.
+        \item If $A_t > 0$ (good action): increase its probability, but not too much.
+        \item If $A_t < 0$ (bad action): decrease its probability, but not too much.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Why popular?} Simple, stable, good performance across diverse tasks. Widely used in training LLMs via RLHF (Reinforcement Learning from Human Feedback).
+\end{frame}
+
+
+\begin{frame}{SAC: Soft Actor-Critic}
+    \textbf{Key innovation:} Add \textbf{entropy regularization} to the objective.
+    \[
+      J_{\text{SAC}} = \mathbb{E}\!\left[\sum_t \gamma^t\bigl(r_t + \alpha \,\mathcal{H}(\pi(\cdot|s_t))\bigr)\right],
+    \]
+    where $\mathcal{H}(\pi) = -\sum_a \pi(a|s)\log\pi(a|s)$ measures policy ``spread.''
+
+    \vspace{0.3cm}
+    \begin{itemize}
+        \item $\alpha$ large $\Rightarrow$ more exploration (high-entropy policy).
+        \item $\alpha$ small $\Rightarrow$ more exploitation (near-deterministic).
+        \item Prevents premature convergence to local optima.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Practical features:} Twin Q-networks (reduce overestimation), soft target updates (stability), stochastic policy (reparameterization trick).
+
+    \vspace{0.2cm}
+    \textbf{When to use:} Uncertain environments requiring robust exploration.
+\end{frame}
+
+
+\begin{frame}{Choosing an Algorithm: Summary}
+    \small
+    \begin{center}
+    \begin{tabular}{llll}
+        \toprule
+        \textbf{Algorithm} & \textbf{Key Feature} & \textbf{Action Space} & \textbf{Best For} \\
+        \midrule
+        Q-Learning & Off-policy, tabular & Discrete & Small problems \\
+        A2C/A3C & Advantage + parallel & Both & Parallel simulations \\
+        DDPG & Deterministic policy & Continuous & Single best action \\
+        PPO & Clipped updates & Both & Stable improvements \\
+        SAC & Entropy regularization & Continuous & Robust exploration \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.3cm}
+    \normalsize
+    \textbf{For economists solving macro models:}
+    \begin{itemize}
+        \item \textbf{Known model, continuous controls:} Actor-critic (DDPG or PPO).
+        \item \textbf{Unknown environment, need exploration:} SAC or PPO.
+        \item \textbf{Discrete actions, small state space:} Q-learning suffices.
+        \item \textbf{Training LLMs (RLHF):} PPO is the standard.
+    \end{itemize}
+\end{frame}
+
+
+%=============================================================================
+% PART 10: APPLICATIONS AND BREAKTHROUGHS
+%=============================================================================
+\section{Applications and Breakthroughs}
+
+\begin{frame}{RL Breakthroughs: AlphaGo and Beyond}
+\begin{itemize}
+    \item \textbf{AlphaGo (DeepMind, 2016):} First program to defeat a human Go champion.
+    \begin{itemize}
+        \item Combined deep NNs with RL (Monte Carlo Tree Search).
+        \item \textbf{Policy network:} estimates probability of each move.
+        \item \textbf{Value network:} predicts win/loss from current position.
+    \end{itemize}
+    \item \textbf{AlphaZero (2017):} Learned Go, chess, and shogi entirely through \textbf{self-play}, without human knowledge.
+    \item \textbf{RLHF for LLMs:} PPO used to align ChatGPT, Claude, etc.\ with human preferences.
+    \item \textbf{Robotics:} RL enables robots to learn manipulation, navigation from trial-and-error.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Common thread:} Deep RL + self-play/simulation can discover strategies that surpass human expertise --- relevant for economic policy design.
+\end{frame}
+
+\begin{frame}{How AlphaGo Works: MCTS + RL}
+\centering
+\includegraphics[width=14cm]{alpha_go_1.png}
+\end{frame}
+
+\begin{frame}{Monte Carlo Tree Search: Connection to Economics}
+\begin{itemize}
+    \item \textbf{MCTS} evaluates moves by simulating future game progressions (\emph{rollouts}).
+    \item Four steps: \textbf{Selection} (UCB) $\to$ \textbf{Simulation} (rollout) $\to$ \textbf{Backpropagation} $\to$ \textbf{Move selection}.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{MCTS vs.\ DP:}
+\begin{itemize}
+    \item DP enumerates \textbf{all} states and transitions.
+    \item MCTS selectively simulates \textbf{promising branches}.
+    \item Both update value estimates from future returns (Bellman-like).
+    \item Key difference: MCTS works when $P(s'|s,a)$ is \textbf{not fully known}.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{For economists:} MCTS is like running targeted ``what-if'' simulations of policy scenarios, focusing computational effort on the most relevant paths through the economy.
+\end{frame}
+
+
+%=============================================================================
+% PART 11: CASE STUDY
+%=============================================================================
+\section{Case Study: AlphaManager}
+
+\begin{frame}{AlphaManager: Offline RL for Corporate Finance}
+\textbf{Campello, Cong, and Zhou (2023)} develop an AI-assisted framework (DDRC) for corporate finance:
+
+\vspace{0.3cm}
+\textbf{Three challenges addressed:}
+\begin{itemize}
+    \item \textbf{Curse of dimensionality:} managers' decisions in high-dimensional action/state space.
+    \item \textbf{Dynamic feedback:} decisions interact with the economic environment; market reactions feed back.
+    \item \textbf{Evolving environment:} data distributions shift as markets evolve.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Solution approach:}
+\begin{enumerate}
+    \item \textbf{Predictive Environment Module (PEM):} estimate $\Delta X_{t+1} = f(X_t, u_t) + \varepsilon_{t+1}$ from historical data using deep neural networks.
+    \item \textbf{Policy Module:} offline RL (policy gradient) to find optimal $g(X_t|\theta)$.
+    \item \textbf{Ambiguity aversion:} penalize actions where model ensemble disagrees, addressing distribution shift.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{AlphaManager: Policy Gradient and Ambiguity}
+\textbf{Optimization:}
+\[
+\max_{g(X_t|\theta)} \mathbb{E}_{t_0}\sum_{t=t_0}^{t_0+T} r(X_t, u_t)
+\quad \text{s.t.} \quad
+\Delta X_{t+1} = f(X_t, u_t) + \varepsilon_{t+1},\; u_t = g(X_t|\theta).
+\]
+
+\vspace{0.2cm}
+\textbf{Ambiguity via Boosting:}
+\begin{itemize}
+    \item Train ensemble $\{f^i\}_{i=1}^I$ with different initializations.
+    \item Measure disagreement: $\text{BoostingError}(X_t, u_t)$.
+    \item Penalize high-disagreement regions:
+    \[
+    \sum_t \min_i r^i - \delta \cdot \max\{0, \max_t \text{BoostingError} - \theta(X_{t_0})\}.
+    \]
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Key insight:} When $\delta \to \infty$, the agent becomes infinitely ambiguity-averse --- it avoids novel, uncertain regions. Balancing $\delta$ is analogous to the exploration--exploitation tradeoff.
+\end{frame}
+
+\begin{frame}{AlphaManager: Consistency and Extensions}
+\textbf{Consistency question:}
+\begin{itemize}
+    \item PEM estimates $f(X_t, u_t)$ from historical data.
+    \item Optimal policy $g^*$ (given $f$) changes agent behavior $\Rightarrow$ new data distribution.
+    \item Will the estimated $f$ remain valid under the new policy?
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Possible extension --- toward full RL:}
+\begin{enumerate}
+    \item Use solved $g(X|f)$ to generate new data via bootstrap.
+    \item Mix new (out-of-sample) data with historical data.
+    \item Re-estimate $\hat{f}$ with a learning rate for new observations.
+    \item Repeat until $f$ and $\hat{f}$ converge.
+\end{enumerate}
+
+\vspace{0.2cm}
+This moves from \textbf{offline RL} (fixed dataset) toward \textbf{online RL} (iterative environment learning) --- improving robustness and discovering strategies invisible in historical data alone.
+\end{frame}
+
+
+%=============================================================================
+% SUMMARY
+%=============================================================================
+\section{Summary}
+
+\begin{frame}{Lecture Summary}
+\begin{enumerate}
+    \item \textbf{RL = DP + Learning}: same Bellman foundations, but replaces full expectation backup with \textbf{sample-based} updates.
+
+    \item \textbf{Monte Carlo}: learns from complete episodes; model-free but slow and high-variance.
+
+    \item \textbf{TD / Q-Learning}: incremental updates after each step; balances bias and variance; handles continuing tasks.
+
+    \item \textbf{Actor-Critic}: combines policy optimization (actor) with value estimation (critic); handles continuous actions and large state spaces.
+
+    \item \textbf{Advanced algorithms} (PPO, SAC, DDPG): stability, entropy regularization, deterministic policies for different use cases.
+
+    \item \textbf{For economists}: RL enables solving dynamic models that are too high-dimensional for classical DP, and environments where transition probabilities are unknown or endogenous.
+\end{enumerate}
+\end{frame}
+
+
+\begin{frame}{The RL Landscape for Economists}
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Method} & \textbf{Model Required?} & \textbf{Update Style} \\
+\midrule
+Value Function Iteration (DP) & Yes (full model) & Full backup \\
+Monte Carlo & No & End of episode \\
+TD(0) / SARSA & No & Every step \\
+Q-Learning & No & Every step (off-policy) \\
+Actor-Critic & No & Every step (policy + value) \\
+\midrule
+\textbf{Deep RL variants} & & \\
+DQN / DDPG / PPO / SAC & No & Mini-batch gradient \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5cm}
+\textbf{As models grow in complexity, RL becomes not a replacement for DP, but its necessary \textbf{generalization}.}
+\end{frame}
+
+
+\begin{frame}{Key Takeaways}
+\begin{itemize}
+    \item Economists already know the theory behind RL --- it's the \textbf{Bellman equation}.
+    \item What RL adds: the ability to \textbf{learn} value functions and policies from \textbf{simulated experience} rather than solving them analytically.
+    \item The exploration--exploitation tradeoff has direct economic interpretations (R\&D, pricing, portfolio choice).
+    \item Actor-critic methods are the workhorse for solving continuous-action dynamic models with deep learning.
+    \item Modern breakthroughs (AlphaGo, RLHF for LLMs) rest on the same foundations covered today.
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{Next lecture (Lec06):} Applying RL to \textbf{Heterogeneous Agent Models} --- Aiyagari, Krusell--Smith, OLG, and Mean Field Games.
+\end{frame}
+
+
+\end{document}

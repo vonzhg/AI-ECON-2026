@@ -1,0 +1,77 @@
+%% Lec01 shared MAP slide: "one map, three acts" recurring diagram.
+%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray,
+%% DarkText) and AFTER \usetikzlibrary{positioning,arrows.meta,shapes,calc}.
+%% Call \LecOneMap{k} inside a frame, where k in {1,2,3} highlights the current
+%% act ("you are here") and k = 0 renders the closing reprise with all three
+%% acts checked green (used by T3's closing frame).
+%% Filename deliberately does NOT match the build glob Lec*_T*.tex, so the build
+%% script never tries to compile it standalone.
+%%
+%% The three acts are the lecture's story: FRAME -> PROOF -> PRACTICE, i.e.
+%% AI framed as an economic object (cognitive capital), live proof that AI
+%% already does frontier research (DeepRamsey, GRAM, measurement), and how
+%% this course turns that into the student's own practice.
+
+\newcommand{\LecOneMap}[1]{%
+% Precompute per-box style selectors; TikZ option lists are comma-split before
+% TeX conditionals run, so \ifnum must not sit inside a [...] options list.
+\ifnum#1=0
+  \tikzset{lmapa/.style={lmapdone}, lmapb/.style={lmapdone},
+           lmapc/.style={lmapdone}}%
+\else
+  \tikzset{lmapa/.style={}, lmapb/.style={}, lmapc/.style={}}%
+  \ifnum#1=1 \tikzset{lmapa/.style={lmapcur}}\fi
+  \ifnum#1=2 \tikzset{lmapb/.style={lmapcur}}\fi
+  \ifnum#1=3 \tikzset{lmapc/.style={lmapcur}}\fi
+\fi
+\begin{center}
+\begin{tikzpicture}[
+    act/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=3.4cm, minimum height=1.0cm, text width=3.25cm,
+        align=center, font=\small, text=DarkText},
+    lmapcur/.style={draw=RedTitle, very thick, fill=orange!20},
+    lmapdone/.style={draw=green!45!black, thick, fill=green!10},
+    q/.style={font=\tiny\itshape, text width=3.4cm, align=center, text=black!70},
+    barlab/.style={font=\tiny\bfseries, text=black!65},
+    sat/.style={rectangle, rounded corners, draw=black!45, dashed, fill=white,
+        text width=4.6cm, align=center, font=\tiny, text=black!70,
+        minimum height=0.5cm},
+    arr/.style={-{Stealth[length=2.4mm]}, thick, gray!60}
+]
+    % --- three act boxes ---
+    \node[act, lmapa] (a1) at (0,0)
+        {\textbf{1.1\ \ FRAME}\\[1pt] \tiny cognitive capital $\cdot$ growth};
+    \node[act, lmapb] (a2) at (4.5,0)
+        {\textbf{1.2\ \ PROOF}\\[1pt] \tiny DeepRamsey $\cdot$ GRAM $\cdot$ meas.};
+    \node[act, lmapc] (a3) at (9.0,0)
+        {\textbf{1.3\ \ PRACTICE}\\[1pt] \tiny roadmap $\cdot$ tooling $\cdot$ capstone};
+    \draw[arr] (a1) -- (a2);
+    \draw[arr] (a2) -- (a3);
+    % --- the student question each act answers ---
+    \node[q] at (0,-0.98)   {what kind of economic\\ object is AI?};
+    \node[q] at (4.5,-0.98) {can AI actually do\\ frontier research?};
+    \node[q] at (9.0,-0.98) {how does this course\\ make it mine?};
+    % --- "you are here" marker above the current act ---
+    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (4.5,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (9.0,1.02)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (4.5,1.02)
+        {all three acts complete};\fi
+    % --- bottom band: each act's memorable tagline (the lecture's spine) ---
+    \fill[blue!10]   (-1.6,-1.78) rectangle (1.6,-1.45);
+    \fill[green!12]  (2.9,-1.78)  rectangle (6.1,-1.45);
+    \fill[orange!16] (7.4,-1.78)  rectangle (10.6,-1.45);
+    \node[barlab] at (0,-1.615)   {PRICE OF COGNITION $\downarrow$};
+    \node[barlab] at (4.5,-1.615) {CONTEXT, NOT CAPABILITY};
+    \node[barlab] at (9.0,-1.615) {REPLICATION-FIRST};
+    % --- dashed satellites: where this lecture sits in the course flow ---
+    \node[sat] at (0,-2.45)
+        {\textit{front door:} no prerequisites --- bring a research question and skepticism};
+    \node[sat] at (9.0,-2.45)
+        {\textit{downstream:} Lec02 opens the toolbox --- the predictive and generative stacks};
+\end{tikzpicture}
+\end{center}
+}

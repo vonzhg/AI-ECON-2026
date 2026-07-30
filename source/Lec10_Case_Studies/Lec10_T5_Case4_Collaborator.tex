@@ -1,0 +1,530 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.5: Case Study 4 --- AI as Research Collaborator
+%% Source: ./archive_pre_split/Lec10_Case_Studies_v2.tex (section 5)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T5_Case_DynamicMacro.tex
+%% Pass B ports: the canonical five-stage workflow vocabulary
+%%         (model -> equilibrium -> algorithm -> pseudo-code -> code)
+%%         as a reference framework before the labor-market case stages.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{./Exercise10_ES_Fellows/plots/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\lstdefinestyle{markdownstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!40},
+    backgroundcolor=\color{gray!8},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.5: Case Study 4 --- AI as Research Collaborator}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.5 Agenda}
+\begin{enumerate}
+  \item \textbf{Reference framework} --- the canonical five-stage research workflow
+  \item \textbf{Case Study 4} --- AI as research collaborator across the lifecycle
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Reference: The Five-Stage Workflow}
+%===========================================================
+
+\sectiondivider{Reference framework}{Model $\to$ equilibrium $\to$ algorithm $\to$ pseudo-code $\to$ code}
+
+% ---- 5-Stage 1: Diagram -- ported from MiniCourse M4_T5 ----
+\begin{frame}{The Canonical Five-Stage Workflow}
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+                minimum width=2.1cm, minimum height=0.9cm,
+                text width=1.95cm, align=center, font=\footnotesize},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+    \node[box] (s1) {1\\\textbf{Model}};
+    \node[box, right=0.35cm of s1] (s2) {2\\\textbf{Equilibrium}};
+    \node[box, right=0.35cm of s2] (s3) {3\\\textbf{Algorithm}};
+    \node[box, right=0.35cm of s3] (s4) {4\\\textbf{Pseudo-code}};
+    \node[box, right=0.35cm of s4, fill=orange!15] (s5) {5\\\textbf{Code}};
+    \draw[arrow] (s1)--(s2);
+    \draw[arrow] (s2)--(s3);
+    \draw[arrow] (s3)--(s4);
+    \draw[arrow] (s4)--(s5);
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\begin{itemize}\itemsep1pt
+  \item \textbf{Stages 1--4} are \emph{contracts}. They stop the agent from inventing the problem while coding.
+  \item \textbf{Stage 5} is execution. It is allowed only after the contracts are clear.
+  \item \textbf{Human approval} happens between stages. Skipping a stage is a process failure, even if the code runs.
+\end{itemize}
+\end{frame}
+
+% ---- 5-Stage 2: Each stage's artifact and gate ----
+\begin{frame}{Each Stage Produces a Reviewable Artifact}
+\small
+\begin{tabular}{p{2.0cm} p{4.4cm} p{5.4cm}}
+\toprule
+\textbf{Stage} & \textbf{Artifact} & \textbf{Exit gate (human-checked)} \\
+\midrule
+1. Model & \texttt{delta\_spec.md}: equations, parameters, what stays unchanged & every new symbol has a defining condition \\
+2. Equilibrium & policy, prices, distributions, aggregates, and clearing conditions & every new market has a clearing equation \\
+3. Algorithm & method choice + numerical knobs + diagnostics & where it can fail; what convergence criterion \\
+4. Pseudo-code & \texttt{pseudocode.md}: loop nesting, tensor shapes, validation gate & a 2nd-year PhD could implement without follow-up questions \\
+5. Code & source files, tests, session notes & validation gate passes; reduce-to-previous behaves \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\textbf{Mantra.} Stages 1--4 are \emph{contracts}; Stage 5 is \emph{execution}. The researcher's job is to design and approve the contracts.
+\end{frame}
+
+% ---- 5-Stage 3: Stage-specific prompt patterns ----
+\begin{frame}[fragile]{Prompt Patterns for Stages 1--4}
+\begin{lstlisting}[style=markdownstyle, basicstyle=\tiny\ttfamily]
+# Stage 1 (Model) prompt pattern
+Read versions/v{n}/model_spec.md.
+Draft versions/v{n+1}/delta_spec.md for exactly one model extension.
+Define equations, parameters, outputs, and what stays unchanged.
+Restate the model in plain language; wait for my approval.
+
+# Stage 2 (Equilibrium) prompt pattern
+State the recursive equilibrium. List the policy, prices, distributions,
+aggregates, and all clearing/optimality conditions. Push back on any
+inconsistency in my model spec.
+
+# Stage 3 (Algorithm) prompt pattern
+Compare candidate methods and trade-offs. I am choosing {method}
+because {reason}. Explain where it may fail, what diagnostics to log,
+and what convergence criterion to use. Do not write code.
+
+# Stage 4 (Pseudo-code) prompt pattern
+Write Python-style pseudo-code: loop nesting, tensor shapes, loss terms,
+diagnostics, and validation gate. Then have domain-reviewer check
+Euler/KKT/market-clearing equations.
+\end{lstlisting}
+\end{frame}
+
+% ---- 5-Stage 4: Stage 5 implementation and validation ----
+\begin{frame}[fragile]{Stage 5 (Code): Implementation and Validation}
+\textbf{Artifact.} Source files, tests, notebook section, and \texttt{session\_notes.md}.
+
+\medskip
+\begin{lstlisting}[style=markdownstyle, basicstyle=\tiny\ttfamily]
+Implement V{n+1} per the approved pseudocode. Include diagnostics,
+tests/test_v{n+1}_smoke.py, and the validation gate in delta_spec.md.
+Do NOT add features beyond V{n+1}. Plan first; show me the plan
+before writing code. Then run the tests and iterate until the gate
+passes.
+\end{lstlisting}
+
+\medskip
+\textbf{Agent loop.} Plan $\to$ approve $\to$ implement $\to$ verify $\to$ review $\to$ fix $\to$ score.
+
+\medskip
+\textbf{Stop condition.} The validation gate passes, \emph{and} reduce-to-previous checks behave as expected (e.g., $\psi_K=0$ recovers the prior version).
+
+\medskip
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!50]\small
+\textbf{Key lesson.} A passing test suite is not enough; the gates must encode \emph{economics} (procyclical capital, lifecycle hump, market clearing).
+\end{tcolorbox}
+\end{frame}
+
+% ---- 5-Stage 5: Map the vocabulary onto Case 4 ----
+\begin{frame}{Mapping the Five Stages onto Case Study 4 (Labor Market)}
+\small
+\begin{tabular}{p{2.2cm} p{4.6cm} p{4.8cm}}
+\toprule
+\textbf{Canonical stage} & \textbf{Case 4 instantiation} & \textbf{Artifact} \\
+\midrule
+1. Model & glue-work theory; AI-Easy vs.\ AI-Hard glue; $2\!\times\!2$ matrix & verbal theory + O*NET item codes \\
+2. Equilibrium & empirical specification; allowed predictions P1, P2 & specification prompt + claims memo \\
+3. Algorithm & 11-script pipeline architecture; \texttt{config.py} & pipeline DAG + 51 unit tests \\
+4. Pseudo-code & per-script validation rules + adversarial review & module table + review memo \\
+5. Code & scripts run; data executed; results interpreted & figures + repositioned paper \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\textbf{Same vocabulary, different domain.} Stages 1--4 remain contracts; Stage 5 is execution. The discipline travels from dynamic macro solvers to empirical labor-market research \emph{intact}.
+\end{frame}
+
+%=============================================================================
+\section{Case Study 4: AI as Research Collaborator}
+%===========================================================
+
+%===========================================================
+
+\sectiondivider{Case Study 4}{AI as full-lifecycle research collaborator in empirical macroeconomics}
+
+% ---- CS4-01: The Research Question ----
+\begin{frame}{Case 4 --- The Research Question}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Question:} Why has rapid AI adoption not produced uniform occupational collapse,
+and what role does coordinative labor play in shaping which occupations survive?
+\end{tcolorbox}
+\vspace{0.3cm}
+\begin{itemize}
+  \item Paper: ``Glue Work, Task Bundles, and the AI Labor Market'' --- Feng (2026, in progress)
+  \item Extends Garicano--Li--Wu (2026) by endogenizing bundle strength via glue labor supply
+  \item \textbf{This case covers the full research lifecycle:} theory articulation, empirical pipeline design, adversarial review, and claims discipline --- not just one execution stage
+\end{itemize}
+\end{frame}
+
+% ---- CS4-02: The Glue Work Hypothesis ----
+\begin{frame}{The Glue Work Hypothesis}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{What is glue work?}
+\begin{itemize}
+  \item Coordinative tasks that integrate components without producing a visible standalone output
+  \item O*NET examples: coordinating work and activities; scheduling; communicating across silos
+  \item Underrewarded: workers capture only $\lambda < 1$ of the social marginal product
+  \item When glue erodes, the bundle weakens --- often with a lag before it becomes visible
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{The 2$\times$2 AI impact matrix}
+\vspace{0.2cm}
+
+\small
+\begin{tabular}{p{2.0cm}p{1.6cm}p{1.6cm}}
+\toprule
+ & \textbf{Low AI glue} & \textbf{High AI glue} \\
+\midrule
+\textbf{High AI prod.} & Restructure & Full disruption \\
+\textbf{Low AI prod.} & Stable & Glue erosion \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\footnotesize{Core prediction: high-AI + high-glue occupations \emph{restructure} rather than collapse.}
+\end{column}
+\end{columns}
+\vspace{0.3cm}
+\textbf{The insight was human. The matrix formalization was joint.}
+\end{frame}
+
+% ---- CS4-03: Stage 1 --- Theory Building ----
+\begin{frame}{Stage 1 --- Theory Building with AI}
+\begin{itemize}
+  \item Human developed the core insight: endogenize bundle strength through glue labor supply
+  \item Claude was asked to:
+    \begin{itemize}
+      \item Articulate the 2$\times$2 prediction matrix from verbal intuition
+      \item Define AI-Easy Glue vs.\ AI-Hard Glue using specific O*NET item codes
+      \item Identify the market failure formally ($\lambda < 1$ creates underinvestment equilibrium)
+    \end{itemize}
+  \item \textbf{AI-Easy Glue} (LLM-susceptible): documenting/recording information, synthesizing knowledge, routine cross-functional reporting
+  \item \textbf{AI-Hard Glue} (embodied/relational): building trust, mentoring, navigating ambiguous authority, reading implicit organizational signals
+  \item Prompting mode: \textbf{specification-driven} --- ``List O*NET items 4C1--4C3 that qualify as AI-Hard Glue by the following criteria\ldots'' not ``tell me what glue work is''
+\end{itemize}
+\end{frame}
+
+% ---- CS4-04: Stage 2 --- Empirical Specification ----
+\begin{frame}[fragile]{Stage 2 --- Translating Theory into Empirical Specification}
+\begin{lstlisting}[style=markdownstyle, basicstyle=\tiny\ttfamily]
+## Empirical Specification Prompt
+
+You are translating the following theoretical model into a
+testable empirical specification.
+
+THEORY CLAIMS:
+- P1: High-glue, high-AI-exposure occupations restructure
+  rather than collapse (employment share positive 2019-2024)
+- P2: The reallocation margin operates at junior entry
+  (age < 30), not incumbent exit
+
+VARIABLE CONSTRUCTION RULES:
+- glue_core: mean of O*NET items [4C1.a.2, 4A4.a.1, 4A4.b.1]
+  normalized to [0,1] at SOC 2018 level
+- ai_exposure: FRS AIOE score (Felten-Raj-Seamans 2021)
+- outcome: CPS monthly employment share (seasonally adj.)
+
+FORBIDDEN: do not use occupation-level wage as a glue proxy
+without first checking correlation > 0.6 with glue_core.
+\end{lstlisting}
+\footnotesize
+\begin{itemize}
+  \item Exact item codes prevent hallucinated variable definitions
+  \item A ``FORBIDDEN'' instruction enforces scope before results appear
+\end{itemize}
+\end{frame}
+
+% ---- CS4-05: Claims Discipline ----
+\begin{frame}[fragile]{Claims Discipline --- Setting the Rules Before Seeing Results}
+\begin{lstlisting}[style=markdownstyle, basicstyle=\tiny\ttfamily]
+## Claims Discipline Specification
+
+BEFORE any data is analyzed, record the following:
+
+ALLOWED CLAIMS (theory-derived, testable):
+- P1: Occupations in top quartile of both glue_core and AIOE
+  show positive employment share growth 2019--2024
+- P2: Entry share (age < 30) declines faster in
+  low-glue / high-AI occupations
+
+FORBIDDEN CLAIMS (data-mining temptations to block):
+- Any claim about wage effects not pre-specified here
+- Any interaction term not listed in the model section
+- Any subgroup finding discovered post-estimation
+
+GATE: results memo must cite which allowed claim each
+regression speaks to before interpretation proceeds.
+\end{lstlisting}
+\footnotesize\textbf{This is claims discipline.} It must be set before results appear, not reconstructed after.
+It is the empirical analog of pre-registration.
+\end{frame}
+
+% ---- CS4-06: Pipeline Architecture ----
+\begin{frame}{Stage 3 --- The 11-Script Pipeline Architecture}
+\begin{center}
+\begin{tikzpicture}[
+  pscript/.style={rectangle, rounded corners=3pt, draw=RedTitle!70, fill=blue!5,
+    minimum width=1.42cm, minimum height=0.72cm, font=\scriptsize\bfseries,
+    text width=1.38cm, align=center},
+  cfgnode/.style={rectangle, rounded corners=3pt, draw=gray!60, fill=gray!8,
+    minimum width=3.0cm, minimum height=0.48cm, font=\scriptsize, align=center},
+  parr/.style={-{Stealth[length=2mm]}, thick, gray!60},
+  darr/.style={dashed, gray!40, -{Stealth[length=1.5mm]}},
+]
+% Top row
+\node[pscript] (s00) {00\\Download};
+\node[pscript, right=0.22cm of s00] (s01) {01\\Glue\\Proxies};
+\node[pscript, right=0.22cm of s01] (s02) {02\\Merge};
+\node[pscript, right=0.22cm of s02] (s03) {03\\CPS\\Panel};
+\node[pscript, right=0.22cm of s03] (s05) {05\\Groups};
+% Config node
+\node[cfgnode, above=0.5cm of s02] (cfg) {config.py (single source of truth)};
+% Bottom row
+\node[pscript, below=0.55cm of s00] (s06) {06\\Figures};
+\node[pscript, right=0.22cm of s06] (s07) {07\\Regress.};
+\node[pscript, right=0.22cm of s07] (s09) {09\\O*NET\\Test};
+\node[pscript, right=0.22cm of s09] (s10) {10\\ASEC\\Panel};
+\node[pscript, right=0.22cm of s10] (s11) {11\\Diagnos.};
+% Top arrows
+\draw[parr] (s00)--(s01); \draw[parr] (s01)--(s02);
+\draw[parr] (s02)--(s03); \draw[parr] (s03)--(s05);
+% Handoff
+\draw[parr, very thick] (s05.south) -- ++(0,-0.27cm) -| (s06.north);
+% Bottom arrows
+\draw[parr] (s06)--(s07); \draw[parr] (s07)--(s09);
+\draw[parr] (s09)--(s10); \draw[parr] (s10)--(s11);
+% Config dashes
+\foreach \t in {s00,s01,s02,s03,s05}
+  \draw[darr] (cfg.south) -- (\t.north);
+\end{tikzpicture}
+\end{center}
+\vspace{0.15cm}
+\textbf{One config.py = single source of truth.} \quad 51 unit tests specified before any script runs on real data.
+\end{frame}
+
+% ---- CS4-07: Pipeline Module Detail ----
+\begin{frame}{Pipeline Module Detail}
+\small
+\begin{tabular}{p{1.1cm}p{5.6cm}p{5.5cm}}
+\toprule
+Script & Key output & Validation rule \\
+\midrule
+00 & onet\_raw, frs\_aioe, crosswalks (parquet) & row count $\geq$ expected; no null SOC codes \\
+01 & glue\_proxies (6 variants, SOC 2018) & all variants in $[0,1]$; correlation matrix saved \\
+02 & master\_soc: glue + AI exposure + crosswalks & merge rate $\geq 95\%$; no duplicate SOC \\
+03 & cps\_panel: employment share, entry share & weights sum to civilian pop; seasonal adj.\ flag set \\
+05 & analysis: 4 AI $\times$ glue groups defined & group counts balanced; no SOC in $>1$ group \\
+06--11 & figures, tables, diagnostics & files written; no NaN in reported statistics \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+Each script has explicit inputs (parquet), explicit outputs (parquet), and a pass/fail validation rule. Failure halts the pipeline.
+\end{frame}
+
+% ---- CS4-08: Variable Construction ----
+\begin{frame}{Stage 3 --- Variable Construction Details}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\textbf{Glue proxies (6 variants)}
+\begin{itemize}\small
+  \item \texttt{glue\_core}: 3 O*NET items, baseline
+  \item \texttt{glue\_ext}: 8-item extended set
+  \item \texttt{glue\_aihard}: AI-Hard items only
+  \item \texttt{glue\_social}: social/interpersonal subset
+  \item \texttt{glue\_dominance}: mean glue / mean all activities
+  \item \texttt{glue\_minus\_mgmt}: robustness check
+\end{itemize}
+\vspace{0.2cm}
+\footnotesize{The 6 variants test whether the theory's protection story depends on which aspect of coordination is measured.}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{AI exposure and outcomes}
+\begin{itemize}\small
+  \item AI exposure: FRS AIOE (2021), SOC-linked
+  \item Outcomes: CPS monthly employment share
+  \item Entry margin: age $<30$ share within occ-month
+  \item Long-run: ASEC panel 2000--2025
+  \item 4 groups: median splits of AIOE $\times$ glue\_core
+\end{itemize}
+\vspace{0.2cm}
+\textbf{Core group definitions:}
+
+\small
+\begin{tabular}{ll}
+High AI + High Glue & Restructuring \\
+High AI + Low Glue  & Disruption \\
+Low AI + High Glue  & Insulated \\
+Low AI + Low Glue   & Stable \\
+\end{tabular}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- CS4-09: Adversarial Review ----
+\begin{frame}{Stage 4 --- Adversarial Review}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Adversarial prompt:} ``Find 6 structural weaknesses in this empirical design. For each, state whether it is fatal or manageable, and why.''
+\end{tcolorbox}
+\vspace{0.2cm}
+Six weaknesses identified:
+\begin{enumerate}\small
+  \item AIOE is cross-sectional --- does not capture within-occupation AI adoption dynamics
+  \item Glue proxies are task-level O*NET ratings, not worker-level observations
+  \item Selection: high-glue workers may self-select into high-AI firms for unobserved reasons
+  \item Crosswalk from SOC 2018 to Census codes loses $\sim$12\% of occupations (a validation rule catches this)
+  \item CPS monthly sample sizes for narrow occupations produce large standard errors
+  \item \textbf{The interaction (AI $\times$ Glue) is negative in the data} --- but the theory predicts positive
+\end{enumerate}
+\vspace{0.2cm}
+\textbf{Item 6 was the decisive finding.} It repositioned the entire paper.
+\end{frame}
+
+% ---- CS4-10: When Data Contradicts Theory ----
+\begin{frame}{When Data Contradicts Theory}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Data finding:} the estimated interaction (AI exposure $\times$ glue score) is \emph{negative}.\\
+\textbf{Theory predicted:} positive --- glue preserves bundles, so high-glue/high-AI should survive.\\
+\textbf{This is not a bug.} It is information.
+\end{tcolorbox}
+\vspace{0.2cm}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\textbf{What the theory predicted}
+\begin{itemize}\small
+  \item High-AI + High-Glue $\to$ restructuring and survival
+  \item Glue preserves value when production tasks are automated
+  \item Expected positive interaction
+\end{itemize}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{The reinterpretation}
+\begin{itemize}\small
+  \item Negative sign: high-glue workers in high-AI occupations are displaced, not preserved
+  \item Effect operates through \emph{occupational reallocation}, not within-occupation survival
+  \item Theory-specific prediction $\neq$ generic heterogeneity claim
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.2cm}
+\textbf{Claude distinguished theory-specific predictions from generic heterogeneity findings.} That distinction determines what the paper can claim.
+\end{frame}
+
+% ---- CS4-11: Division of Labor ----
+\begin{frame}{Division of Labor Across the Full Lifecycle}
+\small
+\begin{tabular}{p{3.4cm}p{3.2cm}p{5.0cm}}
+\toprule
+Task & Human Researcher & AI (Claude) \\
+\midrule
+Core insight & Endogenizes bundle strength via glue & \\
+Literature positioning & Sets the GLW extension & \\
+Variable specs & Co-designed, approved & Elaborated O*NET codes; caught crosswalk inconsistency \\
+Pipeline architecture & Approved the design & Designed 11-script layout from scratch \\
+Claims discipline & Enforces the gate & Drafted allowed/forbidden claims \\
+Adversarial review & Decided which weaknesses were fatal & Structured the 6 adversarial findings \\
+Data execution & Runs the scripts & \\
+Interpretation & Final call on repositioning & \\
+Paper writing & Authors & Assists with exposition \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% ---- CS4-12: Key Prompting Strategies ----
+\begin{frame}{Key Prompting Strategies in Case 4}
+\begin{enumerate}
+  \item \textbf{Specification-driven:} exact O*NET item codes, not vague requests --- prevents hallucinated variable definitions
+  \item \textbf{Constraint-based (claims discipline):} allowed and forbidden claims specified before results appear --- prevents data mining
+  \item \textbf{Adversarial:} ``find 6 structural weaknesses'' not ``review this memo'' --- prevents sycophantic validation
+  \item \textbf{Modular decomposition:} each script as an independent testable unit --- prevents silent errors accumulating across stages
+  \item \textbf{Deferred execution:} pipeline fully specified before any real data is analyzed --- separates design from execution, preserving pre-specification discipline
+\end{enumerate}
+\vspace{0.3cm}
+\textbf{Each strategy is a structural response to a specific failure mode, not a stylistic preference.}
+\end{frame}
+
+% ---- CS4-13: Failure Modes ----
+\begin{frame}{Failure Modes Specific to Case 4}
+\begin{enumerate}
+  \item \textbf{AI agrees too readily:} asking ``does this design look good?'' produces validation; adversarial mode must be explicit
+  \item \textbf{Vague theory $\to$ untestable claims:} ``glue work matters'' is not a prediction; specification-driven prompting forces operationalization
+  \item \textbf{Data mining disguised as exploration:} claims discipline must be logged before results; retroactive framing is indistinguishable from pre-specification to a reader
+  \item \textbf{Silent crosswalk errors:} the 12\% SOC loss is found only because a validation rule checks merge rate; without validation rules, the pipeline produces credible-looking numbers
+  \item \textbf{Mechanical overclaiming:} when data contradicts theory, the temptation is ad hoc reframing; adversarial review forces the repositioning to be deliberate and documented
+\end{enumerate}
+\end{frame}
+
+% ---- CS4-14: The Meta-Irony ----
+\begin{frame}{The Meta-Irony: AI Doing Glue Work}
+\begin{columns}[T]
+\begin{column}{0.46\textwidth}
+\textbf{What the paper studies}
+\begin{itemize}
+  \item Glue work: coordinative labor that binds complex task bundles
+  \item Holds specifications together across stages
+  \item Tracks implicit commitments across time
+  \item Underrewarded because its contribution is diffuse in output attribution
+\end{itemize}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{What Claude did in the research itself}
+\begin{itemize}
+  \item Maintained specification coherence across 11 scripts and 4 research stages
+  \item Tracked which claims were allowed before results arrived
+  \item Structured the adversarial review to produce actionable findings
+  \item Held the interface between theory and empirical design
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.4cm}
+\begin{center}
+\textbf{The AI is demonstrating its own research subject.}\\
+That is not an accident --- it is evidence about where AI comparative advantage lies in complex intellectual work.
+\end{center}
+\end{frame}
+
+% ---- CS4-15: Key Lessons ----
+\begin{frame}{Key Lessons from Case Study 4}
+\begin{itemize}
+  \item AI can operate across the \textbf{full research lifecycle} --- theory articulation, pipeline design, adversarial review --- not just execution
+  \item The human researcher must own the core insight, literature positioning, data execution, and final interpretation
+  \item \textbf{Specification-driven and adversarial prompting} are structural defenses against the most common AI failure modes in research settings
+  \item \textbf{Claims discipline} must be established before results appear; it cannot be reconstructed credibly after
+  \item When data contradicts theory, the right move is deliberate repositioning, not ad hoc reframing; AI can structure that repositioning but cannot decide whether it is intellectually honest
+  \item This is a new pattern: \textbf{AI as full-lifecycle research collaborator}, distinct from skill, empirical pipeline, or dataset harness
+\end{itemize}
+\end{frame}
+
+
+\end{document}

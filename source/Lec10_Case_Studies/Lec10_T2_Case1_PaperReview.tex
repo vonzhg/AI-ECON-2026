@@ -1,0 +1,235 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.2: Case Study 1 --- Paper Review Skill
+%% Source: ./archive_pre_split/Lec10_Case_Studies_v2.tex (section 2)
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{./Exercise10_ES_Fellows/plots/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\lstdefinestyle{markdownstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!40},
+    backgroundcolor=\color{gray!8},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.2: Case Study 1 --- Paper Review Skill}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.2 Agenda}
+\begin{enumerate}
+  \item \textbf{Case Study 1} --- building a paper-review skill from scratch
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Case Study 1: Paper Review Skill}
+%===========================================================
+
+%===========================================================
+
+\sectiondivider{Case Study 1}{A reusable quality-control workflow for paper review}
+
+\begin{frame}{Case Study 1: Why This Becomes a Skill}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Research job:} produce a structured referee-style review for a quantitative economics paper with quote-level evidence and quality gates.
+\end{tcolorbox}
+
+\vspace{0.3cm}
+\begin{itemize}
+    \item You may run this workflow many times across papers, coauthors, and seminars
+    \item Quality matters more than speed because a wrong criticism is costly
+    \item The task has internal stages with clear dependencies
+    \item That makes it a good candidate for a reusable skill rather than a one-off prompt
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Naive Baseline Fails Fast}
+\textbf{Tempting prompt:} ``Review this paper.''
+
+\vspace{0.25cm}
+\textbf{What usually comes back:}
+\begin{itemize}
+    \item generic praise and generic weaknesses
+    \item no verbatim anchor to the paper
+    \item no proof-checking discipline
+    \item no calibration to quantitative macro standards
+    \item no filter removing low-confidence comments
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{The failure is not just model quality.} It is the absence of structure, specialization, and a final editorial gate.
+\end{frame}
+
+\begin{frame}[fragile]{What a High-Quality Output Should Look Like}
+\begin{tcolorbox}[colback=gray!5, colframe=gray!40, title={\footnotesize Shortened review template}, fonttitle=\bfseries\footnotesize]
+\begin{lstlisting}[style=markdownstyle, basicstyle=\ttfamily\scriptsize]
+## Overall Feedback
+1. Estimand is not fully pinned down in Section 2.3
+2. Proof of Theorem 2 needs one missing justification
+3. Numerical section needs a reproducibility note
+
+## Detailed Comments
+### 1. Proof step in Theorem 2
+Quote: "By dominated convergence ..."
+Feedback: This step needs an explicit domination argument.
+\end{lstlisting}
+\end{tcolorbox}
+
+\vspace{0.25cm}
+\textbf{Target properties:} issue prioritization, exact anchoring, specific fixes, and a recommendation you can defend.
+\end{frame}
+
+\begin{frame}{The 7-Phase Pipeline}
+\begin{center}
+\begin{tikzpicture}[
+    phase/.style={rectangle, rounded corners=3pt, draw=RedTitle!70, fill=blue!5,
+        minimum width=1.5cm, minimum height=0.85cm, font=\scriptsize\bfseries,
+        text width=1.45cm, align=center, text=DarkText},
+    arr/.style={-{Stealth[length=2.5mm]}, thick, gray!60},
+]
+\node[phase] (p1) {1\\Extract};
+\node[phase, right=0.28cm of p1] (p2) {2\\Calibrate};
+\node[phase, right=0.28cm of p2] (p3) {3\\Overview};
+\node[phase, right=0.28cm of p3] (p4) {4\\Section\\Reviews};
+\node[phase, right=0.28cm of p4] (p5) {5\\Cross-\\Section};
+\node[phase, right=0.28cm of p5] (p6) {6\\Editorial\\Filter};
+\node[phase, right=0.28cm of p6] (p7) {7\\Output};
+
+\draw[arr] (p1) -- (p2);
+\draw[arr] (p2) -- (p3);
+\draw[arr] (p3) -- (p4);
+\draw[arr] (p4) -- (p5);
+\draw[arr] (p5) -- (p6);
+\draw[arr] (p6) -- (p7);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.25cm}
+\begin{itemize}
+    \item Parallelism happens inside phases, not across them
+    \item The output of one phase becomes the acceptance criteria for the next
+    \item This is a quality-control pipeline, not just a prompt chain
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why Decomposition Matters Here}
+\begin{columns}[T]
+\begin{column}{0.32\textwidth}
+\textbf{Context}
+\begin{itemize}
+    \item long paper
+    \item review rules
+    \item output template
+\end{itemize}
+One call is too coarse.
+\end{column}
+\begin{column}{0.32\textwidth}
+\textbf{Specialization}
+\begin{itemize}
+    \item proof review
+    \item methodology review
+    \item literature fit
+\end{itemize}
+One prompt does not do all well.
+\end{column}
+\begin{column}{0.32\textwidth}
+\textbf{Quality}
+\begin{itemize}
+    \item generic comments
+    \item invented quotes
+    \item duplicated issues
+\end{itemize}
+You need a final filter.
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Economics translation:} this is like assigning specialized RA tasks, then forcing everything through one senior review before it goes out.
+\end{frame}
+
+\begin{frame}{The Highest-Value Guardrails}
+\begin{enumerate}
+    \item \textbf{Confidence gate.} Do not assert an error unless the model can derive it step by step.
+    \item \textbf{Quote verification.} Comments that cite the paper must be anchored to real text.
+    \item \textbf{Editorial filter.} Remove generic advice, duplicates, and stylistic fluff.
+    \item \textbf{Humanization.} The final report should read like a serious economics referee report, not model boilerplate.
+\end{enumerate}
+
+\vspace{0.3cm}
+\textbf{The lesson is broader than paper review:} when the stakes are high, validation must be a named stage in the workflow.
+\end{frame}
+
+\begin{frame}{Worked Example: Why the MPE Paper Is a Good Stress Test}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Demo paper:} \textit{Markov Equilibria with Quasi-Hyperbolic Discounting}
+\end{tcolorbox}
+
+\vspace{0.25cm}
+\begin{itemize}
+    \item it mixes proofs, numerical work, and dynamic economic interpretation
+    \item it forces the workflow to separate theorem checking from broader conceptual review
+    \item it is hard enough that a one-shot prompt should fail
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{This is why case studies matter:} you only learn the workflow once you see where the naive baseline actually breaks.
+\end{frame}
+
+\begin{frame}{What the Economist Still Owns in Case Study 1}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Agent side}
+\begin{itemize}
+    \item parse sections
+    \item fan out specialized prompts
+    \item draft comments
+    \item enforce formatting
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Economist side}
+\begin{itemize}
+    \item decide what counts as a serious objection
+    \item reject false positives
+    \item judge novelty and importance
+    \item decide what feedback is worth sending
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Skill logic:} you are not outsourcing judgment. You are outsourcing disciplined first-pass execution.
+\end{frame}
+
+\begin{frame}{When Should a Workflow Become a Skill?}
+\small
+\begin{tabular}{p{5.7cm}p{6.0cm}}
+\toprule
+\textbf{Build a skill when ...} & \textbf{Stay ad hoc when ...} \\
+\midrule
+you will repeat the workflow many times & the task is one-off \\
+the workflow has named validation stages & you are still exploring what the workflow should be \\
+multiple users need consistent output & only one user needs the result \\
+quality failures are expensive & output format is flexible \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{Case 1 verdict:} this is a skill because repeatability and quality control are the point.
+\end{frame}
+
+
+\end{document}

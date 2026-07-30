@@ -1,0 +1,826 @@
+%% FullCourse_10Lecs -- Lecture 5, Topic 5.2: Motivating Example + MC + Exploration + TD/Q-Learning
+%% Source: ./archive_pre_split/Lec05_RL_Nutshell.tex (sections 4-7)
+%% Pass B: compared against
+%%         ../../MiniCourse_8hr/Slides/Module2_DL_RL_Macro/M2_T3_RL_Basics.tex
+%% Result: FullCourse is a strict superset of MiniCourse content for T2.
+%%   MiniCourse MC+TD+QL frames (Model-Based DP vs MC, Basic MC, MC for Growth,
+%%   MC Limitations, From MC to TD, TD(0), SARSA vs Q-Learning, MC vs TD vs DP)
+%%   are all present here, often expanded into separate frames.
+%% FullCourse-only frames (no MiniCourse counterpart):
+%%   - Motivating 3x3 Economic Grid (with grid figure)
+%%   - Actions and Rewards on the Grid
+%%   - Illustrative Episode
+%%   - Subepisodes and Exploring Starts
+%%   - Boltzmann (Softmax) Exploration
+%%   - Upper Confidence Bounds (UCB)
+%%   - Comparison of Exploration Approaches (4-method table)
+%%   - TD(0) Applied to the Growth Model
+%%   - Comparing SARSA and Q-Learning (detail table)
+%%   - Q-Learning in the Growth Model
+%%   - Multi-Step Methods: TD(lambda)
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module2_DL_RL_Macro/pic/}{../}}
+
+% Suppress the redundant auto-generated metropolis section page; the
+% \sectiondivider frames below are the dividers we keep.
+\metroset{sectionpage=none}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+\input{lec05_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 5.2: Monte Carlo, Exploration, and Temporal-Difference Learning}
+\author{Zhigang Feng}
+\date{\today\ \DTMcurrenttime}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 5 in One Map --- Act 5.2}
+\textbf{Act 5.1 ended with three departures on the table. This act executes \#1 --- replace the full-expectation backup, which needs a known model ($P$, $R$), with a \emph{sample} backup: Monte Carlo, TD, Q-learning --- and pays sampling's price, \#3: \emph{exploration}.}
+
+\LecFiveMap{2}
+
+\vspace{0.05cm}
+\footnotesize\textit{The internal flow of this act: a concrete economic gridworld $\to$ \textbf{Monte Carlo} (learn from whole episodes) $\to$ the \textbf{exploration--exploitation} problem $\to$ \textbf{temporal-difference} and \textbf{Q-learning} (update every step). One backbone underneath all of them: Generalized Policy Iteration.}
+\end{frame}
+
+%=============================================================================
+% FullCourse-only section: 3x3 grid-world motivating example (Mini has no grid)
+\section{A Motivating Example}
+
+\sectiondivider{A Motivating Example}{A small economic gridworld to make ``learning from experience'' concrete}
+
+\begin{frame}{A 3$\times$3 Economic Grid}
+\begin{itemize}
+    \item A \textbf{policymaker} navigates macroeconomic conditions (inflation $\times$ unemployment).
+    \item Goal: reach and maintain the optimal state (low inflation, low unemployment).
+\end{itemize}
+
+\begin{columns}
+\column{0.50\textwidth}
+\begin{itemize}
+    \item \textcolor{red!70!black}{Top-left ($S_{0,0}$)}: High inflation \& unemployment (worst).
+    \item \textcolor{green!50!black}{Bottom-right ($G \equiv S_{2,2}$)}: Low inflation \& low unemployment (\textbf{goal}).
+    \item Episode ends upon reaching the goal.
+    \item Optimal trajectory (arrows) shows one greedy path; many equivalent paths exist.
+\end{itemize}
+
+\column{0.45\textwidth}
+\centering
+\begin{tikzpicture}[
+    cell/.style={rectangle, draw=DarkText, thick, minimum width=1.3cm, minimum height=1.3cm, font=\scriptsize, align=center},
+    policy/.style={->, very thick, RedTitle}
+]
+\node[cell, fill=red!35] (s00) at (0,0)   {$S_{0,0}$ \\ \tiny high/high};
+\node[cell, fill=red!22] (s01) at (1.4,0) {$S_{0,1}$};
+\node[cell, fill=orange!22] (s02) at (2.8,0) {$S_{0,2}$};
+\node[cell, fill=red!22] (s10) at (0,-1.4)   {$S_{1,0}$};
+\node[cell, fill=orange!22] (s11) at (1.4,-1.4) {$S_{1,1}$};
+\node[cell, fill=yellow!30] (s12) at (2.8,-1.4) {$S_{1,2}$};
+\node[cell, fill=orange!22] (s20) at (0,-2.8)   {$S_{2,0}$};
+\node[cell, fill=yellow!30] (s21) at (1.4,-2.8) {$S_{2,1}$};
+\node[cell, fill=green!35] (g)   at (2.8,-2.8) {$G$ \\ \tiny low/low};
+
+\draw[policy] (s00) -- (s10);
+\draw[policy] (s10) -- (s11);
+\draw[policy] (s11) -- (s21);
+\draw[policy] (s21) -- (g);
+\end{tikzpicture}
+
+\vspace{0.1cm}
+\footnotesize\textit{Macro analogue of textbook gridworld.}\normalsize
+\end{columns}
+\end{frame}
+
+\begin{frame}{What Makes This RL, Not DP?}
+\textbf{Known} (the MDP skeleton): the states $\mathcal{S}$ (9 cells), the actions $\mathcal{A}$ (Up/Down/Left/Right), and the discount $\gamma$.
+\vspace{0.25cm}
+
+\textbf{Unknown} --- and this is what forces \emph{learning}:
+\begin{itemize}
+  \item \textbf{Transition dynamics $P(s'\mid s,a)$.} The policymaker does \emph{not} know where an action lands them. Does ``Down'' (expansionary policy) reliably cut unemployment, or overshoot into higher inflation? The \emph{economy's response to an intervention} is exactly the unknown.
+  \item \textbf{Reward function $R(s,a)$.} The agent doesn't know \emph{where} the $+1$ lives --- it learns ``this was the goal'' only by \emph{reaching} $G$.
+\end{itemize}
+
+\begin{cautionbox}
+\textbf{Known model $\to$ DP; unknown model $\to$ RL.} With $P,R$ unknown you \emph{cannot} sweep the Bellman operator (value iteration). The agent must \emph{sample} trajectories and learn $\widehat{Q}$ from experienced returns (MC) or bootstrapped transitions (TD/Q-learning) --- the topic of the rest of this lecture.
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Same Framework, Very Different Worlds}
+Two questions decide how hard an RL problem is: \textbf{(a)} is the model ($P,R$) known? \quad \textbf{(b)} can you \emph{explore freely} (reset, simulate, fail cheaply)?
+\vspace{0.15cm}
+\begin{center}\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{p{2.5cm}|p{2.9cm}p{2.6cm}p{2.7cm}}
+\toprule
+ & \textbf{Dynamics $P$} & \textbf{Reward $R$} & \textbf{Free exploration?} \\
+\midrule
+\textbf{Game of Go} & rules known \& deterministic; \emph{opponent} unknown & known (win/lose) & \textcolor{green!50!black}{\textbf{yes}} --- perfect simulator, self-play \\
+\textbf{Autonomous driving} & unknown, stochastic & hard to \emph{specify} & limited --- sim + logged data; unsafe to fail \\
+\textbf{Real economy} & unknown, \emph{non-stationary} & mostly known (mandate loss) & \textcolor{red!70!black}{\textbf{no}} --- one history, no resets \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.1cm}
+\footnotesize\textbf{Go} is the ``easy'' corner: the \emph{rules} are a perfect free simulator, so the real challenge is not unknown dynamics but the \emph{opponent} and sheer \emph{size} ($\sim\!10^{170}$ states) --- solved by self-play + look-ahead search (AlphaZero).\normalsize
+\end{frame}
+
+\begin{frame}{Why the Economy Is the Hardest Case}
+The gridworld teaches the \emph{mechanics} of learning an unknown $P$. The real economy adds three difficulties the toy problem --- and even Go and driving --- do not have:
+\begin{itemize}
+  \item \textbf{$P$ is reflexive (Lucas critique).} The economy's response \emph{changes when the policy rule changes}, because agents are forward-looking. You learn a target that moves \emph{because} you are learning it --- not a fixed table.
+  \item \textbf{You cannot explore.} No resets, no parallel worlds: a central bank gets \emph{one} history, and a bad ``exploratory'' move costs real jobs. Algorithms that assume millions of episodes simply do not apply.
+  \item \textbf{Partial observability.} The true state (output gap, natural rate) is never observed directly --- only estimated with noise. Really a \textbf{POMDP} (\emph{partially observable} MDP): the agent sees noisy signals, not the state, so it must act on a \emph{belief} --- a distribution over where the economy truly is.
+\end{itemize}
+\begin{conceptbox}
+\textbf{Takeaway.} It is not that the \emph{math} is deeper in macro --- it is that you \emph{cannot run the experiment}. This is why macro leans so hard on \emph{models} (structure, theory) to substitute for the exploration it can never do.
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{Actions and Rewards on the Grid}
+\textbf{Actions (Policy Interventions):}
+\begin{itemize}
+    \item \textbf{Up}: Contractionary policy (reduces inflation, may raise unemployment).
+    \item \textbf{Down}: Expansionary policy (reduces unemployment, may raise inflation).
+    \item \textbf{Left/Right}: Fiscal or structural interventions.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Reward Structure:}
+\[
+R(s,a)=
+\begin{cases}
++1 & \text{if next state = Goal state } G,\\[3pt]
+0 & \text{otherwise.}
+\end{cases}
+\]
+
+\vspace{0.3cm}
+\textbf{MDP on the grid:}
+$\langle \mathcal{S}, \mathcal{A}, P, R, \gamma \rangle$ where $\mathcal{S} = \{S_{i,j}\}$, $\mathcal{A} = \{\text{Up, Down, Left, Right}\}$.
+\end{frame}
+
+\begin{frame}{Illustrative Episode}
+\textbf{Example rollout} ($r_t = 0$ until goal; $r_T = +1$):
+
+\vspace{0.1cm}
+\centering
+\begin{tikzpicture}[
+    state/.style={circle, draw=RedTitle, fill=blue!8, thick, minimum size=0.9cm, inner sep=0pt, font=\scriptsize},
+    goalstate/.style={circle, draw=green!50!black, fill=green!20, thick, minimum size=0.9cm, inner sep=0pt, font=\scriptsize\bfseries},
+    action/.style={font=\footnotesize\itshape, text=RedTitle},
+    reward/.style={font=\footnotesize, text=gray!50!black}
+]
+\node[state] (s0) at (0,0) {$S_{0,0}$};
+\node[state] (s1) at (2.3,0) {$S_{1,0}$};
+\node[state] (s2) at (4.6,0) {$S_{1,1}$};
+\node[state] (s3) at (6.9,0) {$S_{2,1}$};
+\node[goalstate] (s4) at (9.2,0) {$G$};
+
+\draw[->, thick] (s0) -- node[action, above]{Down} node[reward, below]{$r{=}0$} (s1);
+\draw[->, thick] (s1) -- node[action, above]{Right} node[reward, below]{$r{=}0$} (s2);
+\draw[->, thick] (s2) -- node[action, above]{Down} node[reward, below]{$r{=}0$} (s3);
+\draw[->, thick] (s3) -- node[action, above]{Right} node[reward, below]{$r{=}{+}1$} (s4);
+
+\node[font=\scriptsize, gray!60!black] at (0, -0.85) {$t{=}0$};
+\node[font=\scriptsize, gray!60!black] at (9.2, -0.85) {$t{=}T$};
+\end{tikzpicture}
+
+\vspace{0.1cm}
+\begin{itemize}
+    \item Cumulative return $G_0 = \sum_{t=0}^{T-1}\gamma^t r_{t+1} = \gamma^{T-1}$.
+    \item Update $Q(s,a)$ by averaging returns over many such episodes.
+    \item Repeated simulation $\to$ stable policy guiding the economy toward $G$.
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{How do we compute updates?} Three families:
+\begin{enumerate}
+    \item \textbf{Monte Carlo} --- wait for the full episode, then average.
+    \item \textbf{Temporal Difference} --- update after every single step.
+    \item \textbf{Actor-Critic} --- combine policy learning with value estimation.
+\end{enumerate}
+\end{frame}
+
+
+%=============================================================================
+\section{Monte Carlo Methods}
+
+\sectiondivider{Monte Carlo Methods}{Learn from complete simulated episodes --- no model required}
+
+\begin{frame}{Model-Based DP vs.\ Monte Carlo}
+\textbf{Model-Based Policy Iteration (Classical DP):}
+\begin{enumerate}
+    \item \textbf{Policy evaluation:} Solve the Bellman equation:
+    $V^\pi(s) = \sum_{a} \pi(a|s) \bigl[R(s,a) + \gamma \sum_{s'} P(s'|s,a) V^\pi(s')\bigr]$.
+    \item \textbf{Policy improvement:}
+    $\pi'(s) = \arg\max_a Q^\pi(s,a)$.
+\end{enumerate}
+\textbf{Requirement:} Must know $P(s'|s,a)$ and $R(s,a)$.
+
+\vspace{0.3cm}
+\textbf{Monte Carlo (MC):}
+\begin{itemize}
+    \item Learn through \textbf{simulated episodes} without requiring explicit transition models.
+    \item Estimate $Q(s,a)$ from \textbf{observed returns} instead of computing expectations.
+    \item Like running a randomized policy experiment many times and averaging the outcomes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Basic Monte Carlo: Key Idea}
+\textbf{Simulate full episodes, then average the returns.}
+
+\begin{itemize}
+    \item Simulate multiple \textbf{full episodes} from each $(s,a)$.
+    \item Collect total discounted return:
+    \[
+        G_t = \sum_{k=0}^{T-1} \gamma^k r_{t+k+1}.
+    \]
+    \item Update rule:
+    \[
+        Q(s,a) \leftarrow \frac{1}{N} \sum_{i=1}^{N} G_0^{(i)},
+    \]
+    where $N$ = number of episodes, $G_0^{(i)}$ = return from episode $i$.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Why full episodes?}
+\begin{itemize}
+    \item Captures \textbf{long-run consequences} of actions.
+    \item Avoids dependence on explicit transition models.
+    \item By the Law of Large Numbers, estimates converge.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Monte Carlo: Two Senses of ``Converge''}
+When we say Monte Carlo ``converges,'' it helps to keep \textbf{three distinct quantities} straight:
+\vspace{0.2cm}
+\begin{itemize}
+  \item \textbf{$G$ --- not iterated.} One episode gives \emph{one} return, computed directly by summing its discounted rewards. Each episode $\to$ one sample $G_0^{(i)}$.
+  \item \textbf{$\widehat{Q}$ for a \emph{fixed} $\pi$ --- converges \emph{statistically}.} Average \emph{more} episodes and $\widehat{Q} \to Q^\pi$ by the Law of Large Numbers (variance shrinks) --- \emph{not} by iterating a Bellman fixed point the way DP does. There is no bootstrapping: each $G$ is already unbiased; more samples just cut the noise.
+  \item \textbf{$Q^*,\pi^*$ (optimal) --- the outer loop.} Reaching the \emph{optimum} needs the GPI ``ping-pong'': evaluate ($\widehat{Q}$ by MC) $\to$ improve ($\pi$ greedy) $\to$ re-evaluate $\to \cdots$ until $(\widehat{Q},\pi)$ stops moving.
+\end{itemize}
+\begin{conceptbox}
+\footnotesize This slide (and the previous one) is MC \textbf{evaluation} of a \emph{given} $\pi$; wrapping it in the improvement loop turns it into MC \textbf{control} for $\pi^*$.\normalsize
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{Monte Carlo Applied to the Growth Model}
+\textbf{Environment:} State $(k_t, z_t)$, action $c_t$, reward $u(c_t)$, transition $k_{t+1} = F(k_t,z_t) - c_t$.
+
+\vspace{0.3cm}
+\textbf{MC Episode:}
+\begin{enumerate}
+    \item Initialize $k_0$, $z_0$.
+    \item For $t = 0, 1, \ldots, T-1$:
+    \begin{itemize}
+        \item Choose $c_t$ from current (or exploratory) policy.
+        \item Observe $r_t = u(c_t)$, transition to $(k_{t+1}, z_{t+1})$.
+    \end{itemize}
+    \item Compute $G_0 = \sum_{t=0}^{T-1} \gamma^t r_t$.
+\end{enumerate}
+
+\vspace{0.2cm}
+\textbf{Key difference from VFI:}
+\begin{itemize}
+    \item VFI: evaluate $V$ at \textbf{every grid point}, using known $P(z'|z)$.
+    \item MC: evaluate $V$ along \textbf{sampled trajectories}, no need for explicit $P$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Challenges of Basic Monte Carlo}
+\textbf{Full-Episode Dependence:}
+\begin{itemize}
+    \item Updates only after \textbf{entire episodes} are completed.
+    \item Inefficient for long-horizon or continuing (non-terminating) problems.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Exploration Dilemma:}
+\begin{itemize}
+    \item Infrequent visits to rare but important states (e.g., financial crises).
+    \item Theory requires every $(s,a)$ visited infinitely often.
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{High Variance:}
+\begin{itemize}
+    \item Returns from full episodes vary significantly.
+    \item Slow convergence $\Rightarrow$ many episodes needed.
+\end{itemize}
+
+\vspace{0.2cm}
+These motivate \textbf{exploring starts / subepisodes} (coverage), \textbf{explicit exploration} ($\epsilon$-greedy, Boltzmann, UCB), and \textbf{incremental TD} updates.
+\end{frame}
+
+
+% FullCourse-only: first/every-visit MC and exploring starts (Mini omits)
+\begin{frame}{Subepisodes and Exploring Starts}
+\textbf{Subepisodes (First-Visit vs.\ Every-Visit MC):}
+\begin{itemize}
+    \item \textbf{First-Visit MC}: Update $Q(s,a)$ only on the \textbf{first} occurrence per episode.
+    \item \textbf{Every-Visit MC}: Update $Q(s,a)$ on \textbf{every} occurrence.
+    \item Both speed up convergence by leveraging all data within an episode.
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Exploring Starts:}
+\begin{itemize}
+    \item Each episode starts from a randomly chosen $(s_0, a_0)$ with nonzero probability.
+    \item Ensures every $(s,a)$ pair receives enough visits.
+    \item \textbf{Problem:} often unrealistic in practice (can't arbitrarily reset the economy).
+\end{itemize}
+
+\vspace{0.3cm}
+$\Rightarrow$ We need a more practical exploration mechanism: \textbf{$\epsilon$-greedy}.
+\end{frame}
+
+
+% NEW: concrete first-visit vs every-visit worked trajectory (book Ch12 §4.4)
+\begin{frame}{First-Visit vs.\ Every-Visit: a Worked Trajectory}
+One simulated episode (discount $\gamma = 0.9$), with state $k_L$ visited \textbf{twice}:
+\vspace{0.15cm}
+\centering
+\begin{tikzpicture}[
+  st/.style={circle, draw=RedTitle, fill=blue!8, thick, minimum size=0.85cm, inner sep=0pt, font=\scriptsize},
+  rw/.style={font=\scriptsize, text=gray!50!black}
+]
+\node[st] (a) at (0,0) {$k_L$};
+\node[st] (b) at (2.6,0) {$k_M$};
+\node[st] (c) at (5.2,0) {$k_L$};
+\node[st, fill=green!18, draw=green!50!black] (d) at (7.8,0) {$k_H$};
+\draw[->,thick] (a) -- node[above,rw]{$r{=}1$} node[below,rw]{$t{=}0$} (b);
+\draw[->,thick] (b) -- node[above,rw]{$r{=}2$} node[below,rw]{$t{=}1$} (c);
+\draw[->,thick] (c) -- node[above,rw]{$r{=}3$} node[below,rw]{$t{=}2$} (d);
+\end{tikzpicture}
+\vspace{0.15cm}
+\begin{itemize}
+  \item Return from $t{=}0$: $G_0 = 1 + 0.9(2) + 0.9^2(3) = 5.23$. \quad From $t{=}2$: $G_2 = 3$.
+  \item \textbf{First-visit MC:} use $G_0$ only $\Rightarrow$ $\widehat{V}(k_L) = 5.23$ (one clean, independent sample).
+  \item \textbf{Every-visit MC:} use \emph{both} $\Rightarrow$ $\widehat{V}(k_L) = \tfrac{5.23+3}{2} = 4.12$ (more data, but correlated samples).
+\end{itemize}
+\footnotesize\textit{Trade-off: every-visit squeezes more from each episode; first-visit keeps samples independent.}\normalsize
+\end{frame}
+
+% NEW: GPI backbone (book Ch12 §5) --- the organizing theme
+\begin{frame}{Generalized Policy Iteration (GPI): the RL Backbone}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\textbf{Two steps, alternated until stable:}
+\begin{enumerate}
+  \item \textbf{Evaluate} --- estimate $\widehat{Q}^{\pi}$ (MC: average sampled returns; DP: full backup).
+  \item \textbf{Improve} --- act greedily: $\pi'(s) = \arg\max_a \widehat{Q}^{\pi}(s,a)$.
+\end{enumerate}
+\vspace{0.2cm}
+\textbf{MC control = MC prediction \emph{inside} GPI.}
+\column{0.42\textwidth}
+\centering
+\begin{tikzpicture}[font=\footnotesize]
+\node[draw=RedTitle, fill=blue!8, thick, rounded corners, inner sep=5pt] (q) at (0,1.3) {value $\widehat{Q}$};
+\node[draw=green!50!black, fill=green!10, thick, rounded corners, inner sep=5pt] (p) at (0,-0.3) {policy $\pi$};
+\draw[->, thick, RedTitle] (p) to[bend left=45] node[right, font=\scriptsize]{evaluate} (q);
+\draw[->, thick, green!45!black] (q) to[bend left=45] node[left, font=\scriptsize]{improve} (p);
+\node[font=\scriptsize, text=gray!60!black] at (0,-1.15) {$\to (Q^*,\pi^*)$};
+\end{tikzpicture}
+\end{columns}
+\vspace{0.2cm}
+\begin{conceptbox}
+\textbf{One backbone, every algorithm.} DP, MC, TD, SARSA, Q-learning, and (in T3) actor-critic are \emph{all} GPI --- they differ only in \emph{how evaluation approximates the expectation} and \emph{how improvement explores}.
+\end{conceptbox}
+\end{frame}
+
+% NEW: GPI ping-pong numerical example (book Ch12 §5.1)
+\begin{frame}{GPI in Action: a Two-State ``Ping-Pong''}
+\textbf{Toy growth model:} capital $k \in \{k_L, k_H\}$; action = next capital $k'$. Current estimate $\widehat{Q}$:
+\vspace{0.1cm}
+\begin{center}\small
+\begin{tabular}{c|cc}
+\toprule
+$\widehat{Q}(k,k')$ & $k' = k_L$ & $k' = k_H$ \\
+\midrule
+$k = k_L$ & $3$ & $\mathbf{5}$ \\
+$k = k_H$ & $\mathbf{8}$ & $6$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+  \item \textbf{Improve} (greedy): $\pi(k_L){=}k_H$ ($5{>}3$), $\pi(k_H){=}k_L$ ($8{>}6$). \textit{Low capital $\to$ invest, high capital $\to$ consume} --- the sensible rule.
+  \item \textbf{Re-evaluate} $\widehat{Q}$ under the new $\pi$, then improve again --- ``ping-pong'' until $(\widehat{Q},\pi)$ stops moving: a fixed point $\approx (Q^*,\pi^*)$.
+\end{itemize}
+\begin{cautionbox}
+\footnotesize \textbf{When noise fools the $\arg\max$.} True values at $k_L$: $Q(k_L,k_L){=}3$, $Q(k_L,k_H){=}5$, so ``invest'' ($k_H$) is correct. But with few sampled returns, one lucky episode inflates $\widehat{Q}(k_L,k_L){=}5.4$ vs.\ $\widehat{Q}(k_L,k_H){=}5.0$: greedy now flips to $k_L$ (stay low) --- the \emph{wrong} action, a \emph{worse} policy. Monotone improvement holds only with \emph{exact} $Q$ --- hence the need for \textbf{exploration} (next).\normalsize
+\end{cautionbox}
+\end{frame}
+
+
+%=============================================================================
+% FullCourse-only section: full exploration-exploitation treatment (Boltzmann, UCB,
+% comparison table). MiniCourse only mentions epsilon-greedy briefly in a single frame.
+\section{Exploration--Exploitation}
+
+\sectiondivider{Exploration vs.\ Exploitation}{To learn a good policy you must sometimes act sub-optimally on purpose}
+
+\begin{frame}{The Exploration--Exploitation Tradeoff}
+    \textbf{Key Challenge in RL:}
+    \begin{itemize}
+        \item \textbf{Exploitation:} Choose the best-known action to maximize \emph{immediate} reward.
+        \item \textbf{Exploration:} Try actions that may seem suboptimal now but could yield better \emph{long-term} rewards.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic Analogies:}
+    \begin{itemize}
+        \item \textbf{Dynamic Pricing:} Use the current best-known price, or test new prices?
+        \item \textbf{Portfolio Management:} Stick to blue-chip stocks, or diversify into unknowns?
+        \item \textbf{R\&D Investment:} Exploit existing technology, or explore new innovations?
+        \item \textbf{Monetary Policy:} Follow the Taylor rule, or experiment with novel instruments?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{$\epsilon$-Greedy Exploration}
+  \begin{itemize}
+    \item With probability $1 - \epsilon$: select the \textbf{best-known action} (greedy).
+    \item With probability $\epsilon$: select an action \textbf{at random} (explore).
+    \[
+        \pi(a|s) =
+        \begin{cases}
+            1 - \epsilon + \frac{\epsilon}{|\mathcal{A}(s)|}, & \text{if } a = \arg\max_{a'} Q(s,a') \\[4pt]
+            \frac{\epsilon}{|\mathcal{A}(s)|}, & \text{otherwise}.
+        \end{cases}
+    \]
+    \item Ensures all actions have \textbf{nonzero probability} $\Rightarrow$ every $(s,a)$ visited eventually.
+    \item Simple, practical, widely used.
+    \item Limitation: explores \textbf{uniformly} among non-greedy actions (doesn't favor promising ones).
+    \item \textbf{GLIE} --- \emph{Greedy in the Limit with Infinite Exploration} (convergence condition): decay $\epsilon_n \to 0$ slowly (e.g.\ $\epsilon_n = 1/n$) so the policy becomes greedy in the limit, yet every $(s,a)$ is still visited infinitely often --- then $\epsilon$-greedy GPI converges to $\pi^*$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Boltzmann (Softmax) Exploration}
+    \textbf{Idea:} Actions chosen \textbf{probabilistically}, weighted by estimated value.
+    \[
+       \Pr(a \mid s) = \frac{\exp\!\bigl(Q(s,a)/\tau\bigr)}{\sum_{a'} \exp\!\bigl(Q(s,a')/\tau\bigr)},
+    \]
+    where $\tau > 0$ is the \textbf{temperature}:
+    \begin{itemize}
+        \item $\tau$ \textbf{high} $\Rightarrow$ near-uniform exploration.
+        \item $\tau$ \textbf{low} $\Rightarrow$ near-greedy selection.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Connection to LLMs:} Large Language Models use the same ``temperature'' parameter to balance creativity (exploration) and consistency (exploitation) in text generation.
+
+    \vspace{0.3cm}
+    \textbf{Economic example:} Online advertising allocates budget to ads $\propto \exp(\text{estimated ROI}/\tau)$.
+\end{frame}
+
+% NEW: eps-greedy vs Boltzmann numerical comparison (book Ch12 §6.2)
+\begin{frame}{$\epsilon$-Greedy vs.\ Boltzmann: a Numerical Look}
+Three actions with current values $\widehat{Q} = (10,\, 9,\, 1)$:
+\vspace{0.1cm}
+\begin{center}\small
+\begin{tabular}{lccc}
+\toprule
+ & $a_1\ (Q{=}10)$ & $a_2\ (Q{=}9)$ & $a_3\ (Q{=}1)$ \\
+\midrule
+$\epsilon$-greedy ($\epsilon{=}0.1$) & $0.93$ & $0.03$ & $0.03$ \\
+Boltzmann ($\tau{=}2$)              & $0.62$ & $0.37$ & $0.01$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\footnotesize\textit{Where the numbers come from:} each row is the action-selection probability.\\
+$\epsilon$-greedy: best action gets $1-\epsilon+\tfrac{\epsilon}{3}=0.9+0.033=0.93$; each other gets $\tfrac{\epsilon}{3}=0.033$.\\
+Boltzmann: $\Pr(a)=\dfrac{e^{Q(a)/\tau}}{\sum_{a'}e^{Q(a')/\tau}}$, e.g.\ $a_1=\dfrac{e^{10/2}}{e^{5}+e^{4.5}+e^{0.5}}=\dfrac{148.4}{240.1}=0.62$.\par}
+\begin{itemize}
+  \item $\epsilon$-greedy spreads exploration \textbf{uniformly}: the near-optimal $a_2$ and the clearly-bad $a_3$ get the \emph{same} probability ($0.03$).
+  \item Boltzmann respects the \textbf{value ordering}: it explores the promising $a_2$ ($0.37$) far more than the inferior $a_3$ ($0.01$).
+\end{itemize}
+\footnotesize\textit{The same softmax/temperature structure economists know from discrete-choice (logit) models --- and from LLM decoding.}\normalsize
+\end{frame}
+
+\begin{frame}{Upper Confidence Bounds (UCB)}
+    \textbf{Key idea:} Give an \textbf{exploration bonus} to less-tried actions.
+    \[
+        a^* = \arg\max_a \left[\hat{Q}(a) + \alpha \sqrt{\frac{\ln t}{N(a)}}\right],
+    \]
+    where $\hat{Q}(a)$ = average reward of $a$, \ $N(a)$ = number of times $a$ has been tried, and $t$ = \textbf{total} number of action selections so far (so $t = \sum_a N(a)$).
+
+    \begin{itemize}
+        \item \textbf{Intuition:} the bonus is an \emph{optimism} term --- an upper edge of a confidence interval. $\ln t$ grows with total experience, $N(a)$ in the denominator shrinks the bonus for actions already tried a lot.
+        \item As $N(a)$ grows, the bonus shrinks $\Rightarrow$ converges to exploitation. Under-tried actions ($N(a)$ small relative to $t$) get a large bonus $\Rightarrow$ principled ``optimism in the face of uncertainty.''
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic example:} A firm evaluating new markets. Early data is sparse, so a confidence bonus encourages trying each region enough to reduce uncertainty.
+\end{frame}
+
+\begin{frame}{Comparison Table --- $\epsilon$-Greedy / Boltzmann / UCB}
+    \small
+    \begin{center}
+    \begin{tabular}{p{1.9cm} p{2.4cm} p{4.0cm} p{4.0cm}}
+        \toprule
+        \textbf{Method} & \textbf{Hyperparameter} & \textbf{Exploration mechanism} & \textbf{Sample complexity / when best} \\
+        \midrule
+        $\epsilon$-Greedy
+        & $\epsilon \in [0,1]$
+        & Uniform random with prob.\ $\epsilon$; greedy with prob.\ $1-\epsilon$
+        & $\tilde{\mathcal{O}}(|\mathcal{A}|/\epsilon^2)$ visits; default workhorse for tabular and deep RL \\
+        Boltzmann
+        & Temperature $\tau > 0$
+        & Soft\-max over $Q$, $\Pr(a|s) \propto \exp(Q/\tau)$
+        & Smooth; favors near-optimal actions; natural for continuous $\mathcal{A}$ \\
+        UCB
+        & Exploration weight $\alpha$
+        & Bonus $\alpha\sqrt{\ln t / N(a)}$ on under-tried actions
+        & $\tilde{\mathcal{O}}(\sqrt{|\mathcal{A}| t \ln t})$ regret; principled but assumes stationarity \\
+        \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.3cm}
+    \textbf{Optimistic initialization} is a complementary trick: start $Q(s,a)$ large so every action is tried at least once. Often combined with $\epsilon$-greedy in early training.
+\end{frame}
+
+\begin{frame}{When to Use Which: Decision Rule by Problem Class}
+\centering
+\begin{tikzpicture}[
+    decision/.style={rectangle, draw=RedTitle, fill=blue!8, thick, rounded corners=4pt, inner sep=4pt, font=\footnotesize, text width=3.0cm, align=center},
+    method/.style={rectangle, draw=green!50!black, fill=green!10, thick, rounded corners=2pt, inner sep=4pt, font=\footnotesize\bfseries, align=center},
+    arrow/.style={->, thick},
+    yeslabel/.style={font=\scriptsize\itshape, text=green!40!black},
+    nolabel/.style={font=\scriptsize\itshape, text=red!50!black}
+]
+\node[decision] (q1) at (0,0) {Continuous action space?};
+\node[method] (boltz) at (-5.5, -1.6) {Boltzmann\\\footnotesize\mdseries(softmax / SAC)};
+\node[decision] (q2) at (0, -2.0) {Bounded regret needed?};
+\node[method] (ucb) at (-5.5, -3.6) {UCB\\\footnotesize\mdseries(finite-time bounds)};
+\node[method] (eps) at (0, -4.0) {$\epsilon$-greedy\\\footnotesize\mdseries(default workhorse)};
+
+\draw[arrow] (q1.west) -- node[yeslabel, above]{yes} (boltz.east);
+\draw[arrow] (q1.south) -- node[nolabel, right]{no} (q2.north);
+\draw[arrow] (q2.west) -- node[yeslabel, above]{yes} (ucb.east);
+\draw[arrow] (q2.south) -- node[nolabel, right]{no} (eps.north);
+
+\node[font=\footnotesize\itshape, gray!60!black, text width=4.2cm] at (4.8, -1.6) {portfolio weight, policy rate, continuous control};
+\node[font=\footnotesize\itshape, gray!60!black, text width=4.2cm] at (4.8, -3.6) {online ads, A/B testing on a budget};
+\node[font=\footnotesize\itshape, gray!60!black, text width=4.2cm] at (4.8, -4.3) {tabular RL, deep-RL warm-up};
+\end{tikzpicture}
+
+\vspace{0.1cm}
+\footnotesize\textbf{Choice also depends on:} cost of a bad action, size of $\mathcal{A}$, whether $Q(s,a)$-uncertainty can be quantified.\normalsize
+\end{frame}
+
+
+%=============================================================================
+\section{Temporal-Difference Learning and Q-Learning}
+
+\sectiondivider{Temporal-Difference Learning and Q-Learning}{Update every step: sampling (like MC) $+$ bootstrapping (like DP)}
+
+\begin{frame}{From MC to TD: The Key Innovation}
+    \textbf{Monte Carlo:} waits until the \textbf{end of an episode} to update.
+    \begin{itemize}
+        \item Analogy: estimate a mean by collecting a \textbf{full batch} of data, then averaging.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Temporal Difference (TD):} updates \textbf{after every single step}.
+    \begin{itemize}
+        \item Analogy: \textbf{incremental mean update} after each new data point.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{From statistics:}
+    \begin{itemize}
+        \item Non-incremental: $\hat{\mu}_n = \frac{1}{n}\sum_{i=1}^n X_i$
+        \quad $\rightarrow$ collect $n$ samples, then compute.
+        \item Incremental: $\hat{\mu}_{k+1} = \hat{\mu}_k + \alpha_{k+1}(X_{k+1} - \hat{\mu}_k)$
+        \quad $\rightarrow$ update after each sample.
+    \end{itemize}
+
+    \vspace{0.2cm}
+    TD applies this incremental logic to \textbf{value function estimation}.
+\end{frame}
+
+\begin{frame}{TD(0): The Simplest TD Method}
+    \textbf{MC update:}
+    \[
+        V(s_t) \leftarrow V(s_t) + \alpha \bigl(\underbrace{G_t}_{\text{full return}} - V(s_t)\bigr).
+    \]
+
+    \textbf{TD(0) update:}
+    \[
+        V(s_t) \leftarrow V(s_t) + \alpha \Bigl(\underbrace{r_{t+1} + \gamma\,V(s_{t+1})}_{\text{one-step target}} - V(s_t)\Bigr).
+    \]
+
+    \vspace{0.15cm}
+    \textbf{Key difference:}
+    \begin{itemize}
+        \item MC uses the \textbf{actual full return} $G_t$ (unbiased, high variance).
+        \item TD uses a \textbf{bootstrapped target} $r_{t+1}+\gamma V(s_{t+1})$ (biased, lower variance), and learns \textbf{online}.
+    \end{itemize}
+
+    \vspace{0.1cm}
+    \textbf{TD Error:} $\delta_t = r_{t+1} + \gamma V(s_{t+1}) - V(s_t)$ \quad (the ``surprise'' signal).
+
+    \vspace{0.1cm}
+    \begin{conceptbox}
+    \footnotesize \textbf{Biased, but self-correcting:} the target aims at the Bellman image $T^\pi V$, not $V^\pi$. While $V$ is wrong it is biased --- but $T^\pi$ is a contraction, so as $V \to V^\pi$ the bias vanishes.\normalsize
+    \end{conceptbox}
+\end{frame}
+
+
+% FullCourse-only: TD(0) walk-through on the growth model
+\begin{frame}{TD(0) Applied to the Growth Model}
+  \textbf{Setup:} State $s_t = (k_t, z_t)$, policy $\pi$ chooses $c_t$, reward $r_{t+1} = u(c_t)$.
+
+  \vspace{0.3cm}
+  \textbf{Each time step:}
+  \begin{enumerate}
+      \item Observe state $(k_t, z_t)$, choose $c_t$ via policy $\pi$.
+      \item Receive reward $r_{t+1} = u(c_t)$.
+      \item Observe next state $(k_{t+1}, z_{t+1})$.
+      \item Update:
+      \[
+        V(k_t, z_t) \leftarrow V(k_t, z_t) + \alpha \Bigl[u(c_t) + \beta\, V(k_{t+1}, z_{t+1}) - V(k_t, z_t)\Bigr].
+      \]
+  \end{enumerate}
+
+  \vspace{0.3cm}
+  \textbf{Advantage over VFI:} no need to sum over all possible $z'$. Just use the \textbf{realized} transition.
+
+  \textbf{Advantage over MC:} no need to simulate an entire lifetime. Update \textbf{every period}.
+\end{frame}
+
+
+\begin{frame}{MC vs.\ TD(0) vs.\ DP: Comparison}
+\footnotesize
+\begin{center}
+    \begin{tabular}{p{2.6cm} p{3.0cm} p{3.0cm} p{3.0cm}}
+    \toprule
+    \textbf{Dimension} & \textbf{Monte Carlo} & \textbf{TD(0)} & \textbf{Dynamic Prog.} \\
+    \midrule
+    Bias / variance & Unbiased / high & Biased / low & Exact (no sampling) \\
+    Bootstrapping & No (full return) & Yes (1-step target) & Yes (full backup) \\
+    Requires model? & No & No & Yes ($P$, $R$) \\
+    On-/off-policy & Either & Either & N/A (planning) \\
+    Sample complexity & Episodes & Steps & Sweeps (no samples) \\
+    Convergence & Asymptotic (LLN) & Asymptotic & Finite (contraction) \\
+    \bottomrule
+    \end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\normalsize
+\textbf{Key insight:} TD sits between MC and DP. It uses \textbf{sampling} (like MC) and \textbf{bootstrapping} (like DP), combining the best of both worlds.
+\end{frame}
+
+
+\begin{frame}{On-Policy vs.\ Off-Policy Learning}
+    \begin{itemize}
+        \item \textbf{On-Policy (SARSA):}
+        \begin{itemize}
+            \item The \emph{behavior policy} (collects data) $=$ the \emph{target policy} (being improved).
+            \item Updates based on the \textbf{action actually taken}:
+            \[
+              Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \bigl[r_{t+1} + \gamma\,Q(s_{t+1}, a_{t+1}) - Q(s_t,a_t)\bigr].
+            \]
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \item \textbf{Off-Policy (Q-Learning):}
+        \begin{itemize}
+            \item The behavior policy can \textbf{differ} from the target policy.
+            \item Updates assume \textbf{greedy} next action, regardless of what was actually done:
+            \[
+              Q(s_t, a_t) \leftarrow Q(s_t,a_t) + \alpha \bigl[r_{t+1} + \gamma\,\max_{a'} Q(s_{t+1}, a') - Q(s_t,a_t)\bigr].
+            \]
+        \end{itemize}
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{Economic insight:} Off-policy $=$ learn about the \textbf{optimal} strategy while exploring with a different behavior. Like studying the best possible portfolio allocation while actually holding a diversified ``safe'' portfolio.
+\end{frame}
+
+% FullCourse-only: SARSA vs Q-Learning detail table + when-to-use guidance
+\begin{frame}{Comparing SARSA and Q-Learning}
+    \begin{center}
+    \small
+    \begin{tabular}{lcc}
+    \toprule
+    \textbf{Feature} & \textbf{SARSA (On-Policy)} & \textbf{Q-Learning (Off-Policy)} \\
+    \midrule
+    Update target
+        & $r + \gamma Q(s', a')$
+        & $r + \gamma \max_{a'} Q(s', a')$ \\
+    Behavior $=$ target?
+        & Yes
+        & No (can differ) \\
+    Converges to
+        & $Q^\pi$ (of \emph{actual} behavior)
+        & $Q^*$ (optimal) \\
+    Risk awareness
+        & Reflects real actions
+        & Plans for ``ideal'' actions \\
+    \bottomrule
+    \end{tabular}
+    \end{center}
+
+    \vspace{0.4cm}
+    \textbf{Which to choose?}
+    \begin{itemize}
+        \item \textbf{SARSA}: when \textbf{safety} matters --- learning matches actual behavior (e.g., autonomous driving).
+        \item \textbf{Q-Learning}: when you want the \textbf{optimal} policy directly and can tolerate off-policy mismatch.
+    \end{itemize}
+\end{frame}
+
+
+% NEW: off-policy evaluation with importance sampling + Volcker (book Ch12 §5.3 / Ch13 §2.3)
+\begin{frame}{Off-Policy Evaluation: Learning a New Rule from Old Data}
+\textbf{Goal:} evaluate a \emph{target} policy $\pi$ using trajectories generated by a \emph{different} \emph{behavior} policy $\mu$ (e.g.\ historical data).
+\[
+  \mathbb{E}_\pi[G_t] = \mathbb{E}_\mu\!\left[\rho_{t:T-1}\, G_t\right], \qquad
+  \rho_{t:T-1} = \prod_{k=t}^{T-1} \frac{\pi(a_k|s_k)}{\mu(a_k|s_k)}
+\]
+the \textbf{importance-sampling} (reweighting) ratio.
+\vspace{0.1cm}
+\begin{examplebox}
+\footnotesize \textbf{Volcker as a ``behavior policy.''} Pre-1979 vs.\ post-1979 Fed behavior $\approx$ two different Taylor rules (Clarida--Gal\'i--Gertler 2000). IS lets us estimate the value of a \emph{new} candidate rule $\pi$ from historical data --- \textbf{without re-running the policy experiment}. This is \emph{counterfactual policy evaluation}.\normalsize
+\end{examplebox}
+\begin{cautionbox}
+\footnotesize \textbf{Two cautions.} (i) \textbf{Coverage / overlap:} need $\mu(a|s)>0$ wherever $\pi(a|s)>0$ --- the RL version of the \emph{common-support} condition in causal inference (the ratio is dynamic IPW). (ii) The \emph{product} of ratios can make the variance \textbf{explode} over long horizons.\normalsize
+\end{cautionbox}
+\end{frame}
+
+
+% FullCourse-only: Q-learning derivation on the growth model
+\begin{frame}{Q-Learning in the Growth Model}
+  \hfill\footnotesize{Watkins \& Dayan (1992), \emph{Machine Learning}, ``Q-learning''}\normalsize
+  \begin{itemize}
+    \item \textbf{Action-value function:}
+      $Q(k,c) = u(c) + \beta \,\mathbb{E}[V(k') \mid k,c]$.
+    \item \textbf{Optimal policy:}
+      $\pi^*(k) = \arg\max_c Q^*(k,c)$.
+    \item \textbf{Q-Learning update (online, model-free):}
+      \[
+        Q_{m+1}(k_t,c_t)
+        = Q_m(k_t,c_t)
+        + \alpha \Bigl[u(c_t) + \beta \max_{c'} Q_m(k_{t+1},c')
+        - Q_m(k_t,c_t)\Bigr].
+      \]
+    \item \textbf{Advantages:}
+      \begin{itemize}
+        \item Works with stochastic or \textbf{unknown} transitions (sample-based).
+        \item Can approximate $Q(\cdot)$ with neural networks for continuous state/action spaces.
+        \item Converges to $Q^*$ under standard conditions.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+
+% FullCourse-only: n-step / TD(lambda) eligibility traces
+\begin{frame}{Multi-Step Methods: TD($\lambda$)}
+    \small
+    \textbf{Idea:} Combine partial returns over $n$ steps with bootstrapping.
+    \begin{itemize}
+        \item $n = 1$: recovers TD(0).
+        \item $n = T - t$: recovers MC.
+        \item Intermediate $n$: balances bias and variance.
+    \end{itemize}
+
+    \vspace{0.3cm}
+    \textbf{TD($\lambda$) --- eligibility traces:}
+    \begin{itemize}
+        \item Blends all $n$-step returns using exponential weighting parameter $\lambda \in [0,1]$.
+        \item $\lambda = 0$: pure TD(0). \quad $\lambda = 1$: pure MC.
+        \item Often improves convergence in practice.
+    \end{itemize}
+
+    \vspace{0.25cm}
+    \begin{takeawaybox}
+    \footnotesize \textbf{One dial, two endpoints:} $\lambda$ slides continuously between \textbf{TD(0)} ($\lambda{=}0$: one-step, low variance) and \textbf{Monte Carlo} ($\lambda{=}1$: full return, unbiased). Every method in Act 5.2 is a choice along this single bias--variance dial.
+    \end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+% House-style bridge closer (matches Lec09): restate the act, hand off to T3.
+\begin{frame}{Bridge: From Tables to Function Approximation}
+\textbf{Act 5.2 delivered the model-free core. MC, TD(0), SARSA, and Q-learning all learn values and policies from \emph{sampled} experience --- tied together by one backbone, Generalized Policy Iteration.}
+
+\vspace{0.25cm}
+\begin{itemize}
+  \item But every method so far stores one number per state (or state--action pair) --- a \textbf{table}. That is exactly the wall Act 5.1 warned about: economic states (capital, prices, wealth distributions) are \textbf{continuous and high-dimensional}, so the table explodes.
+  \item \textbf{Next (5.3):} replace the table with a \textbf{neural network}. Function approximation turns tabular Q-learning into \textbf{deep RL} (DQN); the policy-gradient / \textbf{actor--critic} family then handles continuous actions --- and we see where the recipe has actually worked (AlphaGo, RLHF, AlphaManager, Krusell--Smith).
+\end{itemize}
+
+\vspace{0.25cm}
+\begin{center}
+\footnotesize\textit{Arc: 5.1 MODEL (framework $+$ DP) $\;\to\;$ \textbf{5.2 SAMPLE} (MC / TD / Q-learning) $\;\to\;$ 5.3 SCALE (actor--critic $+$ deep RL $+$ applications).}
+\end{center}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,16 @@
+% Copyright overlay stamped onto every page of every published deck.
+% 16x9cm matches the decks' beamer aspectratio=169 (454x255 pt).
+% Compile TWICE -- `remember picture` needs two passes to place the node.
+% Kept identical to the sister course Quant_Macro so both sites match.
+%   pdflatex watermark.tex && pdflatex watermark.tex
+% Driven by tools/build_slides.py; you should not need to run it by hand.
+\documentclass{article}
+\usepackage[paperwidth=16cm,paperheight=9cm,margin=0pt]{geometry}
+\usepackage{tikz}\usepackage[T1]{fontenc}\pagestyle{empty}
+\begin{document}%
+\begin{tikzpicture}[remember picture, overlay]
+  \node[rotate=29, opacity=0.16, text=black, font=\sffamily\bfseries\large, align=center]
+    at (current page.center)
+    {\copyright~Zhigang Feng \quad\textbullet\quad Redistribution prohibited without permission};
+\end{tikzpicture}%
+\end{document}

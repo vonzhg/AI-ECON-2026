@@ -1,0 +1,6 @@
+Date,Model,USD_per_Million_Tokens,Source
+2022-11,GPT-3.5 (text-davinci-003),20.00,Stanford AI Index 2025 (GPT-3.5-level; endpoint)
+2023-06,GPT-3.5 Turbo,2.00,illustrative (Epoch AI trend)
+2023-11,GPT-3.5 Turbo-1106,1.00,illustrative (Epoch AI trend)
+2024-05,GPT-4o mini,0.15,illustrative (Epoch AI trend)
+2024-10,Gemini 1.5 Flash-8B,0.07,Stanford AI Index 2025 (GPT-3.5-level; endpoint)

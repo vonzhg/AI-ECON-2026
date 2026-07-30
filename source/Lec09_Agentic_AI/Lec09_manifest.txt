@@ -1,0 +1,7 @@
+Lec09_T1_Framing_Setup.pdf
+Lec09_T1b_Agentic_Landscape.pdf
+Lec09_T2_Under_the_Hood_FirstSession.pdf
+Lec09_T3_Homotopy_Tools.pdf
+Lec09_T4_Project_Org.pdf
+Lec09_T5_Tracing_Mistakes_Context.pdf
+Lec09_T6_Preview_Wrap.pdf

@@ -1,0 +1,275 @@
+%% FullCourse_10Lecs -- Lecture 3, Topic 3.1: Why ML + Pattern Recognition
+%% Source: ./archive_pre_split/Lec03_ML_for_Macro.tex (sections 1-2)
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module1_ML_Foundations/pic/}{../}}
+
+% Suppress the redundant auto-generated metropolis section page; the
+% \sectiondivider frames below are the dividers we keep.
+\metroset{sectionpage=none}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+\input{lec03_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 3.1: Why ML for Economists \& Pattern Recognition}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 3 in One Map}
+\textbf{One lecture, four decks, one goal: make neural networks a working tool for economists --- why they matter, what they are, how they learn, and how to make them respect economics.}
+
+\LecThreeMap{1}
+
+\vspace{0.05cm}
+\footnotesize\textit{\textbf{Act 3.1 (here)} makes the case for ML in economic research --- unstructured data, better prediction and controls, high-dimensional models --- then builds the core intuition with pattern recognition: digits live on a low-dimensional manifold, and networks learn the encoder.}
+\end{frame}
+
+%=============================================================================
+\section{Why ML for Economists?}
+
+\sectiondivider{Why ML for Economists?}{Four doors ML opens: unstructured data, causal inference, forecasting, and high-dimensional models}
+
+\begin{frame}{Harnessing the Power of Unstructured Data}
+\begin{itemize}
+\item Economics has traditionally relied on structured, tabular data. However, a wealth of economic information is locked in unstructured formats: text, images, satellite imagery.
+\item ML algorithms, particularly deep learning, provide tools to systematically process and quantify this unstructured data into economic indicators.
+\item \textbf{Applications:}
+\begin{itemize}
+\item Measuring economic sentiment and uncertainty from financial news and social media
+\item Analyzing satellite images to track economic activity (nighttime lights $\approx$ GDP proxy, ships in ports $\approx$ trade flows)
+\item Using image recognition on product pictures to understand non-standardized product features
+\end{itemize}
+\item \textbf{Course arc:} Lec.\ 1 T1 framed AI as cognitive capital --- the \emph{why}. This lecture delivers the \emph{what} (NN architectures, training algorithms); Lec.\ 4 delivers the \emph{how} (solving dynamic equilibrium models).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Extracting Insights from Textual Data}
+\begin{itemize}
+\item Natural Language Processing (NLP) offers powerful techniques to analyze large volumes of text --- going beyond simple word counts.
+\item \textbf{Applications:}
+\begin{itemize}
+\item Gauging dovish or hawkish stance of central bankers from public communications
+\item Identifying key risk factors from corporate annual reports
+\item Quantifying the evolution of economic policy uncertainty from news articles
+\end{itemize}
+
+\medskip
+\item \textbf{For macro:} FOMC minutes, Beige Books, and congressional records contain rich information that traditional econometrics cannot easily exploit.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Enhancing Causal Inference and Forecasting}
+\begin{itemize}
+\item \textbf{Causal Inference:}
+\begin{itemize}
+\item ``Double Machine Learning'' allows flexible inclusion of high-dimensional controls, reducing omitted variable bias
+\item ML identifies \emph{heterogeneous treatment effects}: how does a policy impact vary across subgroups?
+\end{itemize}
+
+\medskip
+\item \textbf{Forecasting \& Nowcasting:}
+\begin{itemize}
+\item ML captures complex, non-linear relationships that time-series models miss
+\item Regularization (e.g., LASSO) enables ``kitchen sink'' regression without overfitting
+\item Nowcasting: real-time economic indicators from credit card transactions, web searches, satellite imagery
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Solving Large-Scale Macro and Finance Models}
+\begin{itemize}
+\item Cutting-edge models (heterogeneous agents, portfolio choice) feature:
+\begin{itemize}
+\item High dimensionality and complex non-linear dynamics
+\item Traditional grid-based methods hit the \textbf{curse of dimensionality}
+\end{itemize}
+
+\medskip
+\item ML techniques provide powerful new numerical methods:
+\begin{itemize}
+\item \textbf{Deep learning:} parameterize policy/value functions with neural networks
+\item \textbf{Reinforcement learning:} solve sequential decision problems via simulation
+\end{itemize}
+
+\medskip
+\item \textbf{Examples:}
+\begin{itemize}
+\item Optimal fiscal/monetary policy in heterogeneous agent models
+\item Life-cycle portfolio choice with realistic income uncertainty
+\item Krusell--Smith (1998) with neural network approximation of the law of motion
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ML and the Curse of Dimensionality in Macro}
+\begin{itemize}
+\item \textbf{CoD \#1: Dimension of the state space}
+\begin{itemize}
+\item $k\rightarrow\{k,a,h,\ldots\}$; the distribution $\Gamma$ is infinite-dimensional
+\item \textit{Traditional:} sparse grids, local approximation --- scale poorly
+\item \textit{ML:} neural networks are \textbf{grid-free}; recover equilibrium functions via Monte Carlo sampling
+\end{itemize}
+
+\medskip
+\item \textbf{CoD \#2: Unfolding of uncertainty}
+\begin{itemize}
+\item $\mathbb{E}$ over future contingencies; the space for $\Gamma$ is unknown
+\item \textit{Traditional:} discretize shocks, impose Markov structure
+\item \textit{ML:} focus on the ergodic distribution; direct simulation Monte Carlo
+\end{itemize}
+
+\medskip
+\item \textbf{Key insight:} ML shifts the computational bottleneck from \emph{grid construction} to \emph{function representation} --- a much more scalable paradigm.
+
+\medskip
+\item \textbf{Where this gets concrete in the course:} Lec.\ 4 T1 applies it to the optimal-growth state $(k,z)$; Lec.\ 5 T1 generalizes to MDPs $(S, A, P, R, \gamma)$; Lec.\ 6 attacks high-dim Aiyagari and Krusell--Smith with the methods you'll learn in T2--T4.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Pattern Recognition as Motivating Illustration}
+
+\sectiondivider{Pattern Recognition as Motivating Illustration}{Digits, manifolds, encoders --- the intuition behind every network in this course}
+
+\begin{frame}{Example: Handwritten Digit Recognition}
+\begin{center}
+\includegraphics[width=12cm,height=7cm,keepaspectratio]{3.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Digit Recognition as a Mathematical Problem}
+\begin{itemize}
+  \item \textbf{Dataset:}
+        $\bigl\{(\mathbf{x}_i, y_i)\bigr\}_{i=1}^N$ with images $\mathbf{x}_i \in [0,1]^{784}$
+        and labels $y_i \in \{0,\dots,9\}$
+
+  \item \textbf{Input--Output Mapping:}
+        \[
+          f_{\theta} \colon \mathbf{x} \longmapsto \hat{\mathbf{p}} \in \Delta^{9},
+          \qquad
+          \hat{y} = \arg\max_{k} \hat{p}_k
+        \]
+        where $\Delta^{9}$ is the 10-dimensional probability simplex
+
+  \item \textbf{Learning Objective (Empirical Risk + Regularization):}
+        \[
+          \min_{\theta} \;
+          \frac{1}{N}\sum_{i=1}^{N}
+          \underbrace{\mathcal{L}\bigl(f_{\theta}(\mathbf{x}_i), y_i\bigr)}_{\text{cross-entropy}}
+          + \lambda \lVert\theta\rVert_{p}
+        \]
+
+  \item \textbf{Search Strategy:} Stochastic gradient descent \& variants (Adam, RMSProp)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Constraints and Structure in Handwritten Digits}
+\begin{itemize}
+\item \textbf{Anatomical constraints:} Muscles, tendons, and joints dictate possible strokes --- leading to systematic patterns in how digits are formed.
+
+\medskip
+\item \textbf{Geometric properties:} Each digit has defining features --- `0' has a closed loop, `1' a vertical stroke, `8' two stacked loops.
+
+\medskip
+\item \textbf{Spatial relationships:} Relative positions, sizes, and orientations of components maintain digit identity even with individual variation.
+
+\medskip
+\item \textbf{Lesson for economists:} Just as economic theory constrains the space of plausible models, structural constraints on handwriting reduce the effective dimensionality of the recognition problem.
+
+\medskip
+\item ML algorithms can \textbf{learn} these constraints from data --- data augmentation, regularization, and architecture choices all exploit this structure.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From 784 Pixels to a Low-Dimensional Manifold}
+\begin{itemize}
+  \item \textbf{Manifold Hypothesis:}
+        Natural digit images occupy a smooth, $d$-dimensional manifold
+        $\mathcal{M}\subset\mathbb{R}^{784}$ with $d\ll784$.
+
+  \medskip
+  \item \textbf{Plain-English version:} only a few ``writing-style'' degrees of freedom matter:
+        slant, stroke thickness, loop closure, and local translation.
+
+  \medskip
+  \item The other 780+ pixel directions are nearly empty: random pixel noise almost never looks like a digit.
+
+  \medskip
+  \item \textbf{Macro analogy:} finding a low-dimensional state in a high-dimensional model is the same problem.
+        A good representation preserves the few variables that matter for the next decision.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Encoder View of Digit Recognition}
+\begin{itemize}
+  \item \textbf{Two-stage model:}
+        \[
+          \mathbf{x}
+          \xrightarrow{\;\pi\,:\;\mathbb{R}^{784}\!\!\to\mathbb{R}^{d}\;}
+          \mathbf{z}
+          \xrightarrow{\;g_{\phi}\,:\;\mathbb{R}^{d}\!\!\to\Delta^{9}\;}
+          \hat{\mathbf{p}}
+          ,\qquad
+          \hat y=\arg\max_k\hat p_k
+        \]
+        \begin{itemize}
+          \item $\pi$: \textit{encoder} --- flattens the manifold to a latent code $\mathbf z\in\mathbb{R}^{d}$
+          \item $g_{\phi}$: \textit{classifier head} --- 1--2 FC layers + softmax $\to$ class probabilities
+        \end{itemize}
+
+  \medskip
+  \item \textbf{Choices for $\pi$:}
+        \begin{itemize}
+          \item \textbf{Linear:} PCA, SVD, random projections
+          \item \textbf{Non-linear:} Auto-encoder, t-SNE, UMAP, first layers of a CNN
+        \end{itemize}
+
+  \medskip
+  \item \textbf{Economist's translation:} the encoder learns a nonlinear factor model instead of imposing a fixed sufficient statistic. Sufficient statistics for prediction --- by learning.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Defining a Deep Neural Network for Digit Recognition}
+\begin{itemize}
+\item \textbf{Network Architecture:}
+\begin{itemize}
+\item Input Layer: 784 neurons corresponding to pixel intensities
+\item Hidden Layers: Multiple layers applying nonlinear transformations to learn complex patterns
+\item Output Layer: 10 neurons, each representing one digit class (0--9)
+\end{itemize}
+
+\medskip
+\item \textbf{Activation Functions:}
+\begin{itemize}
+\item Nonlinear functions (ReLU, sigmoid) between layers
+\item Customizable depth and width based on task complexity
+\end{itemize}
+
+\medskip
+\item \textbf{Economic parallel:} The network structure mirrors the recursive structure in macro models --- state variables are transformed layer by layer into decisions, just as $k_t \to c_t, l_t$ through policy functions.
+
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% House-style bridge closer (matches Lec05/Lec09): restate the act, hand off.
+\begin{frame}{Bridge: From \emph{Why ML} to \emph{What a Network Is}}
+\textbf{Act 3.1 made the case. ML earns its place in the economist's toolkit where classical methods stall --- unstructured data, flexible controls and nowcasts, high-dimensional models --- and pattern recognition showed the mechanism: learn a low-dimensional representation, then decide.}
+
+\vspace{0.25cm}
+\begin{itemize}
+  \item You have seen \emph{why}: four doors ML opens for economic research, and one running illustration (digits $\to$ manifold $\to$ encoder) of how a network learns structure from data instead of having it hand-built.
+  \item \textbf{Next (3.2):} open the box --- neurons, layers, and activation functions, plus the theorems (universal approximation; Barron's dimension-free rate) that explain why these objects fit the functions economists care about.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{center}
+\footnotesize\textit{Arc: \textbf{3.1 WHY} (the case for ML) $\;\to\;$ 3.2 BUILD (architecture $+$ UAT) $\;\to\;$ 3.3 TRAIN (backprop $+$ SGD) $\;\to\;$ 3.4 SHAPE (economics-aware nets $+$ lab).}
+\end{center}
+\end{frame}
+
+\end{document}

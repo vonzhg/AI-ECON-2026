@@ -1,0 +1,353 @@
+%% FullCourse_10Lecs -- Lecture 6, Topic 6.4: Deep Equilibrium Nets + OLG Aggregate Uncertainty
+%% Source: ./archive_pre_split/Lec06_HA_Models.tex (sections 8-9)
+%% Pass B additions: Validation frames (Euler residuals + economic plausibility) ported from MiniCourse M2_T4 sec 5.
+%% FullCourse-only: OLG with Aggregate Uncertainty section (not present in MiniCourse).
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module2_DL_RL_Macro/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 6.4: DEQN and OLG with Aggregate Uncertainty}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 6.4 Agenda}
+\begin{enumerate}
+  \item \textbf{Deep Equilibrium Nets (DEQN)}
+  \medskip
+  \item \textbf{OLG with Aggregate Uncertainty}
+\end{enumerate}
+\medskip
+\textit{Arc: T1 Aiyagari + computation $\to$ T2a Why ML / Euler $\to$ T2b Global DNN $\to$ T3 KS / DeepHAM $\to$ \textbf{T4 DEQN / OLG} $\to$ T5 MFG $\to$ Lab06}
+\end{frame}
+
+%=============================================================================
+\section{Deep Equilibrium Nets (DEQN)}
+
+\begin{frame}{Deep Equilibrium Nets (Azinovic, Gaegauf \& Scheidegger 2022, \emph{IER})}
+\begin{itemize}
+\item DEQN is a \textbf{general} method: a \textbf{single} policy network, trained on equilibrium conditions, no value function. The original paper introduced it on \textbf{OLG / Bewley} economies.
+\medskip
+\item \textit{In this lecture} we \textbf{apply} DEQN to the KS economy (the Lab06 setup). For KS the single network represents the policy:
+\[
+\sigma_\theta(a, e, Z, K) \in (0,1)
+\;\Rightarrow\;
+a' = \underline a + \sigma_\theta\cdot(\text{cash on hand} - \underline a).
+\]
+\medskip
+\item The training objective is the \textbf{Euler equation residual}, not a Bellman residual.
+\medskip
+\item No value network, no fictitious play; just supervised learning on the Euler condition.
+\medskip
+\item Key innovation: a \emph{cloud} of parallel economies provides a rich training distribution.
+\end{itemize}
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!40, title={Why DEQN is the capstone of the deep-HA toolbox}]
+\scriptsize DEQN combines the Euler-loss idea (Topic 6.2a) with the policy-network architecture (Topic 6.2b) --- without ever computing a value function. Azinovic et al.\ (2022) demonstrate it on OLG/Bewley models; \emph{this lecture} applies the same recipe to the full KS heterogeneous-agent benchmark.
+\end{tcolorbox}
+\end{frame}
+
+\begin{frame}{DEQN: policy network architecture}
+\begin{itemize}
+\item Single multilayer perceptron $\sigma_\theta : \mathbb{R}^4 \to (0,1)$.
+\medskip
+\item Inputs: $(a, e, Z, K)$ where $K = \int a\, d\mu$ is aggregate capital.
+\medskip
+\item Architecture applied in this lecture (Lab06):
+  \begin{itemize}
+  \item 3 hidden layers, 64 units each.
+  \item Mish activation function.
+  \item Sigmoid output for the savings rate.
+  \end{itemize}
+\medskip
+\item Sigmoid output enforces the budget constraint at the network level: the implied $a'$ always lies within $[\underline a, \text{cash on hand}]$.
+\medskip
+\item Contrast with DeepHAM: DeepHAM uses both $V_{\text{NN}}$ and $\mathcal C_{\text{NN}}$; DEQN uses only the policy network.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DEQN: Euler equation as the loss function}
+The household optimality condition is the Euler equation:
+\[
+u'(c_t) \;=\; \beta\,\mathbb{E}_t\!\left[(1+r_{t+1})\,u'(c_{t+1})\right].
+\]
+\medskip
+The \textbf{Euler residual}:
+\[
+\varepsilon \;=\; 1 \,-\, \frac{\beta\,\mathbb{E}\!\left[(1+r')\,u'(c')\right]}{u'(c)}.
+\]
+\medskip
+The DEQN loss aggregates squared residuals across a sample of agents:
+\[
+\mathcal{L}(\theta) \;=\; \frac{1}{M}\sum_{m=1}^{M} \varepsilon_m^2.
+\]
+\medskip
+\textbf{Why Euler equations?} They are \emph{necessary} for optimality; sufficiency requires in addition a transversality / no-Ponzi condition (plus concavity). DEQN works because the bounded state space and simulated paths effectively impose transversality, so driving $\varepsilon\to 0$ trains the optimal policy without ever computing $V$.
+\end{frame}
+
+\begin{frame}{DEQN: cloud simulation}
+\textbf{Problem.} To evaluate the Euler residual we need $(K, Z)$, but $K$ depends on the cross-sectional distribution $\mu$, which itself evolves endogenously under the trained policy.
+\medskip
+
+\textbf{Solution.} Simulate $N$ \emph{independent copies} of the entire economy in parallel:
+\medskip
+\begin{itemize}
+\item Epoch 0: all $N$ economies start at the steady-state distribution $\mu_{ss}$ from a sequence-Jacobian (SSJ) calibration.
+\item As training progresses, each economy evolves under its own TFP path $\{Z_n\}$, so the set $\{K_n\}$ spreads out across a realistic range.
+\item Result: an economically consistent and \emph{diverse} batch on which the Euler loss is meaningful.
+\end{itemize}
+\medskip
+Compared to DeepHAM (one economy, $N$ agents, $T_v$-step rollout), DEQN runs $N$ economies, each with its own $\mu_n$, evaluating the Euler equation directly each step.
+\end{frame}
+
+\begin{frame}{DEQN: distribution transport}
+At each epoch, $\mu_{n,t}$ is a histogram over $(a_j, e_k)$. Steps to advance one period:
+\medskip
+
+\begin{enumerate}
+\item Compute savings $a'_{j,k}$ for every grid point under the current policy.
+\item \textbf{Linear interpolation transport}: split mass $\mu(a_j, e_k)$ between the two adjacent grid points with weights $w_{\ell+1}, w_\ell$.
+\item \textbf{Markov transition for employment}: distribute mass to $(a_\ell, e')$ weighted by the transition matrix $\Pi_{e\to e'}$.
+\item Update $K_{n,t+1} = \sum_{j,k} a_j \cdot \mu_{n,t+1}(a_j, e_k)$.
+\end{enumerate}
+\medskip
+
+The transport step runs inside \texttt{torch.no\_grad()} so that gradients only propagate through the Euler residual loss, not through the simulation step itself.
+\end{frame}
+
+\begin{frame}{DEQN: algorithm outline}
+\textbf{Initialisation.} Solve the steady state via SSJ to get $K_{ss}$, asset/employment grids, $\mu_{ss}$, and the Markov transition $\Pi$.
+\medskip
+
+\textbf{For each training epoch $t \in \{1,\ldots,T\}$:}
+\begin{enumerate}
+\item Compute $K_n = \int a\,d\mu_n$ and read $Z_n$ for each cloud copy $n$.
+\item Sample $M$ random $(a, e)$ per copy.
+\item Forward pass: evaluate $\sigma_\theta \to (a', c)$.
+\item Compute Euler residuals $\varepsilon^2$ via expectations over $(Z', e')$.
+\item Backward pass: Adam update on $\theta$.
+\item Transport: $\mu_n \to \mu_n'$ inside \texttt{no\_grad()}; draw next $Z_n$.
+\end{enumerate}
+\medskip
+
+\textbf{Convergence.} Loss decreases over $\sim 2000$ epochs; Euler errors below $10^{-3}$ indicate the policy solves the model to high accuracy.
+\end{frame}
+
+% Validation frames ported from MiniCourse M2_T4_KS_DEQN section 5.
+\begin{frame}{Validation: Euler residuals over training}
+\begin{itemize}
+\item Track $\log_{10}\!|EE|$ across iterations on a held-out validation sample of $(a, e, Z, K)$.
+\medskip
+\item Standard targets (Judd 1998, applied to KS):
+  \begin{itemize}
+  \item Acceptable: $\log_{10}|EE| < -3$
+  \item Good: $\log_{10}|EE| < -4$
+  \item In this lecture's KS run: \textbf{below $10^{-3}$ over $\sim 2000$ epochs}.
+  \end{itemize}
+\medskip
+\item \textbf{What healthy training looks like}:
+  \begin{enumerate}
+  \item Loss curve monotone-decreasing on log scale (no oscillation).
+  \item Aggregate $K_n$ stays near steady-state range across cloud copies.
+  \item Validation Euler error tracks training error (no overfitting --- expected, since the loss \emph{is} the optimality condition).
+  \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Validation: economic plausibility}
+\begin{itemize}
+\item Beyond Euler errors, check that the \emph{economics} is sensible:
+  \begin{enumerate}
+  \item Savings policy $a'(a, e, Z, K)$ is monotone increasing in $a$ for each fixed $(e, Z, K)$.
+  \item Employed agents save more than unemployed at the same $a$ (precautionary motive).
+  \item Aggregate $K_n$ tracks the KS log-linear PLM slope-and-intercept reasonably.
+  \item Wealth distribution under simulation matches Aiyagari-style steady-state shape (right-skewed, fat upper tail).
+  \end{enumerate}
+\medskip
+\item \textbf{Diagnostic plots} for the lab:
+  \begin{itemize}
+  \item Loss curve on a log scale.
+  \item Policy heatmap $a' = \sigma_\theta(a, e, Z, K)$ at fixed $(Z, K)$.
+  \item Stationary wealth histogram.
+  \item Cloud trajectory of $K_n$ over training (fan plot).
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{DEQN vs.\ DeepHAM: comparison}
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+ & \textbf{DeepHAM} & \textbf{DEQN}\\
+\midrule
+Networks & Value $+$ policy (2) & Policy only (1)\\
+Optimality & Bellman / fictitious play & Euler residual\\
+Distribution rep.\ & Generalised moments & Full histogram\\
+Training data & $N$ agents, 1 economy & $N$ economies, cloud sim\\
+Forward sim & Yes, $T_v$ steps & Yes, 1 step / epoch\\
+Distribution evolution & Implicit via moments & Linear-interp transport\\
+Scalability & Moments fixed; NN width grows & Histogram sized to grid\\
+Differentiability & Through truncated rollout & Euler loss only\\
+\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+\begin{itemize}
+\item Both avoid the curse of dimensionality of the underlying KS problem.
+\item DeepHAM has richer distributional info via learned moments; DEQN has a simpler architecture and direct Euler-based training.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Recap: the modern HA toolbox}
+\begin{itemize}
+\item Aiyagari (1994): a non-trivial nested fixed point, classically solved by VFI + bisection on $r$.
+\medskip
+\item Krusell--Smith (1998): adds aggregate uncertainty, classically tamed by bounded-rationality moments.
+\medskip
+\item DeepHAM: replaces moments with \emph{learned} sufficient statistics; alternates supervised value learning and fictitious-play policy improvement.
+\medskip
+\item DEQN: drops the value function entirely; trains a single policy network on Euler residuals over a cloud of simulated economies.
+\medskip
+\item Both deep-learning methods generalise straightforwardly to:
+  \begin{itemize}
+  \item Multiple assets (HANK)
+  \item OLG with aggregate shocks (next part)
+  \item Mean-Field Games in continuous time (Part X)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{OLG with Aggregate Uncertainty}
+% FullCourse-only
+
+\begin{frame}{From infinite-horizon to overlapping generations}
+\begin{itemize}
+\item In Aiyagari/KS, agents are infinitely lived. Many quantitative questions require finite life cycles:
+  \begin{itemize}
+  \item Social security and pension reform
+  \item Retirement savings and 401(k)
+  \item Lifecycle wealth accumulation
+  \item Education financing and student debt
+  \end{itemize}
+\medskip
+\item \textbf{OLG model} (Diamond, Auerbach--Kotlikoff): agents live $J$ periods (or cohorts), are born, age, and die.
+\medskip
+\item State vector now includes the \emph{age} of each cohort, plus its asset/income distribution.
+\medskip
+\item Standard OLG with aggregate shocks remains computationally hard --- the per-cohort distribution is itself an infinite-dimensional state.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OLG with aggregate uncertainty: state vector}
+With $J$ cohorts indexed by age $j = 1, \ldots, J$:
+\medskip
+\begin{itemize}
+\item Cohort $j$ has its own asset distribution $\Gamma_j$ over $(a_j, y_j)$.
+\medskip
+\item Aggregate state: $S = (Z, \Gamma_1, \Gamma_2, \ldots, \Gamma_J)$.
+\medskip
+\item Aggregate capital and labour:
+\[
+K_t = \sum_{j=1}^{J} \int a\,d\Gamma_{j,t}, \qquad
+L_t = \sum_{j=1}^{J} \int \bar\ell_j\, y\, d\Gamma_{j,t},
+\]
+where $\bar\ell_j$ is the cohort-specific labour endowment (often hump-shaped).
+\medskip
+\item Lifecycle Bellman: $V_j(a_j, y_j, S) = \max\,\{u(c) + \beta\, \mathbb{E}[V_{j+1}(a',y',S')]\}$, with $V_{J+1}\equiv 0$ (or a terminal bequest function).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{OLG state vector: budget constraints and lifecycle profile}
+Within each cohort, the household's intertemporal problem at age $j$ has the budget constraint
+\[
+c_j + a_{j+1} \;=\; (1+r_t)\,a_j \;+\; w_t\,\bar\ell_j\, y_j, \qquad j = 1, \ldots, J,
+\]
+with terminal condition $a_{J+1} = 0$ (no bequest) or $a_{J+1} = b$ (warm-glow bequest).
+\medskip
+\begin{itemize}
+\item \textbf{Age-profile labour endowment} $\bar\ell_j$ is hump-shaped: rising 25--50, declining 50--65, zero after 65 (retirement).
+\item \textbf{Cohort dimensionality.} With $J = 60$ cohorts and a 2-dim individual state $(a, y)$, the full distribution $\{\Gamma_j\}_{j=1}^J$ lives in a $J \times 2 = 120$-dim space.
+\item \textbf{Backward induction (deterministic case).} Without aggregate shocks, solve $V_J \to V_{J-1} \to \cdots \to V_1$ cohort-by-cohort; aggregate shocks couple all cohorts simultaneously.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why DL helps for OLG with aggregate shocks}
+\begin{itemize}
+\item Without aggregate shocks: standard backward induction over cohorts works.
+\medskip
+\item \textbf{With} aggregate shocks: each cohort's continuation value depends on the future joint distribution of all cohorts $\Rightarrow$ exponential state-space blow-up.
+\medskip
+\item Deep neural networks let us:
+  \begin{itemize}
+  \item Approximate $V_j(a, y, S)$ with a single MLP per cohort (or one MLP with cohort as an input).
+  \item Encode $S$ via learned summary statistics (analogous to DeepHAM moments).
+  \item Train across cohorts in parallel on a GPU.
+  \end{itemize}
+\medskip
+\item Recent reference: Brumm, Kubler \& Scheidegger (2023, working paper), ``Economics-inspired neural networks with stabilizing homotopies''.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Homotopy-stabilised training (Brumm--Kubler--Scheidegger 2023)}
+\begin{itemize}
+\item OLG with aggregate uncertainty is hard to train: borrowing constraints, occasionally-binding bond limits, and discontinuities in the policy create unstable gradients.
+\medskip
+\item \textbf{Stabilising homotopy}: introduce constraints \emph{gradually} during training.
+  \begin{itemize}
+  \item Start with a relaxed (smooth) version of the model: no binding constraint, smooth penalties.
+  \item Slowly tighten the constraints toward their true value as training progresses.
+  \item By the time the constraints are at their true level, the network is already in a good basin.
+  \end{itemize}
+\medskip
+\item Empirically, homotopy is essential for getting OLG-with-aggregate-shocks training to converge.
+\medskip
+\item Implementation often combines JAX (for automatic differentiation through long simulation rollouts) with the Adam optimiser and a multistep homotopy schedule.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Homotopy schedule: results and convergence diagnostics}
+A typical 3-stage homotopy for OLG with aggregate uncertainty:
+\medskip
+\begin{enumerate}
+\item \textbf{Stage 1 --- no aggregate shocks.} Fix $Z = \bar Z$; train on the deterministic OLG. Loss converges to $\sim 10^{-5}$ in a few thousand epochs.
+\item \textbf{Stage 2 --- small shocks.} Re-introduce aggregate shocks at $\sigma_Z^{(2)} = 0.3\,\sigma_Z^{\text{full}}$. Loss rises to $\sim 10^{-3}$, then converges.
+\item \textbf{Stage 3 --- full shocks.} Restore $\sigma_Z^{\text{full}}$; loss stabilises at $\sim 10^{-3}$.
+\end{enumerate}
+\medskip
+\textbf{Convergence diagnostics:}
+\begin{itemize}
+\item Euler residuals below $10^{-3}$ on a held-out validation set.
+\item Cohort-by-cohort policy plots match the Stage-1 deterministic baseline at the modal aggregate state.
+\item Cross-stage warm-starting: each stage's final parameters initialise the next.
+\end{itemize}
+\textit{Why homotopy works:} the policy never sees a discontinuous jump in the loss landscape.
+\end{frame}
+
+\begin{frame}{Lab12\_OLG.ipynb preview}
+\begin{itemize}
+\item \texttt{Notebooks/Lab12\_OLG.ipynb} is a JAX-based implementation of the Brumm--Kubler--Scheidegger OLG model with stabilising homotopies.
+\medskip
+\item Highlights:
+  \begin{itemize}
+  \item 7 cohorts spanning a 72-period life cycle, life-cycle labour endowment.
+  \item Aggregate TFP shocks following an AR(1).
+  \item Capital adjustment costs.
+  \item State-dependent depreciation (TFP-tied).
+  \item Two-stage homotopy: capital-only model first, then add bond.
+  \end{itemize}
+\medskip
+\item Use this notebook as an \textbf{optional follow-up} after Lab06: students who finish the KS lab early can explore OLG.
+\medskip
+\item In production research, the same toolkit handles multi-asset HANK and asset-pricing models.
+\end{itemize}
+\medskip
+\emph{Next (T5a):} the continuous-time view --- Mean-Field Games, HJB, and the continuum-of-agents limit.
+\end{frame}
+
+\end{document}

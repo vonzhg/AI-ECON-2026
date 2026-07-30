@@ -1,0 +1,27 @@
+% F-IF: slash-command interface the researcher uses end-to-end.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  cmd/.style      ={draw,rounded corners=1pt,inner sep=4pt,minimum width=68mm,minimum height=9mm,align=center,fill=blue!10,font=\ttfamily\footnotesize},
+  res/.style      ={font=\scriptsize\itshape,text=gray!45!black,align=left,text width=56mm,inner sep=1pt},
+  snum/.style     ={font=\scriptsize\bfseries,text=gray!55!black,align=right,inner sep=1pt},
+  arr/.style      ={-{Latex[length=1.5mm]},semithick,gray!70!black},
+]
+\node[snum] (s1) at (-4.6, 0.0)  {1.};
+\node[cmd]  (c1) at ( 0.0, 0.0)  {/literature-manager corpus.md};
+\node[res,right=4mm of c1] {$\to$ canonical \texttt{manifest.yaml} $+$ verified PDFs};
+
+\node[snum] (s2) at (-4.6,-1.4)  {2.};
+\node[cmd]  (c2) at ( 0.0,-1.4)  {/matlas-extract <paper\_id>};
+\node[res,right=4mm of c2] {$\to$ per-paper statement \textsc{dag} (Lens A)};
+
+\node[snum] (s3) at (-4.6,-2.8)  {3.};
+\node[cmd]  (c3) at ( 0.0,-2.8)  {/promptecon-extract paper.md};
+\node[res,right=4mm of c3] {$\to$ per-paper framework JSON, 51 elements (Lens B)};
+
+\node[snum] (s4) at (-4.6,-4.2)  {4.};
+\node[cmd]  (c4) at ( 0.0,-4.2)  {/graph-query "<query>"};
+\node[res,right=4mm of c4] {$\to$ typed \textsc{ppr} $\to$ ranked papers $+$
+                            statements $+$ elements, cited};
+
+\foreach \x/\y in {c1/c2, c2/c3, c3/c4} \draw[arr] (\x) -- (\y);
+\end{tikzpicture}

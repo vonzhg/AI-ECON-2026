@@ -1,0 +1,332 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recursive Formulation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{State Variables}
+The economy is described by the state vector $s = (B, \mu, g)$:
+\begin{itemize}
+    \item $B$: Real government debt (beginning of period).
+    \item $\mu$: The Lagrange multiplier on the resource constraint (shadow price of consumption), where $c = 1/\mu$. This acts as the co-state variable summarizing past commitments.
+    \item $g \in \{g_L, g_H\}$: Exogenous government expenditure shock, following a Markov process $g \sim \pi(\cdot|g_{-1})$.
+\end{itemize}
+
+\subsection{Ramsey Government's Problem}
+The government chooses a policy $\mu'(g')$ (the multiplier for the next period conditional on the next shock) to maximize value.
+For $t > 0$, the Bellman equation is:
+\begin{equation}\label{eq:bellman}
+V(B, \mu, g) = \max_{\{\mu'(g')\}_{g'}} \left\{ u(c, l) + \beta \mathbb{E}[V(B', \mu', g') \mid g] \right\}
+\end{equation}
+subject to the implementation constraints:
+\begin{align}
+    c &= 1/\mu \\
+    l &= c + g \\
+    \tau &= 1 - \frac{\gamma_l c}{1 - l} \quad \text{(Implied Labor Tax)} \\
+    q &= \beta \frac{\mathbb{E}[\mu' \mid g]}{\mu} \quad \text{(Bond Price)} \\
+    B' &= \frac{B + g - \tau l}{q} \quad \text{(Govt Budget Constraint)} \label{eq:budget_dynamic}
+\end{align}
+Crucially, the solution must satisfy $(B', \mu') \in \Omega(g')$, where $\Omega(g')$ is the endogenous set of feasible states where a competitive equilibrium exists.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Deep Learning Algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Architecture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The algorithm approximates the solution using two neural networks and one heuristic module:
+
+\begin{enumerate}
+    \item \textbf{Policy Network} $\pi(B, \mu, g; \theta_{\pi}) \to (\mu'_{L}, \mu'_{H})$: \\
+    A feedforward network with ReLU activations. Outputs logits that are transformed via sigmoid to $[\mu_{\min}, \mu_{\max}]$:
+    \[ \mu'_{g'} = \sigma(\text{logit}_{g'}) \cdot (\mu_{\max} - \mu_{\min}) + \mu_{\min} \]
+    
+    \item \textbf{Value Network} $V(B, \mu, g; \theta_V) \to \mathbb{R}$: \\
+    Approximates the government's value function.
+    
+    \item \textbf{Admissibility Scorer} $\mathcal{A}(B, \mu, g)$: \\
+    A non-parametric module that evaluates the ``safety'' or feasibility of a state based on the current policy's implied tax rates and debt dynamics. 
+    This replaces a trained domain network with an explicit, economically-grounded signal.
+\end{enumerate}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adaptive Sampling Strategy}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The feasible state space $\Omega(g)$ is unknown a priori. We employ a \textbf{Tri-Partition Adaptive Sampling} strategy to iteratively learn the boundaries of this set. The core logic relies on an \textit{Operational Definition of Feasibility}: a state $s=(B, \mu, g)$ is considered feasible if and only if the policy network can generate a valid transition to a sustainable future state.
+
+To quantify this, we define an \textit{Admissibility Score} $\mathcal{A}(s)$, which acts as a proxy for the feasibility of the current state based on the safety of its policy-induced transition.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Unified Admissibility Scoring}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To streamline the algorithm and ensure consistent gradient signals, we employ a unified \textbf{Distance-Based Power Barrier} function for all state variables.
+
+\subsubsection{The Generic Barrier Function $\mathcal{S}(x)$}
+We compute component scores using a generic function $\mathcal{S}(x)$. Given a feasible interval $\Omega_x = [x_{\min}, x_{\max}]$ and a buffer parameter $\delta_x$, the score is:
+
+\begin{equation}
+    \mathcal{S}(x; \Omega_x, \delta_x) = \left[ 1 - \left( \frac{\text{dist}(x, \Omega_x)}{\delta_x} \right)^k \right]^+
+\end{equation}
+
+where $[ \cdot ]^+ = \max(0, \cdot)$, $k$ is a sharpness parameter (e.g., $k=4$), and the distance to the feasible set is:
+\begin{equation}
+    \text{dist}(x, [x_{\min}, x_{\max}]) = \max\left(0, \; x_{\min} - x, \; x - x_{\max}\right)
+\end{equation}
+
+This function guarantees a score of 1.0 strictly within the bounds, and decays to 0.0 as the variable traverses the buffer zone $\delta_x$. To ensure meaningful gradients, the buffer width $\delta_x$ is defined \textbf{proportionally to the domain size} $|\Omega_x| = x_{\max} - x_{\min}$.
+
+\subsubsection{The Global Score Components}
+For a state $s=(B, \mu, g)$, the policy outputs $\mu'(g')$, which implies current allocations and next-period debt. The global score is a weighted average of three transition metrics:
+\begin{equation}
+    \mathcal{A}(s) = w_{\mu} A_{\mu} + w_{\tau} A_{\tau} + w_{b} A_{b}
+\end{equation}
+where weights are typically balanced, e.g., $(0.33, 0.33, 0.34)$.
+
+We apply the generic barrier function to each component:
+
+\begin{enumerate}
+    \item \textbf{Current Implementation Feasibility ($A_{\tau}$):}
+    Checks if the current state $(B, \mu)$ allows for a feasible tax rate $\tau$.
+    \[ \tau = 1 - \frac{\gamma_l (1/\mu)}{1 - (1/\mu + g)} \]
+    If the current $\mu$ or $B$ implies a $\tau \notin [0, 1]$, this score drops to 0.
+    \begin{itemize}
+        \item \textbf{Bounds:} $\Omega_{\tau} = [0, 1]$.
+        \item \textbf{Buffer:} \textbf{Tight} ($\delta_{\tau} \approx 0.02 |\Omega_{\tau}|$). Since tax bounds are strict, we use a narrow buffer to enforce the domain rigidly.
+    \end{itemize}
+    \[ A_{\tau} = \mathcal{S}(\tau; \Omega_{\tau}, \delta_{\tau}) \]
+
+    \item \textbf{Policy Safety ($A_{\mu}$):}
+    Checks if the chosen policy $\mu'$ avoids the singularity at the computational limit $\mu_{\max}$.
+    \begin{itemize}
+        \item \textbf{Bounds:} $\Omega_{\lambda} = [\mu_{\min}, \mu_{\max}]$.
+        \item \textbf{Buffer:} \textbf{Moderate} ($\delta_{\lambda} \approx 0.05 |\Omega_{\lambda}|$). A proportional buffer allows exploration of high-multiplier states without immediate collapse.
+    \end{itemize}
+    \[ A_{\mu} = \mathcal{S}(\mu'; \Omega_{\lambda}, \delta_{\lambda}) \]
+
+    \item \textbf{Recursive Debt Sustainability ($A_{b}$):}
+    Checks if the resulting next-period debt $B'$ lands within the \textit{learned} feasible set for the future state.
+    \begin{itemize}
+        \item \textbf{Bounds:} $\Omega_{B}(\mu', g') = [B_{\min}(\mu', g'), B_{\max}(\mu', g')]$. These are state-dependent boundaries estimated from the previous iteration (see Section \ref{sec:dynamic_bounds}).
+        \item \textbf{Buffer:} \textbf{Wide} ($\delta_{b} \approx 0.10 |\Omega_{B}|$). As debt limits are evolving during training, a wider buffer prevents premature truncation of feasible trajectories.
+    \end{itemize}
+    \[ A_{b} = \min_{g' \in \{L, H\}} \mathcal{S}(B'; \Omega_{B}(\mu', g'), \delta_{b}) \]
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Learning Endogenous Boundaries}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The definition of "Debt Sustainability" ($A_b$) relies on knowing the feasible range of debt for a given multiplier, which is unknown. We learn it iteratively through the following update cycle.
+
+\subsubsection{Dynamic State-Dependent Estimation}\label{sec:dynamic_bounds}
+At the end of every sampling epoch, the algorithm:
+\begin{enumerate}
+    \item \textbf{Identification:} Collects all "Admissible Points" where $\mathcal{A}(s) > \tau_{\text{high}}$.
+    \item \textbf{Estimation (The "Backward" Step):} Estimates the feasible envelope $\Omega_{B}(\mu, g)$ by analyzing the distribution of these points.
+    \begin{itemize}
+        \item \textbf{Binning:} Partitions the $\mu$-axis into $N$ discrete bins.
+        \item \textbf{Quantile Statistics:} Computes robust bounds for each bin $j$:
+        \[ \hat{B}_{\min}^j = Q_{\alpha}(B \mid \mu \in \text{bin}_j), \quad \hat{B}_{\max}^j = Q_{1-\alpha}(B \mid \mu \in \text{bin}_j) \]
+    \end{itemize}
+    \item \textbf{Interpolation (The "Forward" Step):} Fits continuous piecewise linear functions $B_{\min}(\mu, g)$ and $B_{\max}(\mu, g)$ through these estimates.
+    \item \textbf{Application:} These updated functions are plugged into the $A_b$ scoring function for the \textit{next} iteration, creating a feedback loop where the sampler can explore further as the policy improves.
+\end{enumerate}
+
+\subsubsection{Iterative Refinement}
+To ensure consistency between the cache scores and the newly computed boundaries, we perform a multi-step refinement loop (e.g., 3 iterations) where we re-score a fixed grid and re-estimate bounds until the envelope stabilizes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Learning Endogenous Boundaries}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The definition of "Debt Sustainability" ($A_b$) relies on evaluating whether next-period debt $B'$ falls within the feasible envelope $\Omega_B(\mu')$. However, $\Omega_B$ is itself defined by the set of admissible states. This creates a circular dependency: we need the bounds to compute scores, but we need high scores to estimate bounds.
+
+We resolve this via an **Iterative Refinement Algorithm** that acts as a fixed-point iteration to stabilize the feasible set definition.
+
+\subsubsection{Initialization}
+At the start of the adaptive phase (or the very first iteration), we lack a learned envelope. We initialize $\Omega_B^{(0)}$ using \textbf{Global Heuristic Bounds} (e.g., ``arbitrary large bounds'' derived from the domain limits, such as $[-0.5, 3.5]$). This broad search space ensures we do not artificially restrict the model before it has begun to learn.
+
+\subsubsection{The Refinement Loop}
+Periodically (e.g., every $N$ epochs), we update the boundary functions. To ensure the estimated envelope $\hat{\Omega}_B$ is consistent with the current policy $\pi$, we perform the following loop:
+
+\begin{enumerate}
+    \item \textbf{Step 0: Reference Grid Generation} \\
+    We generate a dense, fixed grid of candidate states $\mathcal{G}_{ref}$ spanning the entire initialized domain. This grid serves as the "test set" for feasibility.
+
+    \item \textbf{Step 1: Iterative Updates (Fixed-Point Search)} \\
+    We iterate for $k = 1 \dots K$ steps (typically $K=3$) to stabilize the boundaries:
+    \begin{itemize}
+        \item \textbf{Score:} Compute admissibility scores $\mathcal{A}(s)$ for all $s \in \mathcal{G}_{ref}$ using the \textit{current} boundary estimate $\hat{\Omega}_B^{(k-1)}$.
+        \item \textbf{Filter:} Identify the current set of admissible points $\mathcal{S}_{adm} = \{s \in \mathcal{G}_{ref} \mid \mathcal{A}(s) > \tau_{\text{strong}}\}$.
+        \item \textbf{Estimate (Backward Step):} Re-estimate the bounds by computing the quantiles of $B$ in $\mathcal{S}_{adm}$ conditioned on $\mu$ (as detailed in Section \ref{sec:dynamic_bounds}).
+        \item \textbf{Update:} Fit the new envelope functions $\hat{\Omega}_B^{(k)}$ through these estimates.
+    \end{itemize}
+    \textit{Logic:} As the envelope tightens around the true safe set, points on the fringe that were previously considered "safe" (due to loose bounds) will now be penalized, further refining the boundary in the next sub-step.
+
+    \item \textbf{Step 2: Final Synchronization} \\
+    Once the loop completes and the boundaries $\hat{\Omega}_B$ have stabilized, we perform a final scoring pass on the cache. This ensures that the Admissibility Scores used for the subsequent \textbf{Sampling Action} (Section \ref{sec:sampling_action}) perfectly reflect the newly established constraints.
+\end{enumerate}
+
+\subsubsection{Dynamic State-Dependent Estimation}\label{sec:dynamic_bounds}
+The estimation step (Step 1.3 above) transforms the raw cloud of admissible points into a usable function:
+\begin{enumerate}
+    \item \textbf{Binning:} Partition the $\mu$-axis into $N$ discrete bins.
+    \item \textbf{Quantile Statistics:} For each bin $j$ and shock $g$, compute robust bounds to ignore outliers ("Green Noise"):
+    \[ \hat{B}_{\min}^j = Q_{\alpha}(B \mid \mu \in \text{bin}_j), \quad \hat{B}_{\max}^j = Q_{1-\alpha}(B \mid \mu \in \text{bin}_j) \]
+    \item \textbf{Interpolation:} Fit continuous piecewise linear functions $B_{\min}(\mu, g)$ and $B_{\max}(\mu, g)$ through these bin estimates.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sampling Action: Boundary-Focused Exploration}\label{sec:sampling_action}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+With the Admissibility Score established and the Boundaries updated, we proceed to sample training data. We classify candidate states into three sets:
+
+\begin{itemize}
+    \item \textbf{Safe Set} ($\mathcal{S}_{\text{safe}}$): $\mathcal{A}(s) > \tau_{\text{high}}$ (e.g., 0.7). Used for optimality training.
+    \item \textbf{Boundary Set} ($\mathcal{S}_{\text{bound}}$): $\tau_{\text{low}} \le \mathcal{A}(s) \le \tau_{\text{high}}$. These states represent the "Feasibility Cliff" found by the refinement loop. We oversample this region.
+    \item \textbf{Infeasible Set} ($\mathcal{S}_{\text{fail}}$): $\mathcal{A}(s) < \tau_{\text{low}}$ (e.g., 0.3). Used for supervised penalty training.
+\end{itemize}
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Training Procedure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The training alternates between generating data via adaptive sampling and updating the networks.
+
+\subsubsection{Two-Phase Training Structure}
+The algorithm operates in two phases:
+\begin{itemize}
+    \item \textbf{Phase 1: Warmup} ($k < K_{\text{warmup}}$): Uses uniform sampling from previous simulation data with small perturbations.
+    \item \textbf{Phase 2: Adaptive} ($k \geq K_{\text{warmup}}$): Uses weighted resampling based on admissibility scores.
+\end{itemize}
+
+\subsubsection{Sampling Phase}
+
+\paragraph{Warmup Sampling:} Samples from history of simulated trajectories with Gaussian noise:
+\begin{align}
+    B &\leftarrow B_{\text{hist}} + \mathcal{N}(0, 0.05 \cdot (B_{\max} - B_{\min})) \\
+    \mu &\leftarrow \mu_{\text{hist}} + \mathcal{N}(0, 0.05 \cdot (\mu_{\max} - \mu_{\min}))
+\end{align}
+with 20\% probability of resampling the $g$-index.
+
+\paragraph{Adaptive Sampling:} Generates $10 \times$ batch size candidates uniformly, then:
+\begin{itemize}
+    \item Computes admissibility scores for each candidate (using cache or fresh computation).
+    \item Assigns sampling weights: $w = 1$ if $\mathcal{A} > \tau_{\text{strong}}$, else $w = 0.0001$.
+    \item Resamples without replacement according to normalized weights.
+    \item Separately collects inadmissible samples where $\mathcal{A} < \tau_{\text{inad}}$.
+\end{itemize}
+
+\subsubsection{Policy Training (Two-Stage)}
+The policy network $\pi_{\theta}$ is trained in two stages to balance optimality and feasibility.
+
+\begin{itemize}
+    \item \textbf{Stage 1: Gradient Descent (Optimality).} Trained on $\mathcal{S}_{\text{good}}$ only for $N_p$ epochs. The objective is to maximize the simulated discounted utility:
+    \[ \max_{\theta} \mathbb{E}_{s \sim \mathcal{S}_{\text{good}}} \left[ \sum_{t=0}^{T} \beta^t u(c_t, l_t) + \beta^{T+1} V(s_{T+1}) \right] \]
+    Soft penalties are applied during simulation for constraint violations (labor, tax, debt bounds).
+    
+    \item \textbf{Stage 2: Data Fitting (Feasibility).} \textit{(Optional, controlled by \texttt{use\_two\_stage\_training} flag.)} Trained on $\mathcal{S}_{\text{good}} \cup \mathcal{S}_{\text{bad}}$ for $N_{p,2}$ epochs using MSE loss.
+    \begin{itemize}
+        \item For $s \in \mathcal{S}_{\text{good}}$: Target is the current network output (preserving Stage 1 solution).
+        \item For $s \in \mathcal{S}_{\text{bad}}$: Target is $[\text{logit}^{-1}(\mu_{\max}), \text{logit}^{-1}(\mu_{\max})]$.
+    \end{itemize}
+    This supervised step forces the policy to explicitly learn to output ``failure'' values at boundary states.
+\end{itemize}
+
+\subsubsection{Value Training (Dual-Data)}
+The value network $V_{\phi}$ is trained via regression (MSE) on a combined dataset:
+\begin{itemize}
+    \item \textbf{Good Data:} Simulated values $V_{\text{sim}}$ generated by rolling out the policy from $s \in \mathcal{S}_{\text{good}}$. Input format: $(B, \mu, g_{\text{val}})$ where $g_{\text{val}} \in \{0.045, 0.155\}$.
+    \item \textbf{Bad Data:} \textit{(If two-stage training enabled.)} A penalty scalar $V_{\text{thr}}$ (default -50) assigned to all states $s \in \mathcal{S}_{\text{bad}}$.
+\end{itemize}
+This prevents the value function from extrapolating high values into infeasible regions. The dataset is regenerated every $N_{\text{draw}}$ epochs.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simulation Module}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Period $t=0$ Problem}
+At $t=0$, the algorithm solves the Ramsey problem by direct optimization (L-BFGS-B):
+\[ \max_{l_0, \mu'_{g_L}, \mu'_{g_H}} \left\{ u(c_0, l_0) + \beta \mathbb{E}[V(B', \mu', g') \mid g_0] \right\} \]
+where $c_0 = l_0 - g_0$ and $\mu_0 = 1/c_0$.
+
+\subsubsection{Periods $t \geq 1$}
+For $t \geq 1$, the simulation follows the trained policy network:
+\begin{enumerate}
+    \item Query policy: $(\text{logit}_L, \text{logit}_H) = \pi_\theta(B_t, \mu_t, g_t)$
+    \item Transform: $\mu'_{g'} = \sigma(\text{logit}_{g'}) \cdot (\mu_{\max} - \mu_{\min}) + \mu_{\min}$
+    \item Compute allocations and next-period debt $B'$.
+    \item Clamp $B'$ to current dynamic bounds.
+    \item Draw next shock $g_{t+1} \sim \pi(\cdot | g_t)$.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}[H]
+\caption{Deep Ramsey Algorithm with Adaptive Sampling}
+\label{alg:main_training_loop}
+\begin{algorithmic}[1]
+\Require Config $\mathcal{C}$, Networks $\pi_{\theta}, V_{\phi}$, Iterations $K$, Warmup iterations $K_w$.
+\State Initialize Scorer $\mathcal{A}$, Sampler $S$, History $\mathcal{H} \gets \emptyset$.
+\For{$k = 1$ \textbf{to} $K$}
+    \State \textbf{// Phase Transition}
+    \If{$k = K_w$}
+        \State $S.\text{set\_phase}(\text{`adaptive'})$
+        \State Build initial cache via iterative refinement.
+    \EndIf
+
+    \State \textbf{// Step 1: Sampling}
+    \If{$k < K_w$} \Comment{Warmup Phase}
+        \State $\mathcal{S}_{\text{main}} \gets S.\text{sample\_from\_history}(\mathcal{H})$
+        \State $\mathcal{S}_{\text{bad}} \gets \emptyset$
+    \Else \Comment{Adaptive Phase}
+        \State Generate candidates $\mathcal{S}_{\text{cand}}$ uniformly.
+        \State Compute scores: $A_i \gets \mathcal{A}(s_i)$ for $s_i \in \mathcal{S}_{\text{cand}}$.
+        \State Assign weights: $w_i = 1$ if $A_i > \tau_s$, else $w_i = 0.0001$.
+        \State $\mathcal{S}_{\text{main}} \gets \text{WeightedResample}(\mathcal{S}_{\text{cand}}, w)$.
+        \State $\mathcal{S}_{\text{bad}} \gets \{s \in \mathcal{S}_{\text{cand}} : A(s) < \tau_i\}$.
+    \EndIf
+
+    \State \textbf{// Step 2: Policy Training}
+    \State Copy $\pi_{\theta,\text{old}} \gets \pi_\theta$.
+    \State \textit{Stage 1:} Update $\pi_{\theta}$ on $\mathcal{S}_{\text{main}}$ maximizing $V_{\text{sim}}$ for $N_p$ epochs.
+    \If{\texttt{use\_two\_stage\_training}}
+        \State \textit{Stage 2:} Update $\pi_{\theta}$ on $\mathcal{S}_{\text{main}} \cup \mathcal{S}_{\text{bad}}$ using MSE for $N_{p,2}$ epochs.
+        \State \hskip2em Targets: $\pi_{\theta}(s)$ for good, $[\mu_{\max\text{-logit}}, \mu_{\max\text{-logit}}]$ for bad.
+    \EndIf
+
+    \State \textbf{// Step 3: Value Training}
+    \State Generate $V_{\text{sim}}$ for $\mathcal{S}_{\text{main}}$ via simulation.
+    \State Update $V_{\phi}$ for $N_v$ epochs:
+    \State \hskip2em Every $N_{\text{draw}}$ epochs, regenerate target dataset.
+    \If{\texttt{use\_two\_stage\_training}}
+        \State Include $(\mathcal{S}_{\text{bad}}, V_{\text{thr}})$ in training set.
+    \EndIf
+
+    \State \textbf{// Step 4: Collect Simulation Data}
+    \State $\mathcal{H} \gets \mathcal{H} \cup \{\text{simulated states}\}$
+    \State Trim $\mathcal{H}$ to most recent $H_{\text{size}}$ batches.
+
+    \State \textbf{// Step 5: Update Adaptive Components}
+    \If{$k \geq K_w$ \textbf{and} $(k - K_w) \mod f_{\text{cache}} = 0$}
+        \State Update Cache with iterative refinement.
+        \State Update Dynamic Bounds $B_{\min}(\mu, g), B_{\max}(\mu, g)$.
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

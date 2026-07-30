@@ -1,0 +1,408 @@
+%% FullCourse_10Lecs -- Lecture 8, Topic 8.4b: Demo + Failures + Evaluation + Bridge to Agentic
+%% Source: Phase 1 split from ./archive_pre_split/Lec08_T4_Augmented_Gen_Apps_Wrap.tex
+%%   T4b reorders the demo to appear FIRST (after the agenda), before failure modes,
+%%   so students see the working system before the troubleshooting catalogue.
+
+\input{../shared_preamble.tex}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc, backgrounds}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 8.4b: Demo, Failure Modes, Evaluation, Bridge to Agentic}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 8.4b Agenda}
+\begin{enumerate}
+  \item \textbf{Classroom Demo: OLG RAG} --- a working pipeline you can run today
+  \medskip
+  \item \textbf{Failure Modes and Mitigations}
+  \medskip
+  \item \textbf{Evaluation} --- RAGAS and Cohen's $\kappa$
+  \medskip
+  \item \textbf{From RAG to Agentic RAG} --- bridge to Lecture~9
+  \medskip
+  \item \textbf{Summary and Closing}
+\end{enumerate}
+
+\medskip
+\textit{Arc: T1 Prompting wall $\to$ T2 Chunking \& embeddings $\to$ T3 Vector \& graph retrieval $\to$ T4a Augmented generation $\to$ \textbf{T4b Demo, failures, agentic bridge}}
+\end{frame}
+
+
+%=============================================================================
+\section{Classroom Demo: OLG RAG}
+
+\begin{frame}{Demo Step 1 --- The Query and the Pipeline}
+\textbf{Classroom question:} \emph{What did Diamond (1965) add to the OLG approach?}
+
+\vspace{0.2cm}
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.35cm and 0.45cm,
+  box/.style={draw, rounded corners=2pt, minimum width=2.15cm, minimum height=0.7cm, align=center, fill=VeryLightGray},
+  arr/.style={-{Latex[length=2mm]}, thick}
+]
+\node[box] (source) {source paper\\markdown};
+\node[box, right=of source] (chunks) {line-addressable\\chunks};
+\node[box, right=of chunks] (index) {local TF-IDF\\index};
+\node[box, right=of index] (retrieve) {top-$K$\\evidence};
+\node[box, right=of retrieve] (answer) {grounded\\answer};
+\draw[arr] (source) -- (chunks);
+\draw[arr] (chunks) -- (index);
+\draw[arr] (index) -- (retrieve);
+\draw[arr] (retrieve) -- (answer);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+\begin{itemize}
+  \item \textbf{Why this question.} It is a classic methodology question (what does the Diamond extension contribute to Samuelson-style OLG?) — answerable from the source paper if and only if retrieval finds the right paragraph.
+  \item \textbf{Source (local copy):} \texttt{./demos/M4\_rag\_olg\_demo}
+  \item \textbf{Default path is offline:} no API key, no network, no vector DB service.
+  \item \textbf{Teaching point:} citations are an answer contract, not decoration. Each demo step makes one part of the contract visible.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Demo Launch and Expected Artifacts}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, numbers=none]
+cd demos/M4_rag_olg_demo
+/usr/bin/python3 run_demo.py
+/usr/bin/python3 run.py ask "What did Diamond 1965 add to the OLG approach?"
+PYTHONPATH=src /usr/bin/python3 -m unittest discover -s tests
+\end{lstlisting}
+
+\vspace{0.2cm}
+\begin{tabular}{p{3.0cm}p{8.5cm}}
+\toprule
+\textbf{Artifact} & \textbf{What students should inspect} \\
+\midrule
+chunk file & boundaries and line references \\
+retrieval report & top-$K$ evidence, scores, and anchor checks \\
+extractive answer & whether every claim is supported by retrieved text \\
+unsupported query & whether the system refuses rather than improvises \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.12cm}
+{\scriptsize Files are written under the demo's \texttt{build/} folder, including \texttt{chunks.json} and a retrieval-report CSV.}
+\end{frame}
+
+\begin{frame}{Demo Step 2 --- Corpus Audit Before You Index}
+\begin{itemize}
+\item Before chunking, \emph{look at the corpus}. The OLG demo's \texttt{run\_demo.py} prints a Step-1 audit:
+\begin{itemize}\small
+    \item character count, line count, heading count
+    \item the first $\sim$5 headings (sections of Spear--Young's paper)
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters.} If the audit shows zero headings, your chunker will be flying blind: no section boundaries, no metadata to filter on later. The corpus audit is the cheapest sanity check in the entire RAG pipeline.
+
+\medskip
+\item \textbf{Practical rule.} If you cannot describe your corpus in two minutes from an audit print-out, you are not ready to index it.
+
+\medskip
+\item \textbf{Output to inspect:} \texttt{build/chunks.json} after Step 2 of \texttt{run\_demo.py}. Each chunk carries \texttt{chunk\_id}, \texttt{citation}, and \texttt{section} --- the metadata that makes retrieval auditable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Demo Step 3 --- Retrieval Diagnostics + Anchor Checks}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{What the demo prints (per question)}
+\begin{itemize}\small
+\item top-$K$ chunks with \texttt{score}
+\item \texttt{citation} (file + line range)
+\item \texttt{section} heading
+\item \emph{anchor hits} --- did retrieval surface the gold-standard phrases the instructor expected?
+\item \texttt{PASS/FAIL} verdict per question
+\end{itemize}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{Why anchor checks matter}
+\begin{itemize}\small
+\item Score thresholds alone can lie --- a low-quality chunk can still rank highest.
+\item Anchors are \emph{specific phrases} that must appear in a correct retrieval.
+\item Anchor hit rate is the simplest cousin of context-recall (T4b RAGAS).
+\item Watching the PASS/FAIL trail tells you which question types your index handles --- and which it doesn't.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\centering\textit{Rule restated: read the retrieval report \emph{before} the generated answer. The diagnostic is the publication-grade artifact.}
+\end{frame}
+
+\begin{frame}{Demo Step 4 --- The Grounded Prompt Anatomy}
+\small
+\begin{tabular}{p{2.6cm}p{8.9cm}}
+\toprule
+\textbf{Prompt part} & \textbf{What it does in the OLG demo} \\
+\midrule
+Role & ``You are a research assistant for academic economists.'' \\
+Context & retrieved chunks, each prefixed with \texttt{[\textit{filename}:L\textit{a}-\textit{b}]} \\
+Question & the user query, verbatim --- not rephrased \\
+Citation rule & every substantive claim must carry one \texttt{[\textit{filename}:L\textit{a}-\textit{b}]} \\
+Refusal rule & ``If the context does not support the answer, say so explicitly.'' \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\begin{itemize}\small
+\item \textbf{Why preserve line ranges.} An answer that cites \texttt{[Spear-Young\_OLG:L412-440]} is one-click-verifiable; a free-form ``the paper argues\dots'' is not.
+
+\item \textbf{Lec.\ 7 callback.} The \emph{grounded generation contract} from Lec.\ 7 T3b (``cite-then-claim'') is exactly what this prompt enforces, line by line.
+
+\item \textbf{Try it (next slide).} Run \texttt{run\_demo.py}; inspect Step 6 of the script for the prompt that the model actually sees.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Demo Step 5 --- Extractive Answer vs.\ Refusal}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{Supported query} (Q3 in demo)
+\begin{itemize}\small
+\item Top retrieved chunks discuss Diamond's production-side extension of Samuelson OLG.
+\item Extractive answer quotes those chunks verbatim, with line citations.
+\item Anchor hits $\geq 1$; \texttt{PASS}.
+\item This is what a publication-grade RAG should look like.
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\textbf{Unsupported query} (refusal test)
+\begin{itemize}\small
+\item E.g.\ ``What is the demo author's email address?''
+\item Top retrieved chunks have low score and no anchor coverage.
+\item Extractive answer returns: \emph{``I do not have enough retrieved evidence in the provided source to answer.''}
+\item This is the \emph{feature}, not the bug.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\begin{takeawaybox}
+\textbf{The two behaviors are inseparable.} A system that can answer ``Diamond 1965'' correctly \emph{and} refuses to invent an email address is the minimum bar for using RAG in published research.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+\centering\textit{Artifact: \texttt{build/terminal\_retrieval\_report.csv} --- archive it next to your paper draft.}
+\end{frame}
+
+%=============================================================================
+\section{Failure Modes and Evaluation}
+
+\begin{frame}{When RAG Fails}
+\textbf{Six common failure modes:}
+\begin{enumerate}
+\item \textbf{Retriever miss.} Relevant document exists but the embedder ranks it outside top-$K$. Often caused by terminology mismatch.
+
+\medskip
+\item \textbf{Re-ranker promotes the wrong context.} Cross-encoder mis-scores; the LLM gets a confident-but-irrelevant chunk.
+
+\medskip
+\item \textbf{Generator ignores the retrieved context.} The LLM falls back on its parametric memory and answers from training data --- often confidently and incorrectly.
+
+\medskip
+\item \textbf{Chunk boundary cuts critical information.} The fact spans the boundary between two chunks; neither chunk alone contains the answer.
+
+\medskip
+\item \textbf{Outdated index.} The corpus has been updated, but the index hasn't been re-run. The retriever returns stale chunks.
+
+\medskip
+\item \textbf{Ambiguous query.} ``Inflation'' could mean CPI, PCE, expectations, or asset prices. The retriever picks one interpretation; the user wanted another.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Mitigations --- One per Failure Mode}
+\begin{itemize}
+\item \textbf{Retriever miss} $\Rightarrow$ \emph{query expansion} and \emph{HyDE} (hypothetical document embeddings: ask the LLM to draft a fake answer, embed \emph{that}, retrieve nearest documents). Also: hybrid sparse + dense retrieval.
+
+\medskip
+\item \textbf{Re-ranker mis-scores} $\Rightarrow$ try a stronger re-ranker (\texttt{bge-reranker-v2}); train a domain-specific re-ranker on labeled query-document pairs.
+
+\medskip
+\item \textbf{Generator ignores context} $\Rightarrow$ stricter system prompt (``Answer ONLY from the context''); lower temperature; faithfulness check in post-processing.
+
+\medskip
+\item \textbf{Chunk boundary cuts information} $\Rightarrow$ semantic chunking; larger chunk overlap; or use a parent-document retriever (retrieve a chunk, return its parent paragraph).
+
+\medskip
+\item \textbf{Outdated index} $\Rightarrow$ incremental ingestion pipeline triggered when source documents change; nightly re-embed for high-churn corpora.
+
+\medskip
+\item \textbf{Ambiguous query} $\Rightarrow$ query rewriting (ask the LLM to clarify or expand the query before retrieval); multi-query retrieval (generate $N$ paraphrases, retrieve for each, fuse).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation: The RAGAS Framework}
+\begin{itemize}
+\item Es, James, Espinosa-Anke \& Schockaert (2023), \emph{EACL}, ``RAGAS: Automated Evaluation of Retrieval Augmented Generation.'' Now the standard.
+
+\medskip
+\item \textbf{Four metrics, two for retrieval and two for generation:}
+\begin{itemize}
+    \item \textbf{Context precision.} Of the retrieved chunks, how many are actually relevant to the query? \emph{(Retriever quality.)}
+    \medskip
+    \item \textbf{Context recall.} Of the chunks that should have been retrieved, how many did we get? \emph{(Retriever coverage.)}
+    \medskip
+    \item \textbf{Faithfulness.} Are all the claims in the answer supported by the retrieved context? \emph{(Generator anti-hallucination.)}
+    \medskip
+    \item \textbf{Answer relevance.} Does the answer actually address the query? \emph{(Generator on-topic.)}
+\end{itemize}
+
+\medskip
+\item RAGAS computes all four automatically using an LLM-as-judge. Cost a few cents per query.
+
+\medskip
+\item \textbf{The right way to use it:} build a small ($\sim$50-question) eval set for your specific corpus, run RAGAS each time you change a pipeline component, and only ship a change when the metrics improve.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Cohen's $\kappa$ for RAG: Beyond LLM-as-Judge}
+\begin{itemize}
+\item \textbf{RAGAS uses an LLM as the judge} --- fast and useful for iteration, but inherits exactly the drift, sycophancy, and version-instability that Lec.\ 7 T3b documented (Yin--Vu--Persico replication, $\kappa = 0.36$ across frontier LLMs on the same rubric).
+
+\medskip
+\item \textbf{For publication-grade research}, layer a human-anchored audit on top:
+\begin{enumerate}
+    \item Build a 100--200-item \textbf{gold standard}: queries paired with ideal retrievals \emph{and} ideal answers, curated by a domain expert.
+    \item Have a \emph{second annotator} score retrieval relevance independently; compute \textbf{Cohen's $\kappa$} (target $\geq 0.75$, per Lec.\ 7's measurement-rigor frames).
+    \item Treat RAGAS as the fast inner loop, the gold-standard $\kappa$ audit as the slow outer loop. Only publish numbers from the latter.
+\end{enumerate}
+
+\medskip
+\item \textbf{AEA reproducibility (Oct 2024) extends to RAG pipelines.} Disclose: prompt template, embedding model + version, vector DB + parameters, retrieval $K$, generator model + version + temperature, evaluator model + version, gold-set provenance.
+
+\medskip
+\item \textbf{Take-away:} RAGAS tells you whether the pipeline got \emph{better}; Cohen's $\kappa$ tells you whether the pipeline is \emph{good enough to cite}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Open Challenges}
+\begin{itemize}
+\item \textbf{Multi-hop reasoning.} Questions that require synthesizing evidence across \emph{multiple} retrieved documents (``Did the Fed's response in 2008 differ from the ECB's in 2011?''). Current RAG often retrieves either one side or the other, not both. Active research area.
+
+\medskip
+\item \textbf{Long-document QA.} Documents that are themselves longer than the context window (a 600-page legal opinion). Hierarchical retrieval and recursive summarization help but aren't solved.
+
+\medskip
+\item \textbf{Tables and figures.} Most embedders are trained on prose. Tables and figures in PDFs are routinely missed or garbled. Specialized layout-aware extractors (\texttt{nougat}, \texttt{marker}) help.
+
+\medskip
+\item \textbf{Multilingual retrieval.} Retrieving from a corpus that mixes English, French, Spanish, Mandarin\dots requires multilingual embedders (\texttt{multilingual-e5-large}, \texttt{bge-m3}). Quality is uneven across languages.
+
+\medskip
+\item \textbf{Dynamic knowledge and graph maintenance.} A flat vector index is easy to append to. A graph-based index may require re-extracting entities, re-computing communities, and re-writing summaries each time new documents arrive.
+
+\medskip
+\item \textbf{Evaluation cost.} RAGAS-style LLM-as-judge eval is expensive at scale. Cheap, reliable retrieval metrics for domain-specific corpora remain an open problem.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Bridge to Lecture 9}
+
+\begin{frame}{From RAG to Agentic RAG: Retrieval as One Tool Among Many}
+\begin{itemize}\small
+\item \textbf{Single-shot RAG} (today's pipeline): fixed plumbing --- query $\to$ retrieve $\to$ augment $\to$ generate. One round; the developer wires the steps.
+
+\medskip
+\item \textbf{Agentic RAG:} the LLM \emph{decides} whether, when, and what to retrieve, via the \emph{JSON tool calls} introduced in Lec.\ 7 T3a (``Structured Output: JSON as a Measurement Tool''). The loop continues until the model signals \texttt{done}.
+
+\medskip
+\item \textbf{Patterns this unlocks:} multi-hop retrieval (one query begets the next); \emph{query rewriting} (the agent reformulates an ambiguous user question before retrieving); and \emph{cross-tool composition} --- RAG \emph{plus} code execution \emph{plus} web fetch \emph{plus} structured-data queries.
+
+\medskip
+\item \textbf{Inherited failure modes (Lec.\ 7 T5):} the agent's context still drifts; sycophancy still bites. Worse: an agent can retrieve confirming evidence \emph{and ignore disconfirming evidence} unless the loop is designed to penalize that.
+\end{itemize}
+
+\vspace{-0.1cm}
+\begin{center}
+\begin{tikzpicture}[
+  font=\footnotesize,
+  node distance=0.32cm and 0.42cm,
+  box/.style={draw, rounded corners=2pt, minimum width=1.4cm, minimum height=0.6cm, align=center, fill=VeryLightGray},
+  llm/.style={draw, rounded corners=2pt, minimum width=1.6cm, minimum height=0.6cm, align=center, fill=orange!12},
+  tool/.style={draw, rounded corners=1pt, minimum width=1.5cm, minimum height=0.5cm, align=center, fill=blue!8, font=\scriptsize},
+  arr/.style={-{Latex[length=1.8mm]}}
+]
+  \node[box] (user) {User};
+  \node[llm, right=of user] (agent) {Agent (LLM)};
+  \node[tool, above right=0.15cm and 0.6cm of agent] (rag) {Tool: RAG};
+  \node[tool, right=of agent] (py) {Tool: Python};
+  \node[tool, below right=0.15cm and 0.6cm of agent] (web) {Tool: Web};
+  \node[box, right=1.4cm of py] (out) {Cited\\Answer};
+  \draw[arr] (user) -- (agent);
+  \draw[arr] (agent) -- (rag);
+  \draw[arr] (agent) -- (py);
+  \draw[arr] (agent) -- (web);
+  \draw[arr, dashed] (rag.east) .. controls +(0.5,0) and +(0.5,0.5) .. (agent.north east);
+  \draw[arr, dashed] (web.east) .. controls +(0.5,0) and +(0.5,-0.5) .. (agent.south east);
+  \draw[arr] (py) -- (out);
+\end{tikzpicture}
+\end{center}
+
+\vspace{-0.1cm}
+\centering\textit{Lec.\ 9 details the harness, the safety boundary, and a working terminal-agent walkthrough.}
+\end{frame}
+
+\begin{frame}{Summary: The Four-Step Pipeline + the Why}
+\begin{enumerate}
+\item \textbf{Chunk.} Split documents into self-contained, metadata-rich pieces.
+
+\medskip
+\item \textbf{Embed.} Map each chunk to a vector so semantically similar text lives nearby in $\mathbb{R}^d$.
+
+\medskip
+\item \textbf{Store \& Retrieve.} Use a vector DB (Chroma, Qdrant, FAISS) for local semantic search; add graph or hierarchical indexes when the task depends on relationships, coverage, or multi-hop reasoning.
+
+\medskip
+\item \textbf{Augmented Generation.} Insert the retrieved evidence into a prompt template that demands grounded, cited, refusable answers.
+\end{enumerate}
+
+\bigskip
+\textbf{Why this matters:} A vanilla LLM hits a hard wall on freshness, scale, latency, cost, and attribution --- exactly the dimensions that matter most for academic research. RAG separates the cost of indexing from the cost of querying, giving you a system that is cheap to update, cheap to query, faithful to sources, and capable of refusing to answer.
+
+\bigskip
+\centering\emph{The LLM is the brain. The index is the memory. The retriever is the librarian.}
+\end{frame}
+
+\begin{frame}{Closing --- Pick the Right Tool, Disclose Like a Researcher}
+\begin{center}\large
+RAG turns institutional text --- FOMC, NBER, Congress, SEC, central banks --- into a \textbf{queryable research instrument.}
+\end{center}
+
+\vspace{0.15cm}
+\small
+\begin{tabular}{p{2.7cm}p{8.9cm}}
+\toprule
+\textbf{Decision} & \textbf{Pick this when\dots} \\
+\midrule
+RAG (today)            & you need facts from a corpus the LLM never saw, with citations the reader can verify. \\
+Fine-tuning            & you need \emph{style}, \emph{format}, or rare \emph{tokens} --- not facts. (Pair with RAG; don't substitute.) \\
+Agentic RAG (Lec.\ 9)   & the question requires multi-hop retrieval, query rewriting, or cross-tool composition (RAG + code + web). \\
+None of the above      & the corpus fits in 200K tokens \emph{and} the question is single-shot --- a long-context prompt suffices. \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+\textbf{Disclosure checklist for publication (AEA 2024 + Cohen's $\kappa$ frame):}
+\begin{itemize}\small
+\item embedding model + version, vector DB + parameters, retrieval $K$, re-ranker (if any) + version
+\item prompt template, generator model + version + temperature, evaluator model + version
+\item gold-standard size, second-annotator $\kappa$ (target $\geq 0.75$)
+\item archive the retrieval report alongside the draft
+\end{itemize}
+
+\vspace{0.1cm}
+\centering\textbf{Next lecture (Lec.\ 9):} a terminal agent that uses RAG as one tool among many, plans multi-step research workflows, and edits its own code. \textbf{Questions?}
+\end{frame}
+
+\end{document}

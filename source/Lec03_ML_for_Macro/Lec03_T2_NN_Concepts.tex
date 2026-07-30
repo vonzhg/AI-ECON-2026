@@ -1,0 +1,293 @@
+%% FullCourse_10Lecs -- Lecture 3, Topic 3.2: Neural Network Concepts
+%% Source: ./archive_pre_split/Lec03_ML_for_Macro.tex (section 3)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module1_ML_Foundations/M1_T2_NN_Concepts.tex
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module1_ML_Foundations/pic/}{../}}
+
+% Suppress the redundant auto-generated metropolis section page; the
+% \sectiondivider frames below are the dividers we keep.
+\metroset{sectionpage=none}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+\input{lec03_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 3.2: Neural Networks --- Architecture and Activations}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 3 in One Map}
+\textbf{One lecture, four decks, one goal: make neural networks a working tool for economists --- why they matter, what they are, how they learn, and how to make them respect economics.}
+
+\LecThreeMap{2}
+
+\vspace{0.05cm}
+\footnotesize\textit{\textbf{Act 3.2 (here)} opens the box: neurons, layers, and activations assemble into $f_\theta$, and the approximation theorems (Cybenko--Hornik UAT; Barron's dimension-free rate) explain why this class fits the functions macro needs.}
+\end{frame}
+
+%=============================================================================
+\section{Neural Network Architecture}
+
+\sectiondivider{Neural Network Architecture}{Neurons, layers, depth --- the anatomy of $f_\theta$}
+
+\begin{frame}{Neural Networks: The Basic Building Block}
+\begin{itemize}
+\item Artificial neural networks are:
+\begin{itemize}
+\item Inspired by biological neural networks
+\item Composed of interconnected neurons organized in layers
+\item Trained by adjusting weights based on data
+\end{itemize}
+
+\medskip
+\item \textbf{Key components:}
+\begin{itemize}
+\item \textbf{Neuron:} Receives inputs, applies an activation function, produces output
+\item \textbf{Activation function:} Nonlinear map applied by each neuron (sigmoid, tanh, ReLU)
+\item \textbf{Loss function:} Measures how well predictions match true values --- the objective to minimize
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Single Neuron: Visual}
+\begin{center}
+\includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{neuron.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{Single Hidden Layer Network}
+\begin{itemize}
+\item Input $x\in\mathbb{R}^{M}$, output $y\in\mathbb{R}^{N}$.
+
+\item The $j$-th hidden unit:
+\begin{equation}
+h_{j}^{(1)} = f_{j}^{(1)}(x) = \sigma\!\left(b_{j}^{(1)}+\sum_{m=1}^{M}w_{j,m}^{(1)}x_{m}\right),\quad j=1,\dots,U_{1} \label{eq:hidden1}
+\end{equation}
+
+\item The $i$-th output:
+\begin{equation}
+y_{i} = \sum_{j=1}^{U_{1}}\tilde{w}_{i,j}\,h_{j}^{(1)}+\tilde{b}_{i},\quad i=1,\dots,N \label{eq:output1}
+\end{equation}
+
+\item $\sigma$ is a nonlinear activation function.
+
+\medskip
+\item Common choices: $\sigma(x)=\tanh(x)$, $\sigma(x)=\max(0,x)$ (ReLU), $\sigma(x)=\frac{1}{1+e^{-x}}$ (sigmoid).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Hidden Layer Network}
+\begin{itemize}
+\item Take the linear combination of $h^{(1)}$ and pass through another activation:
+\begin{equation}
+h_{j}^{(2)} = \sigma\!\left(b_{j}^{(2)}+\sum_{k=1}^{U_{1}}w_{j,k}^{(2)}\,f_{k}^{(1)}(x)\right),\quad j=1,\dots,U_{2} \label{eq:hidden2}
+\end{equation}
+\begin{equation}
+y_{i} = \sum_{j=1}^{U_{2}}\tilde{w}_{i,j}\,h_{j}^{(2)}+\tilde{b}_{i},\quad i=1,\dots,N \label{eq:output2}
+\end{equation}
+
+\medskip
+\item \textbf{Pattern:} Each layer performs a linear transformation followed by a nonlinear activation. Depth adds representational power.
+
+\medskip
+\item \textbf{Macro analogy:} Successive layers are like successive time steps in a dynamic program --- each transforms the ``state'' into a richer representation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hidden Layers: Visual}
+\begin{center}
+\includegraphics[width=12cm]{dnn}
+\end{center}
+\end{frame}
+
+%=============================================================================
+\section{Activation Functions and Universal Approximation}
+
+\sectiondivider{Activation Functions and Universal Approximation}{Nonlinearity is the point: sigmoid, tanh, ReLU --- and why two layers approximate anything}
+
+\begin{frame}{Activation Functions: Visual}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    width=10cm, height=5.5cm,
+    xmin=-3, xmax=3, ymin=-1.2, ymax=1.5,
+    axis lines=middle,
+    xlabel={$x$}, ylabel={$\sigma(x)$},
+    tick label style={font=\scriptsize},
+    label style={font=\footnotesize},
+    legend style={font=\scriptsize, draw=none, at={(1.02,0.5)}, anchor=west},
+    legend cell align=left,
+    samples=80,
+]
+\addplot[blue, very thick, domain=-3:3] {1/(1+exp(-x))};
+\addlegendentry{sigmoid}
+\addplot[orange!80!black, very thick, dashed, domain=-3:3] {tanh(x)};
+\addlegendentry{tanh}
+\addplot[red!70!black, very thick, dotted, domain=-3:3] {max(0,x)};
+\addlegendentry{ReLU}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+\vspace{-2mm}
+{\footnotesize\textit{Sigmoid \& tanh saturate ($\Rightarrow$ vanishing gradients); ReLU is piecewise linear ($\Rightarrow$ sparse activation, fast gradient flow).}}
+\end{frame}
+
+\begin{frame}{Activation Functions: What They Do}
+\begin{itemize}
+\item \textbf{Sigmoid:} $\sigma(x) = \frac{1}{1+e^{-x}}$ --- outputs in $(0,1)$, useful for probabilities.
+\medskip
+\item \textbf{Tanh:} $\tanh(x)$ --- outputs in $(-1,1)$, zero-centered, smoother than ReLU.
+\medskip
+\item \textbf{ReLU:} $\max(0,x)$ --- simple, sparse activation, dominant in modern networks.
+\medskip
+\item \textbf{Why nonlinearity matters:} without activation functions, stacked layers collapse into one linear map --- depth gains us nothing without nonlinearity.
+
+\medskip
+\item \textbf{For economists:} the activation is the network's analogue of choosing a flexible functional form (translog, CES, semi-parametric) --- but the network composes it across layers.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Function Approximation with ReLU}
+\begin{itemize}
+    \item \textbf{Goal:} Approximate arbitrary nonlinear functions using simple building blocks.
+    \item \textbf{Key Idea:} Linear combination of shifted ReLU functions:
+    \[
+    \hat{y}(x) = a_0 + \sum_{i=1}^{N} a_i\,\text{ReLU}(x-b_i)
+    \]
+    \item \textbf{Shifts $b_i$:} Define the ``kink'' points where marginal slope changes.
+    \item \textbf{Coefficients $a_i$:} Scale each ReLU's contribution to match local slope.
+
+    \medskip
+    \item \textbf{Example:} Approximating $\sin(x)$ on $[-\pi, \pi]$:
+    \begin{itemize}
+        \item Choose shifts $b_i$ evenly over the domain
+        \item Form design matrix with columns $\text{ReLU}(x-b_i)$ and a bias
+        \item Solve a least-squares problem for coefficients $a_i$
+    \end{itemize}
+
+    \medskip
+    \item \textbf{Economist's take:} ReLU kinks are piecewise-linear splines --- the network \emph{learns} the knot locations, unlike a fixed Chebyshev grid.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: Increasing Complexity}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm,keepaspectratio]{relu1}
+\end{center}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: More Kink Points}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm,keepaspectratio]{relu2}
+\end{center}
+\end{frame}
+
+\begin{frame}{ReLU Approximation: High Fidelity}
+\begin{center}
+\includegraphics[width=12cm,height=7.5cm,keepaspectratio]{relu3}
+\end{center}
+\end{frame}
+
+\begin{frame}{Why Neural Networks Work: Universal Approximation}
+\begin{tcolorbox}[colback=blue!3, colframe=blue!40, title={Universal Approximation Theorem (Cybenko 1989; Hornik 1991)}]
+\small Any continuous function on $[0,1]^d$ can be approximated \emph{uniformly} by a two-layer network --- for sigmoidal $\sigma$ (Cybenko), for any bounded nonconstant $\sigma$ (Hornik), indeed for \emph{any} non-polynomial $\sigma$ (Leshno, Lin, Pinkus \& Schocken 1993).
+\end{tcolorbox}
+\smallskip
+\begin{conceptbox}
+\small\textbf{Intuition --- you just watched the proof.} Those ReLU plots \emph{were} the construction: a weighted sum of shifted kinks $\sum_i a_i\,\mathrm{ReLU}(x-b_i)$ bends to fit any curve, and a sigmoid network stacks soft ``bumps'' the same way. \textbf{One hidden unit $=$ one building block; add units $\Rightarrow$ shrink the error.} Nonlinearity is the glue --- drop it and the whole sum collapses back to a single straight line.
+\end{conceptbox}
+\smallskip
+\begin{cautionbox}
+\small\textbf{Existence, not a recipe.} UAT promises a good network \emph{exists} --- not that training will \emph{find} it, nor that ``enough'' units is a \emph{small} number. Approximation $\neq$ optimization $\neq$ generalization; T3 takes on the finding. \emph{(The same theorem later is why transformer attention approximates --- Lec.\ 7.)}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Why Neural Networks Work: Beating the Curse of Dimensionality}
+\begin{tcolorbox}[colback=green!3, colframe=green!40, title={Barron (1993): a dimension-free rate}]
+\small A one-hidden-layer network reaches squared error of order $O(1/M)$ in $M$ units --- \emph{independent of the input dimension $N$}. Fixed series bases (polynomials, splines, Chebyshev) manage only $O(1/M^{2/N})$: to hold accuracy as $N$ grows, $M$ must blow up exponentially.
+\end{tcolorbox}
+\vspace{-2mm}
+\begin{columns}[T]
+\column{0.58\textwidth}
+\small\textbf{Why the gap?}
+\begin{itemize}\small\setlength\itemsep{2pt}
+    \item \textbf{Grid basis is fixed:} resolution $k$ per axis needs $k^{N}$ pieces --- most parked where $f$ barely moves. That is the curse.
+    \item \textbf{A neuron is a ridge $\sigma(w^\top x+b)$:} a soft step aimed along a \emph{learned} direction $w$. The net spends its $M$ units where $f$ varies --- so error tracks $f$'s \emph{intrinsic} complexity, not the dimension $N$.
+\end{itemize}
+\column{0.42\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny]
+  % series: fixed tensor grid --- many points
+  \draw[gray!55] (0,0) rectangle (1.5,1.5);
+  \foreach \i in {0,...,4}\foreach \j in {0,...,4}
+     \fill[blue!55] (0.15+\i*0.3,0.15+\j*0.3) circle (0.025);
+  \node[anchor=south] at (0.75,1.55) {grid: $k^{N}$};
+  \node[red!70!black,anchor=north,font=\tiny\itshape] at (0.75,-0.05) {curse};
+  % network: few learned ridge directions
+  \begin{scope}[shift={(2.15,0)}]
+    \draw[gray!55] (0,0) rectangle (1.5,1.5);
+    \draw[green!45!black,very thick] (0,0.30)--(1.5,1.25);
+    \draw[green!45!black,very thick] (0.25,1.5)--(1.20,0);
+    \draw[green!45!black,very thick] (0,1.05)--(1.5,0.62);
+    \node[anchor=south] at (0.75,1.55) {ridges: $M$};
+    \node[green!45!black,anchor=north,font=\tiny\itshape] at (0.75,-0.05) {dim-free};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+\end{columns}
+\vspace{-2mm}
+\begin{takeawaybox}\small
+\textbf{For economists:} this is why deep learning cracks high-dimensional dynamic models --- heterogeneous-agent macro, many assets and shocks --- exactly where Chebyshev and tensor grids break down (Lec.\ 4--6; the DeepRamsey case).
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{DNN = Linear Transformation + Nonlinear Activation}
+\begin{itemize}
+\item \textbf{Linear Transformation:}
+\begin{itemize}
+\item Each neuron performs a weighted sum of inputs: projects data onto a new axis
+\item The set of transformations across a layer creates a \emph{new representation}
+\item Enables: flexible feature representation, information compression, interaction capture
+\end{itemize}
+
+\medskip
+\item \textbf{Nonlinear Activation:}
+\begin{itemize}
+\item Allows the network to capture nonlinearity and complex patterns
+\item Creates curved decision boundaries in the feature space
+\item \textbf{Essential} for the universal approximation property
+\end{itemize}
+
+\medskip
+\item \textbf{Together:} Each layer applies an affine map $Wx+b$ then a pointwise nonlinearity $\sigma(\cdot)$. Stacking layers composes these maps:
+\[
+f(x) = \sigma_L \circ A_L \circ \cdots \circ \sigma_1 \circ A_1 (x)
+\]
+where $A_\ell(x) = W_\ell x + b_\ell$.
+
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+% House-style bridge closer (matches Lec05/Lec09): restate the act, hand off.
+\begin{frame}{Bridge: A Good Network \emph{Exists} --- Now We Must \emph{Find} It}
+\textbf{Act 3.2 built the object. A network is a composition of affine maps and pointwise nonlinearities; universal approximation says a good one \emph{exists}, and Barron says width buys accuracy at a rate the input dimension cannot destroy.}
+
+\vspace{0.25cm}
+\begin{itemize}
+  \item You have seen \emph{what}: neurons, layers, and activations --- and why nonlinearity is essential (drop it and the whole stack collapses to one straight line).
+  \item \textbf{Next (3.3):} existence is not a recipe. The finding machinery --- forward pass, backpropagation, stochastic gradient descent --- plus the regularization discipline that keeps the fit honest.
+\end{itemize}
+
+\vspace{0.3cm}
+\begin{center}
+\footnotesize\textit{Arc: 3.1 WHY (the case for ML) $\;\to\;$ \textbf{3.2 BUILD} (architecture $+$ UAT) $\;\to\;$ 3.3 TRAIN (backprop $+$ SGD) $\;\to\;$ 3.4 SHAPE (economics-aware nets $+$ lab).}
+\end{center}
+\end{frame}
+
+\end{document}

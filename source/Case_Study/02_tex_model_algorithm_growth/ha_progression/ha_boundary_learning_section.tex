@@ -1,0 +1,391 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Admissibility and Boundary Learning in High Dimensions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The admissible set $\Omega$ is the set of states from which a competitive equilibrium can be sustained. As in the RA model, $\Omega$ is unknown a priori and depends on the policy—creating a two-level fixed-point problem.
+
+\subsubsection{Simplifying Assumption: Exogenous Consumption Bounds}
+
+To make the boundary learning tractable, we assume exogenous bounds on consumption:
+\begin{equation}
+    c^e, c^u \in [c_{\min}, c_{\max}]
+\end{equation}
+These bounds are set based on economic reasoning (e.g., subsistence consumption below, resource constraints above) and remain fixed throughout training.
+
+With this assumption, the \textbf{endogenous admissible set} reduces to three dimensions:
+\begin{equation}
+    \Omega_{K,a} = \{(K, a^e, a^u) : \text{feasible equilibrium exists for some } (c^e, c^u) \in [c_{\min}, c_{\max}]^2\}
+\end{equation}
+
+\subsubsection{Admissibility Score Components}
+
+The score $\mathcal{A}(s)$ now has three components:
+
+\begin{enumerate}
+    \item \textbf{Capital Feasibility ($A_K$):}
+    \begin{equation}
+        A_K = \mathcal{S}(K'; [K_{\min}, K_{\max}], \delta_K)
+    \end{equation}
+    Ensures next-period capital lies within economically meaningful bounds.
+    
+    \item \textbf{Asset Feasibility ($A_a$):}
+    \begin{equation}
+        A_a = \min_{i \in \{e, u\}} \mathcal{S}(a'^i; [0, K'], \delta_a)
+    \end{equation}
+    Checks that derived assets satisfy borrowing constraints and do not exceed aggregate capital.
+    
+    \item \textbf{Bond Price Feasibility ($A_Q$):}
+    \begin{equation}
+        A_Q = \mathcal{S}(Q; [0, \beta], \delta_Q)
+    \end{equation}
+    Ensures the equilibrium bond price lies in the economically valid range $[0, \beta]$. A price $Q > \beta$ would imply negative real interest rates below the discount rate; $Q < 0$ is economically meaningless.
+\end{enumerate}
+
+\textbf{Global Score:}
+\begin{equation}
+    \mathcal{A}(s) = w_K A_K + w_a A_a + w_Q A_Q
+\end{equation}
+
+\subsubsection{The Boundary Learning Problem}
+
+Given a set of sampled states $\{s_i\}_{i=1}^N$ with computed admissibility scores $\{\mathcal{A}(s_i)\}$, we partition:
+\begin{align}
+    \mathcal{S}_{\text{adm}} &= \{s_i : \mathcal{A}(s_i) > \tau_{\text{high}}\} \quad \text{(admissible)} \\
+    \mathcal{S}_{\text{fail}} &= \{s_i : \mathcal{A}(s_i) < \tau_{\text{low}}\} \quad \text{(inadmissible)}
+\end{align}
+
+The goal is to estimate the boundary $\partial \Omega_{K,a}$ from $\mathcal{S}_{\text{adm}}$ such that:
+\begin{enumerate}
+    \item New samples can be efficiently classified as inside/outside $\hat{\Omega}_{K,a}$
+    \item The boundary estimate improves as more admissible points are discovered
+    \item The representation supports the two-level fixed-point iteration
+\end{enumerate}
+
+We focus on two approaches: \textbf{Support Vector Domain Description (SVDD)} and \textbf{Convex Hull / $\alpha$-Shapes}.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Approach 1: Support Vector Domain Description (SVDD)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+SVDD is a one-class classification method that finds the smallest hypersphere (in a kernel-induced feature space) containing most of the data.
+
+\paragraph{Formulation.}
+Given admissible points $\{x_i\}_{i=1}^n \subset \mathbb{R}^3$ where $x = (K, a^e, a^u)$, SVDD solves:
+\begin{equation}
+\begin{aligned}
+    \min_{R, c, \xi} \quad & R^2 + C \sum_{i=1}^n \xi_i \\
+    \text{s.t.} \quad & \|\phi(x_i) - c\|^2 \leq R^2 + \xi_i, \quad \forall i \\
+    & \xi_i \geq 0
+\end{aligned}
+\end{equation}
+where:
+\begin{itemize}
+    \item $\phi: \mathbb{R}^3 \to \mathcal{H}$ maps data to a high-dimensional feature space
+    \item $c \in \mathcal{H}$ is the center of the hypersphere
+    \item $R$ is the radius
+    \item $\xi_i$ are slack variables allowing outliers
+    \item $C > 0$ controls the trade-off between sphere volume and outlier tolerance
+\end{itemize}
+
+\paragraph{Kernel Formulation.}
+Using the kernel trick with $k(x, x') = \langle \phi(x), \phi(x') \rangle$, the decision function is:
+\begin{equation}
+    f(x) = R^2 - \|phi(x) - c\|^2 = R^2 - k(x,x) + 2\sum_i \alpha_i k(x_i, x) - \sum_{i,j} \alpha_i \alpha_j k(x_i, x_j)
+\end{equation}
+A point $x$ is classified as admissible if $f(x) \geq 0$.
+
+\paragraph{Kernel Choice.}
+For the 3D state space $(K, a^e, a^u)$, we recommend the \textbf{Radial Basis Function (RBF) kernel}:
+\begin{equation}
+    k(x, x') = \exp\left(-\gamma \|x - x'\|^2\right)
+\end{equation}
+where $\gamma > 0$ controls the kernel width. This allows SVDD to capture non-convex admissible regions.
+
+\paragraph{Integration with Training Loop.}
+
+\begin{algorithm}[H]
+\caption{SVDD-Based Boundary Learning}
+\label{alg:svdd_boundary}
+\begin{algorithmic}[1]
+\Require Admissible points $\mathcal{S}_{\text{adm}} = \{(K_i, a^e_i, a^u_i)\}$, Kernel parameter $\gamma$, Outlier fraction $\nu$
+\State \textbf{// Normalize features for numerical stability}
+\State Compute mean $\bar{x}$ and std $\sigma_x$ from $\mathcal{S}_{\text{adm}}$
+\State $\tilde{x}_i \gets (x_i - \bar{x}) / \sigma_x$ for all $i$
+
+\State
+\State \textbf{// Fit SVDD model}
+\State Solve SVDD optimization (or use one-class SVM with $\nu$-parameterization)
+\State Store support vectors $\{x_{sv}\}$, coefficients $\{\alpha_{sv}\}$, threshold $\rho$
+
+\State
+\State \textbf{// Define boundary function}
+\Function{IsAdmissible}{$x$}
+    \State $\tilde{x} \gets (x - \bar{x}) / \sigma_x$
+    \State $f \gets \sum_{sv} \alpha_{sv} k(\tilde{x}_{sv}, \tilde{x}) - \rho$
+    \State \Return $f \geq 0$
+\EndFunction
+
+\State \Return Boundary function \textsc{IsAdmissible}
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Practical Considerations.}
+\begin{itemize}
+    \item \textbf{Hyperparameter selection:} Use cross-validation on held-out admissible points, or set $\nu$ (fraction of outliers) based on expected noise in admissibility scores.
+    \item \textbf{Computational cost:} Training is $O(n^2)$ to $O(n^3)$; prediction is $O(n_{sv})$ per point. For large $n$, use approximate methods (e.g., Nyström approximation).
+    \item \textbf{Updating:} When new admissible points are discovered, retrain SVDD from scratch or use incremental updates.
+    \item \textbf{Implementation:} Use \texttt{sklearn.svm.OneClassSVM} with \texttt{kernel='rbf'}.
+\end{itemize}
+
+\paragraph{Advantages and Limitations.}
+\begin{center}
+\begin{tabular}{p{6cm}p{6cm}}
+\toprule
+\textbf{Advantages} & \textbf{Limitations} \\
+\midrule
+Handles non-convex regions via kernel & Requires hyperparameter tuning ($\gamma$, $\nu$) \\
+Principled probabilistic interpretation & Computational cost for large datasets \\
+Robust to outliers (noise in scores) & Does not provide explicit boundary surface \\
+Well-established theory and software & May need retraining each iteration \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Approach 2: Convex Hull and $\alpha$-Shapes}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+An alternative geometric approach represents the admissible set via its convex hull or a generalization that captures non-convexity.
+
+\paragraph{Convex Hull.}
+The convex hull of admissible points is:
+\begin{equation}
+    \hat{\Omega}_{\text{convex}} = \text{ConvexHull}(\mathcal{S}_{\text{adm}}) = \left\{ \sum_{i=1}^n \lambda_i x_i : \lambda_i \geq 0, \sum_i \lambda_i = 1 \right\}
+\end{equation}
+
+Testing membership: A point $x$ is inside the convex hull if there exist $\lambda_i \geq 0$ with $\sum_i \lambda_i = 1$ and $\sum_i \lambda_i x_i = x$. This can be solved via linear programming.
+
+\paragraph{Limitation of Convex Hull.}
+The true admissible set $\Omega_{K,a}$ may be \textbf{non-convex}. For example:
+\begin{itemize}
+    \item High capital with high assets may be feasible
+    \item Low capital with low assets may be feasible
+    \item But intermediate combinations may violate bond price constraints
+\end{itemize}
+The convex hull would incorrectly include these infeasible intermediate points.
+
+\paragraph{$\alpha$-Shapes: Generalization to Non-Convex Sets.}
+The $\alpha$-shape is a generalization of the convex hull that can capture non-convex and even disconnected regions.
+
+\textit{Intuition:} Imagine carving out the point set with a ball of radius $1/\alpha$. The $\alpha$-shape is the boundary of what remains.
+
+\begin{itemize}
+    \item $\alpha \to 0$: Recovers the convex hull
+    \item $\alpha \to \infty$: Recovers the point set itself
+    \item Intermediate $\alpha$: Captures concavities and holes
+\end{itemize}
+
+\paragraph{Formal Definition.}
+For a point set $P \subset \mathbb{R}^3$ and parameter $\alpha > 0$:
+\begin{enumerate}
+    \item Compute the \textbf{Delaunay triangulation} of $P$
+    \item Remove all tetrahedra with circumradius $> 1/\alpha$
+    \item The $\alpha$-shape is the boundary of the remaining simplicial complex
+\end{enumerate}
+
+\paragraph{Membership Testing.}
+To test if point $x$ is inside the $\alpha$-shape:
+\begin{enumerate}
+    \item Locate the Delaunay tetrahedron containing $x$ (or nearest if outside triangulation)
+    \item Check if this tetrahedron is part of the $\alpha$-complex
+    \item If yes, $x$ is inside; otherwise, outside
+\end{enumerate}
+
+\paragraph{Integration with Training Loop.}
+
+\begin{algorithm}[H]
+\caption{$\alpha$-Shape Boundary Learning}
+\label{alg:alpha_boundary}
+\begin{algorithmic}[1]
+\Require Admissible points $\mathcal{S}_{\text{adm}} = \{(K_i, a^e_i, a^u_i)\}$, Shape parameter $\alpha$
+\State \textbf{// Compute Delaunay triangulation}
+\State $\mathcal{D} \gets \text{Delaunay}(\mathcal{S}_{\text{adm}})$
+
+\State
+\State \textbf{// Filter simplices by circumradius}
+\State $\mathcal{A}_\alpha \gets \emptyset$
+\For{each tetrahedron $T \in \mathcal{D}$}
+    \If{circumradius$(T) \leq 1/\alpha$}
+        \State $\mathcal{A}_\alpha \gets \mathcal{A}_\alpha \cup \{T\}$
+    \EndIf
+\EndFor
+
+\State
+\State \textbf{// Build spatial index for fast queries}
+\State Build AABB tree or similar structure over $\mathcal{A}_\alpha$
+
+\State
+\State \textbf{// Define boundary function}
+\Function{IsAdmissible}{$x$}
+    \State Find tetrahedron $T \in \mathcal{D}$ containing $x$ (or nearest)
+    \State \Return $T \in \mathcal{A}_\alpha$
+\EndFunction
+
+\State \Return Boundary function \textsc{IsAdmissible}, $\alpha$-shape $\mathcal{A}_\alpha$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Choosing $\alpha$.}
+The parameter $\alpha$ controls the ``tightness'' of the boundary:
+\begin{itemize}
+    \item Too small: Boundary is too loose (approaches convex hull), includes infeasible points
+    \item Too large: Boundary is too tight, excludes feasible points, may create holes
+\end{itemize}
+
+\textit{Heuristic:} Set $\alpha$ based on the typical spacing between admissible points:
+\begin{equation}
+    \alpha \approx \frac{1}{2 \cdot \text{median}(\text{nearest-neighbor distances})}
+\end{equation}
+
+\paragraph{Practical Considerations.}
+\begin{itemize}
+    \item \textbf{Computational cost:} Delaunay triangulation is $O(n^2)$ in 3D worst case, $O(n \log n)$ expected. Membership queries are $O(\log n)$ with spatial indexing.
+    \item \textbf{Degeneracies:} Collinear or coplanar points can cause numerical issues; use convex position perturbation.
+    \item \textbf{Implementation:} Use \texttt{scipy.spatial.Delaunay} for triangulation, \texttt{alphashape} package for $\alpha$-shapes.
+\end{itemize}
+
+\paragraph{Advantages and Limitations.}
+\begin{center}
+\begin{tabular}{p{6cm}p{6cm}}
+\toprule
+\textbf{Advantages} & \textbf{Limitations} \\
+\midrule
+Captures non-convex boundaries & Requires choosing $\alpha$ \\
+Explicit geometric representation & Sensitive to outliers (no soft margin) \\
+Fast membership queries after construction & May create holes or disconnected regions \\
+Provides volume estimates & Computational cost for very large $n$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Comparison and Recommendation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Criterion} & \textbf{SVDD} & \textbf{Convex Hull} & \textbf{$\alpha$-Shape} \\
+\midrule
+Non-convex regions & \checkmark (kernel) & $\times$ & \checkmark \\
+Outlier robustness & \checkmark (soft margin) & $\times$ & $\times$ \\
+Explicit boundary & $\times$ & \checkmark & \checkmark \\
+Fast membership query & $O(n_{sv})$ & $O(d)$ LP & $O(\log n)$ \\
+Hyperparameters & $\gamma$, $\nu$ & None & $\alpha$ \\
+Volume estimation & Approximate & Exact & Exact \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of boundary estimation methods for 3D admissible set.}
+\label{tab:boundary_comparison}
+\end{table}
+
+\paragraph{Recommended Strategy: Hybrid Approach.}
+
+Given the characteristics of the Ramsey problem, we recommend:
+
+\begin{enumerate}
+    \item \textbf{Primary: $\alpha$-Shape} for boundary representation
+    \begin{itemize}
+        \item Provides explicit geometric boundary
+        \item Fast membership queries during sampling
+        \item Natural for visualization and debugging
+    \end{itemize}
+    
+    \item \textbf{Preprocessing: Outlier removal via SVDD}
+    \begin{itemize}
+        \item Before computing $\alpha$-shape, fit SVDD to identify outliers
+        \item Remove points with $f(x) < -\epsilon$ (far outside the support)
+        \item This cleans noisy admissibility scores before geometric construction
+    \end{itemize}
+    
+    \item \textbf{Adaptive $\alpha$:} Start with small $\alpha$ (loose boundary) and tighten as training progresses:
+    \begin{equation}
+        \alpha^{(k)} = \alpha_{\text{init}} + (\alpha_{\text{final}} - \alpha_{\text{init}}) \cdot \frac{k}{K}
+    \end{equation}
+\end{enumerate}
+
+\paragraph{Integration with Two-Level Fixed Point.}
+
+\begin{algorithm}[H]
+\caption{Hybrid Boundary Refinement}
+\label{alg:hybrid_boundary}
+\begin{algorithmic}[1]
+\Require Scored samples $\{(s_i, \mathcal{A}(s_i))\}$, SVDD params $(\gamma, \nu)$, Shape param $\alpha$
+\State \textbf{// Extract admissible points}
+\State $\mathcal{S}_{\text{adm}} \gets \{(K'_i, a'^e_i, a'^u_i) : \mathcal{A}(s_i) > \tau_{\text{high}}\}$
+
+\State
+\State \textbf{// Step 1: Outlier removal via SVDD}
+\State Fit OneClassSVM on $\mathcal{S}_{\text{adm}}$ with kernel='rbf', $\nu$
+\State $\mathcal{S}_{\text{clean}} \gets \{x \in \mathcal{S}_{\text{adm}} : \text{svm.decision\_function}(x) \geq -\epsilon\}$
+
+\State
+\State \textbf{// Step 2: Compute $\alpha$-shape}
+\State $\mathcal{A}_\alpha \gets \text{AlphaShape}(\mathcal{S}_{\text{clean}}, \alpha)$
+
+\State
+\State \textbf{// Step 3: Build membership function}
+\Function{IsAdmissible}{$K', a'^e, a'^u$}
+    \State \Return $(K', a'^e, a'^u) \in \mathcal{A}_\alpha$
+\EndFunction
+
+\State
+\State \textbf{// Step 4: Update score function}
+\State Modify $A_a$ component to use learned boundary:
+\State $A_a(s) \gets \mathcal{S}((K', a'^e, a'^u); \mathcal{A}_\alpha, \delta_a)$
+
+\State \Return Updated scorer with learned boundary
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Scoring with Learned Boundary.}
+The barrier function $\mathcal{S}$ for the learned boundary can be defined as:
+\begin{equation}
+    \mathcal{S}(x; \mathcal{A}_\alpha, \delta) = \begin{cases}
+        1 & \text{if } x \in \mathcal{A}_\alpha \\
+        \max(0, 1 - (d(x, \mathcal{A}_\alpha) / \delta)^\kappa) & \text{if } x \notin \mathcal{A}_\alpha
+    \end{cases}
+\end{equation}
+where $d(x, \mathcal{A}_\alpha)$ is the distance from $x$ to the nearest point on the $\alpha$-shape boundary.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{The Two-Level Fixed-Point Structure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The boundary learning integrates into the overall algorithm as follows:
+
+\begin{itemize}
+    \item \textbf{Level 1 (Inner Fixed Point):} For fixed policy $\pi_\theta$:
+    \begin{enumerate}
+        \item Sample candidate states uniformly
+        \item Compute forward pass to get $(K', a'^e, a'^u)$
+        \item Score using current boundary estimate $\hat{\Omega}^{(n)}_{K,a}$
+        \item Collect admissible points: $\mathcal{S}_{\text{adm}}^{(n+1)}$
+        \item Update boundary: $\hat{\Omega}^{(n+1)}_{K,a} \gets \text{AlphaShape}(\mathcal{S}_{\text{adm}}^{(n+1)})$
+        \item Repeat until $\hat{\Omega}^{(n+1)}_{K,a} \approx \hat{\Omega}^{(n)}_{K,a}$
+    \end{enumerate}
+    
+    \item \textbf{Level 2 (Outer Fixed Point):} Alternate:
+    \begin{enumerate}
+        \item Train $(\pi_\theta, V_\phi)$ on states sampled from current $\hat{\Omega}_{K,a}$
+        \item Run inner loop to update $\hat{\Omega}_{K,a}$ based on improved policy
+    \end{enumerate}
+\end{itemize}
+
+As the policy improves, it may ``unlock'' previously infeasible regions (finding better asset allocations), causing the admissible set to expand—the same discovery mechanism as in the RA model.
+

@@ -1,0 +1,296 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.4: Case Study 3 --- ES Fellows Dataset
+%% Source: ./archive_pre_split/Lec10_Case_Studies_v2.tex (section 4)
+%% FullCourse-only content (not in MiniCourse).
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{./Exercise10_ES_Fellows/plots/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\lstdefinestyle{markdownstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!40},
+    backgroundcolor=\color{gray!8},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.4: Case Study 3 --- ES Fellows Dataset}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.4 Agenda}
+\begin{enumerate}
+  \item \textbf{Case Study 3} --- ES Fellows dataset construction with agentic AI
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Case Study 3: ES Fellows Dataset}
+%===========================================================
+
+%===========================================================
+
+\sectiondivider{Case Study 3}{A provenance-aware public-web dataset construction workflow}
+
+\begin{frame}{Why This Third Case Is Different}
+\begin{itemize}
+    \item the source material is public and semi-structured
+    \item metadata quality is uneven across people and institutions
+    \item missingness is part of the result, not a nuisance to hide
+    \item the workflow must control sources, provenance, and coding rules
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{This is not a web-scraping stunt.} It is a data-construction problem with explicit source restrictions.
+\end{frame}
+
+\begin{frame}{Research Question for the Fellows Dataset}
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!60]
+\textbf{Question:} What can we learn about career stage, election timing, and field composition among current Econometric Society fellows using only official and institutional sources?
+\end{tcolorbox}
+
+\vspace{0.25cm}
+\begin{itemize}
+    \item it is a useful dataset about the economics profession itself
+    \item it exposes a new research pattern: roster seed + metadata enrichment + coverage reporting
+    \item it forces us to separate current biological age, years since PhD, and age at fellow election
+    \item it forces students to confront missingness, source quality, and coding judgment
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why a Naive Web-Chat Workflow Still Fails Here}
+\begin{enumerate}
+    \item \textbf{Roster control is weak.} You need a canonical seed list and fixed batches.
+    \item \textbf{Source discipline is weak.} You need a rule that excludes Wikipedia and open-web guesswork.
+    \item \textbf{State tracking is weak.} You need persistent files recording what was found and what stayed missing.
+    \item \textbf{Auditability is weak.} You need field-level source URLs, not just narrative answers.
+\end{enumerate}
+
+\vspace{0.25cm}
+\textbf{Precise contrast:} modern web chat can browse and summarize, but this assignment needs a project harness with files, batching, and provenance rules.
+\end{frame}
+
+\begin{frame}{Official Seed Roster as of April 14, 2026}
+\begin{itemize}
+    \item canonical source: the official Econometric Society current fellows page
+    \item parsed roster size: 882 fellows
+    \item official CV links on the seed page: 64
+    \item usable election years in the current page: 880; two entries parse as \texttt{0000}
+    \item batching rule: 18 batches of 50 fellows
+    \item seed fields: name, affiliation, election year, profile URL, CV URL
+\end{itemize}
+
+\vspace{0.25cm}
+\textbf{Interpretation:}
+\begin{itemize}
+    \item the roster is large enough that the workflow must be batched
+    \item CV coverage is sparse enough that missingness will remain visible
+    \item the current roster is not the same thing as a confirmed-living roster
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Batch Workflow and Project Structure}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Project files}
+\begin{itemize}
+    \item seed roster CSV
+    \item batch assignment file
+    \item normalized batch CSV
+    \item analysis script
+    \item plots and memo
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Workflow}
+\begin{enumerate}
+    \item parse the official roster
+    \item assign a batch of 50
+    \item fill official/institutional metadata
+    \item run analysis
+    \item write findings and limitations
+\end{enumerate}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{This is the public-web analog of `CLAUDE.md`:} the project files hold the rules and state across sessions.
+\end{frame}
+
+\begin{frame}{Schema and Provenance Rules}
+\small
+\begin{tabular}{p{3.4cm}p{8.4cm}}
+\toprule
+\textbf{Field} & \textbf{Rule} \\
+\midrule
+\texttt{name}, \texttt{affiliation}, \texttt{election\_year} & seed roster only \\
+\texttt{bio\_url}, \texttt{cv\_url} & official or institutional only \\
+\texttt{phd\_year}, \texttt{research\_fields\_raw} & record source URL for each field \\
+normalized field bucket & map raw text into the lecture taxonomy \\
+\texttt{coverage\_status} & say what remains missing \\
+\texttt{notes} & document coding judgment or ambiguity \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{Credibility requires traceable provenance for each field.}
+\end{frame}
+
+\begin{frame}{Missingness, Gender, and Living-Status Caution}
+\begin{itemize}
+    \item \textbf{Birth date:} leave missing unless the official source states it
+    \item \textbf{PhD year:} use only if the source states the degree year directly
+    \item \textbf{Gender:} code only from explicit pronouns or explicit gender language
+    \item \textbf{No inference:} not from names, photos, or country
+    \item \textbf{Living status:} do not infer from old election year alone; for lecture purposes, use a 90-year cap only as a conservative sensitivity rule
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{This is deliberate.} The assignment is designed to teach credible coding rules, not aggressive completion.
+\end{frame}
+
+\begin{frame}{Instructor Full Scan: What the Agentic Workflow Added}
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}
+\small
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Official $\rightarrow$ Web} \\
+\midrule
+Local CV docs & 62 $\rightarrow$ 316 \\
+Birth year & 11 $\rightarrow$ 46 \\
+PhD year & 47 $\rightarrow$ 183 \\
+Field bucket & 15 $\rightarrow$ 73 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+\textbf{Main implication:}
+\begin{itemize}
+    \item the agent scaled discovery and parsing well
+    \item PhD-year coverage improved materially
+    \item birth-year coverage stayed thin
+\end{itemize}
+\end{column}
+\begin{column}{0.54\textwidth}
+\includegraphics[width=\textwidth]{full_web_coverage_dashboard.pdf}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{The 90-Year Rule Does Not Solve the Main Problem}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\includegraphics[width=\textwidth]{full_web_age90_status.pdf}
+\end{column}
+\begin{column}{0.41\textwidth}
+\small
+\begin{itemize}
+    \item observed age $\leq 90$: 44 fellows
+    \item observed age $> 90$: 1 fellow
+    \item birth year unknown: 836 fellows
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Takeaway:}
+\begin{itemize}
+    \item the problem is missing birth year, not a handful of extreme ages
+    \item do not treat current biological age as the main variable
+    \item use age at election or years since PhD instead
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Career Stage: Use Years Since PhD and Age at Election}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{full_web_years_since_phd.pdf}
+\end{column}
+\begin{column}{0.5\textwidth}
+\includegraphics[width=\textwidth]{full_web_age_at_election.pdf}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+\textbf{Main descriptive findings:}
+\begin{itemize}
+    \item median years since PhD: 35
+    \item median age at fellow election: 40
+    \item median years from PhD to election: 17
+    \item age at election is cleaner than current age because it does not depend on fellows being alive today
+    \item this is exactly why agent-generated datasets still need variable-design judgment
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Election Counts Around Major Economics Events}
+\begin{columns}[T]
+\begin{column}{0.58\textwidth}
+\includegraphics[width=\textwidth]{full_web_event_windows.pdf}
+\end{column}
+\begin{column}{0.38\textwidth}
+\scriptsize
+\textbf{3-year post-event windows}
+\begin{itemize}
+    \item Internet turn (2000): 41 $\rightarrow$ 45
+    \item GFC (2008): 35 $\rightarrow$ 51
+    \item COVID era (2020): 82 $\rightarrow$ 117
+\end{itemize}
+
+\vspace{0.2cm}
+\textbf{Interpretation:}
+\begin{itemize}
+    \item there is no obvious post-dot-com collapse
+    \item counts rise after 2008 and surge after 2020
+    \item the 2020--2024 jump likely reflects Society-side policy or catch-up effects
+    \item use this as descriptive timing evidence, not a causal event study
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{What Agentic AI Actually Did Here}
+\begin{itemize}
+    \item discovered and cached candidate homepages at scale, then kept the search state on disk
+    \item parsed 527 institutional profile pages and downloaded 316 CV or CV-like documents
+    \item normalized fields, tracked source URLs, and reran the analysis after rule changes
+    \item surfaced a negative result clearly: even a large search pass does not rescue current biological age
+\end{itemize}
+
+\vspace{0.25cm}
+\textbf{What stayed human:}
+\begin{itemize}
+    \item define source restrictions and coding rules
+    \item separate current age, years since PhD, and age at election
+    \item treat event patterns as descriptive rather than causal
+    \item decide when missingness is too severe for a claim
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercise B: Full-Roster Fellows Assignment}
+\begin{itemize}
+    \item start from the official seed roster and take one batch of 50 fellows
+    \item use only official and institutional sources
+    \item produce a normalized CSV, four figures, and a short memo
+    \item keep missing values visible and documented
+    \item use age only if birth-year coverage reaches the lecture threshold; otherwise use years since PhD or age at election
+    \item explain clearly what the agent automated and what judgment you supplied
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{This case is not about scraping harder.} It is about designing a trustworthy public-web research pipeline.
+\end{frame}
+
+
+\end{document}

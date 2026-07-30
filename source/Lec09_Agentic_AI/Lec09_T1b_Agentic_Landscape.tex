@@ -1,0 +1,416 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.1b: The Agentic-AI Landscape (mid-2026)
+%% New deck broadening the lecture from the terminal-agent spine to the
+%% mid-2026 agentic-AI landscape. Facts web-verified for June 2, 2026.
+%% Tagging convention: [solid] = primary/citable; [hype] = vendor self-report.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.1b: The Agentic-AI Landscape (mid-2026)}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 9.1b Agenda}
+\textbf{T1 framed the terminal-agent workflow. This interlude widens the lens to the broader agentic-AI landscape an economist now operates inside.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+  \item \textbf{The interoperability stack} --- MCP, A2A, AGNTCY/ACP, neutral governance
+  \item \textbf{Orchestration patterns} --- frameworks, context engineering, the multi-agent cost-benefit
+  \item \textbf{Reasoning models \& inference-time compute} --- think budgets, measured time horizons
+  \item \textbf{Autonomous coding \& computer-use agents} --- scheduled runtimes, sandboxing
+  \item \textbf{Benchmarks \& measurement validity} --- ties to the course's measurement theme
+  \item \textbf{Safety \& reproducibility} --- untrusted inputs, chain-of-custody
+\end{enumerate}
+
+\vspace{0.15cm}
+\footnotesize\textit{Reading convention: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report (counter-source given).}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Facts current as of June 2026. Model versions are stated with release dates; the field moves monthly --- recheck before teaching.}}
+\end{frame}
+
+%=============================================================================
+\section{The Interoperability Stack}
+%===========================================================
+
+\sectiondivider{The Interoperability Stack}{Compete on models, cooperate on plumbing}
+
+\begin{frame}{Three Layers of Agent Interoperability}
+\textbf{The 2025--26 story is standard-setting: vendors compete on models but increasingly cooperate on the wiring between agents and tools.}
+
+\vspace{0.18cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.6cm}|p{3.0cm}|p{4.9cm}|}
+\hline
+\textbf{Layer} & \textbf{Protocol} & \textbf{What it standardizes} \\ \hline
+Agent $\leftrightarrow$ tool & \textbf{MCP} (Model Context Protocol) & how an agent discovers and calls external tools/data sources \\ \hline
+Agent $\leftrightarrow$ agent & \textbf{A2A} (Agent-to-Agent) & how independent agents delegate tasks to one another \\ \hline
+Discovery / identity & \textbf{AGNTCY / ACP} & agent directories, capability cards, identity and trust \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.18cm}
+
+\begin{itemize}\footnotesize
+    \item MCP was introduced by Anthropic (Nov 2024); it is now \emph{multi-vendor}, not proprietary.
+    \item \textbf{OpenAI adopted MCP} at DevDay (Oct 6, 2025); Google and Microsoft tooling support it too. \textbf{[solid]}
+    \item Governance moved to a neutral home: the \textbf{Linux Foundation Agentic AI Foundation (AAIF)}, formed Dec 9, 2025, now hosts MCP and related projects. \textbf{[solid]}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why Neutral Governance Is a Network-Effects Story}
+\textbf{For economists, the interoperability stack is a textbook standard-setting / network-effects case.}
+
+\vspace{0.22cm}
+
+\begin{itemize}
+    \item A shared protocol lowers switching costs: a tool wrapped once in MCP works across Claude, ChatGPT, Gemini, and open agents
+    \item Network effects make the standard more valuable as adoption grows --- which is why a single-vendor protocol faces adoption resistance
+    \item Moving MCP under the \textbf{Linux Foundation AAIF} (Dec 9, 2025) is the classic move: hand the ``plumbing'' to a neutral body so rivals will build on it
+    \item Competition then concentrates where rents remain: model quality, latency, and price --- not the connectors
+\end{itemize}
+
+\vspace{0.22cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Reproducibility note.} Protocols version. Pin the \emph{spec version} you used (e.g.\ MCP spec date, A2A version) alongside the model version and date --- a tool call that worked under one spec revision may behave differently under the next.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{Orchestration Patterns}
+%===========================================================
+
+\sectiondivider{Orchestration Patterns}{How multi-step agent systems are actually built}
+
+\begin{frame}{Four Orchestration Patterns}
+\textbf{Production agent systems are built from a small set of recurring control structures.}
+
+\vspace{0.18cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.0cm}|p{7.4cm}|}
+\hline
+\textbf{Pattern} & \textbf{Shape} \\ \hline
+Orchestrator--worker & a lead agent decomposes a task and dispatches workers; \emph{dominant in production} \\ \hline
+Planner--executor & one component plans, another executes step by step \\ \hline
+Reflection & the agent critiques and revises its own output before returning \\ \hline
+Handoff & control passes between specialized agents (e.g.\ triage $\to$ specialist) \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.16cm}
+
+\footnotesize\textbf{The terminal-agent workflow you learned in T1--T5 is an orchestrator--worker system}: the main agent orchestrates; \texttt{code-reviewer}, \texttt{domain-reviewer}, and \texttt{verifier} sub-agents are the workers. The landscape just adds vocabulary and tooling around the same loop.
+\end{frame}
+
+\begin{frame}{Frameworks Reached 1.0 (2025--26)}
+\textbf{The orchestration layer matured from research demos to versioned, supported frameworks.}
+
+\vspace{0.16cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{4.6cm}|p{3.0cm}|p{2.6cm}|}
+\hline
+\textbf{Framework} & \textbf{Milestone} & \textbf{Vendor} \\ \hline
+LangGraph 1.0 & Oct 2025 & LangChain \\ \hline
+OpenAI Agents SDK ($+$ AgentKit) & SDK Mar 2025 & OpenAI \\ \hline
+Google Agent Dev. Kit (ADK) & v1.0 May 2025 & Google \\ \hline
+Microsoft Agent Framework & 1.0 Apr 2026 & Microsoft \\ \hline
+CrewAI & 1.0 & CrewAI \\ \hline
+Anthropic \textbf{Claude Agent SDK} & Sep 2025 & Anthropic \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Naming note.} What was the \emph{Claude Code SDK} was renamed the \textbf{Claude Agent SDK} on Sep 29, 2025, reflecting generalization beyond coding. \textbf{[solid]}
+
+\vspace{0.05cm}
+\textbf{Durable lesson:} the patterns outlive the framework. Learn orchestrator--worker once; map it onto whichever SDK your institution adopts.
+\end{frame}
+
+\begin{frame}{The Multi-Agent Cost--Benefit Decision}
+\textbf{More agents is not free. Treat it as marginal value vs.\ marginal cost.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}
+    \item Anthropic reports its multi-agent research system beat a single-agent baseline by \textbf{+90.2\%} on its internal research-eval\ldots
+    \item \ldots at roughly \textbf{15$\times$ the token cost}
+    \item So multi-agent pays off when the task is broad, parallelizable, and the answer's value is high relative to tokens
+    \item It is wasteful for narrow, sequential, or cheap tasks
+\end{itemize}
+
+\vspace{0.12cm}
+{\scriptsize \textbf{[solid, label: Anthropic-internal-eval]} --- a vendor benchmark on a self-defined research task, not an external suite. Read the $+90.2\%$ as directional, not portable.}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{Economist framing.} You are choosing a point where marginal research value $=$ marginal token (and latency, and debugging) cost. The Aiyagari sub-agent review in T4 was justified on \emph{wall-clock}, not because ``more agents are better.''
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Context Engineering Displaced Prompt Engineering}
+\textbf{The 2025--26 shift: managing what is \emph{in} the context window now matters more than wording a clever prompt.}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item \textbf{Compaction.} Summarize and clear stale turns so the working set stays in the high-recall part of the window (the ``lost in the middle'' problem from Lec07 T3b).
+    \item \textbf{External memory.} Persist state to files (\texttt{NOTES.md}, \texttt{progress.md}, \texttt{CLAUDE.md}) rather than relying on the chat history.
+    \item \textbf{Sub-agents with clean context windows.} Hand a worker a fresh, focused context instead of the orchestrator's accumulated noise.
+\end{itemize}
+
+\vspace{0.2cm}
+
+\textbf{Why this matters for research:} it is exactly the discipline T4--T5 already taught --- file-driven workflow, progress logs, focused reviewers. The landscape gave it a name; the habit was already correct.
+\end{frame}
+
+%=============================================================================
+\section{Reasoning Models \& Inference-Time Compute}
+%===========================================================
+
+\sectiondivider{Reasoning Models}{Tool use in the reasoning loop, and how long agents actually run}
+
+\begin{frame}{Reasoning Models and Think-Budget Control}
+\textbf{Frontier models now spend variable inference-time compute, and increasingly call tools \emph{inside} the reasoning loop.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{Tool use in the loop.} OpenAI o3 / o4-mini (Apr 2025) interleave tool calls with chain-of-thought rather than reasoning first and acting after.
+    \item \textbf{Think-budget routers.} GPT-5 (Aug 2025) $\to$ GPT-5.5 (Apr 2026) route between fast and deep modes per query.
+    \item \textbf{Toggleable extended thinking + configurable token budget.} \textbf{Claude Opus 4.5} (Nov 2025) lets you turn extended thinking on/off and cap the thinking-token budget; it was the first model past \textbf{80\% on SWE-bench Verified}, and Opus pricing was cut to \$5/\$25 per Mtok (input/output).
+    \item \textbf{Parallel deep reasoning.} Gemini ``Deep Think'' explores multiple reasoning paths in parallel.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Benchmark caveat (carry this everywhere).} The 80\% SWE-bench Verified figure is real but the metric is contaminated/saturating: OpenAI \emph{stopped reporting} SWE-bench Verified in Feb 2026. Pair any Verified headline with SWE-bench Pro ($\sim$55--59\% at the frontier, held-out). \textbf{[solid]}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{How Long Can an Agent Actually Work? Measure, Don't Trust Marketing}
+\textbf{Vendors say ``works for hours'' or ``runs for days.'' METR gives a \emph{measured} alternative.}
+
+\vspace{0.18cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}\footnotesize
+    \item METR's \emph{task-length-doubling} result: the task length an agent completes at \textbf{50\% reliability} has doubled roughly every \textbf{7 months}, accelerating to $\sim$\textbf{4 months} in 2024--25. \textbf{[solid]}
+    \item Time Horizon 1.1 (Jan 2026) pegs \textbf{Opus 4.5 $\approx$ 320 min} and \textbf{GPT-5 $\approx$ 214 min} (50\%-reliability horizon).
+    \item Use these measured minutes instead of vendor ``multi-hour/multi-day autonomy.''
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Metric fragility.} The number is tied to a \textbf{50\% reliability} threshold and a specific task suite; the horizon at 80\% reliability is much shorter, and it shifts across suites. A measured-but-fragile number still beats a vendor claim. \\[2pt]
+\textbf{[hype counterpoint]} product pages advertising ``multi-hour'' or ``multi-day'' autonomy --- no reliability threshold stated.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Research translation:} the right question is not ``can it run for hours?'' but ``at what reliability, on what task distribution, validated how?''
+\end{frame}
+
+%=============================================================================
+\section{Autonomous Coding \& Computer-Use Agents}
+%===========================================================
+
+\sectiondivider{Autonomous Coding \& Computer Use}{From interactive assistants to scheduled, sandboxed runtimes}
+
+\begin{frame}{Coding Agents Became Scheduled, Autonomous Runtimes}
+\textbf{In 2025--26, coding agents shifted from interactive assistants to background runtimes with persistent state.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{OpenAI Codex ``Goal Mode''} became the default (May 2026), with persistent cross-session state --- the agent resumes a goal rather than starting fresh each chat.
+    \item \textbf{Anthropic ``Code with Claude'' (May 6, 2026)} reframed Claude Code as an \emph{orchestrator}:
+    \begin{itemize}\scriptsize
+        \item \textbf{Auto Mode} with prompt-injection / destructive-action classifiers $+$ human approval gates
+        \item \textbf{Routines} triggered by cron or webhook
+        \item \textbf{Worktrees} for parallel branches
+        \item sandboxed \textbf{Managed Agents} with scoped credentials
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{takeawaybox}
+\footnotesize\textbf{Lesson for research infra.} Before an agent runs unattended on real data or repos, configure sandboxing, credential scoping, and approval gates first. ``Autonomous'' is a permissions decision, not a model capability.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Computer-Use Agents: Strong Benchmarks, Volatile Products}
+\textbf{Browser/computer-use agents got good on paper but the standalone products churned.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item Computer-use / browser agents reached $\sim$\textbf{78--84\% on OSWorld-Verified} (human baseline $\sim$72\%).
+    \item \textbf{But standalone products are volatile:} Google \emph{killed} Project Mariner (May 2026); OpenAI folded Operator into ChatGPT Agent / Atlas.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Flag the benchmark numbers.} OSWorld scores are \textbf{scaffold-dependent and largely self-reported}: the same model scores very differently under different harnesses, and ``above human baseline'' does not mean reliable on \emph{your} unseen workflow. Treat as directional. \textbf{[solid claim that products churned; benchmark figures = vendor/scaffold-dependent]}
+\end{cautionbox}
+
+\vspace{0.12cm}
+\textbf{Lesson:} do not build durable research infrastructure on a single experimental product. Build on the protocol layer (MCP) and your own files; treat any one browser agent as replaceable.
+\end{frame}
+
+%=============================================================================
+\section{Benchmarks \& Measurement Validity}
+%===========================================================
+
+\sectiondivider{Benchmarks \& Measurement Validity}{The course's measurement theme, applied to agents}
+
+\begin{frame}{SWE-bench Verified Collapsed Under Scrutiny}
+\textbf{This module is the measurement theme of the course pointed at agent evals: a headline number is not a measurement until you know its validity.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{Contamination + harness-hacking critiques} eroded SWE-bench Verified; \textbf{OpenAI stopped reporting it in Feb 2026}.
+    \item Berkeley RDI \emph{trivially broke four agent benchmarks via the harness} (Apr 2026) --- exploiting the scaffold, not solving the task.
+    \item \textbf{Always pair} a Verified headline with \textbf{Scale's SWE-bench Pro} ($\sim$55--59\% frontier, held-out problems).
+    \item \textbf{Reliability under repetition} matters more than best-of-$n$ for autonomous use: $\tau$-bench \emph{pass-hat-$k$} falls from $\sim$90\% single-try to $\sim$57\% at $k{=}8$.
+\end{itemize}
+
+\vspace{0.1cm}
+\begin{cautionbox}
+\footnotesize\textbf{Hard rule.} Never put a SWE-bench \emph{Verified} score and a SWE-bench \emph{Pro} score on the same axis --- different problem sets, different difficulty, different contamination exposure. \textbf{[solid]}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Single-Try Score vs.\ Reliability Under Repetition}
+\textbf{For an agent that runs unattended, the relevant statistic is not its \emph{best} run --- it is whether it succeeds \emph{every} time.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Best-of-$n$ thinking (wrong for autonomy)}
+\begin{itemize}\footnotesize
+    \item report the best of several attempts
+    \item flatters the model
+    \item fine for a human-in-the-loop draft you will check
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{pass-hat-$k$ / reliability (right for autonomy)}
+\begin{itemize}\footnotesize
+    \item probability \emph{all} $k$ independent runs succeed
+    \item $\tau$-bench: $\sim$90\% at $k{=}1$ $\to$ $\sim$57\% at $k{=}8$
+    \item this is what matters when no human checks each run
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.22cm}
+
+\textbf{Economist translation:} an unattended agent on a recurring data pull is a repeated trial. A 90\% single-try success compounds into frequent failure across a quarter of nightly runs. Design for the reliability curve, not the demo.
+\end{frame}
+
+%=============================================================================
+\section{Safety \& Reproducibility}
+%===========================================================
+
+\sectiondivider{Safety \& Reproducibility}{Untrusted inputs and chain-of-custody for agentic research}
+
+\begin{frame}{Treat Everything the Agent Reads as Untrusted}
+\textbf{The defining agentic-AI security failure is prompt injection: data the agent merely \emph{reads} can hijack what it \emph{does}.}
+
+\vspace{0.14cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{OWASP Top-10 for Agentic Applications} (Dec 2025) now codifies these risks.
+    \item Documented exploits: \textbf{EchoLeak} (CVE-2025-32711, zero-click M365 Copilot data exfiltration); \textbf{ShadowPrompt} in Claude's Chrome extension; Anthropic's \textbf{GTG-1002} --- the first largely-autonomous cyberattack (Nov 2025).
+    \item \textbf{NIST CAISI} red-teaming raised task-hijacking success from \textbf{11\% to 81\%} with adaptive attacks.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Operating rule.} Treat any content the agent reads --- emails, web pages, retrieved documents, even tool descriptions --- as an \emph{untrusted injection channel}. Use least-privilege sandboxing and revocable permissions, exactly as T4's \texttt{settings.json} \texttt{deny} list and T5's security frame prescribed. \textbf{[solid]}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Reproducibility: Chain-of-Custody for Agentic Results}
+\textbf{Can an agent reproduce a published computational result? Often only partly --- which makes logging non-negotiable.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{CORE-Bench}: agents reproduce published computational results only $\sim$\textbf{60\% (easy)} / $\sim$\textbf{21\% (hard)}. \textbf{[solid]}
+    \item Therefore \textbf{log full trajectories}: prompts, tool calls, seeds, \emph{model versions}, \emph{spec versions}, and \emph{dates} --- the chain-of-custody for any agent-produced artifact.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Read vendor safety numbers skeptically.} Distinguish a vendor's ``$\sim$1\% attack success on a \emph{fixed} suite'' from academic findings that \emph{adaptive} attacks still exceed $\sim$85\%. A fixed-suite number measures the suite, not the threat model. \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.1cm}
+\footnotesize\textbf{Ties to T6.} This is the same six-criteria discipline (reproducibility, verifiability, auditability) --- now with the dates and spec versions the landscape forces you to pin.
+\end{frame}
+
+%=============================================================================
+\section{Synthesis}
+%===========================================================
+
+\begin{frame}{Synthesis: The Landscape Reinforces the Workflow Spine}
+\textbf{Every module above maps back onto the terminal-agent workflow of T1--T6 and onto the course's measurement / identification theme.}
+
+\vspace{0.16cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{|p{3.2cm}|p{7.2cm}|}
+\hline
+\textbf{Landscape module} & \textbf{Connection to the spine} \\ \hline
+Interoperability (MCP/A2A) & build on the neutral protocol layer, not one product; pin spec versions \\ \hline
+Orchestration & T4's sub-agent review \emph{is} orchestrator--worker; pay for multi-agent only when value $>$ token cost \\ \hline
+Reasoning \& time horizons & ``runs for hours'' $\to$ a measured, reliability-thresholded number \\ \hline
+Coding / computer-use & autonomy is a sandboxing + approval-gate decision, set before the run \\ \hline
+Benchmarks & a headline score is not a measurement until you know its validity (Verified vs.\ Pro) \\ \hline
+Safety \& reproducibility & untrusted-input discipline $+$ logged chain-of-custody (dates, versions, seeds) \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+\begin{center}
+\textbf{The plumbing changes monthly; the research discipline does not.}\\
+\footnotesize\textit{Compete on questions and judgment; cooperate on standards; measure before you trust.}
+\end{center}
+\end{frame}
+
+%===========================================================
+\end{document}

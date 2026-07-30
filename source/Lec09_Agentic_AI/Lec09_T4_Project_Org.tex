@@ -1,0 +1,671 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.4: Project Organization
+%% Source: ./archive_pre_split/Lec09_Agentic_AI_v3.tex (section 8)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T7_Specs_Harness_Skills.tex
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T8_Remote_HPC_Subagents.tex
+%% Rewritten 2026-07-06: Act 4 "Management" of the five-act structure. Opens with the
+%%         researcher-as-project-manager paradigm shift; HA-Ramsey milestone ladder,
+%%         division-of-labor contract, quality gates, orchestration (Lec10 T8 F19/F20/
+%%         F22/F25/F38); fellows provenance rules as rules+hooks example (Lec10 T4).
+%%         HPC segment compressed 4->2 frames. See Lec09_Rewrite_Plan_2026-07-06.md.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.4: Project Organization --- The Researcher as Project Manager}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{The Map: Act 4 --- The Management}
+\textbf{This deck answers the fourth question: how do I run a whole project with this --- not just one task?}
+
+\LecNineMap{4}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: the paradigm shift (researcher as project manager) $\to$ how HA-Ramsey was actually managed $\to$ the manager's instruments on disk (CLAUDE.md, skills, agents, rules, hooks) $\to$ your sub-agent RA team and cross-verification $\to$ remote/HPC execution.}
+\end{frame}
+
+%=============================================================================
+\section{The Paradigm Shift}
+%===========================================================
+
+\sectiondivider{The Paradigm Shift}{From solo coder to project manager}
+
+\begin{frame}{The Paradigm Shift: You Are the Project Manager}
+\textbf{When execution becomes cheap, the scarce input is management: deciding what gets built, to what standard, by whom.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    pm/.style={rectangle, rounded corners, draw=RedTitle!70, fill=blue!5,
+        minimum width=1.92cm, minimum height=1.0cm, text width=1.84cm,
+        align=center, font=\scriptsize},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+    \node[pm] (g)  at (0,0)     {\textbf{Goal}\\ \tiny one sentence + success criteria};
+    \node[pm] (fp) at (2.17,0)  {\textbf{Final product}\\ \tiny paper, dataset, validated solver};
+    \node[pm] (ig) at (4.34,0)  {\textbf{Intermediate goods}\\ \tiny spec, pseudocode, V0, batches};
+    \node[pm] (qg) at (6.51,0)  {\textbf{Quality gate per good}\\ \tiny criterion set in advance};
+    \node[pm] (as) at (8.68,0)  {\textbf{Assignment}\\ \tiny which session, agent, sub-agent};
+    \node[pm] (cv) at (10.85,0) {\textbf{Cross-verifi\-cation}\\ \tiny producer never sole reviewer};
+    \draw[arr] (g) -- (fp);
+    \draw[arr] (fp) -- (ig);
+    \draw[arr] (ig) -- (qg);
+    \draw[arr] (qg) -- (as);
+    \draw[arr] (as) -- (cv);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{itemize}
+    \item Decompose the goal into \textbf{intermediate goods} --- real artifacts (spec, validated V0, batch CSV, review report), not vague ``progress''
+    \item Decide the \textbf{quality gate} for each good \emph{before} it is produced (T3's acceptance criteria, now for everything, not just code)
+    \item \textbf{Assign} each good to the right producer --- this session, a sub-agent, a different model tier, or yourself; then \textbf{cross-verify}: whoever produced it, someone else checks it
+\end{itemize}
+
+\vspace{0.05cm}
+\textbf{T3 disciplined one artifact; T4 runs the factory.} Every object in this deck is one of the manager's instruments.
+\end{frame}
+
+\begin{frame}{A Managed Project in One Slide: HA-Ramsey's Milestones}
+\textbf{The HA-Ramsey program is the PM chain instantiated: seven milestones, each a validated, preserved intermediate good.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    m/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=1.9cm, minimum height=1.05cm, text width=1.8cm,
+        align=center, font=\tiny},
+    md/.style={fill=green!10, draw=green!45!black},
+    gate/.style={font=\tiny, text=black!60, align=center},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!60}
+]
+    \node[m] (m1) at (0,0)    {\textbf{M1}\\refine the seed\\ \emph{zero new economics}};
+    \node[m] (m2) at (2.2,0)  {\textbf{M2}\\new model in TeX\\ \emph{before any code}};
+    \node[m] (m3) at (4.4,0)  {\textbf{M3}\\v1 prototype\\ \emph{proof of concept}};
+    \node[m] (m4) at (6.6,0)  {\textbf{M4}\\full model v2\\ \emph{debugging $\to$ architecture}};
+    \node[m, md] (m5) at (8.8,0) {\textbf{M5--M7}\\three new methods\\ \emph{discoveries}};
+    \node[m] (fin) at (11.0,0){\textbf{Final}\\full paper +\\methods note};
+    \draw[arr] (m1) -- (m2);
+    \draw[arr] (m2) -- (m3);
+    \draw[arr] (m3) -- (m4);
+    \draw[arr] (m4) -- (m5);
+    \draw[arr] (m5) -- (fin);
+    \node[gate] at (1.1,-0.95)  {gate: TeX $\equiv$ code};
+    \node[gate] at (3.3,-0.95)  {gate: economist audit};
+    \node[gate] at (5.5,-0.95)  {gate: reproduces hand-derived checks};
+    \node[gate] at (7.7,-0.95)  {gate: each v1 failure answered};
+    \node[gate] at (9.9,-0.95)  {gate: written up, cited};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{itemize}
+    \item Every milestone preserved as a citable artifact in the project's \texttt{Case\_Study/} package --- \emph{intermediate goods, literally}; no milestone skipped, no gate waived
+    \item The green box is the payoff of management: the discoveries (Story 1 in T1) \emph{surfaced from gated iteration} --- they were not the plan
+\end{itemize}
+
+{\scriptsize \textit{Economics and figures: Lec10 T8. Source: HA-Ramsey case-study package.}}
+\end{frame}
+
+\begin{frame}{Write the Contract First: Who Owns What}
+\textbf{Before any code, the HA-Ramsey project wrote down the division of labor --- T2's table, now with signatures.}
+
+\vspace{0.2cm}
+
+\begin{center}
+\small
+\begin{tabular}{|p{5.4cm}|p{5.8cm}|}
+\hline
+\textbf{AI owns (throughput)} & \textbf{Economist owns (judgment)} \\ \hline
+Drafting and revising the LaTeX model note & Economic correctness of every equation \\ \hline
+Translating math into vectorized PyTorch & Which simplifications are acceptable \\ \hline
+Penalty/boundary implementation patterns & Catching conceptual bugs in timing and probabilities \\ \hline
+Running diagnostics and summarizing sweeps & Validation benchmarks and when a result is credible \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{``AI supplies throughput; the economist supplies judgment''} --- stated \emph{before} any code was written. The contract is an assignment rule: which goods the AI may produce alone, and which gates only you may sign.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Quality Gates Catch What No Compiler Catches}
+\textbf{Two conceptual bugs the economist caught in AI-drafted equations --- the code ran, the losses fell, the results would have been wrong. No compiler catches these:}
+
+\begin{enumerate}
+    \item \textbf{Wrong timing:} asset transitions written with next-period consumption --- but the budget constraint is a \emph{current-period} object
+    \item \textbf{Wrong direction:} transition probabilities indexed by state occupied, not by \emph{direction of movement}
+\end{enumerate}
+
+\textbf{When v1 then failed numerically, each failure became v2 architecture:}
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{4.6cm}|p{6.2cm}|}
+\hline
+\textbf{v1 failure} & \textbf{v2 structural answer} \\ \hline
+Naive sampling of a 5D state space & Adaptive sampling loops \\ \hline
+Fragile feasible-set boundary learner & Normalized coordinates + robust geometry \\ \hline
+Simulated paths escape the valid region & Explicit projection back + penalty term \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{cautionbox}
+\footnotesize
+\textbf{``Debugging becomes architecture'' only if someone with judgment reads the failures} --- the gate is where the economist earns authorship.
+\end{cautionbox}
+\end{frame}
+
+%=============================================================================
+\section{Project Organization}
+%===========================================================
+
+\sectiondivider{Project Organization}{The manager's instruments: files on disk}
+
+\begin{frame}{The PM's Instruments Live on Disk}
+\textbf{A manager who re-explains the standards every morning is not managing. Files on disk are how you delegate without re-explaining.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Conventions live in files, not in your memory --- or the agent's
+    \item Validation steps become reproducible lab procedure
+    \item New sessions start from the project's actual state (T2: initialization reloads it all)
+    \item Coauthors and students can inspect what the workflow is supposed to be
+\end{itemize}
+
+\vspace{0.25cm}
+
+\textbf{Economist translation:} the harness turns tacit RA practice into written lab protocol --- and the protocol, not the chat, is what your name ultimately stands behind.
+\end{frame}
+
+\begin{frame}{Six Instruments, Six Pain Points}
+\begin{center}
+\small
+\begin{tabular}{|p{2.1cm}|p{4.2cm}|p{4.1cm}|}
+\hline
+\textbf{Instrument} & \textbf{Management pain point it solves} & \textbf{Running example} \\ \hline
+\texttt{CLAUDE.md} & re-explaining the project every session & keep the MEPS weights rule or Aiyagari benchmark visible \\ \hline
+Skill & a repeated workflow improvised differently every time & paper-review pipeline with the same quality gates \\ \hline
+Agent & review roles need specialization and parallelism & code reviewer vs.\ domain reviewer \\ \hline
+Rule & some instructions must \emph{always} be on & every filled field carries a source URL \\ \hline
+Verifier & output should pass named checks before it counts & rerun script, inspect diagnostics, confirm files exist \\ \hline
+Provenance log & source discipline must survive beyond the chat & fellows dataset with field-level URLs and notes \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.05cm}
+\textbf{Reason for this slide:} these objects are not product trivia. Each one retires a coordination or credibility failure you would otherwise absorb personally.
+\end{frame}
+
+\begin{frame}[fragile]{Minimal Project Tree}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny]
+my-research-project/
++-- CLAUDE.md
++-- .claude/
+|   +-- skills/
+|   |   +-- paper-review/
+|   |       +-- SKILL.md
+|   |       +-- references/
+|   |           +-- referee-template.md
+|   +-- agents/
+|   |   +-- code-reviewer.md
+|   |   +-- domain-reviewer.md
+|   |   +-- verifier.md
+|   +-- rules/
+|   |   +-- iterative-workflow.md
+|   +-- settings.json
++-- scripts/
++-- output/
++-- sources/
++-- quality_reports/
+\end{lstlisting}
+
+\textbf{This is enough to explain the workflow without burying students in infrastructure.} The exact research question can change; the organizational logic stays.
+\end{frame}
+
+\begin{frame}[fragile]{CLAUDE.md: The Standing Brief}
+\texttt{CLAUDE.md} is the main shared instruction file for the project --- the brief a good manager writes once instead of repeating daily.
+
+\vspace{0.2cm}
+
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+# CLAUDE.md
+Project: MEPS uninsurance pilot for lecture 9
+Language: Python
+Goal: harmonize 2012--2014 files and produce one validated figure
+Conventions: no hardcoded paths; save outputs to output/
+Checks: use survey weights; save the year map; report what passed
+\end{lstlisting}
+
+\vspace{0.2cm}
+
+\textbf{Why students should care:} it captures the project context you would otherwise re-explain every session.
+
+\vspace{0.1cm}
+\footnotesize\textit{The fellows project runs the same play with public-web material: the seed CSV, the batch file, and the schema rules are ``the public-web analog of \texttt{CLAUDE.md}'' (Lec10 T4) --- project files holding the rules and state across sessions.}
+\end{frame}
+
+\begin{frame}{Three Memories, Three Writers}
+\textbf{Three different persistence ideas should not be confused.}
+
+\vspace{0.2cm}
+
+\begin{center}
+\small
+\begin{tabular}{|p{2.4cm}|p{2.4cm}|p{5.3cm}|}
+\hline
+\textbf{Mechanism} & \textbf{Who writes it} & \textbf{Why it exists} \\ \hline
+\texttt{CLAUDE.md} & you / team & durable project instructions and conventions \\ \hline
+Auto memory & the tool & per-project learned patterns and corrections \\ \hline
+Optional course log & you / course & explicit progress notes such as \texttt{progress.md} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Course recommendation:} rely on \texttt{CLAUDE.md} for shared rules, treat auto memory as helpful but not authoritative, and keep explicit logs when you want students to inspect the evolution of a project.
+\end{frame}
+
+\begin{frame}{Skills, Agents, and Rules: Three Different Jobs}
+\begin{center}
+\begin{tikzpicture}[
+    head/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+                 minimum width=3.4cm, minimum height=0.7cm,
+                 text width=3.2cm, align=center, font=\small\bfseries},
+    body/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+                 minimum width=3.4cm, minimum height=1.55cm,
+                 text width=3.2cm, align=center, font=\scriptsize, anchor=north},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!70}
+]
+    \node[head] (hS) at (-4.0, 0) {Skills};
+    \node[head] (hA) at ( 0.0, 0) {Agents};
+    \node[head] (hR) at ( 4.0, 0) {Rules};
+
+    \node[body] (bS) at (hS.south) {Callable workflows.\\
+        Invoked by name, parameterized.\\
+        \emph{Loaded on demand.}};
+    \node[body] (bA) at (hA.south) {Specialist roles.\\
+        Separate context, focused mandate.\\
+        \emph{Spawned by the orchestrator.}};
+    \node[body] (bR) at (hR.south) {Always-on guardrails.\\
+        Applied automatically every session.\\
+        \emph{Loaded at session start.}};
+
+    \node[font=\tiny, gray!70] at (-2.0, -2.45) {load on demand $\rightarrow$};
+    \node[font=\tiny, gray!70] at ( 2.0, -2.45) {$\leftarrow$ spawn on need};
+    \node[font=\tiny, gray!70] at ( 0.0, -2.85) {Rules load \emph{first} every session; Skills and Agents enter the loop later.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.15cm}
+\footnotesize\textbf{Loading order matters.} Rules are read before the first user message; Skills load when invoked; Agents launch with the rules and any inherited context as their system prompt.
+\end{frame}
+
+\begin{frame}{Plain English vs.\ Encoded Skill}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Plain English}
+
+\vspace{0.15cm}
+\textit{Review this paper and tell me the top problems with exact quotes.}
+
+\vspace{0.2cm}
+\textbf{Use when}
+\begin{itemize}
+    \item Exploring
+    \item Doing a one-off task
+    \item Still deciding the workflow
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Encoded skill}
+
+\vspace{0.15cm}
+\texttt{/paper-review draft\_A.pdf}
+
+\vspace{0.2cm}
+\textbf{Use when}
+\begin{itemize}
+    \item The workflow should repeat exactly
+    \item A student team needs one standard procedure
+    \item Validation must be consistent across versions
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+
+\textbf{Exploration starts in English. Reproducibility lives in skills.}
+
+\vspace{0.1cm}
+\footnotesize\textit{Capstone note: Track D2 asks you to deliver exactly this --- a validated skill for a recurring research task.}
+\end{frame}
+
+\begin{frame}[fragile]{Skill File Structure}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+.claude/skills/paper-review/
+  SKILL.md
+  references/
+    referee-template.md
+\end{lstlisting}
+
+\vspace{0.2cm}
+
+\textbf{\texttt{SKILL.md}} stores the repeatable protocol:
+\begin{itemize}
+    \item what the command is called
+    \item what steps it should follow
+    \item what checks must pass before it reports success
+\end{itemize}
+
+\vspace{0.2cm}
+
+\textbf{Reference files} store task-specific detail that would clutter the main instruction file.
+\end{frame}
+
+\begin{frame}{Skills Are Saved Research Playbooks}
+\textbf{A skill is the right home for long, repeated procedures.} Keep always-loaded project context short; put domain workflows in reusable skills.
+
+\vspace{0.1cm}
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{2.8cm}|p{4.0cm}|p{4.8cm}|}
+\hline
+\textbf{Skill} & \textbf{Reusable workflow} & \textbf{Validation hook} \\ \hline
+\texttt{data-analysis} & Load, explore, regress, produce tables/figures & Output schema + script rerun \\ \hline
+\texttt{review-paper} & Read paper, audit argument, generate referee objections & Structured review report \\ \hline
+\texttt{weighted-survey} & Compute survey-weighted rates/means & Formula check against benchmark \\ \hline
+\texttt{hpc-job} & Write \texttt{sbatch} script, submit, parse logs & Scheduler status + parser \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\textbf{Portable idea:} Claude may call them \texttt{skills}; Codex may package them differently. The durable object is a saved playbook with triggers, allowed tools, steps, and acceptance tests.
+\end{frame}
+
+\begin{frame}[fragile]{Rules and Hooks: Encoding the Fellows Provenance Discipline}
+\textbf{Guidance the agent should follow $\to$ a rule. A check that must fire mechanically $\to$ a hook. The fellows project needs both.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\textbf{The rule} (\texttt{.claude/rules/provenance.md}):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+- Every filled field carries a source URL
+  from an official or institutional page.
+- Never infer gender, birth year, or living
+  status from names, photos, or country.
+- Record missing as missing; missingness
+  is a result, not a failure.
+\end{lstlisting}
+\footnotesize Always-on: loaded at session start, batch after batch.
+\end{column}
+\begin{column}{0.45\textwidth}
+\textbf{The hook} (\texttt{settings.json}):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+"PostToolUse": [{
+  "matcher": "Write(data/*.csv)",
+  "hooks": [{"type": "command",
+   "command":
+   "python checks/require_source_url.py"}]
+}]
+\end{lstlisting}
+\footnotesize Mechanical: any CSV row missing \texttt{source\_url} is rejected --- no matter what the conversation said.
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{1.6cm}|p{2.5cm}|p{6.0cm}|}
+\hline
+\textbf{Object} & \textbf{Fires} & \textbf{Use for} \\ \hline
+Rules & during work & natural-language conventions and guardrails \\ \hline
+Hooks & on tool events & mechanical enforcement: format, test, block, log \\ \hline
+Settings & at session start & permissions and project-level behavior \\ \hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Permissions and Hooks in \texttt{settings.json}}
+\textbf{Two jobs:} \emph{permissions} define the blast radius; \emph{hooks} run mechanical checks at tool boundaries.
+
+\vspace{0.15cm}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+{
+  "permissions": {
+    "allow": ["Bash(python *)", "Bash(pytest *)", "Read(*)", "Edit(*)"],
+    "deny":  ["Bash(rm -rf *)", "Bash(git push --force *)",
+              "Read(./.env)", "Read(./secrets/**)"]
+  },
+  "hooks": {
+    "PostToolUse": [{"matcher": "Write|Edit|MultiEdit",
+                     "hooks": [{"type": "command",
+                                "command": ".claude/hooks/format-python.sh"}]}],
+    "Stop":        [{"hooks": [{"type": "command",
+                                "command": "pytest tests/ -q || true"}]}]
+  }
+}
+\end{lstlisting}
+
+\vspace{0.1cm}
+\textbf{Hook types worth knowing:} \texttt{PreToolUse} (block risky commands), \texttt{PostToolUse} (format / lint), \texttt{Stop} (full test suite), \texttt{SubagentStop} (verify report format), \texttt{PreCompact} (save progress).
+\end{frame}
+
+% MiniCourse refinement: harness engineering vocabulary (specs / harness / skills) from M4_T7
+\begin{frame}{Three Lifetimes: Per-Event, Per-Session, Forever}
+\textbf{The harness is the umbrella name for what makes a project survive across sessions.}
+
+\vspace{0.2cm}
+
+\begin{center}
+\small
+\begin{tabular}{|l|l|p{6.0cm}|}
+\hline
+\textbf{Layer} & \textbf{Lifetime} & \textbf{Purpose} \\ \hline
+\textbf{Hooks} (\texttt{settings.json}) & Per-event & Mechanical enforcement: format after edits, run tests on stop, block dangerous tools \\ \hline
+\textbf{Project memory / rules} & Per-session & Bootstrap context. Project instructions and path-scoped guardrails \\ \hline
+\textbf{Auto memory + progress files} & Cross-session & Durable learnings and explicit handoff notes you can inspect and edit \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Why this matters.} Choosing the right layer is half the design: if the rule must fire every time, a hook is safer than a natural-language reminder; if it must survive a fresh session, it belongs in memory or rules, not a transient prompt.
+
+\vspace{0.04cm}
+\textbf{Rule of thumb:} natural-language guidance $\to$ rules and skills. Mechanical enforcement $\to$ hooks.
+\end{frame}
+
+%===========================================================
+% MiniCourse refinement: sub-agents / remote / HPC vocabulary from M4_T8
+\section{Your RA Team}
+%===========================================================
+
+\sectiondivider{Your RA Team}{Sub-agents, assignment, and cross-verification}
+
+\begin{frame}{Sub-Agents: Your Parallel RA Team}
+\textbf{When the orchestrator spawns a sub-agent, the harness launches a separate agent instance with its own context window.}
+
+\vspace{0.15cm}
+
+\begin{itemize}
+    \item Multiple sub-agents run \textbf{in parallel} --- like Python's \texttt{multiprocessing}
+    \item Each receives an agent file as its system prompt and returns a structured report
+    \item The specialist roles are the RA team you met in the project tree:
+    \begin{itemize}
+        \item \texttt{code-reviewer.md}: file hygiene, implementation quality, reproducibility
+        \item \texttt{domain-reviewer.md}: benchmark logic, identification, economic consistency
+        \item \texttt{verifier.md}: rerun the script, inspect diagnostics, confirm outputs exist
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Aiyagari example.} After writing \texttt{aiyagari\_v1.py}, the orchestrator spawns
+\begin{center}
+\texttt{code-reviewer} \quad \textbf{$\Vert$} \quad \texttt{domain-reviewer}
+\end{center}
+in parallel; both finish in roughly one sequential run's wall-clock time. \textbf{Review time is halved.} \textit{Why separate roles? One prompt asking about everything does a mediocre job at each --- one RA checks style, another checks economics, another reruns the table.}
+\end{frame}
+
+\begin{frame}{Assignment and Cross-Verification}
+\textbf{The manager's two questions for every intermediate good: who produces it, and who checks it?}
+
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{Good fit for sub-agents:}
+\begin{itemize}
+    \item Code review (parallel: code, domain, verification)
+    \item Lookups and web research that return short reports
+    \item Independent unit-test generation per module
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Bad fit:}
+\begin{itemize}
+    \item Tightly coupled work (each step depends on the previous)
+    \item Anything you must steer interactively mid-task
+    \item Sub-agents spawning sub-agents (depth causes drift)
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+
+\textbf{Cross-verification: the producer is never the only reviewer.} Blast-radius rules of thumb: plan mode before granting execution on novel pipelines; each sub-agent's checklist \emph{spec'd}, not free-form; checkpoint validation between phases (the homotopy gates from T3).
+
+\vspace{0.1cm}
+\footnotesize\textit{Foreshadow for T5: parallel reviewers are parallel \emph{executionally}, not epistemically --- they read the same project files you wrote.}
+\end{frame}
+
+\begin{frame}{Orchestration at Research Scale}
+\textbf{The HA-Ramsey lesson list ends with a management skill: to benefit the most, you need four things.}
+
+\vspace{0.15cm}
+
+\begin{enumerate}
+    \item \textbf{A good seed} --- T3's criteria: works, documented, modular, points somewhere
+    \item \textbf{A clear vision} --- the final product and the milestone ladder to it
+    \item \textbf{Good judgment} --- the quality gates only an economist can sign
+    \item \textbf{Orchestration} --- run \emph{different sessions and agents on different layers}, then integrate
+\end{enumerate}
+
+\vspace{0.15cm}
+
+\textbf{What orchestration looked like in practice:}
+\begin{itemize}
+    \item Parallel sessions for formalization (TeX), implementation (PyTorch), auditing (code-vs-doc), sweeps, and write-up --- all feeding one preserved package
+    \item 32+ configuration sweeps run and summarized by agents; the economist read summaries and decided at the milestones --- the job is \emph{integration}: the PM chain on a real paper
+\end{itemize}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Source: HA-Ramsey case-study package (Lec10 T8).}}
+\end{frame}
+
+%===========================================================
+\section{Remote and HPC}
+%===========================================================
+
+\sectiondivider{Remote and HPC}{When the laptop is no longer the right host}
+
+\begin{frame}{Remote/HPC: Move the Agent to the Compute}
+\textbf{For heavy workloads the agent should run where the data, modules, and GPUs already are.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    local/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners,
+                  minimum width=3.2cm, minimum height=1.5cm,
+                  text width=3.0cm, align=center, font=\footnotesize},
+    remote/.style={rectangle, draw=orange!70, fill=orange!10, rounded corners,
+                   minimum width=3.6cm, minimum height=1.5cm,
+                   text width=3.4cm, align=center, font=\footnotesize},
+    compute/.style={rectangle, draw=green!50!black, fill=green!8, rounded corners,
+                    minimum width=3.0cm, minimum height=1.0cm,
+                    text width=2.8cm, align=center, font=\scriptsize},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+    \node[local] (mac) {\textbf{Laptop (you)}\\editor / terminal front end};
+    \node[remote, right=1.3cm of mac] (login) {\textbf{Cluster login node}\\agent runs here\\reads/edits code, submits jobs};
+    \node[compute, below=0.7cm of login] (cn) {\textbf{Compute nodes}\\MPI / GPU / long simulations};
+
+    \draw[arr] (mac) -- node[above,font=\tiny]{SSH / VS Code remote} (login);
+    \draw[arr] (login) -- node[right,font=\tiny]{\texttt{sbatch}, \texttt{srun}} (cn);
+    \draw[arr] (cn) -- ++(2.0,0) -- ++(0,1.6) -- (login.east);
+    \node[font=\tiny, gray!70, right=0.05cm of cn, xshift=2.1cm, yshift=0.8cm] {logs, results};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.15cm}
+
+\begin{itemize}
+    \item With a local agent, cluster files must be copied back and forth --- easy for toy code, fragile for research
+    \item With a remote agent, project files stay in the remote worktree; your laptop is only the front end
+\end{itemize}
+
+\vspace{0.05cm}
+\textbf{Rule:} if the data, modules, GPUs, and job logs live on the cluster, install the agent on the cluster.
+\end{frame}
+
+\begin{frame}{Login Node vs.\ Compute Node: The Hard Boundary}
+\textbf{What the agent can do on a login node:}
+\begin{itemize}
+    \item Read/edit code, specs, context files, and job scripts
+    \item Run tiny smoke tests: import checks, unit tests, \texttt{--dry-run}, small-grid V0
+    \item Submit jobs, monitor logs, parse errors, and revise scripts
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{What must go through the scheduler:}
+\begin{itemize}
+    \item MPI jobs, GPU training, large simulations, long calibrations
+    \item Anything that consumes many cores, much memory, or more than a few minutes
+\end{itemize}
+
+\bigskip
+\begin{center}
+\textbf{Research rule:} the agent may orchestrate HPC work; it should not turn the login node into a workstation.
+\end{center}
+\end{frame}
+
+\begin{frame}{Bridge: Management Assumes Trust --- Verify It}
+\textbf{You now delegate through files and a sub-agent team. Delegation works only if you can audit what was actually done --- and know when to distrust the polish.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Act 4 gave you the management system: goods, gates, assignment, cross-verification, and the instruments that encode them
+    \item The final question: \emph{``what can go wrong, and what is my job?''}
+    \item Act 5 answers with three moves: \textbf{trace} what the agent did, catalog the \textbf{failure modes} the harness cannot prevent, and confront the \textbf{Context Dilemma} --- the same context that improves the answer also pulls it toward you
+\end{itemize}
+
+\vspace{0.3cm}
+\footnotesize\textit{Arc: T1 Framing $\to$ T2 Under the Hood $\to$ T3 Homotopy $\to$ \textbf{T4 Project Org} $\to$ T5 Mistakes/Context $\to$ T6 Wrap.}
+\end{frame}
+
+\end{document}

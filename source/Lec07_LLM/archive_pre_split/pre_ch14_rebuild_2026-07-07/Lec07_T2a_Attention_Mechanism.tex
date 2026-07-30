@@ -1,0 +1,537 @@
+%% FullCourse_10Lecs -- Lecture 7, Topic 7.2a: Transformer High-Level + Self-Attention
+%% Source: ./archive_pre_split/Lec07_LLM.tex (sections 4-5)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module3_LLM_Text/M3_T2a_Attention_Mechanism.tex
+%%         (RoPE/ALiBi positional encoding additions)
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.2a: Transformer Overview and the Self-Attention Mechanism}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 7.2a Agenda}
+\begin{enumerate}
+  \item \textbf{Transformer High-Level} --- encoder/decoder, Vaswani 2017 motivation
+  \medskip
+  \item \textbf{Self-Attention Deep Dive} --- Q/K/V, multi-head, positional encoding (sinusoidal $\to$ RoPE/ALiBi)
+\end{enumerate}
+
+\bigskip
+\footnotesize\textit{Arc: T1a Why$+$Tokens $\to$ T1b Embeddings $\to$ T2a Attention $\to$ T2b Transformer $\to$ T3a Training $\to$ T3b Limits $\to$ T4 Applications.}
+\end{frame}
+
+%=============================================================================
+\section{Transformer High-Level}
+
+\begin{frame}{How the Transformer Works in Plain Language}
+\begin{itemize}
+\item Consider the sentence: \textit{``The Fed raised rates to combat inflation.''}
+
+\medskip
+\item When you read the word \textbf{\textit{rates}}, you instinctively ask: \emph{``rates of what? raised by whom? why?''} --- your eye jumps back to \textit{Fed} (subject) and forward to \textit{inflation} (motivation).
+
+\medskip
+\item \textbf{A Transformer does exactly this, for every token simultaneously:}
+\begin{enumerate}
+    \item Every token asks: \emph{``which other tokens are most relevant to understanding me?''}
+    \item Each token collects a weighted blend of information from every other token in the sequence
+    \item All positions are processed in \textbf{parallel} --- not one-by-one as in an RNN
+\end{enumerate}
+
+\medskip
+\item Repeat this ``everyone looks at everyone'' operation $L$ times (e.g.\ $L=96$ in GPT-3) with different learned weights, and the model builds deeply contextualized representations.
+
+\medskip
+\item \textbf{Engineering name for this operation:} scaled dot-product self-attention. The next slides unpack the five steps in detail.
+
+\medskip
+\item \textbf{Contrast with Word2Vec / GloVe.} Those models produced \emph{one vector per word type}, independent of context --- \emph{bank} in ``river bank'' and \emph{bank} in ``central bank'' share the same $\mathbf{u}$. A Transformer produces \emph{one vector per token occurrence}, computed from its neighbors --- the two \emph{bank}s end up at different points in $\mathbb{R}^{d}$. \textbf{Static $\to$ contextual} is the single conceptual jump.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Transformer as a Function}
+\begin{itemize}
+\item A Transformer is a function
+\[
+   \mathcal{T}\colon \bigl(\mathbb{R}^{d}\bigr)^{n} \;\longrightarrow\; \bigl(\mathbb{R}^{d}\bigr)^{n},
+   \quad \bigl[e^{(1)}, \ldots, e^{(n)}\bigr] \mapsto \bigl[e'^{(1)}, \ldots, e'^{(n)}\bigr]
+\]
+mapping $n$ input vectors to $n$ output vectors of the same dimension. Inputs are token embeddings plus positional encodings; outputs are \emph{contextualized} embeddings.
+
+\medskip
+\item \textbf{What ``enriched'' means.} Each $e'^{(i)} \in \mathbb{R}^{d}$ encodes at once (a) the identity of token $t^{(i)}$, (b) its grammatical/semantic role in \emph{this} sequence, (c) a weighted blend of every other token's contribution (causally masked in autoregressive models).
+
+\medskip
+\item \textbf{Important:} these are the Transformer's direct output --- an \emph{intermediate representation}, \textbf{not the final answer}. Inside: $L$ stacked layers, each containing self-attention and a feed-forward network.
+
+\medskip
+\item \textbf{Turning embeddings into task output.} A small \emph{task head} sits on top:
+\begin{itemize}
+    \item Generation: project $e'^{(n)}$ onto the vocabulary $\to$ softmax $\to$ sample a token (Part VII).
+    \item Classification: project $e'^{(\text{[CLS]})}$ onto class labels $\to$ softmax $\to$ pick a class.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Positional Encodings: Why They Are Needed}
+\begin{itemize}
+\item \textbf{Problem:} self-attention is \emph{permutation-equivariant} in its inputs. The tokens $\{\text{\emph{The}}, \text{\emph{Fed}}, \text{\emph{raised}}, \text{\emph{rates}}\}$ give the same internal state whether we read ``\emph{The Fed raised rates}'' or the scrambled ``\emph{Rates raised the Fed}'' --- yet the economic meaning is opposite (agent and patient are reversed). We must inject position.
+
+\medskip
+\item \textbf{Solution:} add a position vector $p(i)$ to each token embedding before the first layer:
+\[
+   e^{(i)} \;=\; \mathcal{E}\bigl(t^{(i)}\bigr) \;+\; p(i).
+\]
+
+\medskip
+\item Three families of position encodings dominate practice. The choice matters most for \emph{long contexts} and \emph{length extrapolation}.
+
+\medskip
+\item \textbf{Take-away:} a Transformer must be \emph{told} where each token is. The mechanism is simple but indispensable.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Sinusoidal, Learned, and Rotary (RoPE)}
+\begin{itemize}
+\item \textbf{Sinusoidal} (Vaswani et al., 2017) --- fixed, no parameters:
+\[
+   \mathrm{PE}(pos, 2i) = \sin\!\bigl(pos\,/\,10000^{2i/d}\bigr), \quad
+   \mathrm{PE}(pos, 2i{+}1) = \cos\!\bigl(pos\,/\,10000^{2i/d}\bigr).
+\]
+Multiple frequencies $\Rightarrow$ relative offsets become linear functions; theoretically extrapolates beyond training length.
+
+\medskip
+\item \textbf{Learned} (BERT, original GPT) --- positions $1, \ldots, n_{\max}$ each get a learnable vector. Simple; \emph{cannot} extrapolate past $n_{\max}$.
+
+\medskip
+\item \textbf{Rotary (RoPE)} --- modern default in LLaMA, GPT-NeoX, Qwen, Mistral. Apply a position-dependent \emph{rotation matrix} to $Q$ and $K$:
+\[
+   \langle R_{\theta_{i}} Q_i,\, R_{\theta_{j}} K_j\rangle \;=\; f(Q_i, K_j,\; i - j).
+\]
+Position information is baked into attention scores and depends only on \emph{relative} offset $i{-}j$ --- excellent length extrapolation.
+
+\medskip
+\item \textbf{ALiBi} (a close cousin) adds a linear distance penalty directly to attention scores; very simple, strong long-context behavior.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Position Encodings: Trade-Off Table}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{l c c c c}
+\toprule
+\textbf{Scheme} & \textbf{Params} & \textbf{Where applied} & \textbf{Extrapolates?} & \textbf{Modern use} \\
+\midrule
+Sinusoidal       & 0       & input embedding & yes (in theory) & rare today \\
+Learned absolute & $n_{\max}\!\cdot\! d$ & input embedding & no & BERT, early GPT \\
+RoPE             & 0       & inside $Q$, $K$ & yes (with scaling) & LLaMA, Qwen, Mistral \\
+ALiBi            & $H$     & attention scores & yes & some long-context models \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item \textbf{Take-away:} a Transformer must be \emph{told} where each token is. Modern LLMs prefer \emph{relative} schemes (RoPE / ALiBi) because they handle 32k+ context windows gracefully.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From Output Embeddings to the Next Token}
+\begin{itemize}
+\item For autoregressive generation we focus on the \emph{last} output vector $e'^{(n)}$.
+
+\medskip
+\item Project it onto the vocabulary with a linear layer:
+\[
+   \text{logits} \;=\; W_{\text{vocab}}\, e'^{(n)} \;+\; b_{\text{vocab}}, \qquad W_{\text{vocab}} \in \mathbb{R}^{M \times d}.
+\]
+
+\medskip
+\item Convert logits to probabilities with softmax:
+\[
+   P\bigl(t^{(n+1)} = w \mid t^{(1)}, \ldots, t^{(n)}\bigr) \;=\; \frac{\exp(\text{logits}_{w})}{\sum_{j} \exp(\text{logits}_{j})}.
+\]
+
+\medskip
+\item \textbf{Sampling strategies:} greedy, top-$k$, top-$p$ (nucleus), temperature scaling. (More on this in Part VII.)
+
+\medskip
+\item Append the chosen token to the context and repeat. \textbf{That} is how an LLM ``generates text''.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Inside a Layer (Preview)}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\footnotesize
+Each Transformer layer has four steps, each with a distinct job:
+\medskip
+\begin{itemize}
+    \item \textbf{Self-attention} --- \emph{gathers context}: every token asks ``who else in this sentence tells me what I mean?'' and collects a weighted blend of their values.
+    \medskip
+    \item \textbf{Residual + LayerNorm} --- \emph{safety net}: the original vector is added back (so attention can only \emph{add} information, never destroy it) and then normalized so deep stacks don't blow up.
+    \medskip
+    \item \textbf{Feed-forward (MLP)} --- \emph{per-token transformation}: each token's vector is passed through a two-layer non-linear network; this is where most of the model's memorized knowledge lives.
+    \medskip
+    \item \textbf{Residual + LayerNorm} again --- the same safety net after the MLP step.
+\end{itemize}
+\medskip
+Stack $L$ such layers; the same shape $(\mathbb{R}^d)^n$ flows through each one.
+
+\column{0.42\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{transformer-diagram.png}
+\end{center}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Real LLM Scale}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l c c c c}
+\toprule
+\textbf{Quantity} & \textbf{Symbol} & \textbf{GPT-2} & \textbf{GPT-3} & \textbf{Modern (2024--26)} \\
+\midrule
+Layers & $L$ & 12--48 & 96 & 60--120 \\
+Hidden dim & $d$ & 768--1600 & 12288 & 4096--16384 \\
+Context length & $n$ & 1024 & 2048 & $32{\rm k}$--$1{\rm M}$ \\
+Vocabulary & $M$ & 50k & 50k & 50k--256k \\
+Parameters & --- & 0.1--1.5B & 175B & 70B--$>$1T \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item \textbf{Modern open-weight examples (2024--2026):} LLaMA-3 (8B, 70B, 405B), DeepSeek-V3 (671B MoE), Qwen-2.5, Mistral.
+\item \textbf{Modern closed examples:} GPT-4/4o, Claude 3/4, Gemini 1.5/2 (sizes undisclosed).
+\item All share the same basic architecture; differences are scale, training data, and tuning.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Self-Attention Deep Dive}
+
+\begin{frame}{Self-Attention: The Key Idea}
+\begin{itemize}
+\item For each position $i$ in the sequence, ask: \emph{``which other positions are most relevant to position $i$?''}
+
+\medskip
+\item Compute a set of weights $\alpha_{ij}$ (with $\sum_j \alpha_{ij}=1$) and form a new representation as a \emph{weighted sum} of all positions.
+
+\medskip
+\item \textbf{Crucial properties:}
+\begin{itemize}
+    \item Every token can attend to every other token in one step (no recurrence)
+    \item Weights are computed dynamically from the input, not fixed
+    \item Operation is parallelizable across positions $\Rightarrow$ trains efficiently on GPUs
+\end{itemize}
+
+\medskip
+\item This single operation replaces a tower of recurrent steps and is the central piece that made the Transformer work.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 1 --- Project to Q, K, V}
+\begin{itemize}
+\item For each input embedding $e^{(i)} \in \mathbb{R}^{d}$, compute three projections:
+\begin{align*}
+   Q_{i} &\;=\; W_{Q}\, e^{(i)} & \text{(query)}\\
+   K_{i} &\;=\; W_{K}\, e^{(i)} & \text{(key)}\\
+   V_{i} &\;=\; W_{V}\, e^{(i)} & \text{(value)}
+\end{align*}
+where $W_{Q}, W_{K}, W_{V} \in \mathbb{R}^{k \times d}$ are learned matrices and typically $k \le d$.
+
+\medskip
+\item \textbf{Mnemonic} (information retrieval):
+\begin{itemize}
+    \item $Q_i$ is the \emph{question} that token $i$ asks: ``what context do I need?''
+    \item $K_j$ is the \emph{description} that token $j$ advertises: ``here's what I am about''
+    \item $V_j$ is the \emph{actual content} that $j$ contributes if matched
+\end{itemize}
+
+\medskip
+\item \textbf{What $W_{Q}, W_{K}, W_{V}$ are trained to achieve:} shape the projections so that the dot product $\langle Q_{i}, K_{j}\rangle$ is high when $V_{j}$'s content is useful to what the task needs at position $i$, and low otherwise. The model discovers which pairings matter from the loss; it is never told in advance.
+
+\medskip
+\item \textbf{Why three separate projections?} Separating roles enables \emph{asymmetric} attention: \textit{rates} can ask a question ($Q$) that matches \textit{inflation}'s advertisement ($K$) without \textit{inflation} having to ask the same question. The next slide shows what breaks if we drop or tie any of $(Q, K, V)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q/K/V at a Glance --- Three Roles, One Token}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  role/.style={draw, rounded corners=1.5pt, minimum width=36mm, minimum height=14mm, align=center},
+  qbox/.style={role, fill=blue!12},
+  kbox/.style={role, fill=orange!18},
+  vbox/.style={role, fill=green!18},
+  tok/.style={draw, rounded corners=0.7pt, minimum width=18mm, minimum height=5mm, fill=gray!12},
+  arr/.style={-{Latex[length=1.6mm]}, thick}
+]
+% Token of interest
+\node[tok] (int) at (-5,1.5) {token: \emph{interest}};
+
+% Three role boxes
+\node[qbox] (Q) at (0, 2.6) {\textbf{Query} $Q_i$\\\emph{asks:} ``what context do I need?''};
+\node[kbox] (K) at (0, 0.0) {\textbf{Key} $K_j$\\\emph{advertises:} ``I am about $X$.''};
+\node[vbox] (V) at (0,-2.6) {\textbf{Value} $V_j$\\\emph{delivers:} the $X$-content.};
+
+% Other tokens
+\node[tok] (rates) at (5, 1.5) {token: \emph{rates}};
+\node[tok] (infl)  at (5,-1.0) {token: \emph{inflation}};
+
+% Q comes from interest
+\draw[arr] (int.east) -- node[above, font=\tiny]{$W_Q$} (Q.west);
+% K, V come from other tokens
+\draw[arr] (rates.west) -- node[above, font=\tiny]{$W_K$} (K.east);
+\draw[arr] (infl.west)  -- node[below, font=\tiny]{$W_V$} (V.east);
+
+% Score / weight arrows
+\draw[arr, dashed, blue!60!black] (Q.south) to[bend left=30] node[right, font=\tiny]{$\alpha_{\text{rates}}=0.50$} (K.north);
+\draw[arr, dashed, blue!60!black] (K.south) to[bend left=30] node[right, font=\tiny]{$\alpha_{\text{infl}}=0.40$} (V.north);
+\end{tikzpicture}
+
+\medskip
+\footnotesize
+\textbf{Three roles, kept separate.} \emph{Query} ($Q_i$) is the token's request; \emph{Key} ($K_j$) is each candidate's advertisement; \emph{Value} ($V_j$) is what each candidate delivers if matched. Asymmetry matters: \emph{interest} can query \emph{rates} without \emph{rates} querying back. The matrices $W_Q, W_K, W_V$ \emph{learn} to make these projections shape attention to the loss --- nobody hand-codes ``attend to rates.''
+\end{frame}
+
+\begin{frame}{Step 2 --- Scaled Dot-Product Scores}
+\begin{itemize}
+\item For each pair $(i, j)$, measure the compatibility between query $Q_i$ and key $K_j$ by their dot product, scaled:
+\[
+   s_{j}^{(i)} \;=\; \frac{\langle Q_{i},\, K_{j} \rangle}{\sqrt{k}}.
+\]
+
+\medskip
+\item \textbf{Why divide by $\sqrt{k}$?} As the dimension $k$ grows, dot products tend to grow too, pushing softmax into saturation (one term dominates, gradients vanish). Scaling by $\sqrt{k}$ keeps the variance of $s_{j}^{(i)}$ around 1.
+
+\medskip
+\item \textbf{Search-engine analogy:}
+\begin{itemize}
+    \item $Q_i$ is your search query
+    \item $\{K_j\}$ are document tags / metadata
+    \item Scores $s_j^{(i)}$ rank tags by relevance to the query
+    \item Top-ranked tags will let us read the corresponding ``documents'' $V_j$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 3 --- Softmax $\rightarrow$ Attention Weights}
+\begin{itemize}
+\item Convert scores into a probability distribution over positions:
+\[
+   \alpha_{j}^{(i)} \;=\; \frac{\exp\bigl(s_{j}^{(i)}\bigr)}{\sum_{r=1}^{n}\exp\bigl(s_{r}^{(i)}\bigr)}.
+\]
+
+\medskip
+\item Properties:
+\begin{itemize}
+    \item $\alpha_{j}^{(i)} \ge 0$ and $\sum_{j}\alpha_{j}^{(i)} = 1$
+    \item Concentrated weights $\Rightarrow$ ``hard'' attention to a few positions
+    \item Diffuse weights $\Rightarrow$ ``soft'' attention spread across many
+\end{itemize}
+
+\medskip
+\item \textbf{Causal masking} (autoregressive models): when predicting position $i+1$, set $s_{j}^{(i)} = -\infty$ for $j > i$ before the softmax. This prevents the model from peeking at the future during training.
+
+\medskip
+\item \textbf{Encoder models} (BERT) use bidirectional attention: every token sees every other.
+
+\medskip
+\item \textbf{Why softmax?} We want the output to be a \emph{convex combination} of value vectors --- weights that sum to 1, all non-negative. Softmax converts any real-valued score vector into exactly such a probability distribution, enabling an interpretable weighted average of content across the sequence.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 4 --- Weighted Sum of Values}
+\begin{itemize}
+\item Given the attention weights $\alpha_{j}^{(i)}$, the attention output for position $i$ is the weighted sum of all value vectors:
+\[
+   \text{AttnVec}_{i} \;=\; \sum_{j=1}^{n} \alpha_{j}^{(i)}\, V_{j} \;\in\; \mathbb{R}^{k}.
+\]
+
+\medskip
+\item \textbf{Interpretation:} token $i$ ``reads'' content from all positions in the sequence, but pays most attention to those whose keys best match its query.
+
+\medskip
+\item Long-range, short-range, and same-position interactions all happen in the same step --- contrast with RNNs where information has to propagate through many time steps.
+
+\medskip
+\item Note: $V_j$ is what is being passed around. $K_j$ only decides \emph{how much} to pass; the content delivered is $V_j$.
+
+\medskip
+\item \textbf{Why a weighted sum rather than a hard lookup?} Instead of selecting a single ``most similar'' token, the model retrieves a \emph{blend}: for \textit{interest} in a monetary-policy sentence, it mixes $V_{\text{rates}}$, $V_{\text{inflation}}$, and $V_{\text{raised}}$ into one vector that reflects all three contexts simultaneously --- richer than any single lookup could provide.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Step 5 --- Project Back to Dimension $d$}
+\begin{itemize}
+\item The attention output lives in $\mathbb{R}^{k}$, but we need a vector in $\mathbb{R}^{d}$ to feed the next layer. Project back with a learned matrix $W_{O} \in \mathbb{R}^{d \times k}$:
+\[
+   \tilde{e}^{(i)} \;=\; W_{O}\,\text{AttnVec}_{i}.
+\]
+
+\medskip
+\item This gives the contextualized representation of token $i$ \emph{after} self-attention.
+
+\medskip
+\item \textbf{Why project back to $\mathbb{R}^{d}$?} In multi-head attention each head operates in a smaller subspace $\mathbb{R}^{k}$ (with $k=d/H$) to keep compute manageable. Projecting back with $W_O$ after concatenating heads restores the common dimension $d$, so the result flows into the next layer without any shape change.
+
+\medskip
+\item \textbf{Five-step recap:}
+\begin{enumerate}
+    \item Project: $Q_i, K_i, V_i$
+    \item Score: $s_{j}^{(i)} = \langle Q_i, K_j\rangle / \sqrt{k}$
+    \item Softmax: $\alpha_{j}^{(i)}$
+    \item Weighted sum: $\text{AttnVec}_i = \sum_j \alpha_{j}^{(i)} V_j$
+    \item Output projection: $\tilde{e}^{(i)} = W_O\, \text{AttnVec}_i$
+\end{enumerate}
+
+\medskip
+\item All matrices ($W_Q, W_K, W_V, W_O$) are learned by backpropagation from a task loss.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Worked Example --- Part 1}
+\small
+\textbf{Sentence:} ``The central bank raised interest rates amid rising inflation.''
+
+\smallskip
+\textbf{Tokenization} (9 word tokens, numbered left to right):
+\[
+\underbrace{\text{The}}_{1}\;\underbrace{\text{central}}_{2}\;\underbrace{\text{bank}}_{3}\;\underbrace{\text{raised}}_{4}\;\underbrace{\text{interest}}_{5}\;\underbrace{\text{rates}}_{6}\;\underbrace{\text{amid}}_{7}\;\underbrace{\text{rising}}_{8}\;\underbrace{\text{inflation}}_{9}
+\]
+
+\smallskip
+\textbf{Goal:} produce $e'^{(5)}$, the contextualized vector for \emph{interest} --- one that encodes how the word is used \emph{in this sentence} (the interest of monetary-policy rates, not ``curiosity'' or ``financial stake'').
+
+\smallskip
+\begin{itemize}
+\item \textbf{Attention score} $s_{j}^{(5)} = \langle Q_{5}, K_{j}\rangle / \sqrt{k}$ measures how much \emph{interest} should listen to token $j$. Suppose, after scaling, the model finds:
+\[
+\begin{array}{l|c}
+   \text{Token } j & s_{j}^{(5)} \\
+   \hline
+   \text{rates}\,(j=6) & 2.3 \\
+   \text{inflation}\,(j=9) & 1.9 \\
+   \text{raised}\,(j=4) & 1.1 \\
+   \text{bank}\,(j=3) & 0.5 \\
+   \text{the}\,(j=1) & -0.2 \\
+\end{array}
+\]
+Intuitively: \emph{interest} is most strongly tied to \emph{rates} and \emph{inflation} --- the words that fix its meaning here.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Worked Example --- Part 2}
+\begin{itemize}
+\item \textbf{Softmax $\to$ attention weights.} $\alpha_{j}^{(5)}$ is the \emph{fraction} of attention \emph{interest} pays to token $j$ --- a probability, with $\sum_{j}\alpha_{j}^{(5)} = 1$:
+\[
+   \alpha_{6}^{(5)} \;\approx\; 0.50, \qquad
+   \alpha_{9}^{(5)} \;\approx\; 0.40, \qquad
+   \alpha_{4}^{(5)} \;\approx\; 0.05, \qquad
+   \ldots
+\]
+50\,\% of the attention goes to \emph{rates}, 40\,\% to \emph{inflation}, a sliver to everything else.
+
+\medskip
+\item \textbf{Weighted sum of value vectors} (what the token actually ``reads''):
+\[
+   \text{AttnVec}_{5} \;\approx\; 0.50\,V_{6} \;+\; 0.40\,V_{9} \;+\; 0.05\,V_{4} \;+\; \ldots
+\]
+
+\medskip
+\item \textbf{Project back:} $\tilde{e}^{(5)} = W_{O}\,\text{AttnVec}_{5}$.
+
+\medskip
+\item \textbf{Result:} $\tilde{e}^{(5)}$ is a vector in $\mathbb{R}^{d}$ that represents \emph{``interest, in a context dominated by rates and inflation''} --- exactly the meaning we want for monetary-policy text.
+
+\medskip
+\item The same computation runs in parallel for every position $i$, producing $\tilde{e}^{(1)}, \ldots, \tilde{e}^{(9)}$ --- every token gets its own context-aware vector in one step.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{How $Q$, $K$, $V$ Are Learned}
+\begin{itemize}
+\item \textbf{What is trainable (the ``controls'' $\theta$):} in every layer, $W_{Q}, W_{K}, W_{V}, W_{O}$, plus the FFN weights $W_{1}, W_{2}, b_{1}, b_{2}$, LayerNorm parameters, the token embedding matrix $\mathcal{E}$, and the output head $W_{\text{vocab}}$. All are initialized randomly and updated by gradient descent on a \textbf{single global loss}.
+
+\medskip
+\item \textbf{Notation:} $t^{(i)}$ is the $i$-th token of a training sequence $s$. The sum $\sum_{s}\sum_{i}$ runs over every position $i$ in every sequence $s$ in the corpus.
+
+\medskip
+\item \textbf{Common training objectives:}
+\begin{itemize}
+    \item \textbf{Autoregressive LM} (GPT-style):
+    \[
+       \mathcal{L}(\theta) \;=\; -\sum_{s}\sum_{i} \log P_{\theta}\bigl(t_{s}^{(i+1)} \mid t_{s}^{(1:i)}\bigr).
+    \]
+    \item \textbf{Masked LM} (BERT-style): hide tokens at random and predict them from bidirectional context.
+    \item \textbf{Classification fine-tuning:} cross-entropy on a sentence-level label.
+\end{itemize}
+
+\medskip
+\item \textbf{One loss, all parameters.} Backpropagation sends gradients through softmax, dot products, Q/K/V projections, residuals, LayerNorm, \emph{and the FFN} --- one backward pass updates every parameter together. There is no separate training signal for attention vs.\ the feed-forward block.
+
+\medskip
+\item Nothing tells the model ``attend to neighbors'' or ``ignore stopwords'' --- it discovers attention patterns from data.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multi-Head Attention}
+\begin{itemize}
+\item One $(Q, K, V)$ trio captures only one ``view'' of the sequence. \textbf{Multi-head attention} runs $H$ such trios in parallel and concatenates their outputs.
+
+\medskip
+\item Each head $h$ has its own projection matrices $W_{Q}^{(h)}, W_{K}^{(h)}, W_{V}^{(h)}$, all of dimension $k = d/H$.
+
+\medskip
+\item After running $H$ attention computations independently, concatenate and project:
+\[
+   \text{MultiHead}_{i} \;=\; W_{O}^{*}\,\Bigl[\,\text{AttnVec}_{i}^{(1)};\,\ldots;\,\text{AttnVec}_{i}^{(H)}\Bigr].
+\]
+
+\medskip
+\item \textbf{Do heads have different objectives?} \emph{No --- all $H$ heads share the same training loss} (e.g.\ next-token cross-entropy). What differs is their random initialization. Specialization is \textbf{emergent}: under one global loss, $H$ parallel feature detectors diversify because identical copies of the same head would be redundant.
+
+\medskip
+\item \textbf{Observed specializations in financial text:}
+\begin{itemize}
+    \item Head 1: monetary-policy relations (\emph{inflation} $\leftrightarrow$ \emph{interest})
+    \item Head 2: temporal phrases (\emph{Q1}, \emph{next month}, \emph{by year-end})
+    \item Head 3: hawkish vs.\ dovish stance markers
+\end{itemize}
+Nobody told the heads what to look for --- they were not assigned separate objectives.
+
+\medskip
+\item Total parameter cost is essentially the same as a single-head attention with the full dimension $d$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{T2a Wrap-Up: Attention as a Building Block}
+\begin{itemize}
+\item \textbf{What we have so far:} a single self-attention block that turns each token into a context-aware vector via $Q$, $K$, $V$ projections, scaled scores, softmax, and a weighted sum of values.
+
+\medskip
+\item \textbf{Three reusable ideas} (returning in every later topic):
+\begin{itemize}
+    \item \emph{Query-key matching} --- the same logic powers RAG retrieval (Lec08).
+    \item \emph{Asymmetric three-projection design} --- queries, keys, values stay distinct because their jobs differ; this asymmetry is what makes attention more expressive than a similarity lookup.
+    \item \emph{Soft, differentiable lookup} --- the engine behind LLM ``reasoning'' over context, including JSON tool calls in Lec09.
+\end{itemize}
+
+\medskip
+\item \textbf{Next: Topic 7.2b.} One attention block is not a Transformer. We add residuals, LayerNorm, a feed-forward network, and stack $L$ such layers --- and meet the Vaswani 2017 encoder/decoder diagram. Then a case study (Kim et al.\ 2024) applies the same machinery at the \emph{paragraph} level on 10-K filings.
+\end{itemize}
+\end{frame}
+
+\end{document}

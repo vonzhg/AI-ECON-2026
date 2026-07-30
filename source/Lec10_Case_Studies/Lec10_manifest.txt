@@ -1,0 +1,8 @@
+Lec10_T1_Framing.pdf
+Lec10_T2_Case1_PaperReview.pdf
+Lec10_T3_Case2_MEPS.pdf
+Lec10_T4_Case3_ESFellows.pdf
+Lec10_T5_Case4_Collaborator.pdf
+Lec10_T6a_Case5_Sprint_Setup.pdf
+Lec10_T6b_Case5_Sprint_Execution.pdf
+Lec10_T7_Synthesis_Appendix.pdf

@@ -1,0 +1,285 @@
+%% FullCourse_10Lecs -- Lecture 7, Act 1 (FRAME): Text as Economic Measurement
+%% NEW deck (ch14 rebuild, 2026-07-07), per Lec07_ch14_Rebuild_Plan_2026-07-07.md.
+%% Reused frames copied verbatim (with renumbered cross-references) from
+%%   archive_pre_split/pre_ch14_rebuild_2026-07-07/Lec07_T1a_Why_LLMs_Tokenization.tex
+%% New frames follow chapter14 (Book1) sec. 14.1: text-DGP spine, EPU/FOMC/PRisk
+%% case unit, feasibility window, China parallels.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds}
+
+\input{lec07_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.1: Text as Economic Measurement}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 7 in One Map}
+\LecSevenMap{1}
+\medskip
+\textit{\footnotesize Two case threads run through all five acts --- \textbf{Thread A: the EPU index} (Baker--Bloom--Davis 2016), the transparent dictionary baseline every method must beat; \textbf{Thread B: FOMC hawk--dove} (central-bank communication), the running example for embeddings, attention, and validation. Watch for them.}
+\end{frame}
+
+%=============================================================================
+\section{Text as Data}
+\sectiondivider{Text as Data}{Why language became an economic measurement problem}
+
+\begin{frame}{The Opening Hook: Reading Uncertainty out of Newspapers}
+\textbf{In 2016, three economists asked: can you \emph{read} policy uncertainty out of the newspaper?}
+\begin{itemize}
+\item Baker, Bloom \& Davis (2016, \emph{QJE}): scan 10 major US newspapers, month by month, and count articles containing \textbf{all three} of \{\texttt{economic}/\texttt{economy}\}, \textbf{and} \{\texttt{uncertain}/\texttt{uncertainty}\}, \textbf{and} one of \{\texttt{Congress}, \texttt{deficit}, \texttt{Federal Reserve}, \texttt{legislation}, \texttt{regulation}, \texttt{White House}\}.
+\item Scale by each paper's total output, standardize, average across papers, index to 100:
+\[
+   \mathrm{EPU}_\tau \;=\; 100 \times \frac{u_\tau}{\bar u}, \qquad
+   u_\tau \;=\; \frac{1}{10}\sum_{p=1}^{10}\frac{c_{p\tau}/N_{p\tau}}{\sigma_p}.
+\]
+{\scriptsize where $p=1,\dots,10$ indexes newspapers, $\tau$ the month; $c_{p\tau}$ = qualifying articles in paper $p$; $N_{p\tau}$ = paper $p$'s total articles (dividing removes size differences); $\sigma_p$ = std.\ dev.\ of paper $p$'s scaled series (so no one paper dominates); $u_\tau$ = 10-paper average; $\bar u$ = its sample mean, so $\times100$ sets the average to 100.}
+\item No statistical agency publishes ``policy uncertainty'' --- it is not directly observed anywhere. Yet in a VAR, EPU spikes precede investment and employment declines.
+\end{itemize}
+\smallskip
+\textbf{The move that matters:} unstructured language became a \emph{regression-ready variable} --- this act asks what that takes, and where it goes wrong. \textit{(Thread A begins.)}
+\end{frame}
+
+\begin{frame}{Text as Economic Data --- The Big Picture}
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\scriptsize},
+  src/.style={draw, rounded corners=1pt, minimum width=28mm, minimum height=6mm, fill=blue!12, align=center},
+  rep/.style={draw, rounded corners=1pt, minimum width=30mm, minimum height=6mm, fill=orange!18, align=center},
+  outcome/.style={draw, rounded corners=1pt, minimum width=30mm, minimum height=6mm, fill=green!18, align=center},
+  arr/.style={-{Latex[length=1.5mm]}, thick}
+]
+% Sources column
+\node[font=\small\bfseries] (h1) at (0,2.6) {Raw text sources};
+\node[src] (s1) at (0,1.8)  {FOMC minutes \& speeches};
+\node[src] (s2) at (0,0.9)  {SEC EDGAR 10-K, MD\&A};
+\node[src] (s3) at (0,0.0)  {News, earnings calls};
+\node[src] (s4) at (0,-0.9) {Patents, congressional records};
+
+% Representation column
+\node[font=\small\bfseries] (h2) at (5.5,2.6) {Representation};
+\node[rep] (r1) at (5.5,1.4) {Counts (TF-IDF, dictionaries)};
+\node[rep] (r2) at (5.5,0.5) {Static embeddings (W2V, GloVe)};
+\node[rep] (r3) at (5.5,-0.4) {Contextual (BERT, GPT, Claude)};
+
+% Outcome column
+\node[font=\small\bfseries] (h3) at (11,2.6) {Economic / business variables};
+\node[outcome] (o1) at (11,1.7) {Uncertainty / sentiment indices};
+\node[outcome] (o2) at (11,0.8) {Firm risk, exposure, similarity};
+\node[outcome] (o3) at (11,-0.1) {Stance, narrative shifts};
+\node[outcome] (o4) at (11,-1.0) {Forecasts / nowcasts};
+
+% Arrows source -> rep
+\foreach \s in {s1,s2,s3,s4}{ \draw[arr, gray!60] (\s.east) -- ($(r2.west)+(-0.1,0)$); }
+% Arrows rep -> outcome
+\foreach \r in {r1,r2,r3}{ \draw[arr, gray!60] (\r.east) -- ($(o2.west)+(-0.1,0)$); }
+\end{tikzpicture}
+
+\medskip
+{\footnotesize\textit{The lecture builds the middle column rung by rung: Act 2 counts $\to$ static embeddings, Act 3 contextual machinery, Act 4 how those models are trained --- and Act 5 turns the machinery into the right-hand column, with validation.}}
+\end{frame}
+
+\begin{frame}{Why Economists Care About LLMs}
+\begin{itemize}
+\item \textbf{Text as data} --- modern economic research increasingly leverages textual sources:
+\begin{itemize}
+    \item Corporate filings (10-K, 10-Q, MD\&A)
+    \item Central bank speeches, FOMC minutes, ECB statements
+    \item Earnings calls, analyst reports, regulatory filings
+    \item News, social media, congressional records
+\end{itemize}
+
+\medskip
+\item \textbf{Applications:}
+\begin{itemize}
+    \item Sentiment analysis for financial forecasting
+    \item Policy stance detection and uncertainty indices
+    \item New text-derived macroeconomic indicators
+    \item Summarization of long, technical documents
+\end{itemize}
+
+\medskip
+\item \textbf{Why LLMs in particular:}
+\begin{itemize}
+    \item Capture nuanced language and domain-specific jargon
+    \item Handle long-range context (sentences, paragraphs, whole documents)
+    \item Provide a unified architecture for many tasks
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Three Roles of Text in Economic Research}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{l p{4cm} p{6cm}}
+\toprule
+\textbf{Role} & \textbf{What text is} & \textbf{Example} \\
+\midrule
+Measurement tool & A way to construct previously unobserved variables & Baker--Bloom--Davis (2016) Economic Policy Uncertainty index from newspapers \\
+Behavioral outcome & A response variable revealing decisions or institutional change & Hansen, McMahon \& Prat (2018): how FOMC transparency reform changed committee speech \\
+Treatment variable & A quasi-experimental input affecting behavior & Central bank communication shocks and inflation expectations \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}{Why Now? The Feasibility Window}
+\textbf{Two curves crossed around 2017: the cost of handling text collapsed while model capability exploded.}
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, xscale=0.78, yscale=0.55]
+% feasible region
+\fill[green!8] (7.44,0) rectangle (12.4,6);
+\node[font=\tiny, green!45!black, align=center, text width=3.0cm] at (10.1,5.5)
+    {text measurement becomes\\ a routine research tool};
+% axes
+\draw[-{Latex[length=2mm]}, gray!60] (0,0) -- (13.0,0) node[below left, font=\tiny, black] {year};
+\draw[-{Latex[length=2mm]}, gray!60] (0,0) -- (0,6.2);
+\foreach \x/\yr in {0.6/2008, 4.4/2013, 7.44/2017, 9.72/2020, 12.0/2023} {
+    \draw[gray!45] (\x,0.07) -- (\x,-0.07);
+    \node[font=\tiny, gray!50!black, below] at (\x,-0.06) {\yr};
+}
+% cost curve (disk $/GB, log scale, stylized through real points)
+\draw[very thick, red!65] plot[smooth, tension=0.55] coordinates
+    {(0.6,5.5) (4.4,3.6) (7.44,2.6) (9.72,1.6) (12.0,1.0)};
+\node[font=\tiny, red!55!black, anchor=west] at (0.75,5.6) {$\approx\$0.30$/GB};
+\node[font=\tiny, red!55!black, anchor=west] at (10.3,1.1) {$\approx\$0.01$/GB};
+% capability curve (model parameters, log scale)
+\draw[very thick, blue!70] plot[smooth, tension=0.55] coordinates
+    {(0.6,0.55) (4.4,1.3) (7.44,2.5) (8.4,3.2) (9.72,4.7) (12.0,5.3)};
+% legend
+\draw[very thick, red!65] (1.0,2.6)--(1.55,2.6);
+\node[anchor=west, font=\tiny, red!55!black] at (1.6,2.6) {storage cost (\$/GB) $\downarrow$};
+\draw[very thick, blue!70] (1.0,2.05)--(1.55,2.05);
+\node[anchor=west, font=\tiny, blue!55!black] at (1.6,2.05) {model scale (parameters) $\uparrow$};
+% crossing threshold
+\draw[dashed, gray!55] (7.44,0) -- (7.44,2.5);
+% milestones
+\fill[blue!70] (4.4,1.3) circle (1.5pt);
+\node[font=\tiny, blue!55!black, below, align=center] at (4.4,1.12) {Word2Vec\\ 2013};
+\fill[blue!70] (7.44,2.5) circle (1.5pt);
+\node[font=\tiny, blue!55!black, align=center] at (6.35,3.25) {Transformer 2017\\ (65M params)};
+\fill[blue!70] (8.4,3.2) circle (1.5pt);
+\node[font=\tiny, blue!55!black, align=center] at (7.55,4.25) {BERT 2018\\ (340M)};
+\fill[blue!70] (9.72,4.7) circle (1.5pt);
+\node[font=\tiny, blue!55!black, anchor=west] at (9.95,4.5) {GPT-3 2020 (175B)};
+\end{tikzpicture}
+\end{center}
+{\footnotesize\textit{Both quantities on log scales; curves are stylized interpolations through the marked real data points. Storage costs after McCallum's disk-price series; model sizes from Vaswani et al.\ (2017), Devlin et al.\ (2018), Brown et al.\ (2020).}}
+\end{frame}
+
+%=============================================================================
+\section{The Spine}
+\sectiondivider{The Spine}{A data-generating process for text --- and the two hazards it creates}
+
+\begin{frame}{An Identification-First View of Text}
+\begin{itemize}
+\item \textbf{Engineering perspective first:} to a machine, a document is just a character string. But every string was \emph{produced} --- by a person, in a situation, for an audience. Before any econometrics, ask: what generated this string?
+
+\medskip
+\item \textbf{The data-generating process (DGP):}
+\[
+   x_i \;=\; g\bigl(s_i,\; a_i,\; c_i\bigr) \;+\; \varepsilon_i
+\]
+\begin{itemize}
+    \item $s_i$: the latent \textbf{economic state} we want to measure (policy stance, sentiment, firm risk)
+    \item $a_i$: the speaker's \textbf{strategic framing} --- audience management, spin, emphasis, tone chosen for effect
+    \item $c_i$: \textbf{institutional context} --- venue, legal disclosure requirements, format conventions
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters for a downstream regression} $y_i = \beta\,m(x_i) + \gamma z_i + u_i$: if the strategic framing $a_i$ is correlated with the regression error $u_i$, then the text feature $m(x_i)$ is \emph{endogenous} --- the familiar omitted-variable problem, now hidden inside the language.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Firms, Same Risk, Different Words}
+\textbf{The endogeneity hazard, made concrete.} Imagine two firms facing the \emph{same} objective political risk $s_i$.
+\medskip
+\begin{cautionbox}
+\begin{itemize}
+\item Firm A's management discloses risks proactively --- building a reputation for transparency.
+\item Firm B's management avoids politically sensitive topics --- afraid of spooking the market.
+\item Same $s_i$, different strategic framing $a_i$ $\;\Rightarrow\;$ different texts $x_i$ $\;\Rightarrow\;$ different measured risk $m(x_i)$.
+\end{itemize}
+\end{cautionbox}
+\medskip
+\begin{itemize}
+\item If the disclosure choice $a_i$ correlates with anything in $u_i$ (governance quality, investor base, financial health), $m(x_i)$ is \textbf{endogenous} --- before any fancy NLP even enters.
+\end{itemize}
+\smallskip
+\textit{\footnotesize Setting from Hassan, Hollander, van Lent \& Tahoun (2019, QJE).}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{EPU: The Validation Standard (Thread A)}
+\textbf{Why is a word-count index taken seriously? Because every step of it was audited.}
+\begin{itemize}
+\item \textbf{Human audit:} a trained team hand-coded 12{,}009 articles (1900--2012) under a 65-page guide; the six policy terms were selected from $\sim$32{,}000 candidate combinations to minimize false positives $+$ false negatives.
+\item \textbf{Machine vs.\ human:} the ``machine'' is the automated word-count index itself --- a program that flags every article matching the six-term rule and tallies the monthly counts, with no human judgment in the loop. Run over the same years the team hand-coded, it tracks the human-coded series at correlation 0.86 (quarterly, 1985--2012) and 0.93 (annual, 1900--2010); the gaps are uncorrelated with GDP growth.
+\item \textbf{Robustness:} dropping any one policy term barely moves the series; a 1{,}500-newspaper daily version correlates 0.85 with the 10-paper index.
+\item \textbf{And still --- the identification critique:} does EPU \emph{cause} downturns, or do downturns make journalists write ``uncertainty''? The VAR ordering (EPU first) is a maintained assumption, not an identification argument.
+\end{itemize}
+\smallskip
+\textit{\footnotesize Source: Baker, Bloom \& Davis (2016, QJE).}
+\end{frame}
+
+%=============================================================================
+\section{Preview: The Machine Ahead}
+\sectiondivider{Preview: The Machine Ahead}{One equation will power everything in Acts 2--4}
+
+\begin{frame}{A Brief History: RNN $\rightarrow$ Transformer $\rightarrow$ GPT}
+\begin{itemize}
+\item \textbf{2003:} Bengio et al. neural language model --- continuous word vectors
+\medskip
+\item \textbf{2013:} Mikolov et al. \emph{Word2Vec} --- dense word embeddings at scale
+\medskip
+\item \textbf{2014:} Pennington et al. \emph{GloVe} --- global co-occurrence matrices
+\medskip
+\item \textbf{2017:} Vaswani et al. \emph{``Attention Is All You Need''} --- the Transformer replaces RNNs/LSTMs
+\medskip
+\item \textbf{2018:} Devlin et al. \emph{BERT} (encoder); Radford et al. \emph{GPT} (decoder)
+\medskip
+\item \textbf{2020--2022:} GPT-3, instruction tuning, RLHF $\rightarrow$ ChatGPT moment
+\medskip
+\item \textbf{2023--2026:} GPT-4/5, Claude (3--4), Gemini, LLaMA-3, DeepSeek; long-context (100k--1M tokens), open-weights ecosystem, agentic systems
+\end{itemize}
+
+\medskip
+\textbf{Driver of the shift:} attention scales better than recurrence, both in compute (parallel) and in quality (long-range dependencies).
+\end{frame}
+
+\begin{frame}{The Autoregressive Principle}
+\begin{itemize}
+\item An LLM is fundamentally a \textbf{next-token predictor}:
+\[
+   p\bigl(t^{(n+1)} \mid t^{(1)}, t^{(2)}, \ldots, t^{(n)}\bigr).
+\]
+
+\medskip
+\item \textbf{Generation:} sample $t^{(n+1)}$ from this distribution, append to the context, and repeat.
+
+\medskip
+\item \textbf{What this single equation enables} (the full revisit comes at the end of Act 4, once pretraining and fine-tuning are on the table):
+\begin{itemize}
+    \item \textbf{Summarizing 10-K filings or FOMC minutes} --- prompt with document + instruction; the model predicts summary tokens one by one
+    \item \textbf{Generating narrative forecasts} conditional on macro state --- condition on data in the prompt; next tokens extend the narrative
+    \item \textbf{Producing scenario analyses in plain language} --- the scenario is the context; prediction fills in the implications
+    \item \textbf{Writing and debugging code} for empirical work --- same objective over a code corpus yields code completions
+\end{itemize}
+
+\medskip
+\item \textbf{Key insight:} ``everything is next-token prediction'' is mathematically tiny but pedagogically and practically enormous.
+\end{itemize}
+\end{frame}
+
+\end{document}

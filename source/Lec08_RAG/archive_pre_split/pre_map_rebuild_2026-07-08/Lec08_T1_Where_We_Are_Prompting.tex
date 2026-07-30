@@ -1,0 +1,450 @@
+%% FullCourse_10Lecs -- Lecture 8, Topic 8.1: Where We Are + Naive Prompting + Personal Wiki KB
+%% Source: ./archive_pre_split/Lec08_RAG.tex (sections 1-3)
+%% FullCourse-only content: Personal Wiki Knowledge Bases section (not in MiniCourse).
+%% Pass B (2026-05-17): diffed against MiniCourse M4_T1; FullCourse T1 already
+%%   expands MiniCourse's compact "Why paste fails" table into 4 detailed slides
+%%   (limits on context window, cost, latency, persistence). No new frames ported.
+
+\input{../shared_preamble.tex}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc, backgrounds, decorations.pathreplacing}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 8.1: Where We Are, Naive Prompting, and Personal Wiki KBs}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 8.1 Agenda}
+\begin{enumerate}
+  \item \textbf{Where We Are} --- recap of LLM limits
+  \medskip
+  \item \textbf{Naive Prompt Engineering Alone} --- limits without retrieval
+  \medskip
+  \item \textbf{Personal Wiki Knowledge Bases} --- the pre-formalism approach
+\end{enumerate}
+
+\medskip
+\textit{Arc: \textbf{T1 Prompting wall} $\to$ T2 Chunking \& embeddings $\to$ T3 Vector \& graph retrieval $\to$ T4a Augmented generation $\to$ T4b Demo, failures, agentic bridge}
+\end{frame}
+
+%=============================================================================
+\section{Where We Are}
+
+\begin{frame}{Recap: What an LLM Is (Lecture 7)}
+\begin{itemize}
+\item A \textbf{Large Language Model} is a neural network that maps a sequence of tokens to a probability distribution over the next token.
+
+\medskip
+\item \textbf{Pipeline:} Tokenization $\to$ Token embeddings $\to$ Transformer layers (attention + feed-forward) $\to$ Output distribution.
+
+\medskip
+\item \textbf{Knowledge is parametric:} Everything the model ``knows'' is encoded in its weights, frozen at the end of pretraining.
+
+\medskip
+\item \textbf{Implication:} The model has no memory beyond its weights and the current context window. Once training is over, its knowledge of the world is fixed in time.
+
+\medskip
+\item \textbf{Today's question:} How do we extend that knowledge \emph{at inference time}, without retraining?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What an LLM Knows vs.\ What It Can Know}
+\begin{itemize}
+\item Every LLM has a \textbf{knowledge cutoff}: the date when its training corpus stopped.
+\begin{itemize}
+    \item GPT-4 Turbo: April 2023
+    \item GPT-4o: October 2023
+    \item Claude 3.5 Sonnet: April 2024
+    \item Claude 4 Opus: early 2025
+\end{itemize}
+
+\medskip
+\item \textbf{Concrete problem:} Ask the model: \emph{``What did the FOMC decide at its December 2025 meeting?''}
+\begin{itemize}
+    \item A pre-2025 model has \emph{never seen} the December 2025 statement.
+    \item It will either refuse, or worse, \emph{hallucinate} a plausible but fictional answer.
+\end{itemize}
+
+\medskip
+\item \textbf{The economist's view:} Macro and finance research depends on the latest data. A model that can't read the December press release is not a research tool.
+
+\medskip
+\item \textbf{Even within the cutoff:} Private datasets (your own working papers, internal Fed memos, FOIA-released records) were never in the training corpus at all.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Three Pain Points for the Economist}
+\begin{itemize}
+\item \textbf{1. Stale knowledge.} Anything published after the cutoff is invisible. So is anything proprietary.
+
+\medskip
+\item \textbf{2. Hallucinated citations.} A vanilla LLM asked to ``cite five NBER papers on the slope of the Phillips curve'' will happily produce five plausible titles, plausible authors, and entirely fake DOIs. This is the most common failure mode in academic use.
+
+\medskip
+\item \textbf{3. No source attribution.} Even when the answer is correct, the model cannot tell you \emph{where} the claim came from. Academic research requires footnotes.
+
+\medskip
+\item \textbf{Bottom line:} For research-grade work we need a system that can (i) read documents the model never saw, (ii) refuse to invent facts, and (iii) tell us which document supplied each claim.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Ways to Add Knowledge}
+\begin{itemize}
+\item \textbf{Option A --- Fine-Tuning:} Re-train (some of) the model's weights on your new corpus.
+\begin{itemize}
+    \item Pros: knowledge becomes ``baked in,'' fast at inference.
+    \item Cons: expensive, fragile, hard to update, no source attribution, doesn't fix hallucination.
+\end{itemize}
+
+\medskip
+\item \textbf{Option B --- Retrieval (RAG):} Leave the model untouched. At query time, fetch the relevant text from an external store and \emph{paste it into the prompt}.
+\begin{itemize}
+    \item Pros: cheap, updatable in real time, gives source attribution, dramatically reduces hallucination.
+    \item Cons: more moving parts; quality depends on the retriever.
+\end{itemize}
+
+\medskip
+\item \textbf{Promise of this lecture:} By the end you will understand both options, know when to use each, and have seen the full RAG pipeline applied to FOMC and NBER corpora.
+
+\medskip
+\item \textbf{Detailed comparison:} Section VIII.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Naive Prompt Engineering Alone}
+
+\begin{frame}{Naive Prompt Engineering: A Tempting First Attempt}
+\textbf{Setup} (Lec.\ 7 T3a covered prompting itself --- zero-shot, few-shot, in-context learning). The naive RAG-less workflow goes one step further: paste the \emph{whole corpus} into the prompt and let the model read it directly.
+
+\medskip
+\textbf{Research question:} \emph{``How did the FOMC's framing of inflation expectations evolve from 2020 to 2025?''}
+
+\smallskip
+\begin{center}
+\begin{tikzpicture}[
+  font=\scriptsize,
+  doc/.style={draw=gray!50, fill=blue!8, minimum width=2.4cm, minimum height=0.32cm, inner sep=1pt},
+  q/.style={draw, fill=orange!20, minimum width=2.4cm, minimum height=0.4cm, inner sep=1pt}
+]
+  % stack of documents
+  \node[doc] (d1) at (0,4.6) {[2020-Jan minutes]};
+  \node[doc, below=0.02cm of d1] (d2) {[2020-Mar statement]};
+  \node[doc, below=0.02cm of d2] (d3) {[2020-Apr minutes]};
+  \node[doc, below=0.02cm of d3] (d4) {[2020-Jun minutes]};
+  \node[doc, below=0.02cm of d4] (d5) {\dots};
+  \node[doc, below=0.02cm of d5] (d6) {[2024-Dec minutes]};
+  \node[doc, below=0.02cm of d6] (d7) {[2025-Mar statement]};
+  \node[doc, below=0.02cm of d7] (d8) {[2025-Dec statement]};
+  \node[q, below=0.05cm of d8] (qq) {Question: how did framing evolve?};
+
+  % context window cap
+  \draw[red, very thick, dashed] (-1.6, 2.95) -- (1.6, 2.95);
+  \node[red, anchor=west, font=\scriptsize\bfseries] at (1.8, 2.95) {context window cap};
+  \node[red, anchor=west, font=\scriptsize] at (1.8, 2.65) {(everything below is \emph{dropped})};
+
+  % brace for "what fits"
+  \draw[decorate, decoration={brace, amplitude=4pt}] (-1.55, 4.75) -- (-1.55, 3.05);
+  \node[anchor=east, font=\scriptsize] at (-1.6, 3.9) {fits};
+  \draw[decorate, decoration={brace, amplitude=4pt, mirror}] (1.55, 2.85) -- (1.55, 0.55);
+  \node[anchor=west, font=\scriptsize, red!70!black] at (1.6, 1.7) {does not fit};
+
+  % "Even what fits suffers lost-in-the-middle"
+  \node[anchor=west, font=\scriptsize, gray] at (5.5, 4.5) {\textbf{Four reasons it still fails:}};
+  \node[anchor=west, font=\scriptsize] at (5.5, 4.0) {1. context window (red dashed line)};
+  \node[anchor=west, font=\scriptsize] at (5.5, 3.6) {2. cost --- pay every token, every query};
+  \node[anchor=west, font=\scriptsize] at (5.5, 3.2) {3. ``lost in the middle'' (Lec.\ 7 T3b)};
+  \node[anchor=west, font=\scriptsize] at (5.5, 2.8) {4. no persistence across sessions};
+\end{tikzpicture}
+\end{center}
+
+\vspace{-0.05cm}
+\textit{In principle the model has all the data it needs. In practice four hard walls block this approach --- we tour them next.}
+\end{frame}
+
+\begin{frame}{Limit \#1: The Context Window}
+\begin{itemize}
+\item Every LLM has a hard cap on how many tokens it can read at once --- the \textbf{context window}.
+\begin{itemize}
+    \item Claude Opus 4.8: 1{,}000{,}000 tokens (about 750{,}000 English words; 1M context is standard since Opus 4.6)
+    \item GPT-5.4 / GPT-5.5: ${\sim}$1{,}000{,}000 tokens (current OpenAI frontier)
+    \item GPT-4 Turbo: 128{,}000 tokens (legacy; not the current frontier)
+    \item Gemini 2.5 Pro: 1{,}000{,}000 tokens
+\end{itemize}
+\medskip
+\footnotesize\textit{Model facts current as of June 2026.}\normalsize
+
+\medskip
+\item \textbf{How big is the FOMC corpus?}
+\begin{itemize}
+    \item 8 meetings per year $\times$ statement ($\sim$1{,}000 tokens) + minutes ($\sim$15{,}000 tokens) + transcript ($\sim$100{,}000 tokens, released with 5-year lag)
+    \item Conservative estimate \emph{excluding} transcripts: $\sim$130{,}000 tokens \emph{per year}
+    \item Five years (2020--2024): $\sim$650{,}000 tokens
+\end{itemize}
+
+\medskip
+\item \textbf{Verdict:} Five years of FOMC text \emph{does not fit} in any model's context window. And we haven't even added press conferences, speeches, or Beige Books.
+
+\medskip
+\item \textbf{This is a hard wall, not a tuning parameter.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Limit \#2: Cost (Callback to Lec.\ 7 T3a)}
+\begin{itemize}
+\item Even when content fits, you pay for \emph{every input token, every query.} Lec.\ 7 T3a ``Tokens, Cost, and Reproducibility'' lists the per-token rates for the frontier models (Opus, GPT-4o, Gemini, local Llama proxy).
+
+\medskip
+\item \textbf{RAG-specific cost arithmetic.} Stuff 600K tokens of FOMC text into each query (input-token prices):
+\begin{itemize}
+    \item One query on Claude Opus: $0.6 \times \$5 = \$3.00$
+    \item One query on GPT-4o: $0.6 \times \$2.50 = \$1.50$
+    \item One thousand exploratory queries: \$3{,}000 / \$1{,}500
+\end{itemize}
+\smallskip
+{\footnotesize\textit{Claude Opus input price is \$5/M (output \$25/M) since Opus~4.5; model facts current as of June 2026.}}
+
+\medskip
+\item \textbf{You pay this every time}, even on a repeat question. There's no caching of expensive context across sessions.
+
+\medskip
+\item \textbf{For research:} prohibitive at the scale of a literature review or an empirical project. (RAG instead pays $O(N)$ embedding calls \emph{once} --- T4a develops the visual.)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Limit \#3: Latency and ``Lost in the Middle'' (Callback to Lec.\ 7 T3b)}
+\begin{itemize}
+\item \textbf{Latency.} Inference time grows roughly linearly (or worse) in input token count. A 600K-token query can take 30+ seconds before the first response token.
+
+\medskip
+\item \textbf{Quality degrades, too.} Lec.\ 7 T3b ``Lost in the Middle: Positional Saliency in Long Contexts'' established the mechanism --- under Liu et al.\ (2024, \emph{TACL}), recall on relevant context drops 20--30 pp.\ when the evidence sits in the middle of the prompt; the position--accuracy curve is U-shaped.
+
+\medskip
+\item \textbf{Implication here:} even if the December 2025 statement \emph{did} fit, concatenated between four years of prior minutes it would land in the middle and be systematically under-weighted.
+
+\medskip
+\item \textbf{Punchline for RAG motivation:} cramming everything into the prompt is not just expensive --- it actively \emph{hurts} answer quality. RAG must therefore both \emph{retrieve} and \emph{rank} chunks, not merely retrieve.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Limit \#4: No Scalability or Persistence}
+\begin{itemize}
+\item Naive prompt engineering treats every query as a \textbf{fresh start}.
+\begin{itemize}
+    \item No reuse of work across queries.
+    \item No incremental updates when the Fed releases new minutes next month.
+    \item No way to grow the corpus past the context window --- ever.
+\end{itemize}
+
+\medskip
+\item \textbf{Compare to a real research workflow:}
+\begin{itemize}
+    \item You collect documents \emph{once}.
+    \item You index them \emph{once}.
+    \item You ask many questions over time, paying only for what you actually retrieve.
+    \item When new documents arrive, you index them incrementally.
+\end{itemize}
+
+\medskip
+\item Naive prompt engineering supports \emph{none} of this. Every question is a brand-new copy-paste.
+
+\medskip
+\item \textbf{The pattern we need:} Separate the cost of \emph{ingesting documents} from the cost of \emph{asking questions}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Wall}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{5.5cm}|p{8cm}|}
+\hline
+\textbf{Naive prompt engineering can do} & \textbf{Research workflows actually need} \\
+\hline
+QA on a single short document & QA over millions of tokens of corpus \\
+\hline
+Tens of queries before cost bites & Thousands of queries over weeks \\
+\hline
+Whatever fits in the context window ($\sim$1M tokens) & Decades of FOMC + NBER + 10-K filings \\
+\hline
+Today's prompt only & Incremental updates as new docs arrive \\
+\hline
+``Trust me'' answers & Cited, source-attributed answers \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+\textbf{Conclusion:} Prompt engineering hits a hard wall on freshness, scale, latency, cost, and attribution. We need a fundamentally different architecture --- one that \textbf{separates indexing from querying}.
+
+\bigskip
+\centering\emph{This is what RAG does.}
+\end{frame}
+
+%=============================================================================
+\section{Before the Formalism: Personal Wiki Knowledge Bases}
+% FullCourse-only
+
+\begin{frame}{Before the Formalism: A Personal Wiki}
+\begin{itemize}
+\item Before we build the full RAG pipeline, consider a \textbf{simpler version} of the same idea that you can set up today.
+
+\medskip
+\item \textbf{Andrej Karpathy} (June 2025):
+\begin{quote}
+\small\itshape
+``I'm finding very useful recently: using LLMs to build personal knowledge bases for various topics of research interest. \textnormal{[\ldots]} A large fraction of my recent token throughput is going less into manipulating code, and more into \textbf{manipulating knowledge} (stored as markdown and images).''
+\end{quote}
+
+\medskip
+\item \textbf{The workflow is disarmingly simple:}
+\begin{enumerate}
+    \item Collect source documents (papers, articles, data) into a \texttt{raw/} directory.
+    \item Ask an LLM to \emph{compile} them into a \textbf{wiki} --- a directory of \texttt{.md} files with summaries, concept articles, and cross-links.
+    \item Query the wiki by asking the LLM questions; it reads the relevant articles and answers from them.
+\end{enumerate}
+
+\medskip
+\item \textbf{Why this matters for us:} This is the \emph{same core insight} behind RAG --- separating data ingestion from querying --- but without any of the formal machinery.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Wiki Pipeline}
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw, rounded corners=2pt, minimum width=2.0cm, minimum height=0.7cm, align=center, fill=VeryLightGray},
+  llm/.style={draw, rounded corners=2pt, minimum width=2.0cm, minimum height=0.7cm, align=center, fill=orange!10},
+  store/.style={draw, rounded corners=2pt, minimum width=2.0cm, minimum height=0.8cm, align=center, fill=blue!8},
+  arr/.style={-{Latex[length=2.2mm]}, thick},
+  darr/.style={-{Latex[length=2.2mm]}, thick, dashed, gray}
+]
+  % Build phase (top row)
+  \node[font=\footnotesize\bfseries] at (1.5, 2.3) {Build (once)};
+  \node[box] (docs) at (0, 1.4) {Source\\Docs};
+  \node[box] (raw) at (3, 1.4) {\texttt{raw/}};
+  \node[llm] (llm1) at (6, 1.4) {LLM\\``compiles''};
+
+  % Wiki (shared artifact)
+  \node[store] (wiki) at (9.5, 0.2) {Wiki\\(\texttt{.md})};
+
+  % Query phase (bottom row)
+  \node[font=\footnotesize\bfseries] at (1.5, -0.8) {Query (many times)};
+  \node[box] (q) at (0, -1.7) {Question};
+  \node[llm] (llm2) at (6, -1.7) {LLM\\reads wiki};
+  \node[box] (ans) at (9.5, -1.7) {Grounded\\Answer};
+
+  \draw[arr] (docs) -- (raw);
+  \draw[arr] (raw) -- (llm1);
+  \draw[arr] (llm1) -- (wiki);
+  \draw[arr] (q) -- (llm2);
+  \draw[arr] (wiki) -- (llm2);
+  \draw[arr] (llm2) -- (ans);
+
+  % Feedback loop: answers filed back into wiki
+  \draw[darr] (ans.north) -- node[right, font=\scriptsize, text=gray] {filed back} (wiki.south);
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item \textbf{Data ingest:} Download papers, clip web articles, save datasets $\to$ \texttt{raw/}.
+\item \textbf{Compile:} LLM reads raw data, produces wiki articles --- summaries, concept pages, back-links. \emph{You rarely edit the wiki manually; the LLM maintains it.}
+\item \textbf{Query:} Ask the LLM a question. It reads the wiki's index and relevant articles, then answers with grounded citations.
+\item \textbf{Feedback loop (dashed):} Answers and explorations get filed \emph{back} into the wiki, so your research ``adds up'' instead of disappearing after each chat.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Wiki vs.\ RAG: Same Intuition, Different Scale}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{3.0cm}|p{4.5cm}|p{5.5cm}|}
+\hline
+& \textbf{Personal Wiki} & \textbf{Full RAG Pipeline} \\
+\hline
+\textbf{Ingestion} & LLM reads raw docs, writes \texttt{.md} summaries & Chunk $\to$ embed $\to$ store in vector DB \\
+\hline
+\textbf{``Retrieval''} & LLM reads index files, picks relevant articles & Embedding similarity search (top-$K$) \\
+\hline
+\textbf{Generation} & LLM answers from wiki articles in context & LLM answers from retrieved chunks \\
+\hline
+\textbf{Scale limit} & ${\sim}$400K words (must fit in context) & Millions of tokens (no upper limit) \\
+\hline
+\textbf{Update} & LLM rewrites/extends articles & Add new chunks incrementally \\
+\hline
+\textbf{Attribution} & Article titles and links & Chunk IDs and source metadata \\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item Karpathy: \emph{``I thought I had to reach for fancy RAG, but the LLM has been pretty good about auto-maintaining index files and brief summaries \textnormal{[\ldots]} at this $\sim$small scale.''}
+
+\medskip
+\item \textbf{The wiki \emph{is} retrieval} --- just LLM-curated rather than automated via embeddings. Both architectures solve the same problem: \textbf{separating ingestion from querying}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Hands-On: A Mini Wiki for This Course}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+course_wiki/
+  index.md                  -- master table of contents
+  concepts/
+    embeddings.md           -- text-to-vector mappings (Lec 7-8)
+    rag.md                  -- retrieval augmented generation
+    transformers.md         -- the architecture behind LLMs
+  lectures/
+    lec07_llm.md            -- key ideas from Lecture 7
+    lec08_rag.md            -- key ideas from Lecture 8
+  papers/
+    vaswani_2017.md         -- Attention Is All You Need
+    lewis_2020_rag.md       -- RAG original paper (NeurIPS)
+  connections/
+    cross_references.md     -- links across lectures
+\end{lstlisting}
+
+\medskip
+\begin{itemize}
+\item A student asks: \emph{``How do the embeddings from Lecture 7 connect to vector stores in Lecture 8?''} --- the LLM reads the relevant wiki pages and gives a \textbf{grounded, cross-referenced} answer.
+\item As the course progresses, \textbf{every new lecture enriches the wiki}. Your questions ``add up'' instead of disappearing after each chat session.
+\item \textbf{See \texttt{wiki\_demo/}} in the lecture folder for a working example you can browse and extend.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From Wiki to RAG: Why We Need the Formal Machinery}
+\begin{itemize}
+\item The personal wiki works beautifully \textbf{at small scale}: ${\sim}$100 articles, ${\sim}$400K words. A modern LLM can read the whole index plus relevant articles in one context window.
+
+\medskip
+\item \textbf{But our economics corpora are much larger:}
+\begin{itemize}
+    \item 30 years of FOMC minutes + transcripts: millions of tokens
+    \item NBER working paper archive: tens of thousands of papers
+    \item Congressional Record: billions of words
+\end{itemize}
+
+\medskip
+\item \textbf{The progression is natural:}
+\begin{enumerate}
+    \item \textbf{Naive prompting} (paste docs into the prompt) $\to$ hits context window at ${\sim}$200K tokens
+    \item \textbf{Personal wiki} (LLM-curated summaries) $\to$ hits context window at ${\sim}$400K words
+    \item \textbf{RAG} (vector search over embeddings) $\to$ scales to millions of documents
+\end{enumerate}
+
+\medskip
+\item Each step is a natural response to the \textbf{scaling problem}. RAG is the wiki idea \emph{formalized and automated}: instead of an LLM maintaining an index by hand, we use embeddings and similarity search to do retrieval at arbitrary scale.
+
+\medskip
+\item Karpathy: \emph{``I think there is room here for an incredible new product instead of a hacky collection of scripts.''}
+
+\medskip
+\item \textbf{Next (Topic 8.2):} the principled solution --- chunking, embeddings, and a vector store that scales past the wiki ceiling.
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,93 @@
+%% Lec07 shared MAP slide: "one map, five acts" recurring diagram.
+%% Adapted from ../Lec09_Agentic_AI/lec09_map.tex (\LecNineMap -> \LecSevenMap).
+%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray)
+%% and call \LecSevenMap{k} inside a frame, where k in {1..5} highlights the
+%% current act ("you are here") and k = 0 renders the closing reprise with all
+%% five acts complete (used by T5b's closing frame).
+%% Filename deliberately does not match the build glob Lec*_T*.tex, so the
+%% build script never tries to compile it standalone.
+
+\newcommand{\LecSevenMap}[1]{%
+% Precompute per-box style selectors; TikZ option lists are comma-split before
+% TeX conditionals run, so \ifnum must not sit inside a [...] options list.
+\ifnum#1=0
+  \tikzset{lecmapa/.style={lecmapdone}, lecmapb/.style={lecmapdone},
+           lecmapc/.style={lecmapdone}, lecmapd/.style={lecmapdone},
+           lecmape/.style={lecmapdone}}%
+\else
+  \tikzset{lecmapa/.style={}, lecmapb/.style={}, lecmapc/.style={},
+           lecmapd/.style={}, lecmape/.style={}}%
+  \ifnum#1=1 \tikzset{lecmapa/.style={lecmapcur}}\fi
+  \ifnum#1=2 \tikzset{lecmapb/.style={lecmapcur}}\fi
+  \ifnum#1=3 \tikzset{lecmapc/.style={lecmapcur}}\fi
+  \ifnum#1=4 \tikzset{lecmapd/.style={lecmapcur}}\fi
+  \ifnum#1=5 \tikzset{lecmape/.style={lecmapcur}}\fi
+\fi
+\begin{center}
+\begin{tikzpicture}[
+    act/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=2.6cm, minimum height=0.92cm, text width=2.5cm,
+        align=center, font=\scriptsize, text=DarkText},
+    lecmapcur/.style={draw=RedTitle, very thick, fill=orange!20},
+    lecmapdone/.style={draw=green!45!black, thick, fill=green!10},
+    q/.style={font=\tiny\itshape, text width=2.7cm, align=center, text=black!70},
+    sat/.style={rectangle, rounded corners, draw=black!45, dashed, fill=white,
+        text width=5.0cm, align=center, font=\tiny, text=black!70,
+        minimum height=0.5cm},
+    barlab/.style={font=\tiny\bfseries, text=black!60},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+    % --- five act boxes ---
+    \node[act, lecmapa] (a1) at (0,0)
+        {\textbf{7.1 FRAME}\\ \tiny text as measurement};
+    \node[act, lecmapb] (a2) at (2.85,0)
+        {\textbf{7.2 REPRESENT}\\ \tiny tokens $\to$ vectors};
+    \node[act, lecmapc] (a3) at (5.7,0)
+        {\textbf{7.3 ATTEND}\\ \tiny attention \& Transformer};
+    \node[act, lecmapd] (a4) at (8.55,0)
+        {\textbf{7.4 PRETRAIN}\\ \tiny LMs \& alignment};
+    \node[act, lecmape] (a5) at (11.4,0)
+        {\textbf{7.5 MEASURE}\\ \tiny limits, apps, validation};
+    \draw[arr] (a1) -- (a2);
+    \draw[arr] (a2) -- (a3);
+    \draw[arr] (a3) -- (a4);
+    \draw[arr] (a4) -- (a5);
+    % --- the student question each act answers ---
+    \node[q] at (0,-0.82)    {what generates\\ this text?};
+    \node[q] at (2.85,-0.82) {how do we turn it\\ into numbers?};
+    \node[q] at (5.7,-0.82)  {how does context\\ get encoded?};
+    \node[q] at (8.55,-0.82) {where does a pretrained\\ model come from?};
+    \node[q] at (11.4,-0.82) {is my measure valid ---\\ and defensible?};
+    % --- "you are here" marker above the current act ---
+    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (2.85,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (5.7,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=4 \node[font=\scriptsize\bfseries, text=RedTitle] at (8.55,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=5 \node[font=\scriptsize\bfseries, text=RedTitle] at (11.4,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (5.7,0.95)
+        {all five acts complete};\fi
+    % --- bottom band: the measurement sandwich ---
+    \fill[blue!10]   (-1.3,-1.55) rectangle (1.40,-1.22);
+    \fill[green!10]  (1.65,-1.55) rectangle (9.85,-1.22);
+    \fill[orange!15] (10.1,-1.55) rectangle (12.7,-1.22);
+    \node[barlab] at (0.05,-1.385) {WHY TEXT = MEASUREMENT};
+    \node[barlab] at (5.75,-1.385) {HOW THE MACHINE READS TEXT};
+    \node[barlab] at (11.4,-1.385) {MEASURE, VALIDATE, DISCLOSE};
+    % --- the recurring spine (text DGP), printed under the band ---
+    \node[font=\tiny\itshape, text=black!60] at (5.7,-1.83)
+        {the spine:\ \ $x_i = g(s_i,\,a_i,\,c_i)+\varepsilon_i
+         \;\longrightarrow\; m(x_i)
+         \;\longrightarrow\; y_i = \beta\,m(x_i)+\gamma z_i+u_i$};
+    % --- dashed satellites: the neighbouring lectures ---
+    \node[sat] at (2.0,-2.42)
+        {\textit{before 7.1:} Lec03--04 gave you neural nets, backprop \& PyTorch --- Lec07 teaches them to read};
+    \node[sat] at (9.8,-2.42)
+        {\textit{after 7.5:} Lec08 RAG (grounded memory) $\to$ Lec09 agents (grounded action) $\to$ Lec10 cases};
+\end{tikzpicture}
+\end{center}
+}

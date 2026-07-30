@@ -1,0 +1,452 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.1: Framing + Practical Setup
+%% Source: ./archive_pre_split/Lec09_Agentic_AI_v3.tex (sections 1-2)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T3_Agentic_AI_Concepts.tex
+%% Rewritten 2026-07-06: five-act structure (Map/Machine/Method/Management/Mindset),
+%%         recurring MAP slide (lec09_map.tex), case threads from Lec10 T8 (HA-Ramsey)
+%%         and Lec10 T4 (ES Fellows). See Lec09_Rewrite_Plan_2026-07-06.md.
+
+\input{../shared_preamble.tex}
+
+% Suppress the redundant auto-generated metropolis section page (a bare "Framing" /
+% "Setup" slide); the \sectiondivider frames below are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.1: Framing --- What Agentic AI Is and Why It Matters}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 9 in One Map}
+\textbf{One lecture, five decks, three questions: how agentic AI works, how to use it well, and what your role is.}
+
+\LecNineMap{1}
+
+\vspace{0.1cm}
+\footnotesize\textit{Two research threads run through all five acts: \textbf{HA-Ramsey} (a published research program, full case in Lec10 T8) and the \textbf{ES Fellows dataset} (a project you could build this week, full case in Lec10 T4). Here we study the workflows; the cases themselves come later this morning.}
+\end{frame}
+
+%=============================================================================
+\section{Two Research Stories}
+%===========================================================
+
+\sectiondivider{Two Research Stories}{Why economists should care --- and what proper use actually produces}
+
+\begin{frame}{Why Economists Should Care: Execution Is the Bottleneck}
+\textbf{The bottleneck in applied research is often not ideas. It is execution.}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Turning a good question into clean code, diagnostics, tables, and figures is slow
+    \item Many research tasks are repetitive: reshape data, rerun specifications, trace sources, refactor scripts, update plots
+    \item Agentic tools compress the time from \textit{idea} to \textit{first defensible result}
+    \item That raises the return to the skills economists uniquely provide: question design, institutional knowledge, validation, and judgment
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{The promise is not ``AI does research for you.''} It is faster implementation and iteration around a question you still define and defend. The rest of the lecture supplies what that takes: the machine (9.2), the method (9.3), the management (9.4), and your role (9.5).
+\end{frame}
+
+\begin{frame}{Story 1 --- HA-Ramsey: Weeks, Not Years}
+\textbf{Proper use of an agentic workflow turned one published solver into a new research program.}
+
+\vspace{0.15cm}
+
+\begin{examplebox}
+\small
+\textbf{Seed:} a working, validated representative-agent (RA) ``deep Ramsey'' neural solver --- the complete code behind Feng--Han--Zhu (2026).\\
+\textbf{Target:} the heterogeneous-agent (HA) Ramsey model of Chien--Feng--Wen (2027) --- the entire paper: idiosyncratic risk, borrowing constraints, a 4--5D state.\\
+\textbf{Outcome:} a full HA research codebase \emph{plus} three methodological discoveries that surfaced from the AI iteration itself --- $\alpha$-shapes for non-convex feasible sets, the admissible set as a viability kernel, and a Lyapunov-type penalty for saddle-path selection.
+\end{examplebox}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item The AI supplied \textbf{throughput} --- LaTeX drafting, PyTorch translation, diagnostics, 32+ sweeps; ``time from seed to working solver: \textbf{weeks, not years}; the binding constraint was economist judgment at the milestones, not implementation labor''
+\end{itemize}
+
+\textbf{Why show this first:} this is what ``using it properly'' buys. Not autocomplete --- research.
+
+{\scriptsize \textit{Full case with the economics and the figures: Lec10 T8, later this morning. Source: HA-Ramsey case-study package.}}
+\end{frame}
+
+\begin{frame}{Story 2 --- 882 Fellows: A Dataset You Could Build This Week}
+\textbf{The second thread is deliberately ordinary: build a credible dataset about the economics profession from the public web.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{Task:} career metadata for all 882 current Econometric Society Fellows --- election year, PhD year, research fields, career stage
+    \item \textbf{Seed:} the official Society roster, split into 18 batches of 50; every filled field must carry a source URL from an official or institutional page
+    \item \textbf{What makes it hard:} roster control, source discipline, state across sessions, auditable provenance --- \emph{bookkeeping, not intelligence}
+    \item \textbf{What happened:} the agentic workflow scaled the search massively; the honest headline was about what still could \emph{not} be measured (T5 tells that part)
+\end{itemize}
+
+\vspace{0.25cm}
+
+\textbf{Why two stories:} HA-Ramsey shows the ceiling of the method. The fellows dataset is the floor you can stand on immediately --- in Exercise B, you build one batch of 50 yourself.
+
+\vspace{0.1cm}
+{\scriptsize \textit{Full case with the coverage results: Lec10 T4, later this morning.}}
+\end{frame}
+
+%=============================================================================
+\section{From Chat to Agent}
+%===========================================================
+
+\sectiondivider{From Chat to Agent}{The loop, the four features, and the spectrum}
+
+\begin{frame}{What Modern Web Chat Already Does Well}
+\textbf{As of mid-2026, a strong web-chat product is already useful for economists.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Brainstorming model setups, empirical strategies, review rubrics, and robustness checks
+    \item Summarizing papers, referee reports, and lecture notes
+    \item Inspecting uploaded files and explaining code snippets
+    \item Sometimes browsing the web or running limited sandboxed tools
+    \item Helping you draft a specification before you open your editor
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{So the weak baseline is not ``a browser cannot do anything.''} The weak baseline is a \textit{single chat session without a durable harness}.
+\end{frame}
+
+\begin{frame}{What Breaks Without a Harness: The Fellows Test}
+\textbf{Try the fellows task in a plain chat window. It is a job of many sittings --- and four things break within the first hour.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Durable context is weak.} The task spans days of separate sessions. The coding rules you settle today --- which sources count, how to record a missing PhD year --- are not reliably remembered by tomorrow's fresh chat
+    \item \textbf{Reusable workflow is weak.} Your checklist lives in prompts you retype (slightly differently) each time, not in a file the tool reads automatically
+    \item \textbf{Controlled execution is weak.} The chat cannot open the roster file, write the CSV, or rerun a check --- \emph{you} become the copy-paste machine between the model and your folder
+    \item \textbf{Audit trail is weak.} Six weeks later: which source URL backed the PhD year of fellow \#312? A scrolled-away transcript cannot answer field-level questions
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\textbf{That is the real contrast.} Agents are not magic because they are ``smarter.'' They are useful because they operate inside a structured project with files, tools, and repeatable workflows.
+\end{frame}
+
+\begin{frame}{Chat vs.\ Agent: Same Brain, Different Arms}
+\textbf{One key technical change made agents possible: modern LLMs (post-2023) support structured tool calls.}
+
+\vspace{0.2cm}
+
+Instead of writing ``you should run \texttt{python solve.py},'' the model emits a machine-readable request --- something like \texttt{\{"tool": "Bash", "command": "python solve.py"\}} --- and a \textbf{harness}, software installed on your machine, executes it and returns the real output. (T2 opens this loop in machine language.)
+
+\vspace{0.25cm}
+
+\begin{center}
+\small
+\begin{tabular}{|l|c|c|}
+\hline
+& \textbf{claude.ai (browser)} & \textbf{Claude Code (terminal)} \\ \hline
+LLM model & \multicolumn{2}{c|}{the same frontier model} \\ \hline
+Harness & none (sandboxed) & local CLI on your machine \\ \hline
+Can run Python? & no & yes---\textit{your} Python, \textit{your} machine \\ \hline
+Sees real errors? & no & yes---loops back automatically \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Same brain, different arms.} The terminal agent is not a magically smarter model. The harness is what flips the switch from text-only output to text\,+\,actions inside a project.
+\end{frame}
+
+\begin{frame}{The Agentic Loop: Plan, Act, Observe, Verify, Repeat}
+\textbf{An agentic workflow is not one long generation. It is a control loop wrapped around tools, files, and checks.}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners, draw=RedTitle!70, fill=blue!5,
+        minimum width=2.0cm, minimum height=0.75cm, text width=1.9cm,
+        align=center, font=\scriptsize, text=DarkText},
+    mem/.style={rectangle, rounded corners, draw=black!55, fill=VeryLightGray,
+        minimum width=2.4cm, minimum height=0.8cm, text width=2.3cm,
+        align=center, font=\scriptsize, text=DarkText},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60},
+    lab/.style={font=\tiny\itshape, text=black!60}
+]
+    \node[box] (goal) at (-3.6,0.75) {User goal\\+ success criteria};
+    \node[box] (plan) at (0,1.5)   {Plan\\next step};
+    \node[box] (act)  at (3.1,0.75)  {Act\\shell, Python, files, web};
+    \node[box] (obs)  at (3.1,-0.75) {Observe\\real outputs, real errors};
+    \node[box] (ver)  at (0,-1.5)  {Verify\\tests, benchmarks, review};
+    \node[mem] (memo) at (0,0)    {Project files\\+ memory on disk};
+    \node[box] (art)  at (-3.6,-0.75) {Artifact\\+ report};
+    \draw[arr] (goal) -- (plan);
+    \draw[arr] (plan) to[bend left=18] (act);
+    \draw[arr] (act) -- (obs);
+    \draw[arr] (obs) to[bend left=18] (ver);
+    \draw[arr] (ver) to[bend left=18] node[lab, below left] {not done yet: loop} (plan);
+    \draw[arr] (ver) -- node[lab, below] {checks pass} (art);
+    \draw[arr, dashed] (memo) -- (plan);
+    \draw[arr, dashed] (act) -- (memo);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item \textbf{Orchestrator:} the loop deciding what to do next --- plan, act, observe, verify
+    \item \textbf{Memory:} saved project state on disk, not just chat history (dashed arrows: the loop reads it and writes it)
+    \item \textbf{Verifier:} tests, benchmarks, or review checks deciding whether output survives
+\end{itemize}
+\end{frame}
+
+% MiniCourse refinement: cleaner autonomy spectrum framing from M4_T3
+\begin{frame}{What Makes Something ``Agentic''? Four Features}
+\begin{itemize}
+    \item \textbf{Tool use} --- invokes \texttt{pandas}, \texttt{curl}, \texttt{R}, \texttt{statsmodels}, the shell, whatever the task requires
+    \medskip
+    \item \textbf{Autonomy} --- plans a multi-step empirical workflow without re-prompting.\\
+    \textit{e.g.,} ``download FRED $\to$ clean $\to$ regress $\to$ plot $\to$ save table'' as one command
+    \medskip
+    \item \textbf{Iteration} --- observes that a regression failed, identifies the bad column, fixes the formula, reruns
+    \medskip
+    \item \textbf{Persistence} --- remembers your project conventions across sessions (variable names, preferred packages, validated benchmarks)
+\end{itemize}
+
+\bigskip
+\textbf{All four are cumulative.} Tool use without autonomy = a glorified interactive console (a REPL --- \emph{read--eval--print loop}, like the Python \texttt{>>>} prompt). Autonomy without iteration = a script that dies on the first error. You need all four for ``agentic.''
+\end{frame}
+
+\begin{frame}{The Spectrum, and Our Featured Tool}
+\begin{center}
+\small
+\begin{tabular}{|p{2.5cm}|p{3.0cm}|p{3.2cm}|p{3.6cm}|}
+\hline
+& \textbf{Web chat} & \textbf{IDE assistant} & \textbf{Terminal agent} \\ \hline
+\textbf{Best at} & thinking, drafting & editing local code & end-to-end execution \\ \hline
+\textbf{Context} & conversation + uploads & open files & full project tree \\ \hline
+\textbf{Typical role} & architect's whiteboard & coding copilot & workflow operator \\ \hline
+\textbf{Economic example} & design the specification & clean one regression file & run the full pipeline \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Concrete example throughout this lecture:} Claude Code, a terminal agent. \textbf{General lesson:} the same workflow logic appears in Codex CLI, Gemini CLI, Aider, and similar tools.
+
+\vspace{0.15cm}
+\footnotesize\textit{The only tool-comparison table in Lecture 9 --- the workflow matters more than the tool. T3 returns to tool choice per pipeline step.}
+\end{frame}
+
+\begin{frame}{Four Research Patterns Across the Lec10 Cases}
+\small
+\begin{tabular}{p{2.55cm}p{3.5cm}p{5.2cm}}
+\toprule
+\textbf{Pattern} & \textbf{Lec10 case(s)} & \textbf{Main risk if you use the wrong workflow} \\
+\midrule
+Reusable skill & Case 1: referee-style paper review & Generic comments, hallucinated quotes, missing quality gate \\
+Empirical pipeline & Case 2: MEPS harmonization and figures & Wrong crosswalk, dropped survey weights, silent validation failure \\
+Public-web dataset & Case 3: fellows metadata with field-level provenance & Weak sources, hidden missingness, no audit trail \\
+Full-lifecycle collaborator & Cases 4--6: collaborator, 4-day sprint, HA-Ramsey & Polished output built on weak framing or claims discipline \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.05cm}
+\textbf{Four patterns organize Lec10's six cases} --- and our two threads are instances: the fellows dataset (Case 3) and HA-Ramsey (Case 6, the full-lifecycle pattern at research scale).
+
+\vspace{0.1cm}
+\scriptsize\textbf{Where RAG fits.} Agentic RAG (Lec08 T5) differs from single-shot RAG: the agent decides \emph{dynamically}, via the same tool-call mechanism, whether and when to retrieve. RAG is one tool among many that the agent can compose.
+\end{frame}
+
+\begin{frame}{What Remains Human Across the Four Patterns}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{You still own}
+\begin{itemize}
+    \item the research question
+    \item the success criteria
+    \item the coding and source rules
+    \item the validation target
+    \item the final interpretation
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{The agent accelerates}
+\begin{itemize}
+    \item repetitive execution
+    \item file handling and refactoring
+    \item promptable decomposition
+    \item reruns after fixes
+    \item draft diagnostics and reports
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Why this matters for economists:} the gain is not that judgment disappears. The gain is that disciplined execution becomes cheaper.
+
+\vspace{0.15cm}
+\textbf{Hold on to the left column.} In 9.4 it becomes a job description: the researcher as project manager.
+\end{frame}
+
+\begin{frame}{Five Tests for Any Agentic Workflow}
+\begin{center}
+\small
+\begin{tabular}{|p{2.2cm}|p{8.2cm}|}
+\hline
+\textbf{Criterion} & \textbf{Question to ask} \\ \hline
+Correctness & Did it compute, extract, or summarize the right object? \\ \hline
+Reproducibility & Can a fresh run recreate the same artifact from the saved files and rules? \\ \hline
+Auditability & Can you inspect the commands, checks, and source trail that produced the result? \\ \hline
+Privacy boundary & Which files stay local, and which contents may still traverse the network? \\ \hline
+Speed / cost & Once you count the tokens you paid for, the time spent checking and fixing the output, and the time spent supervising the run --- did the agent actually save you time and money? \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+\textbf{Why this matters for economists:} an impressive demo is not enough. A research workflow has to be checkable and defensible. Keep these five tests in hand --- every deck that follows is, in the end, machinery for passing them.
+\end{frame}
+
+%===========================================================
+%=============================================================================
+\section{Your Safety Net}
+%===========================================================
+
+\sectiondivider{Your Safety Net}{Git before anything else}
+
+\begin{frame}{What Git Is: A Time Machine for Your Project}
+\textbf{Git is a version-control system: it keeps snapshots of a project folder so you can always see what changed and go back.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    gb/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=2.75cm, minimum height=1.15cm, text width=2.65cm,
+        align=center, font=\scriptsize},
+    cmd/.style={font=\tiny\ttfamily, text=RedTitle},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+    \node[gb] (wd) at (0,0) {\textbf{Working directory}\\ your files, edited freely (by you or the agent)};
+    \node[gb] (st) at (3.9,0) {\textbf{Staging area}\\ what the next snapshot will include};
+    \node[gb] (hist) at (7.8,0) {\textbf{History}\\ snapshot 1 $\leftarrow$ 2 $\leftarrow$ 3 $\cdots$\\ \tiny lives in a hidden \texttt{.git} folder};
+    \node[gb, dashed, fill=white] (rem) at (11.7,0) {\textbf{Remote (GitHub)}\\ optional copy: backup, sharing};
+    \draw[arr] (wd) -- node[above, cmd] {git add} (st);
+    \draw[arr] (st) -- node[above, cmd] {git commit} (hist);
+    \draw[arr, dashed] (hist) -- node[above, cmd] {git push} (rem);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item A \textbf{commit} is a snapshot of the whole project at a moment you chose; the history is a chain of snapshots you can list (\texttt{git log}), compare (\texttt{git diff}), and return to
+    \item Everything is local, plain files, no server required --- the \textbf{remote} is optional
+    \item \textbf{Why it fits agent work:} the agent edits fast and wide; snapshots give you a clean before/after boundary around every session
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Git Is the Safety Net}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{The risk without Git:}
+\vspace{0.15cm}
+\begin{itemize}
+    \item Claude Code can edit dozens of files autonomously in one session
+    \item OneDrive and Dropbox sync by \textit{copying}---two simultaneous writes create corrupt merge files
+    \item No undo: if the agent makes bad changes, there is no ``revert'' without Git
+    \item No audit trail: you cannot see what changed or when
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{What Git gives you:}
+\vspace{0.15cm}
+\begin{itemize}
+    \item \texttt{git diff} shows exactly what the agent changed before you accept it
+    \item \texttt{git checkout -{-} .} reverts all uncommitted changes instantly---your emergency brake
+    \item \texttt{git log} shows every change with a timestamp and message
+    \item Works offline; cloud sync races with the agent's rapid file writes
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+
+\textbf{Practical rule:} keep large data files on OneDrive; keep code and scripts in Git. Mixing them is workable if you are careful --- but do not let OneDrive sync a \emph{live repository} (the hidden \texttt{.git} folder): the two sync models collide and can corrupt the history. Keep the repo outside the synced folder, or exclude \texttt{.git} from sync.
+\end{frame}
+
+\begin{frame}[fragile]{Git Setup: A Four-Step Roadmap (Hand It to Your Agent)}
+\textbf{You do not need to memorize commands. You need the roadmap --- any LLM can walk you through each step.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Step 0 --- check the install:}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+git --version
+\end{lstlisting}
+{\footnotesize (if missing: git-scm.com or your package manager)}
+
+\vspace{0.15cm}
+
+\textbf{Step 1 --- identify yourself} (once per machine):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+git config --global user.name "Your Name"
+git config --global user.email "you@edu.cn"
+\end{lstlisting}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Step 2 --- start the project} (once per project):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+cd my-project
+git init
+echo "data/ output/ *.pdf" > .gitignore
+git add . && git commit -m "initial setup"
+\end{lstlisting}
+
+\vspace{0.15cm}
+
+\textbf{Step 3 --- the session rhythm} (every session):
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+git add -A && git commit -m "pre-session"
+# ... agent works, you validate ...
+git add -A && git commit -m "validated: ..."
+\end{lstlisting}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{Emergency brake:} \texttt{git checkout -{-} .} undoes \emph{all} uncommitted changes instantly. And note: this setup is itself a perfect first agent task --- paste the roadmap into the agent and say \emph{``walk me through steps 0--3 for this folder.''}
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Bridge: Widen the Lens, Then Open the Hood}
+\textbf{Act 1 framed the terminal-agent workflow: chat alone is not enough; a harness wraps tools, files, and verifiers around the model so the loop can do real work.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item You have seen \emph{what} agents do, \emph{why} the harness exists, and what proper use produced in two real projects
+    \item \textbf{Optional interlude (9.1b):} the wider agent landscape --- interoperability standards (MCP, A2A), benchmarks, and safety --- before we commit to one tool's mechanics
+    \item \textbf{Next (9.2):} the question changes from ``what is this?'' to ``\emph{how does it actually work, and how do I start?}'' --- components, install, initialization, the CLI, and your first session
+\end{itemize}
+
+\vspace{0.3cm}
+\footnotesize\textit{Arc: \textbf{T1 Framing} $\to$ T2 Under the Hood $\to$ T3 Homotopy $\to$ T4 Project Org $\to$ T5 Mistakes/Context $\to$ T6 Wrap.}
+\end{frame}
+
+%===========================================================
+\end{document}

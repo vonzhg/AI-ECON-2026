@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "olg-5step-demo"
+version = "0.3.0"
+requires-python = ">=3.9"
+description = "Six-version OLG ladder illustrating the 5-stage Claude Code workflow."
+dependencies = [
+    "numpy>=1.20",
+    "torch>=2.0",
+    "matplotlib>=3.5",
+]
+
+[project.optional-dependencies]
+dev = ["jupyter", "ipykernel"]
+
+[tool.setuptools]
+py-modules = []

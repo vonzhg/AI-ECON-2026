@@ -1,0 +1,497 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.3: Homotopy Workflow + Tool Choice
+%% Source: ./archive_pre_split/Lec09_Agentic_AI_v3.tex (sections 6-7)
+%% Pass B: layer in refinements from
+%%         ../../MiniCourse_8hr/Slides/Module4_Agentic_AI/M4_T9_Homotopy_Failures_Safety.tex
+%% Rewritten 2026-07-06: Act 3 "Method" of the five-act structure. Six-step pipeline
+%%         labels kept VERBATIM (Lec10 T8 reproduces them); adds HA-Ramsey opening
+%%         prompts (Lec10 T8 F18), seed criteria (F12), three-layers frame (F11),
+%%         and the "Grade the Plan" criteria frame. See Lec09_Rewrite_Plan_2026-07-06.md.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.3: The Homotopy Workflow and Tool Choice}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{The Map: Act 3 --- The Method}
+\textbf{This deck answers the third question: how do I structure real work with the machine I just learned to drive?}
+
+\LecNineMap{3}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: the homotopy idea $\to$ the six-step pipeline, step by step (with HA-Ramsey's actual opening prompts) $\to$ how to grade a plan before approving it $\to$ the runnable OLG demo $\to$ which tool for which step.}
+\end{frame}
+
+%=============================================================================
+\section{The Homotopy Workflow}
+%===========================================================
+
+\sectiondivider{The Homotopy Workflow}{Build from simple to complex, validate, then extend}
+
+\begin{frame}{The Homotopy Idea: Solve the Easy Version First}
+\textbf{In workflow design, homotopy means solving an easier version first and then extending it toward the full research task.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{itemize}
+    \item Start from a version with clear intuition and known checks
+    \item Use that validated baseline as the starting point for the next
+    \item Attribute new bugs to the new margin you just added
+    \item Never ask the agent to solve the full complicated problem in one jump
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    v/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+              minimum width=1.1cm, minimum height=0.55cm,
+              text width=1.0cm, align=center, font=\scriptsize},
+    chk/.style={font=\tiny, text=green!50!black},
+    a/.style={-{Stealth[length=1.7mm]}, thick}
+]
+    \node[v] (v0) {V0\\det.};
+    \node[v, right=0.45cm of v0] (v1) {V1\\+risk};
+    \node[v, below=0.6cm of v0] (v2) {V2\\+dist.};
+    \node[v, right=0.45cm of v2] (v3) {V3\\+fiscal};
+    \draw[a] (v0) -- node[above,chk]{$\checkmark$} (v1);
+    \draw[a] (v1) -- ++(0,-0.4) -- node[chk]{$\checkmark$} ++(-2.0,-0.2) -- (v2);
+    \draw[a] (v2) -- node[above,chk]{$\checkmark$} (v3);
+\end{tikzpicture}
+\end{center}
+\vspace{0.05cm}
+\centering\scriptsize\textit{Each step small; each step validated; if a step fails, return to the last validated version.}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+
+\begin{conceptbox}
+\footnotesize
+\textbf{Why the name:} homotopy continuation starts from a problem with a known solution and \emph{continuously deforms} it toward the target (Judd 1998, Ch.~5--7). V0 $\to$ V1 $\to$ V2 are gates along that deformation --- the same discipline, scaled up, produced HA-Ramsey (Story 1; case in Lec10 T8).
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{Homotopy in Practice: Build from Simple to Complex}
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+                minimum width=2.0cm, minimum height=0.95cm,
+                text width=1.9cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+    \node[box] (design) {1.\\Design};
+    \node[box, right=0.25cm of design] (spec) {2.\\Write\\Spec};
+    \node[box, right=0.25cm of spec] (algo) {3.\\Choose\\Algorithm};
+    \node[box, right=0.25cm of algo] (v0) {4.\\Build\\V0};
+    \node[box, right=0.25cm of v0] (val) {5.\\Validate};
+    \node[box, right=0.25cm of val] (ext) {6.\\Extend};
+
+    \draw[arrow] (design) -- (spec);
+    \draw[arrow] (spec) -- (algo);
+    \draw[arrow] (algo) -- (v0);
+    \draw[arrow] (v0) -- (val);
+    \draw[arrow] (val) -- (ext);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{This replaces the fantasy prompt} ``solve my project.''
+
+\begin{itemize}
+    \item Start with a problem you can state and benchmark
+    \item Give the agent bounded tasks with visible acceptance criteria
+    \item Add one new ingredient at a time
+\end{itemize}
+
+\vspace{0.15cm}
+\footnotesize\textit{The next frames walk the six steps in order --- with the HA-Ramsey case showing what each step looks like at research scale.}
+\end{frame}
+
+\begin{frame}{Step 1 --- Design: State the Goal Like an Economist}
+\textbf{Before any code, write down the task in economist language.}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item Research question in one sentence
+    \item Objective and constraints, or the relevant source rules
+    \item Equilibrium definition, estimand, or review standard if applicable
+    \item Parameters, sample, source universe, and economic motivation
+    \item Outputs you will treat as evidence
+\end{itemize}
+
+\vspace{0.15cm}
+
+\textbf{Aiyagari anchor:}
+\[
+\max \; \mathbb{E}_0 \sum_{t=0}^{\infty} \beta^t u(c_t)
+\quad \text{s.t.} \quad
+c_t + a_{t+1} = (1+r)a_t + wz_t,\; a_{t+1} \geq \underline{a}
+\]
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{Goal template} (T2's step 0, made precise): \emph{``Compute X with method Y to answer Z; success looks like W.''} If you cannot fill in W, you are not ready to open the terminal.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Step 2 --- The Spec Is the Contract}
+\textbf{The specification file is the contract between you and the agent.}
+
+\vspace{0.2cm}
+
+\textbf{A good specification file states four things clearly:}
+\begin{enumerate}
+    \item assumptions and domain rules
+    \item data or source restrictions
+    \item procedure and validation target
+    \item required outputs and where to save them
+\end{enumerate}
+
+\vspace{0.25cm}
+
+\textbf{Examples:} CRRA utility and convergence tolerance for Aiyagari; weights and subgroup cuts for MEPS; quote-level evidence rules for paper review; official/institutional-source rules and provenance fields for fellows data.
+
+\vspace{0.18cm}
+\textbf{Best practice:} ask the agent to restate the specification in its own words before it writes code. That catches misunderstandings when they are still cheap.
+\end{frame}
+
+\begin{frame}[fragile]{How HA-Ramsey Opened: Restate, Audit, Refine}
+\textbf{The restate-first practice is not hypothetical --- these three prompts opened the HA-Ramsey collaboration.}
+
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize,numbers=none]
+1. "Here are the RA paper (TeX) and the RA repository.
+    Restate the model and the algorithm in your own words.
+    List every equation and where it is implemented."
+2. "Audit the code against the document. Report every place
+    where the code and the TeX disagree: scoring, bounds,
+    sampling, penalties. Classify each as a correctness risk
+    or a documentation gap."
+3. "Propose a refined RA document + code pair in which the
+    two are consistent. Do not add any new economics yet."
+\end{lstlisting}
+
+\vspace{0.05cm}
+
+\begin{itemize}
+    \item Prompt 1 tests comprehension; prompt 2 tests the \emph{seed}; prompt 3 fixes the foundation while freezing the economics
+    \item ``The audit is the cheapest insurance in the whole project'' --- extending an inconsistent seed propagates the inconsistency
+\end{itemize}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Source: HA-Ramsey case-study package (Lec10 T8).}}
+\end{frame}
+
+\begin{frame}{Grade the Plan Before Any Code: Five Criteria}
+\textbf{T2 said: start in plan mode, review, approve. Approve against \emph{what}? These five criteria.}
+
+\vspace{0.15cm}
+
+\begin{enumerate}
+    \item \textbf{Restates your goal correctly} --- in its own words, not your words echoed back
+    \item \textbf{Bounded steps} --- each step has a named deliverable small enough to review in minutes
+    \item \textbf{Acceptance criterion per step} --- a benchmark, test, or check named \emph{in advance}
+    \item \textbf{Stop and rollback points} --- what happens when a step fails; which validated version you return to
+    \item \textbf{Smallest testable object first} --- the plan begins with V0, not with the full target
+\end{enumerate}
+
+\vspace{0.15cm}
+
+\begin{cautionbox}
+\footnotesize
+\textbf{A plan without acceptance criteria is a wish.} Send it back --- a plan revision costs one message; a wrong build costs a day.
+\end{cautionbox}
+
+\vspace{0.1cm}
+\footnotesize\textit{Fellows instance: one batch of 50 = a bounded step; ``every filled field carries a source URL'' = its acceptance criterion. HA-Ramsey instance: the audit prompt is criterion 3 applied to the seed itself.}
+\end{frame}
+
+\begin{frame}[fragile]{Step 3 --- Algorithm and Pseudocode Catch Design Errors}
+\textbf{Pseudocode or a phase plan is where you catch design mistakes before implementation.}
+
+\vspace{0.2cm}
+
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+Phase A: ingest or define the object
+Phase B: run the chosen procedure
+Phase C: save diagnostics and checks
+Phase D: report only what passed validation
+\end{lstlisting}
+
+\vspace{0.15cm}
+
+\textbf{Concrete procedures:} VFI or EGM for Aiyagari, a 3-prompt pipeline for MEPS, section decomposition for paper review, and batched metadata collection for fellows data.
+
+\vspace{0.15cm}
+\textbf{The point is not elegance.} The point is that you and the agent agree on the procedure before code details begin to hide conceptual errors.
+\end{frame}
+
+\begin{frame}{Step 4 --- V0: The Simplest Version With a Benchmark You Understand}
+\textbf{V0 is the simplest version with a benchmark you understand --- ideally a closed form.}
+
+\vspace{0.15cm}
+
+\textbf{Optimal growth V0: full depreciation.} With log utility, Cobb--Douglas output $y_t = z_t k_t^{\alpha}$, and $\delta = 1$, the model has an exact closed-form solution:
+\[
+k_{t+1} = \alpha\beta\, z_t k_t^{\alpha}, \qquad c_t = (1-\alpha\beta)\, z_t k_t^{\alpha}
+\]
+
+\begin{itemize}
+    \item Your V0 solver must reproduce this policy to numerical precision --- an \emph{absolute} benchmark, not a plausibility check
+    \item Then relax $\delta < 1$: the closed form disappears, but the validated V0 has already certified the plumbing --- grids, interpolation, Euler equation, simulation
+\end{itemize}
+
+\vspace{0.15cm}
+
+\textbf{Discipline:} do not ask the agent to add partial depreciation, risk, or equilibrium search before V0 matches the closed form.
+\end{frame}
+
+\begin{frame}{V0 at Research Scale: What Makes a Good Seed}
+\textbf{At research scale, V0 has a name: the seed. HA-Ramsey grew from a published RA solver because that seed had four properties.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{It works} --- reproduces its own paper's numbers, not just ``runs without error''
+    \item \textbf{It is documented} --- a TeX model note in the \emph{same notation} as the code
+    \item \textbf{It is modular} --- config-driven, so every later experiment is a config diff, not a code fork
+    \item \textbf{It points somewhere} --- the RA model is the degenerate no-risk case of the HA target; the deformation path exists by construction
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\begin{examplebox}
+\footnotesize
+\textbf{A good seed is like a good prototype for manufacturing a new product:} it already works end-to-end at small scale, so scaling up is engineering and refinement --- not a fresh invention on the factory floor.
+\end{examplebox}
+
+\vspace{0.1cm}
+\textbf{Same object, different scales:} the classroom V0 and the research seed play the same role. The OLG demo's \texttt{v0} (later this deck) is your training-wheels seed.
+\end{frame}
+
+\begin{frame}{What ``V0 First'' Means Across Four Tasks}
+\begin{center}
+\small
+\begin{tabular}{|p{2.2cm}|p{3.3cm}|p{5.2cm}|}
+\hline
+\textbf{Task} & \textbf{V0} & \textbf{First validation target} \\ \hline
+Aiyagari model & deterministic household problem & recover simple savings logic and boundary behavior \\ \hline
+MEPS pipeline & 3-year pilot panel & weighted rates line up with an external benchmark \\ \hline
+Paper review skill & one section or theorem block & quotes are real and comments are specific \\ \hline
+Fellows dataset & seed roster only & source rules and provenance fields are actually recorded \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+\textbf{Why economists should care:} V0 keeps the first error interpretable. You want the first failure to be obvious, not hidden inside a giant workflow.
+\end{frame}
+
+\begin{frame}{Steps 5--6 --- Validate, Then Extend One Margin at a Time}
+\begin{center}
+\small
+\begin{tabular}{|c|p{3.5cm}|p{4.0cm}|}
+\hline
+\textbf{Version} & \textbf{New ingredient} & \textbf{Required benchmark} \\ \hline
+V0 & Deterministic household & analytical cases \\ \hline
+V1 & One new model, data, or review margin & setting the new margin to zero recovers V0 \\ \hline
+V2 & Saved diagnostics and state tracking & mass sums, benchmarks, quote checks, or source logs behave sensibly \\ \hline
+V3 & Full target workflow & final artifact survives validation and interpretation \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+
+\textbf{Why this works with agents:} when a new version breaks, both you and the agent know where to look.
+
+\vspace{0.1cm}
+\footnotesize\textit{Hold the gate idea: in T4 it returns as a management principle --- a quality gate on every intermediate good, not just on code versions.}
+\end{frame}
+
+\begin{frame}{Three Layers Grow Together: Model, Algorithm, Code}
+\textbf{A research project is not one artifact but three, and the homotopy steps move all three in lockstep.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    layer/.style={rectangle, rounded corners, draw=RedTitle!70, fill=blue!5,
+        minimum width=3.1cm, minimum height=0.95cm, text width=3.0cm,
+        align=center, font=\small},
+    arr/.style={{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick, gray!70},
+    back/.style={-{Stealth[length=2mm]}, thick, dashed, green!45!black}
+]
+    \node[layer] (model) at (0,0) {\textbf{Model}\\ \scriptsize TeX: economics, timing, constraints};
+    \node[layer] (algo) at (4.5,0) {\textbf{Algorithm}\\ \scriptsize pseudocode: solution method, penalties};
+    \node[layer] (code) at (9.0,0) {\textbf{Code}\\ \scriptsize PyTorch/Python: what actually runs};
+    \draw[arr] (model) -- (algo);
+    \draw[arr] (algo) -- (code);
+    \draw[back] (code.south) to[bend right=20] node[below, font=\tiny, text=green!45!black]
+        {step back anytime: check, validate, revert} (model.south);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{itemize}
+    \item \textbf{Forward:} you grow from the current version toward the final version gradually --- a new model element forces a new algorithm forces new code, one margin at a time
+    \item \textbf{Backward:} every earlier version is preserved and validated, so you can always step back to a simpler one --- to check and validate a result, to isolate where something broke, or to revert to the last working version
+    \item \textbf{The agent's job here:} keep TeX, pseudocode, and code describing \emph{the same economy} at every version --- drift between layers is where silent errors live
+\end{itemize}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Source: HA-Ramsey case-study package (Lec10 T8).}}
+\end{frame}
+
+\begin{frame}{Why This Beats One-Shot Generation}
+\textbf{Four reasons the homotopy workflow is especially effective with agents:}
+
+\begin{enumerate}
+    \item \textbf{Agents excel at well-specified, bounded tasks.} \\
+    ``Solve my model'' fails. ``Implement V0 per this pseudocode and validate against these 3 benchmarks'' succeeds.
+    \medskip
+    \item \textbf{Starting simple gives both you and the agent a working codebase.} \\
+    V1 inherits validated V0 code. The agent builds on tested functions, not a blank file.
+    \medskip
+    \item \textbf{Bug attribution is immediate.} \\
+    If V2 breaks, the bug is in V2's new lines, not the validated inherited ones.
+    \medskip
+    \item \textbf{Context builds naturally.} \\
+    By V3, the agent has seen the spec, pseudocode, three validated versions, and every correction. \emph{Deep context} --- not a 10-page prompt.
+\end{enumerate}
+
+\textbf{Discipline:} resist the urge to skip ahead. A working V0 takes 30 minutes; debugging a broken V2 because V0 was never validated takes a day. This is also how good RAs are trained: simple task, verify, widen scope.
+\end{frame}
+
+%===========================================================
+
+
+%=============================================================================
+\section{OLG Five-Step Demo}
+%===========================================================
+
+\sectiondivider{OLG Five-Step Demo}{A concrete homotopy workflow for computational macro}
+
+\begin{frame}{Demo: Folder Structure Is the Method}
+\small
+\begin{tabular}{p{4.0cm}p{7.7cm}}
+\toprule
+\textbf{Folder or file} & \textbf{Teaching role} \\
+\midrule
+\texttt{stages/} & five durable stages: model, equilibrium, algorithm, pseudocode, implementation/validation \\
+\texttt{prompts/v*\_to\_v*.md} & one bounded terminal-agent session per version transition \\
+\texttt{versions/v0--v5} & validated working code preserved at every step \\
+\texttt{tests/} & one smoke test per version; failures identify the new margin \\
+\texttt{build/*.json} & reproducibility reports from terminal runs \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+\textbf{Demo path:} \texttt{demos/M4\_olg\_5step\_demo/} (local copy in this lecture; mirror of MiniCourse\_8hr \texttt{M4\_olg\_5step\_demo} minus \texttt{.venv}/\texttt{build/}).
+
+\vspace{0.1cm}
+\footnotesize\textit{Note the pattern: the HA-Ramsey \texttt{Case\_Study/} package (Lec10 T8) is this same folder discipline at paper scale --- seed, versions, notes, audits, all preserved.}
+\end{frame}
+
+\begin{frame}{Version Ladder: One Economic Margin at a Time}
+\scriptsize
+\begin{tabular}{p{0.8cm}p{5.0cm}p{5.8cm}}
+\toprule
+\textbf{Ver.} & \textbf{Adds} & \textbf{Validation gate} \\
+\midrule
+V0 & 3 cohorts, 1 asset, 2-state TFP, one NN policy & deterministic steady-state collapse; procyclical capital; RMS Euler residual below threshold \\
+V1 & 7 cohorts and lifecycle labor & V0 logic preserved; middle-aged consumption peak appears \\
+V2 & 4-state Markov TFP & collapse back to two states reproduces V1 \\
+V3 & bonds, price, clearing, complementarity & zero bond-loss weight reproduces V2; positive late-life holdings \\
+V4 & capital adjustment cost & zero adjustment cost reproduces V3; capital path smooths \\
+V5 & stabilizing homotopy phases & residuals fall by phase; final Euler error target met \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+\textbf{Research lesson:} the agent never receives ``solve the big model.'' It receives one validated deformation at a time.
+\end{frame}
+
+\begin{frame}[fragile]{Demo Launch and Classroom Contract}
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize, numbers=none]
+cd Lec09_Agentic_AI/demos/M4_olg_5step_demo
+pip install -e .
+python3 -m unittest discover -s tests
+python3 run_demo.py
+jupyter notebook demo.ipynb
+\end{lstlisting}
+
+\vspace{0.2cm}
+\begin{itemize}
+  \item \textbf{What the demo proves:} homotopy preserves a working baseline while complexity rises.
+  \item \textbf{What to inspect:} prompts, version folders, test names, validation messages, and regenerated reports.
+  \item \textbf{Failure recovery:} if V3 breaks, return to validated V2 and add only the bond-market-clearing layer.
+\end{itemize}
+\end{frame}
+
+
+%=============================================================================
+\section{Tool Choice}
+%===========================================================
+
+\sectiondivider{Tool Choice}{Match the tool to the pipeline step}
+
+\begin{frame}{Tool Choice per Pipeline Step}
+\textbf{The six-step pipeline also tells you which tool to open.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\small
+\begin{tabular}{|p{2.4cm}|p{3.4cm}|p{5.2cm}|}
+\hline
+\textbf{Tool type} & \textbf{Pipeline steps} & \textbf{Economic example} \\ \hline
+Web chat & 1--2: design, draft the spec & clarify identification logic, draft a model summary \\ \hline
+IDE assistant & single-file edits inside a step & vectorize one function, explain one traceback \\ \hline
+Terminal agent & 4--6: build, validate, extend & restructure the project, run scripts, generate diagnostics, iterate \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+
+\textbf{Why the terminal agent becomes the workhorse:} it operates on the real project and runs the real code --- while still leaving you in the approval and validation loop.
+
+\vspace{0.1cm}
+\textbf{For empirical research this is usually the sweet spot:} enough autonomy to save time, not so much autonomy that you stop checking the economics.
+\end{frame}
+
+\begin{frame}{Bridge: One Ladder vs.\ the Whole Factory}
+\textbf{Act 3 disciplined the growth of one artifact. A real project is a factory: many artifacts, many sessions, several reviewers.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item You now have the \emph{method}: design, spec, algorithm, V0, validate, extend --- with a plan graded before any code
+    \item But a paper is model + algorithm + code + data + reviews + write-up, worked across weeks of sessions
+    \item The next question: \emph{``how do I run the whole project?''} --- Act 4's answer is a role change: the researcher as \textbf{project manager}, and the project objects (CLAUDE.md, skills, agents, rules) as the manager's instruments
+\end{itemize}
+
+\vspace{0.3cm}
+\footnotesize\textit{Arc: T1 Framing $\to$ T2 Under the Hood $\to$ \textbf{T3 Homotopy} $\to$ T4 Project Org $\to$ T5 Mistakes/Context $\to$ T6 Wrap.}
+\end{frame}
+
+%===========================================================
+\end{document}

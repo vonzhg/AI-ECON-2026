@@ -1,0 +1,463 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recursive Formulation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{State Variables}
+The economy is characterized by the state vector $s = (B, \mu, g)$:
+\begin{itemize}
+    \item $B \in \mathbb{R}$: Real government debt (beginning of period).
+    \item $\mu \in [\mu_{\min}, \mu_{\max}]$: Lagrange multiplier on the resource constraint, serving as the co-state variable that summarizes past policy commitments. Consumption is given by $c = 1/\mu$.
+    \item $g \in \{g_L, g_H\}$: Exogenous government expenditure shock, following a Markov process with transition probabilities $\pi(g'|g)$.
+\end{itemize}
+
+\subsection{Ramsey Government's Problem}
+For $t > 0$, the government chooses a state-contingent policy $\{\mu'(g')\}_{g' \in \{g_L, g_H\}}$ to maximize lifetime utility. The Bellman equation is:
+\begin{equation}\label{eq:bellman}
+V(B, \mu, g) = \max_{\{\mu'(g')\}_{g'}} \left\{ u(c, l) + \beta \sum_{g'} \pi(g'|g) V(B', \mu'(g'), g') \right\}
+\end{equation}
+subject to the \textbf{implementability constraints}:
+\begin{align}
+    c &= 1/\mu \label{eq:consumption}\\
+    l &= c + g \label{eq:resource}\\
+    \tau &= 1 - \frac{\gamma_l c}{1 - l} \quad &\text{(Labor wedge / Implied tax rate)} \label{eq:tax}\\
+    q &= \beta \frac{\sum_{g'} \pi(g'|g) \mu'(g')}{\mu} \quad &\text{(Bond price)} \label{eq:bond_price}\\
+    B' &= \frac{B + g - \tau l}{q} \quad &\text{(Government budget constraint)} \label{eq:budget}
+\end{align}
+
+\paragraph{Endogenous Feasibility.}
+A critical feature of this problem is that the feasible state space $\Omega(g)$ is \textit{endogenous}: the solution must satisfy $(B', \mu'(g')) \in \Omega(g')$ for all $g'$, where $\Omega(g')$ is the set of states from which a competitive equilibrium exists. This creates a fixed-point structure that the algorithm must discover.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Deep Learning Algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Architecture Overview}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The algorithm approximates the solution using two neural networks:
+
+\begin{enumerate}
+    \item \textbf{Policy Network} $\pi_\theta: (B, \mu, g) \mapsto (\mu'_L, \mu'_H)$ \\
+    A feedforward network with ReLU activations. The raw outputs (logits) are transformed to the feasible range via sigmoid:
+    \begin{equation}\label{eq:policy_transform}
+        \mu'_{g'} = \sigma(\ell_{g'}) \cdot (\mu_{\max} - \mu_{\min}) + \mu_{\min}, \quad \ell_{g'} = \text{logit}_{g'}
+    \end{equation}
+    where $\sigma(\cdot)$ denotes the sigmoid function.
+    
+    \item \textbf{Value Network} $V_\phi: (B, \mu, g) \mapsto \mathbb{R}$ \\
+    Approximates the government's continuation value function.
+\end{enumerate}
+
+Additionally, we employ a non-parametric \textbf{Admissibility Scorer} $\mathcal{A}(s)$ that evaluates state feasibility based on economic fundamentals rather than a learned classifier.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Admissibility Scoring}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The feasible state space $\Omega(g)$ is unknown a priori. We employ an \textit{Operational Definition of Feasibility}: a state $s = (B, \mu, g)$ is feasible if and only if the policy network can generate a valid transition to a sustainable future state. 
+
+The \textbf{Admissibility Score} $\mathcal{A}(s) \in [0, 1]$ quantifies this by combining three economic constraints.
+
+\subsubsection{Generic Barrier Function}
+All component scores use a unified \textbf{Distance-Based Power Barrier}. Given a feasible interval $\Omega_x = [x_{\min}, x_{\max}]$, a buffer width $\delta_x > 0$, and sharpness parameter $\kappa$ (typically $\kappa = 4$):
+\begin{equation}\label{eq:barrier}
+    \mathcal{S}(x; \Omega_x, \delta_x) = \left[ 1 - \left( \frac{d(x, \Omega_x)}{\delta_x} \right)^\kappa \right]^+
+\end{equation}
+where $[\cdot]^+ = \max(0, \cdot)$ and the distance to the feasible set is:
+\begin{equation}
+    d(x, \Omega_x) = \max\left(0,\; x_{\min} - x,\; x - x_{\max}\right)
+\end{equation}
+
+\paragraph{Properties.} This function equals 1.0 strictly within bounds, smoothly decays to 0 as $x$ traverses the buffer zone, and provides gradient signal throughout the buffer.
+
+\subsubsection{Component Scores}
+Given state $s = (B, \mu, g)$ and policy output $\mu'(\cdot)$, compute:
+
+\begin{enumerate}
+    \item \textbf{Tax Feasibility} ($A_\tau$): Verifies the current state admits a feasible tax rate.
+    \begin{align}
+        \tau &= 1 - \frac{\gamma_l / \mu}{1 - (1/\mu + g)} \\
+        A_\tau &= \mathcal{S}(\tau;\, [0, 1],\, \delta_\tau) \quad \text{with } \delta_\tau = 0.02
+    \end{align}
+    \textit{Rationale:} Tax bounds $[0,1]$ are strict economic constraints; tight buffer enforces rigidly.
+
+    \item \textbf{Policy Safety} ($A_\mu$): Ensures chosen policy avoids computational singularities.
+    \begin{equation}
+        A_\mu = \min_{g' \in \{L, H\}} \mathcal{S}\bigl(\mu'(g');\, [\mu_{\min}, \mu_{\max}],\, \delta_\mu\bigr) \quad \text{with } \delta_\mu = 0.05(\mu_{\max} - \mu_{\min})
+    \end{equation}
+    \textit{Rationale:} Proportional buffer allows exploration of high-multiplier states.
+
+    \item \textbf{Debt Sustainability} ($A_B$): Verifies next-period debt lands in the \textit{learned} feasible envelope.
+    
+    For each shock realization $g'$, compute implied debt $B'(g')$ via \eqref{eq:budget}--\eqref{eq:bond_price}. Then:
+    \begin{equation}
+        A_B = \min_{g' \in \{L, H\}} \mathcal{S}\bigl(B'(g');\, \Omega_B(\mu'(g'), g'),\, \delta_B\bigr) \quad \text{with } \delta_B = 0.10 \cdot |\Omega_B|
+    \end{equation}
+    where $\Omega_B(\mu', g') = [B_{\min}(\mu', g'), B_{\max}(\mu', g')]$ are state-dependent boundaries estimated iteratively (Section~\ref{sec:boundary_learning}).
+    
+    \textit{Rationale:} Wide buffer prevents premature truncation as debt limits evolve.
+\end{enumerate}
+
+\subsubsection{Global Admissibility Score}
+\begin{equation}\label{eq:global_score}
+    \mathcal{A}(s) = w_\tau A_\tau + w_\mu A_\mu + w_B A_B
+\end{equation}
+with weights $(w_\tau, w_\mu, w_B)$ typically balanced, e.g., $(0.33, 0.33, 0.34)$.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Two-Level Fixed-Point Structure}\label{sec:fixed_point}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The algorithm must resolve \textbf{two nested circular dependencies}:
+
+\subsubsection{The Circularity Problems}
+
+\paragraph{Level 1: Score-Boundary Circularity (Inner Loop).}
+For a \textit{fixed} policy network $\pi_\theta$:
+\begin{itemize}
+    \item Computing the admissibility score $\mathcal{A}(s)$ requires the feasible debt bounds $\Omega_B(\mu', g')$.
+    \item Estimating $\Omega_B$ requires identifying admissible states (where $\mathcal{A}(s) > \tau_{\text{adm}}$).
+\end{itemize}
+
+\paragraph{Level 2: Policy-Domain Circularity (Outer Loop).}
+Across training iterations:
+\begin{itemize}
+    \item The policy and value networks $(\pi_\theta, V_\phi)$ are trained on samples drawn from the admissible set $\mathcal{S}_{\text{adm}}$.
+    \item The admissible set $\mathcal{S}_{\text{adm}}$ is determined by evaluating the \textit{current} policy $\pi_\theta$ via the score $\mathcal{A}(s)$.
+\end{itemize}
+
+\noindent This means: as the policy improves, it may render previously infeasible states feasible (by finding better escape routes), or reveal that previously ``safe'' states were only safe under a suboptimal policy.
+
+\subsubsection{Resolution Strategy}
+We employ a \textbf{nested fixed-point iteration}:
+\begin{enumerate}
+    \item \textbf{Outer Loop} (Training): Alternate between updating networks and updating the admissible set.
+    \item \textbf{Inner Loop} (Boundary Refinement): For fixed networks, iterate score computation and boundary estimation until the admissible set stabilizes.
+\end{enumerate}
+
+The outer loop corresponds to the main training algorithm (Section~\ref{sec:training}). The inner loop is detailed below.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Boundary Refinement (Inner Fixed-Point)}\label{sec:boundary_learning}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Given fixed networks $(\pi_\theta, V_\phi)$, we estimate consistent boundaries $\Omega_B(\mu, g)$ through iterative refinement.
+
+\subsubsection{Initialization}
+At the first iteration (or start of adaptive phase), initialize with broad heuristic bounds:
+\begin{equation}
+    \Omega_B^{(0)}(\mu, g) = [B^{\text{init}}_{\min}, B^{\text{init}}_{\max}] \quad \forall \mu, g
+\end{equation}
+For example, $[-0.5, 3.5]$ spanning conservative estimates of sustainable debt levels. These should be wide enough to not artificially constrain learning.
+
+\subsubsection{Reference Grid}
+Create a dense fixed grid $\mathcal{G}_{\text{ref}}$ spanning the full domain:
+\begin{equation}
+    \mathcal{G}_{\text{ref}} = \{(B_i, \mu_j, g_k)\} \subset [B_{\min}^{\text{init}}, B_{\max}^{\text{init}}] \times [\mu_{\min}, \mu_{\max}] \times \{g_L, g_H\}
+\end{equation}
+
+\subsubsection{Fixed-Point Iteration}
+For $n = 1, \ldots, N_{\text{refine}}$ (typically $N_{\text{refine}} = 3$):
+\begin{enumerate}
+    \item \textbf{Score:} Compute $\mathcal{A}(s)$ for all $s \in \mathcal{G}_{\text{ref}}$ using current boundaries $\Omega_B^{(n-1)}$ and current policy $\pi_\theta$.
+    \item \textbf{Filter:} Collect admissible points $\mathcal{S}_{\text{adm}}^{(n)} = \{s \in \mathcal{G}_{\text{ref}} : \mathcal{A}(s) > \tau_{\text{adm}}\}$.
+    \item \textbf{Estimate:} Compute new boundaries from $\mathcal{S}_{\text{adm}}^{(n)}$ via binning (see below).
+    \item \textbf{Update:} Set $\Omega_B^{(n)} \leftarrow$ fitted envelope.
+\end{enumerate}
+
+\textit{Convergence Logic:} As boundaries tighten around the true safe set (under the current policy), marginal points lose admissibility, further refining the boundary until stabilization.
+
+\subsubsection{Final Synchronization}
+After convergence, re-score all cached points with the stabilized boundaries to ensure consistency for subsequent sampling.
+
+\subsubsection{Boundary Estimation via Binning}
+Given admissible points $\mathcal{S}_{\text{adm}}$:
+\begin{enumerate}
+    \item \textbf{Partition:} Divide $[\mu_{\min}, \mu_{\max}]$ into $N_{\text{bin}}$ uniform bins.
+    \item \textbf{Quantile Statistics:} For each bin $j$ and shock $g$, compute robust bounds:
+    \begin{equation}
+        \hat{B}_{\min}^{(j,g)} = Q_\alpha\bigl(\{B : (\cdot, \mu, g) \in \mathcal{S}_{\text{adm}},\, \mu \in \text{bin}_j\}\bigr)
+    \end{equation}
+    \begin{equation}
+        \hat{B}_{\max}^{(j,g)} = Q_{1-\alpha}\bigl(\{B : (\cdot, \mu, g) \in \mathcal{S}_{\text{adm}},\, \mu \in \text{bin}_j\}\bigr)
+    \end{equation}
+    where $Q_\alpha$ denotes the $\alpha$-quantile (e.g., $\alpha = 0.05$) to exclude outliers.
+    \item \textbf{Interpolation:} Fit piecewise-linear functions $B_{\min}(\mu, g)$, $B_{\max}(\mu, g)$ through bin centers.
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Adaptive Sampling Strategy}\label{sec:sampling}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+With admissibility scores computed and boundaries stabilized, we classify states into three partitions for sampling.
+
+\subsubsection{Threshold Definitions}
+We define two thresholds to partition the state space:
+\begin{itemize}
+    \item $\tau_{\text{high}} \in (0,1)$: States above this are considered ``safe'' (e.g., $\tau_{\text{high}} = 0.7$).
+    \item $\tau_{\text{low}} \in (0, \tau_{\text{high}})$: States below this are considered ``infeasible'' (e.g., $\tau_{\text{low}} = 0.3$).
+\end{itemize}
+
+\subsubsection{State Partitioning}
+\begin{itemize}
+    \item \textbf{Safe Set} $\mathcal{S}_{\text{safe}} = \{s : \mathcal{A}(s) > \tau_{\text{high}}\}$: Used for optimality training.
+    \item \textbf{Boundary Set} $\mathcal{S}_{\text{bound}} = \{s : \tau_{\text{low}} \leq \mathcal{A}(s) \leq \tau_{\text{high}}\}$: The ``feasibility cliff'' --- oversampled to sharpen boundaries.
+    \item \textbf{Infeasible Set} $\mathcal{S}_{\text{fail}} = \{s : \mathcal{A}(s) < \tau_{\text{low}}\}$: Used for penalty-based training.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Training Procedure}\label{sec:training}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Training alternates between adaptive sampling and network updates across two phases.
+
+\subsubsection{Two-Phase Structure}
+\begin{itemize}
+    \item \textbf{Phase 1: Warmup} ($k < K_{\text{warmup}}$): Uses uniform sampling from simulation history with perturbations.
+    \item \textbf{Phase 2: Adaptive} ($k \geq K_{\text{warmup}}$): Uses weighted resampling based on admissibility scores.
+\end{itemize}
+
+\subsubsection{Sampling Procedures}
+
+\paragraph{Warmup Sampling.}
+Sample from accumulated simulation history $\mathcal{H}$ with Gaussian perturbations:
+\begin{align}
+    B &\leftarrow B_{\text{hist}} + \epsilon_B, \quad \epsilon_B \sim \mathcal{N}(0, \sigma_B^2), \quad \sigma_B = 0.05(B_{\max} - B_{\min}) \\
+    \mu &\leftarrow \mu_{\text{hist}} + \epsilon_\mu, \quad \epsilon_\mu \sim \mathcal{N}(0, \sigma_\mu^2), \quad \sigma_\mu = 0.05(\mu_{\max} - \mu_{\min})
+\end{align}
+with 20\% probability of resampling the shock index $g$.
+
+\paragraph{Adaptive Sampling.}
+\begin{enumerate}
+    \item Generate $M = 10 \times |\text{batch}|$ candidates uniformly over domain.
+    \item Compute admissibility scores (from cache or fresh).
+    \item Assign weights: $w(s) = \mathbf{1}\{\mathcal{A}(s) > \tau_{\text{high}}\} + \epsilon_{\text{base}}$ where $\epsilon_{\text{base}} = 10^{-4}$.
+    \item Resample batch-size points without replacement using normalized weights.
+    \item Separately collect $\mathcal{S}_{\text{fail}} = \{s : \mathcal{A}(s) < \tau_{\text{low}}\}$ for penalty training.
+\end{enumerate}
+
+\subsubsection{Policy Training (Two-Stage)}
+
+\paragraph{Stage 1: Optimality via Gradient Ascent.}
+Train $\pi_\theta$ on $\mathcal{S}_{\text{safe}}$ for $N_{\pi,1}$ epochs by maximizing simulated returns:
+\begin{equation}
+    \max_\theta \mathbb{E}_{s_0 \sim \mathcal{S}_{\text{safe}}} \left[ \sum_{t=0}^{T} \beta^t u(c_t, l_t) + \beta^{T+1} V_\phi(s_{T+1}) \right]
+\end{equation}
+Soft penalties apply for constraint violations (labor feasibility, tax bounds, debt limits) during rollout.
+
+\textit{Purpose:} Learn optimal behavior in the confidently feasible interior.
+
+\paragraph{Stage 2: Boundary Marking via Supervised Learning.}
+\textit{(Optional; controlled by \texttt{use\_two\_stage\_training} flag.)}
+
+Train $\pi_\theta$ on $\mathcal{S}_{\text{safe}} \cup \mathcal{S}_{\text{fail}}$ for $N_{\pi,2}$ epochs using MSE loss:
+\begin{itemize}
+    \item For $s \in \mathcal{S}_{\text{safe}}$: Target $= \pi_\theta(s)$ (current network output, preserving Stage 1 solution).
+    \item For $s \in \mathcal{S}_{\text{fail}}$: Target $= [\sigma^{-1}(\mu_{\max}), \sigma^{-1}(\mu_{\max})]$ where $\sigma^{-1}$ is the logit function.
+\end{itemize}
+
+\textit{Purpose and Mechanism:}
+\begin{enumerate}
+    \item \textbf{Preserve optimality:} By using the current output as target for $\mathcal{S}_{\text{safe}}$, Stage 1's learned policy is retained.
+    \item \textbf{Mark infeasible states:} For states in $\mathcal{S}_{\text{fail}}$, the policy is trained to output $\mu' = \mu_{\max}$ (minimum consumption). This serves as an explicit ``failure signal'' that:
+    \begin{itemize}
+        \item Is economically interpretable: $\mu_{\max} \Rightarrow c_{\min}$, indicating the state is so constrained that only minimal consumption is feasible.
+        \item Creates coordination with value training: The value network learns to associate $\mu_{\max}$ outputs with low values.
+        \item Provides a detectable boundary: Downstream analysis can identify when the policy outputs $\mu_{\max}$ as indicating proximity to or entry into the infeasible region.
+    \end{itemize}
+\end{enumerate}
+
+\paragraph{Note on False Negatives.}
+Stage 2 does \textit{not} directly help the policy discover better actions at misclassified states. If a state in $\mathcal{S}_{\text{fail}}$ is actually feasible (a false negative), Stage 2 will still force the policy toward $\mu_{\max}$ there.
+
+However, false negative correction occurs through the \textbf{outer fixed-point loop}:
+\begin{itemize}
+    \item As the policy improves on $\mathcal{S}_{\text{safe}}$ during Stage 1, the implied debt dynamics and boundary estimates $\Omega_B(\mu, g)$ may shift.
+    \item At the next boundary refinement, some previously ``infeasible'' states may now satisfy $\mathcal{A}(s) > \tau_{\text{high}}$ and be reclassified into $\mathcal{S}_{\text{safe}}$.
+    \item These recovered states then receive proper optimality training in subsequent Stage 1 iterations.
+\end{itemize}
+This is the mechanism by which the algorithm can expand its estimate of the feasible set over training.
+
+\subsubsection{Value Training}
+The value network $V_\phi$ is trained via MSE regression on simulated returns:
+\begin{equation}
+    \min_\phi \mathbb{E}_{s \sim \mathcal{S}_{\text{safe}}} \left[ \bigl(V_\phi(s) - V_{\text{sim}}(s)\bigr)^2 \right]
+\end{equation}
+where $V_{\text{sim}}(s)$ is obtained by rolling out policy $\pi_\theta$ from state $s$.
+
+If two-stage training is enabled, the training dataset is augmented with penalty data:
+\begin{equation}
+    \mathcal{D}_{\text{value}} = \{(s, V_{\text{sim}}(s)) : s \in \mathcal{S}_{\text{safe}}\} \cup \{(s, V_{\text{penalty}}) : s \in \mathcal{S}_{\text{fail}}\}
+\end{equation}
+where $V_{\text{penalty}}$ is a large negative constant (e.g., $-50$, specified by \texttt{v\_threshold} in config).
+
+\textit{Purpose:} Training the value network on $\mathcal{S}_{\text{fail}}$ with penalty values:
+\begin{itemize}
+    \item Prevents the value network from extrapolating high values into infeasible regions.
+    \item Creates a value ``cliff'' at boundaries that reinforces the policy's incentive to stay in $\mathcal{S}_{\text{safe}}$ during Stage 1 optimization.
+    \item Coordinates with Stage 2 policy training: states where $\pi_\theta$ outputs $\mu_{\max}$ will have correspondingly low values.
+\end{itemize}
+
+Target datasets are regenerated every $N_{\text{draw}}$ epochs to reflect policy improvements.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Simulation Module}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Period $t = 0$: Direct Optimization}
+The initial period problem is solved via numerical optimization (L-BFGS-B):
+\begin{equation}
+    \max_{l_0, \mu'_L, \mu'_H} \left\{ u(c_0, l_0) + \beta \sum_{g'} \pi(g'|g_0) V_\phi(B'_0, \mu'_{g'}, g') \right\}
+\end{equation}
+where $c_0 = l_0 - g_0$, $\mu_0 = 1/c_0$, and $B'_0$ is computed via \eqref{eq:budget}.
+
+\subsubsection{Periods $t \geq 1$: Policy Rollout}
+\begin{enumerate}
+    \item Query policy: $(\ell_L, \ell_H) = \pi_\theta(B_t, \mu_t, g_t)$
+    \item Transform: $\mu'_{g'} = \sigma(\ell_{g'}) \cdot (\mu_{\max} - \mu_{\min}) + \mu_{\min}$
+    \item Compute allocations $(c_t, l_t, \tau_t)$ and bond price $q_t$ via \eqref{eq:consumption}--\eqref{eq:bond_price}
+    \item Compute next-period debt: $B'_t = (B_t + g_t - \tau_t l_t) / q_t$
+    \item \textbf{(Optional)} Clamp: $B'_t \leftarrow \text{clip}(B'_t, B_{\min}(\mu', g'), B_{\max}(\mu', g'))$
+    \item Draw shock: $g_{t+1} \sim \pi(\cdot | g_t)$
+\end{enumerate}
+
+\textbf{Note on Clamping:} During simulation for value targets, clamping prevents extreme debt realizations. During gradient computation, consider whether gradients should flow through the clamp (use soft penalties instead if differentiability is needed).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Complete Algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The algorithm implements the two-level fixed-point structure: the outer loop alternates between network updates and domain updates, while periodic inner loops refine boundaries for fixed networks.
+
+\begin{algorithm}[H]
+\caption{Deep Ramsey Algorithm with Two-Level Fixed-Point Iteration}
+\label{alg:main}
+\begin{algorithmic}[1]
+\Require Config $\mathcal{C}$, Networks $\pi_\theta$, $V_\phi$, Total iterations $K$, Warmup iterations $K_w$
+\State Initialize: History $\mathcal{H} \gets \emptyset$, Bounds $\Omega_B^{(0)} \gets [B_{\min}^{\text{init}}, B_{\max}^{\text{init}}]$
+
+\For{$k = 1$ \textbf{to} $K$} \Comment{\textbf{Outer Fixed-Point Loop}}
+    \State \textbf{// --- Phase Transition ---}
+    \If{$k = K_w$}
+        \State Run Inner Fixed-Point: Boundary Refinement (Section~\ref{sec:boundary_learning})
+    \EndIf
+    
+    \State
+    \State \textbf{// --- Step 1: Sampling (using current $\mathcal{S}_{\text{adm}}$) ---}
+    \If{$k < K_w$} \Comment{Warmup}
+        \State $\mathcal{S}_{\text{train}} \gets \text{SampleFromHistory}(\mathcal{H})$ with perturbations
+        \State $\mathcal{S}_{\text{fail}} \gets \emptyset$
+    \Else \Comment{Adaptive}
+        \State Generate uniform candidates $\mathcal{S}_{\text{cand}}$
+        \State Compute scores $\mathcal{A}(s)$ for all $s \in \mathcal{S}_{\text{cand}}$ using current $(\pi_\theta, \Omega_B)$
+        \State $\mathcal{S}_{\text{train}} \gets \text{WeightedResample}(\mathcal{S}_{\text{cand}})$ based on $\mathcal{A}$
+        \State $\mathcal{S}_{\text{fail}} \gets \{s \in \mathcal{S}_{\text{cand}} : \mathcal{A}(s) < \tau_{\text{low}}\}$
+    \EndIf
+    
+    \State
+    \State \textbf{// --- Step 2: Policy Training (updates $\pi_\theta$) ---}
+    \State \textit{Stage 1:} Update $\pi_\theta$ on $\mathcal{S}_{\text{train}}$ via gradient ascent for $N_{\pi,1}$ epochs
+    \If{\texttt{use\_two\_stage\_training}}
+        \State \textit{Stage 2:} Update $\pi_\theta$ on $\mathcal{S}_{\text{train}} \cup \mathcal{S}_{\text{fail}}$ via MSE for $N_{\pi,2}$ epochs
+        \State \hspace{2em} \textit{// May recover false negatives; will be reclassified at next refinement}
+    \EndIf
+    
+    \State
+    \State \textbf{// --- Step 3: Value Training (updates $V_\phi$) ---}
+    \State Generate $V_{\text{sim}}$ via rollouts from $\mathcal{S}_{\text{train}}$
+    \State Update $V_\phi$ via regression for $N_V$ epochs (regenerate targets every $N_{\text{draw}}$)
+    
+    \State
+    \State \textbf{// --- Step 4: History Update ---}
+    \State $\mathcal{H} \gets \mathcal{H} \cup \{\text{simulated trajectories}\}$; trim to size $H_{\max}$
+    
+    \State
+    \State \textbf{// --- Step 5: Domain Update (Inner Fixed-Point) ---}
+    \If{$k \geq K_w$ \textbf{and} $(k - K_w) \mod f_{\text{cache}} = 0$}
+        \State Run Inner Fixed-Point: Boundary Refinement with updated $\pi_\theta$
+        \State \textit{// Admissible set $\mathcal{S}_{\text{adm}}$ may expand as policy improves}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Convergence Interpretation.}
+The algorithm converges when both fixed-points stabilize:
+\begin{itemize}
+    \item \textbf{Inner:} Boundary estimates $\Omega_B$ are consistent with scores under current policy.
+    \item \textbf{Outer:} Policy $\pi_\theta$ is optimal over $\mathcal{S}_{\text{adm}}$, and $\mathcal{S}_{\text{adm}}$ is the true feasible set under $\pi_\theta$.
+\end{itemize}
+At convergence, the algorithm has simultaneously discovered the endogenous feasible set and the optimal policy over that set.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion and Remarks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Key Design Choices}
+
+\paragraph{Why Two-Level Fixed-Point?}
+The endogenous feasibility constraint creates an unusual algorithmic challenge: we cannot separate ``learning the domain'' from ``learning the policy.'' A policy is only as good as the domain it's trained on, but the domain depends on what the policy can achieve. The nested fixed-point structure is the natural resolution---it allows both to co-evolve while maintaining consistency at each level.
+
+\paragraph{Why Admissibility Scoring Instead of Domain Network?}
+A learned domain classifier would require ground-truth feasibility labels, which are unavailable since feasibility is endogenous and policy-dependent. The admissibility scorer provides economically-grounded signals based on observable quantities (tax rates, debt dynamics) without requiring supervision.
+
+\paragraph{Why Two-Stage Policy Training?}
+The two stages serve complementary purposes:
+\begin{itemize}
+    \item \textbf{Stage 1} optimizes for welfare in the confidently feasible interior via gradient ascent on simulated returns.
+    \item \textbf{Stage 2} explicitly marks infeasible states by forcing the policy to output $\mu_{\max}$ (minimum consumption) there. This creates a coordinated signal: the value network learns to assign low values where the policy outputs $\mu_{\max}$, reinforcing the boundary.
+\end{itemize}
+Importantly, Stage 2 does \textit{not} help the policy discover better actions at infeasible states---it purely marks them. Discovery of misclassified states happens through the outer fixed-point loop.
+
+\paragraph{Why $\mu_{\max}$ as the Failure Signal?}
+The choice of $\mu_{\max}$ (corresponding to minimum consumption $c_{\min}$) provides:
+\begin{itemize}
+    \item \textbf{Economic interpretability:} A state so constrained that the government can barely sustain consumption.
+    \item \textbf{Detectability:} A clear, recognizable output that downstream analysis can identify.
+    \item \textbf{Consistency:} A deterministic corner value rather than arbitrary outputs in unexplored regions.
+\end{itemize}
+
+\paragraph{Why Proportional Buffer Widths?}
+Fixed absolute buffers fail when domain scales differ. Proportional buffers (e.g., 5\% of domain width) ensure consistent gradient signal magnitude across variables.
+
+\subsection{The Discovery Mechanism}
+A subtle but important feature: the algorithm can \textit{expand} its estimate of the feasible set over time, even though Stage 2 does not directly help recover false negatives. The mechanism works as follows:
+\begin{enumerate}
+    \item Stage 1 improves the policy on $\mathcal{S}_{\text{safe}}$, potentially finding better debt management strategies.
+    \item Better policies imply different debt dynamics, which shift the boundary estimates $\Omega_B(\mu, g)$ at the next refinement.
+    \item States previously classified as infeasible (because the old policy couldn't sustain them) may now have $\mathcal{A}(s) > \tau_{\text{high}}$ under the improved policy.
+    \item These recovered states join $\mathcal{S}_{\text{safe}}$ and receive optimality training in subsequent iterations.
+\end{enumerate}
+This means initial conservative bounds do not permanently limit the solution---the algorithm discovers the true feasible frontier through learning.
+
+\subsection{Hyperparameter Sensitivity}
+Critical parameters requiring tuning:
+\begin{itemize}
+    \item $\tau_{\text{high}}, \tau_{\text{low}}$: Partition thresholds affecting safe/boundary/fail classification. Too aggressive risks false negatives; too conservative slows convergence.
+    \item $\alpha$: Quantile parameter for boundary estimation (robustness vs. coverage).
+    \item $N_{\text{refine}}$: Inner loop iterations (typically 3 suffices for convergence).
+    \item $f_{\text{cache}}$: Frequency of boundary updates. Too frequent wastes computation; too rare causes policy-domain mismatch.
+    \item $(w_\tau, w_\mu, w_B)$: Score component weights.
+    \item $V_{\text{penalty}}$: The penalty value for infeasible states (e.g., $-50$). Should be significantly below typical feasible values.
+\end{itemize}
+
+\subsection{Extensions}
+\begin{itemize}
+    \item \textbf{Continuous shocks:} Replace discrete $g \in \{g_L, g_H\}$ with continuous distribution; requires integration over shock space in expectations.
+    \item \textbf{Multiple state variables:} Extend boundary estimation to higher dimensions via $k$-d trees or neural density estimation.
+    \item \textbf{Heterogeneous agents:} Incorporate distribution of households; feasibility constraints become distributional.
+\end{itemize}
+
+\end{antml:parameter>

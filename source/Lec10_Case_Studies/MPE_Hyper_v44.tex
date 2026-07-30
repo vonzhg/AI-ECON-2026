@@ -1,0 +1,1787 @@
+%% LyX 2.4.1 created this file.  For more info, see https://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[12pt]{article}
+\usepackage[latin9]{inputenc}
+\usepackage{mathrsfs}
+\usepackage{geometry}
+\geometry{verbose}
+\usepackage{float}
+\usepackage{amsmath, amsthm, amssymb}
+\usepackage{tikz-cd}
+\usepackage{graphicx}
+\usepackage[authoryear]{natbib}
+\usepackage[bookmarks=false,
+ breaklinks=false,pdfborder={0 0 1},backref=section,colorlinks=false]{hyperref}
+\usepackage{subcaption}
+\usepackage{everypage}
+\usepackage{lastpage}
+\usepackage{multirow}
+\usepackage{textpos}
+\usepackage{nicefrac}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{pdfpages}
+\usepackage{url}
+\usepackage{fullpage}
+\usepackage[multiple]{footmisc}
+\usetikzlibrary{calc,arrows,automata,shapes.misc,shapes.arrows,chains,matrix,positioning,scopes,decorations.pathmorphing,shadows}
+\usepackage[page, title]{appendix}
+
+\renewcommand{\appendixpagename}{Online Appendix}
+
+% Theorem Environments
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+% Separate Numbering
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{condition}{Condition}[section]
+
+% Fix for Environment "Theorem" undefined
+\newtheorem{Theorem}[theorem]{Theorem}
+% Fix for Environment "Corollary" undefined
+\newtheorem{Corollary}[theorem]{Corollary}
+\newtheorem{Proposition}[theorem]{Proposition}
+% Layout and Geometry
+\setlength{\TPHorizModule}{1in}
+\setlength{\TPVertModule}{1in}
+
+% --- Preamble ---
+\usepackage{algorithm}      % for the algorithm counter & list
+\usepackage{algpseudocode}  % algorithmicx syntax
+\usepackage{caption}        % for \captionof
+
+% Make algorithmic a bit more compact
+\algrenewcommand\algorithmicindent{0.8em} % default ~1.0–1.2em
+\algrenewcommand\textproc{\textsf}        % shorter function names if you use \textproc
+\algtext*{EndFor}\algtext*{EndIf}\algtext*{EndWhile} % hide closing keywords to save lines
+
+% A breakable "algorithm" that can span pages
+\makeatletter
+\newenvironment{breakablealgorithm}
+  {%
+   \par\addvspace{\topsep}
+   \refstepcounter{algorithm}%
+   \noindent
+   \hrule height .6pt\relax
+   \vspace{3pt}%
+   \textbf{Algorithm \thealgorithm.}%
+   \qquad
+   % \captionsetup can style this if you want
+   % capture a caption with \captionof below
+  }
+  {%
+   \vspace{3pt}%
+   \hrule height .6pt\relax
+   \par\addvspace{\topsep}
+  }
+
+% Spacing
+\onehalfspacing
+
+% Custom Commands (add your own if needed)
+
+% End of Preamble
+
+% Custom Commands (add your own if needed)
+
+% End of Preamble
+
+
+\makeatother
+
+\begin{document}
+\newgeometry{left=2cm, right=2cm, top=3cm, bottom=3cm} \onehalfspacing 
+\title{Markov Equilibria  with Quasi-Hyperbolic Discounting\thanks{We are most grateful  to Rabah Amir,  Martin Jensen, Kevin Reffett,  and Lukasz Wozny for helpful guidance.
+We benefitted from several discussions with Felix Kubler, Chenfeng Shen, participants of the 2025 SAET Conference,  Ischia, Italy, and the  2025 Omaha Macroeconomics Forum. This work was completed using the facilities
+at the Holland Computing Center of the University of Nebraska,  supported by the Nebraska Research Initiative, and the NCSA
+at University of Illinois, supported by  the NSF's
+ACCESS program under grant no. SOC250017. }}
+\author{Zhigang Feng\thanks{Department of Economics, University of Nebraska, Omaha, NE 68106.
+E-mail: z.feng2@gmail.com.}\\
+ {\small{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}}\and
+Manuel S. Santos\thanks{Department of Economics, University of Miami, 5250 University Drive,
+Coral Gables, FL 33146. E-mail: msantos@bus.miami.edu.} \\
+ {\small{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}}}
+\date{Current version: \today}
+\maketitle
+
+
+
+
+
+
+
+\begin{abstract}
+
+ 
+
+ We study  existence and characterization of Markov equilibria  with  quasi-hyperbolic discounting. 
+For the neoclassical growth model,
+ under new differentiability properties we show dynamic stability. Broadly speaking,  steady states are saddle-path stable, and isolated.
+ Then, we provide a constructive proof  of existence of a Markov equilibrium in a general dynamic framework
+with several state variables.
+The (Markov) equilibrium is obtained as  the limit of   a
+sequence of $\varepsilon$-equilibria---circumventing some  non-removable  discontinuities
+of  the 
+equilibrium functions.  
+These results lay out the foundations for the qualitative 
+study and computation   of
+time-consistent economic policy in various environments.   
+
+
+        
+\textbf{JEL Classification}: F3, F4.
+
+
+\textbf{Keywords}: Quasi-Hyperbolic Discounting, Neoclassical Growth Theory,  Time-Consistent Policy,  Markov Equilibrium, Numerical Model Simulation.
+\end{abstract}
+\restoregeometry \pagebreak{}
+
+
+
+
+\section{Introduction}
+
+We  present several  results on existence and characterization of Markov equilibria in a   dynamic framework  with quasi-hyperbolic discounting. We motivate  our approach  with   an extended  version of the  neoclassical 
+growth model.  The neoclassical growth model is usually the starting point of many economic applications. Certainly, there are  notable differences with respect to the simpler convergence patterns  of traditional neoclassical  growth theory; particularly, the policy function may not be continuous, and   steady states cannot be pinned down from the  first-order condition or Euler equation---posing further challenges for numerical simulation. Nonetheless,  under strong concavity of the utility and production functions the equilibrium law of motion for the growth dynamics  is $strictly$ monotone increasing [e.g., \citet{amir2005} and  \citet{DECHERT1983332}]. While there could be 
+  jumps or non-removable  discontinuities at points with multiple  solutions,  we    establish some new differentiability properties of the value and policy functions
+  at points of continuity, which are useful to study  dynamic stability. We show that  the linearization of the Euler equation at a generic steady state  does not admit either zero or unit roots. Broadly speaking, every
+  steady state is   saddle-path stable and isolated.  Thus, we rule out  steady-state indeterminacy under our assumptions.  
+  
+  
+  
+ 
+  The presence   of jumps  in the equilibrium dynamics has constrained  the study  of many relevant  economic models with time-inconsistency, which are usually   limited to the simplest cases. In an attempt to fill in this gap in the literature, 
+  we provide  a  general proof of existence of a Markov equilibrium in a more  abstract setting  with quasi-hyperbolic discounting over a compact domain $\Theta$  with several predetermined state variables, $\Theta \subseteq \mathbb{R}^{n}_{+},$ for
+  $n \ge 1$. We propose a two step-approach to the existence of  Markov equilibria. We first consider  an approximate  iteration  scheme that  searches  over uniformly   continuous policy  functions based   upon an  approximate derivative of the value function. Then, the  Markov equilibrium is obtained  as a limit of a sequence of these approximate equilibria (which we term $\varepsilon$-equilibria). This  existence result lays out   the  foundations for the  qualitative study  and 
+computation  of time-consistent economic programs  in various economic environments.\footnote{This  two-step approach is    a common mathematical method  in economics that  allows for a simpler and constructive proof.  A fixed-point theorem is applied  on a simplified, approximated setting, and then  the  transition to the original model builds on a limit argument, proving existence by showing the approximate solution converges to a true  equilibrium. Some strong assumptions for the application of the fixed-point  theorem need not be imposed on the original model, which  can be  of interest for  numerical simulation.}
+ Our analysis 
+ suggests that  a broad family of models with behavioral discounting and related  time-inconsistency biases can be quite tractable.  
+ 
+
+
+Quasi-hyperbolic discounting  is formally  referred  as  $(\beta, \delta)$-discounting, where  $0<\beta<1$ is the extra  \textit{short-term discount factor}, which   picks  an 
+additional  degree of impatience between times $t= 0$ and $t=1$, and $0< \delta<1$  is  the common or \textit{long-term discount factor} between   times $t$ and $t+1$, for all $t \ge 0$.  Hence,  $\beta$ becomes  a  source of dynamic inconsistency. That is, today's consumption and investment plans may be reversed  in the future---posing  a conflict between what  is desirable in the present and at other points in time.  Many  other forms of  behavioral discounting [cf., \citet{laibson1997}]  cause this temporal conflict between different ``selves'' of the same individual. A main implication is that  time-consistent  outcomes cannot be viewed   as optimal planning programs, and may need to be redefined in a   game-theoretic framework [\citet{strotz1955}, \citet{Pollak1968},  \citet{Peleg1973}]. 
+    In our numerical work below  we show that steady-state  values are mostly influenced by  $\delta$, but time-inconsistency  aligns well with  $\beta$, causing higher volatility of macroeconomic aggregates.
+
+Besides, forward-looking governments  could be  time-inconsistent. Rather than a present-time bias, a main  source of time-inconsistency can be the lack  of credibility of some announced policy---undermining  private-sector expectations and leading to a worse-than-expected outcome.  Starting with   \citet{BARRO1983}, \citet{Calvo1978},  and  \citet{kydland1977}, a central tenet in macroeconomics  is that  economic policy is  bound to be time-inconsistent: a government may change their  announced plans  if given the opportunity to re-optimize at a future date.  Several   macroeconomic    models with time-inconsistency could be recasted in a pseudo-optimization framework where the present results may be applied---including   overlapping-generation models  with voting and  altruistic bequests as mentioned below. 
+
+
+ 
+
+
+In conclusion, in the absence of binding commitments  time-inconsistency  pervades many areas of economics---escaping  the domain   of  optimal  control theory.  For concreteness, suppose that  our planner has preferences of the form, $ u(c_{0}) + \beta \left( \delta u(c_1) + \delta^2 u(c_2) + \delta^3 u(c_3) + \cdots \right)$ where $c_t = f(k_t) - k_{t+1}$ for all $t \ge 0$. We are looking for a \textit{time-consistent rule} or \textit{policy function}, $k_{t+1} = g(k_t),$  technically referred as  a \textit{stationary Markov perfect equilibrium}. Therefore,   $g(k)$ dictates  future plans defining    a   continuation value function $V(k)$ under   $0 < \delta <1$, while $g(k)$ must also be an   optimal rule from the standpoint  of today's decision maker whose  current value function $W(k)$  involves   the extra   impatience  term, $0 <\beta <1$. More precisely, 
+\begin{flalign}
+    \text{(i)}   && \hfill V(k_0) &= u(f(k_0) - g(k_0)) + \delta V(g(k_0)), \hfill & \label{eq:markov_i} \\
+    \text{(ii)}  && \hfill W(k_0) &= \max_{k_1} \left\{ u(f(k_0) - k_1) + \beta \delta V(k_1) \right\}, \hfill & \label{eq:markov_ii} \\
+    \text{(iii)} && \hfill   k_1 = g(k_0) &= \arg \max \left\{ u(f(k_0) - k_1) + \beta \delta V(k_1) \right\}. \hfill & \label{eq:markov_iii}
+\end{flalign}
+
+\paragraph {Related Work} We can now give  some pointers to related existence results  of time-consistent policies  over a broad class of models.
+Some  examples have been discussed in which $g$ displays some  non-removable discontinuities [\citet{Chatterjee2016},  \citet{Leininger1986}, \citet{morris_2020}, \citet{Peleg1973}], reinforcing    the    belief  that  a Markov
+equilibrium would only occur under rather restrictive conditions.\footnote{  In accordance with  several well-known instances of discontinuities in   the one-sector growth model, our  Markov equilibrium will (only) be well-defined and continuous at almost all points.} From this perspective, the literature has branched out in three main  directions: \textit{(i) Linear technologies.} \citet{Phelps1968}  search for a fixed point over constant 
+saving ratios in a model with a linear technology  and CRRA utility. \citet{KOHLBERG19761} shows uniqueness of a smooth  equilibrium consumption schedule in a related altruistic model.  \citet{Cao2018} present  a more general class of utilities  as well as  nonlinear equilibrium functions.  They show that  saving and dissaving may occur over all  wealth levels, and  there could be multiple equilibria. Incidentally,   these results are of interest for  the traditional consumption  buffer-stock model  with linear returns for   economic  agents    facing   stochastic incomes  under        incomplete financial markets and   borrowing constraints.  \textit{(ii) Added extrinsic  uncertainty and randomization.}   Endowment and production uncertainty  may   insure   continuity  of the above value function $V$, and    lottery-based mechanisms may yield concavity of $V$  as well as   continuity of the decision rule $g$ [\citet{Balbus_2018}, \citet{Bernheim1986},  \citet{Chatterjee2016},  \citet{Harris2001},  \citet{jaskiewicz_2021}]. This second approach can be quite attractive for welfare analysis and computation, but we still lack an asymptotic theory of the approximation error to the true  solution.  \textit{(iii) Other simplifying assumptions besides linearity.} Here,  we lump together some work concerned with existence and characterization of   policy function $g$. Starting with \citet{Leininger1986}, the idea  is just to consider  simple economic structures---exploiting  some properties of the decision rule $g$ such as  monotonicity and upper hemi-continuity [see  \citet{BALBUS2022105493} for a  recent development],  while  recognizing     inherent technicalities from jumps in the equilibrium dynamics.
+
+
+All these papers are concerned with   aggregative models of a single predetermined  state variable, whereas many interesting macroeconomic settings  of fiscal and monetary policy are multidimensional  (e.g., physical capital   and public debt).  Most of this literature focuses on   iterative arguments   over   either the policy function $g$ or  the continuation value function $V$.
+ Central to our  method of proof is a  generalized form of  Bellman's equation, where we can think of   $W$ as  an envelope (marginal) function with bounded derivatives, and $\varLambda$ as  the associated correspondence of optimal solutions,  defined over  a compact domain  $\Theta \subseteq \mathbb{R}^{n}$, for $n \ge 1$. 
+First, to 
+ circumvent the aforementioned discontinuities of $g$ and $V$, we take a numerical analysis perspective  and  consider an approximate   $\varepsilon$-derivative (some average slope) leading to    continuous policy  functions with bounded slope. And second,  we establish convergence of the   $\varepsilon$-equilibria to the fixed-point solution   $(W^{\ast},  \varLambda^{\ast}).$ 
+ 
+ 
+ 
+  By the envelope theorem, the pair  $(W,  \varLambda)$ exhibits  some regularity properties, which may  translate into better convergence properties\footnote{In recursive infinite-horizon optimization, the existence of a Markov  equilibrium is usually based on a convergent iterative process  to justify the  interchange of the \textit{``lim''} and \textit{``max''} operators [e.g., \citet{StokeyLucas}]. Hence, stronger  regularity properties (continuity, differentiability) on the functional space may mean    weaker required conditions on the convergence process. Besides,  further  conditions on the  functional space (e.g., convexity and completeness) may be   needed for the existence of a  fixed point.} of these  approximations  to a fixed-point solution $(W^{\ast},  \varLambda^{\ast}).$  Accordingly, we first aim to show that  value function  $W$ is a continuous mapping with well-defined bounded directional  derivatives. This implies that   $W$ is  Lipschitz continuous, and so it is differentiable at almost all points.
+Second, as another   twist to  the envelope theorem, from  function $W$ we can back out the associated correspondence of  equilibrium  policies $\varLambda$. Under mild assumptions, we establish  that this  correspondence $\varLambda$  is single-valued and continuous at almost all points. And third, again  by the envelope theorem  these regularity properties of $\varLambda$  entail that  the value function $W$  is  continuously differentiable at those points $\theta$ of existence of the derivative $DW(\theta)$. The  time-consistent policy rule $g$ and  continuation value function $V$ are univocally  defined and continuous at almost all points $\theta$.
+
+  A main motivation for this research agenda  is to understand and quantify the economic effects  and welfare properties of time-consistent policies.
+   The  existence of Markov equilibria may then 
+ be seen as a starting point  for the construction  of reliable  numerical approximations.
+ As already emphasized,  the equilibrium law of motion may be discontinuous.
+ Another lingering issue   has been  the multiplicity of steady-state equilibria [\citet{Krusell_Smith2003_ECTA}], which may question the use of some numerical approaches.\footnote{ We work with some  carefully chosen assumptions (especially strong concavity). The equilibrium dynamics for the one-sector model are strictly monotone increasing [e.g., \citet{amir2005} and  \citet{DECHERT1983332}]; moreover,  the associated linearized system around a steady state does not contain either  zero or unit  roots. Therefore, for a given Markov equilibrium correspondence, $ \varLambda$,  there is no  steady-state indeterminacy in our framework.}   In particular, it seems that    steady-state  values  cannot be calculated  from the  generalized Euler equation, and so   local approximation methods may not be adequate for model simulation  in the present context.
+\citet{Maliar_2016} reexamine the   indeterminacy of steady-state equilibria  and advocate for a  value-function iteration method---rather than local approximations.
+Similarly, \citet{Jensen2021Ego} proposes a tractable approach to Markov equilibria with several illustrations and economic applications, and makes some progress towards  existence and approximation properties of the  numerical method. 
+\citet{Song_etal2012}
+ study  a model of intergenerational
+conflict over debt, taxes, and public goods, and analyze changes in  
+Markov  equilibria of the voting game over  preference parameters.
+
+
+The paper is structured as follows.  Section 2 deals with  an extended version of the neoclassical growth model.  Section 3 presents our main existence theorems for Markov equilibria in a reduced-form model  with quasi-hyperbolic discounting and multiple predetermined state variables. We also discuss the role of our assumptions, which gets into the fundamental issue of  coping  with equilibrium discontinuities  for related non-optimal economies. Some illustrative computations follow in Section 4 concerning   the interplay   between   $\beta$ and  $\delta$ in the steady-state growth dynamics. Our numerical results seem promising for a successful calibration of our economic model in   macroeconomic applications.  Section 5 ends  with some concluding remarks.  The Online Appendix provides some mathematical background, and details  some supplementary approximation results for our $\varepsilon$-equilibria.     
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+ 
+
+\section{The Neoclassical Growth Model with Quasi-Hyperbolic Discounting}
+
+
+
+
+An  open question  is whether (or under which functional forms and parameter values) models with  exponential  and hyperbolic discounting are observationally equivalent. 
+Here, we make some progress towards the characterization of the equilibrium dynamics for  $(\beta,\delta)$-discounting in  the standard economic growth framework. We focus on     a generalized form of the Euler equation, and exploit some monotonicity and differentiability properties of equilibria.
+ 
+ Let us first  recall the  primitive elements of the model  and the     underlying  basic assumptions.
+
+\textit{Preferences:}
+\begin{equation}\label{eq:preferences}
+u(c_{0}) + \beta \left( \delta u(c_1) + \delta^2 u(c_2) + \delta^3 u(c_3) + \cdots \right).
+\end{equation}
+
+\textit{Parameters:}
+\begin{equation}\label{eq:parameters}
+0 < \beta < 1, \quad 0 < \delta < 1.
+\end{equation}
+
+\textit{Production:}
+\begin{equation}\label{eq:production}
+k_{t+1} = f(k_t) - c_t, \quad t = 0,1,2,\cdots.
+\end{equation}
+
+\textit{Example:} Cobb-Douglas production function,
+\begin{equation}\label{eq:example}
+k_{t+1} = k_t^{\alpha} + (1 - \pi) k_t - c_t, 
+\end{equation}
+where $0 <\alpha <0$ is the capital income share and $0<\pi <1$ is the depreciation rate.
+
+\paragraph{Assumptions for the Economic Growth Model,} \textit{Utility and Production Functions,}  $u: R_+ \rightarrow R$ and  $f: R_+ \rightarrow R_+$  are (strictly) monotone increasing, strongly   concave, of class $C^2$, and satisfy  some Inada-type conditions:  $\lim_{c \rightarrow 0}  u'(c) =  \infty$,    $\lim_{k \rightarrow 0}  f'(k) =  \infty$,  $\lim_{c \rightarrow \infty}  u'(c) =  0$, and $1 > \lim_{k \rightarrow \infty}  f'(k) \ge \kappa,$ for some constant $\kappa>0$.
+
+Here,  prime $(')$ refers  to  the first-order derivative. \textit{These assumptions will apply for all results in this section.} Subsection 2.2 will be the only exception to this rule in which we furthermore assume that  the  correspondence of optimal policies $\varLambda$ is single-valued  (and hence continuous). 
+Then, continuous Markov equilibria  will provide some hints as to what to expect for  the  general case with no particular  restrictions on this equilibrium correspondence (Subsection 2.3).
+
+ 
+
+\paragraph{Stationary Markov Perfect Equilibrium} A Markov equilibrium is described  by a current value function $W$,  a (Markov) equilibrium correspondence  $\varLambda$, a (time-consistent) policy function $g$, and a continuation value function $V$. 
+ Functions $W$ and $V$ are defined as in (\ref{eq:markov_i})-(\ref{eq:markov_ii}). Function $g$ is a selection of $\varLambda$, and
+\begin{equation}\label{eq:optimal1}
+\varLambda(k) = \left\{ k_{+} \mid k_{+} \text{ is a solution to } \eqref{eq:markov_iii} \right\}
+\end{equation}
+
+\noindent for all $k \ge 0$. In the present section the policy function  $g(k)$ will always take the max value of correspondence $\varLambda(k)$, which is upper hemi-continuous. Then, $g$ will be  continuous from the right at all points $k$,  and function $V$ will be  upper semicontinuous  [cf.,  \citet{BALBUS2022105493},  \citet{Leininger1986}]. 
+
+\subsection{General Properties  of Markov Equilibria}
+
+\paragraph{Monotone Dynamics}
+
+
+The following properties of correspondence $\varLambda$  have been discussed in the literature in various ways [e.g., \citet{amir2005},  \citet{DECHERT1983332},  and \citet{KAMIHIGASHI2007435}]
+and follow from our above Assumptions on the utility and production functions. In particular,  the supermodularity embedded in optimization problem (\ref{eq:markov_ii}) implies that  $\varLambda$ is \textit{strictly  monotone increasing}. Further, correspondence  $\varLambda$ is upper hemi-continuous, and so single-valued and continuous at almost all $k$, and function $V$ is upper semicontinuous. 
+
+
+\begin{Proposition}[\textit{Strict} monotonicity of equilibria]\label{monotonicitycorrespondence} 
+Let $k_0 >k'_0$,  with   $k_1 \in \varLambda(k_0)$ and $k'_1 \in \varLambda(k'_0)$. Then, $k_1 > k'_1$.
+\end{Proposition}
+
+
+\begin{Corollary}[Monotone dynamics]\label{monotonicitycorrespondencesequence}
+Let  $k_{1}  \in \varLambda(k_0).$  If $k_1 > k_0$ then $k_2 > k_1$, for $k_2 \in \varLambda(k_1)$, and if  
+$k_1 < k_0$ then $k_2 < k_1$, for $k_2 \in \varLambda(k_1)$.
+\end{Corollary}
+
+\begin{Corollary}[Steady-state convergence]\label{convergence}
+Consider a  sequence $\{k_t \}_{t \ge 0}$ such that  $k_{t+1} \in \varLambda(k_t)$ for every  $t \ge 0.$  Then,  $\{k_t \}_{t \ge 0}$ must converge to a steady state $k^{\ast} =g(k^{\ast})$.
+\end{Corollary}
+
+\begin{Corollary}[Differentiability of the policy function]\label{manuel1}
+The policy function $g$ is differentiable at almost all $k$.
+\end{Corollary}
+
+\begin{Corollary}[Envelope theorem]\label{manuel2} The current value function
+$W$ is differentiable at all $k$ in which $\varLambda(k)$ is a singleton. Moreover,   $W$ is a Lipschitz function on  every compact interval separated from $k= 0$.
+\end{Corollary}
+
+These are standard results, which will be further discussed  below.
+
+\paragraph{A Differentiability Property of $V(\cdot)$}
+
+The following analytical result will be an important tool  in the study of the equilibrium dynamics. 
+
+
+\begin{Theorem}\label{manuel3} Assume that policy function $g$ is a continuous mapping\footnote{\label{footnote_martin} Certainly, understanding the continuous case seems fundamental  for our later analysis of the general equilibrium dynamics below. Further,  many numerical methods  assume   continuity of the   policy function $g$; hence,  researchers should be aware of the  underlying restrictions on the steady-state dynamics from   this continuity property. Finally, the policy function $g$ may be continuous. There are known instances of    analytical  policy functions  as discussed in  Section 4 below. }  on a neighborhood of point $k$.  Then, function  $V$ is of class $C^1$ on a neighborhood of point $k_{+}$, for $k_{+} = g(k)$. 
+\end{Theorem}
+
+\begin{proof} As discussed below, by the Inada-type conditions the solution $k_{+}= g(k)$ lies in the interior  [e.g., see also  \citet{DECHERT1983332}].  Hence, the upper right Dini derivative of function $u(f(k) - k_{+}) + \beta \delta V(k_{+})$ with respect to $k_{+}$ at points $ (k, k_{+})$  for $k_{+} =g(k)$ must be  equal or less than zero 
+on the given neighborhood [e.g., \citet{Giorgi1992}, Theorem 1.17]. This  inequality implies 
+ that the upper right Dini derivative of $V(k_+)$  is bounded by $u'(f(k) - k_{+})/\beta \delta$. Obviously, from (\ref{eq:markov_ii}) we have that $V$ is a non-decreasing function at points of optimality. It follows that $V$ is Lipchitz continuous on such   neighborhood of $ k_{+}$ [\citet{Giorgi1992}, Lemma 1.16],
+and so it is differentiable at almost all  these points. Accordingly,  the first-order condition, $ u'(f(k) - g(k)) = \beta \delta V'(g(k))$, must be satisfied at almost all $k_{+} =g(k)$.  Since $g(k)$ is a continuous function on such neighborhood, and strictly monotone increasing, the derivative $V'(k_{+})$ varies continuously with $k_{+}$ for $k_{+} = g(k)$ whenever such derivative does exist. Therefore,  the generalized gradient in the sense of \citet{Clarke1975} is unique, and so $V$ is of class $C^1$ on the given    neighborhood of $ k_{+}$; see Proposition \ref{Clarke1975_prop} of the Online Appendix.
+\end{proof}
+
+ For  definitions of  Dini derivatives and the generalized gradient, see the Online Appendix. In mathematics, the \textit{Denjoy-Young-Saks theorem} gives some possibilities for the Dini derivatives of a function that hold almost everywhere. Here, the bounds on the Dini derivatives come from the  structure of the dynamic  optimization problem. 
+
+
+
+
+
+
+
+
+
+
+
+\paragraph{The Generalized Bellman and  Euler Equations}
+
+For those points in which $W$ and  $g$ are differentiable, we can derive the corresponding first-order condition or Euler equation  [\citet{Harris2001}]. 
+
+
+From  equations (\ref{eq:markov_i})-(\ref{eq:markov_ii}) we get:
+
+\begin{equation}\label{eq:beta_relation}
+\beta V(k_1) = W(k_1) - (1 - \beta) u(f(k_1) - g(k_1)).
+\end{equation}
+
+\noindent This is the \textit{generalized Bellman equation} [\citet{Balbus_2018}] involving the triple $(g, V, W)$.
+This equation becomes central for the design of computational algorithms.
+
+Corollaries \ref{manuel1} and \ref{manuel2}
+show that these functions are differentiable almost everywhere (for almost all $k$). Totally differentiating (\ref{eq:beta_relation}) with respect to $k_1$:
+\begin{equation}\label{eq:diff_beta_V}
+\beta V'(k_1) = W'(k_1) - (1 - \beta) u'(f(k_1) - g(k_1)) \left(f'(k_1) - g'(k_1)\right).
+\end{equation}
+
+By the envelope theorem, $W'(k_1) = u'(c_1) f'(k_1)$. Then, 
+\begin{equation}\label{eq:envelope}
+\beta V'(k_1) = u'(c_1) f'(k_1) - (1 - \beta) u'(f(k_1) - g(k_1)) (f'(k_1) - g'(k_1)).
+\end{equation}
+
+Assuming that  first-order condition $u'(f(k_0) - k_1) = \beta \delta V'(k_1)$ holds, we  get
+\begin{equation}\label{meq:foc}
+u'(c_0) = \delta u'(c_1) f'(k_1) -  (1 - \beta) \delta u'(c_1) f'(k_1) +  (1 - \beta) \delta u'(c_1) g'(k_1).
+\end{equation}
+
+Rearranging terms, we obtain the \textit{generalized Euler equation}: 
+\begin{equation}\label{eq:euler_simple}
+u'(c_0) =  \beta \delta u'(c_1) f'(k_1) +  (1 - \beta) \delta u'(c_1) g'(k_1).
+\end{equation}
+
+\noindent  Observe that this marginal condition  reflects an extra effect of  capital accumulation  from  future ``selves'' with lower discounting. Next, imposing steady-state conditions, $c_0 = c_1 = c$, $k_0 = k_1 = k$, this equation reduces to:
+\begin{equation}\label{eq:steady_state}
+1 = \beta \delta  f'(k) +  (1 - \beta) \delta g'(k).
+\end{equation}
+
+Finally, from (\ref{eq:steady_state}) we get:
+
+\begin{equation}\label{eq:f_prime_expression}
+f'(k) = \frac{1}{\beta \delta } - \frac{1 - \beta}{\beta} g'(k).
+\end{equation}
+
+ Note that  for   $g'(k)= 1$ in equation  \eqref{eq:f_prime_expression} we get  $f'(k) = \frac{1- \delta (1-\beta)}{\beta \delta }$. This  is the threshold gross  return  in \citet{Cao2018}, which will  be ruled out  by   the strong concavity of  $u(c)$ and $f(k)$; i.e., as presently shown there cannot be a steady state  $k =g(k)$ with $g'(k) \ge 1.$
+
+\subsection{Equilibrium  Dynamics: Correspondence $\varLambda$ Is Single-Valued}
+As already pointed out, this subsection provides a complete characterization of the equilibrium dynamics assuming that    the policy function $g$ displays no jumps. This is a good benchmark case in many economic applications and for the study of the more general case in the subsequent subsection; see footnote \ref{footnote_martin}.  Theorem \ref{manuel3} can now be applied to all $k \ge 0$. 
+
+\begin{theorem}\label{smooth} Assume that equilibrium  correspondence  $\varLambda(k)$ is single-valued at all $k$. Then, functions $W, V$, and $g$ are differentiable of class $C^1$ at all $k>0$.
+\end{theorem}
+
+\begin{proof} By  the envelope theorem (e.g., see Theorem \ref{Danskin} of  the Online Appendix), the current value function $W$ is of class $C^1$ at all $k>0$ since the maximizer $g(k)$  is unique  and lies in the interior.  By Theorem \ref{manuel3}, the continuation value function 
+$V$ is of class $C^1$ since $g$ is strictly  monotone increasing over $R_+$.  By  the inverse function theorem and the chain rule applied to utility function $u$,
+we get  from (\ref{eq:beta_relation}) that $g$ is of class $C^1$ at all $k>0$.
+\end{proof}
+
+Based on the assumed  concavity of $f(\cdot),$  the following becomes evident from  equations (\ref{eq:steady_state})-(\ref{eq:f_prime_expression}) for stationary solutions  $k^{\ast} = g(k^{\ast})$.
+
+\begin{lemma}\label{thm:fixed_r}
+Assume $k^{\ast}, k^{\ast \ast}$ are two steady-state values. If $k^{\ast} > k^{\ast \ast}$, then $g'(k^{\ast}) > g'(k^{\ast \ast}) \ge 0$.
+\end{lemma}
+
+Hence, steady-state values  rank the slope $g'(k^{\ast})$. In particular, there cannot be two steady states $k^{\ast}, k^{\ast \ast}$ with $g'(k^{\ast}) = g'(k^{\ast \ast})$.
+
+
+\begin{Theorem}\label{smoothsteadystates}
+(i) For all  steady states $k^{\ast} =g(k^\ast),$ we must have  $g'(k^{\ast}) \le 1$. \\
+(ii) There is at most one steady state $k^{\ast}$ with $g'(k^{\ast}) < 1$. \\
+(iii)  $k^{\ast} = 0$ cannot be an absorbing steady state.
+\end{Theorem}
+
+
+
+  
+
+\begin{proof}
+ From the Inada-type  conditions, $\lim_{k \to \infty} f'(k) < 1$; hence,    $f(k) < k$ and $g(k) < k$ for large enough $k$. Thus, for the highest steady-state value $k^{\ast \ast}$,  we have that $g'(k^{\ast \ast}) \leq 1$ (i.e., for $k > k^{\ast \ast}$ function  $g(k)$ approaches the  $45^{o}$-degree line from below; see Figure \ref{fig:policy_func_1}).  Lemma \ref{thm:fixed_r} implies that  $g'(k^{\ast }) < 1$ for any other steady state  $k^{\ast } < k^{\ast \ast}$. Since  the policy function  $g$ is continuously differentiable, there is at most one steady state $k^{\ast}$  with $g'(k^{\ast}) < 1$. 
+
+Lastly, from the generalized  Euler equation \eqref{eq:euler_simple}:
+\begin{equation}\label{eq:euler_final}
+\frac{u'(c_0)}{u'(c_1)} = \beta  \delta  f'(k_1) +  (1 - \beta) \delta g'(k_1).
+\end{equation}
+
+\noindent Note that  all RHS terms are non-negative. Therefore,  $c_1 > c_0$ for  small $k_1$, since  $f'(k_1) \to \infty$ as $k_1 \to 0$. This proves that   $k = 0$ cannot be an absorbing steady state.
+\end{proof}
+
+\begin{lemma}\label{ergodicset}
+For every steady state $k^{\ast} = g(k^{\ast})$, we have: 
+\begin{equation}\label{eq:productivity_bounds}
+\frac{1}{\delta} \leq f'(k^\ast) \le  \frac{1}{\beta \delta }.
+\end{equation}
+\end{lemma}
+
+This lemma
+ follows from \eqref{eq:f_prime_expression}, and $0 \le g'(k^{\ast}) \le  1$. The usual equality $\frac{1}{\delta} = f'(k^\ast)$ is restored for $\beta =1$.
+These bounds for the ergodic set have been discussed in  \citet{Barro1999},  \citet{Krusell_Smith2003_ECTA} and \citet{Richter2020}. None of these papers, however, provides a complete characterization of the global dynamics for the neoclassical growth model with $(\beta, \delta)$-discounting.
+
+So far, Figure \ref{fig:policy_func_1} portrays our findings regarding the global dynamics for the present case  in which correspondence $\varLambda$ always maps to a single, unique element. 
+Next, under  the strong concavity of functions $u(\cdot)$ and $f(\cdot)$,  we  show that there cannot be   a steady state $k^{\ast \ast} = g(k^{\ast \ast})$ with  $g'(k^{\ast \ast})= 1.$
+For convenience, we assume that  $g(\cdot)$  has a continuous second-order derivative.
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \caption{A Continuous Policy Function $g(k)$ with Two Steady States.}
+    \label{fig:policy_func_1}
+    
+    \includegraphics[width=0.5\textwidth]{figures/figure_1}
+    
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} Under the  strong concavity of functions $u(\cdot)$ and $f(\cdot)$, there cannot be a  steady state  $k^{\ast \ast}$ with derivative $g'(k^{\ast \ast}) = 1$.
+     \end{minipage}
+\end{figure}
+
+
+
+
+
+\begin{Theorem}\label{unitroot}
+Assume that function $g$ is of class $C^2$. Then, there is no steady state $k^{\ast \ast} = g(k^{\ast \ast})$ with $g'(k^{\ast \ast}) =1.$
+\end{Theorem}
+
+\begin{proof}
+The  proof follows standard arguments [\citet{StokeyLucas}, Ch. 6] after the simple observation that $g'(k^{\ast \ast}) =1$ for the highest 
+ steady state  $k^{\ast \ast} = g(k^{\ast \ast})$ implies that the second-order  derivative $g''(k^{\ast \ast}) \le 0$. 
+This negative value adds to  the strong concavity of $f(k)$ at $k^{\ast \ast}$ for  generalized Euler equation  \eqref{eq:euler_simple}.  
+
+More specifically, let $k^{\ast}$ be a generic steady-state value. Then,  substituting the resource constraint into the generalized Euler equation  \eqref{eq:euler_simple} we get the implicitly defined  non-linear second-order difference equation:
+\begin{equation}\label{eq:euler_H}
+H(k_t, k_{t+1}, k_{t+2}) \equiv u'(f(k_t) - k_{t+1}) - \left(\beta\delta f'(k_{t+1}) + (1 - \beta)\delta g'(k_{t+1})\right) u'(f(k_{t+1}) - k_{t+2}) = 0.
+\end{equation}
+
+Let  $\hat{k}_t := k_t - k^*$. Taking a  first-order Taylor expansion of $H(\cdot)$ around $k^*$, we get 
+\begin{equation}\label{eq:lin-H}
+\left.\frac{\partial H}{\partial k_t}\right|_{k^*} \hat{k}_t + \left.\frac{\partial H}{\partial k_{t+1}}\right|_{k^*} \hat{k}_{t+1} + \left.\frac{\partial H}{\partial k_{t+2}}\right|_{k^*} \hat{k}_{t+2} \approx 0,
+\end{equation}
+where these  partial derivatives are evaluated at $k^{\ast}$:
+\begin{align}
+\left.\frac{\partial H}{\partial k_t}\right|_{k^*} &= u''(c^*) f'(k^*), \label{eq:dHt} \\
+\left.\frac{\partial H}{\partial k_{t+1}}\right|_{k^*} &= -u''(c^*) - \underbrace{\delta\left(\beta f''(k^\ast) +(1 - \beta)g''(k^*)\right)}_{=1 \text{ by \eqref{eq:euler_simple}}}u'(c^*) - u''(c^*) f'(k^*) \nonumber \\
+&= -\left(1 + f'(k^*)\right) u''(c^*) - \delta\left(\beta f''(k^*) + (1 - \beta)g''(k^*)\right) u'(c^*), \label{eq:dHtplus1}\\
+\left.\frac{\partial H}{\partial k_{t+2}}\right|_{k^*} &=   \underbrace{\delta\left(\beta f''(k^\ast) +(1 - \beta)g''(k^*)\right)}_{=1 \text{ by \eqref{eq:euler_simple}}} u''(c^*) = u''(c^*). \label{eq:dHtplus2} 
+\end{align}
+
+Assuming a solution of the form $\hat{k}_t = \lambda^t,$ after dividing \eqref{eq:lin-H} by the leading coefficient $\left.\partial H / \partial k_{t+2}\right|_{k^*} = u''(c^*) \neq 0$, we get  the characteristic equation
+\begin{equation}\label{eq:char-poly}
+P(\lambda) = \lambda^2 - \Sigma \lambda + \Pi = 0,
+\end{equation}
+with
+\begin{equation}\label{eq:Pi}
+\Pi = f'(k^*) > 0,
+\end{equation}
+and
+\begin{equation}\label{eq:Sigma-uprime}
+\Sigma = 1 + f'(k^*) + \delta\left(\beta f''(k^*) + (1 - \beta)g''(k^*)\right) \frac{u'(c^*)}{u''(c^*)}.
+\end{equation}
+
+Observe that  conditions,   $u' > 0$, $u'' < 0$, $f' > 0$, $f'' < 0$,  $g'' \leq 0$, taken together  imply that  $\Pi > 0$, and 
+\[
+\Sigma \geq 1 + f'(k^*) > 0.
+\]
+\noindent  Hence, both characteristic roots are real and positive. Evaluating  polynomial $P(\lambda)$  at $\lambda = 1$,
+\begin{equation}\label{eq:P1}
+P(1) = 1 - \Sigma + \Pi = -\delta\left(\beta f''(k^*) + (1 - \beta)g''(k^*)\right) \frac{u'(c^*)}{u''(c^*)} < 0.
+\end{equation}
+As $P(0) = \Pi > 0$ and $P(1) < 0,$ and $P(\lambda) \to +\infty$ as $\lambda \to \infty$, the two roots must  satisfy
+\begin{equation}\label{eq:root-location}
+0 < \lambda_1 < 1 < \lambda_2.
+\end{equation}
+Thus, the  local dynamics are monotone increasing, and the unique steady state $k^{\ast}$ is \emph{saddle-path stable}. Therefore, there is no steady state $k^{\ast \ast} = g(k^{\ast \ast})$ with  $g'(k^{\ast \ast})=1$.
+\end{proof}
+
+Summing up,  under the above \textit{Assumptions for the Economic Growth Model}, and with no  jumps in the equilibrium dynamics, the policy function is strictly monotone increasing, and  there is a unique steady state, $k^{\ast}= g(k^{\ast}) >0 $, which is globally stable.  Further, Theorem \ref{unitroot} makes clear that the linearization of  equation  (\ref{eq:euler_H}) at a generic steady state $k^{\ast}$ cannot   display   either  zero or   unit roots [see (\ref{eq:char-poly})]. These  local stability properties may extend to  systems  with   one-sided derivatives,  and under  weaker notions of differentiability  bounding the slope of the policy function.
+
+
+
+\subsection{Equilibrium Dynamics in the General Case} 
+Here, \textit{only the above Assumptions for the Economic Growth Model will be in force}. Hence,  $\varLambda(k)$ can map to a set of elements rather  than to a unique point.   As already pointed out, the  selected  policy function $g(k)$ is  the greatest value of $\varLambda (k)$ at all $k \ge 0$.
+It follows that  $g$ is strictly monotone increasing and  continuous from the right. 
+
+We shall be concerned with the  local dynamic  stability about  a steady state $k^{\ast} = g(k^{\ast})$, and the  multiplicity of steady states $k^{\ast} = g(k^{\ast}).$ 
+Obviously, we must realize that policy function $g$ is continuous from the right, and may have jumps or discontinuities at a steady-state solution $k^{\ast}$ and at some other points.
+With  these considerations in mind, we show that in a certain specified way,  steady states $k^{\ast}$ are generally  saddle-path stable at points of continuity [Theorem \ref{nonsmoothsteadystates} (iii), below], and isolated.
+
+More precisely, we say that  steady state $k^{\ast} = g(k^{\ast})$ has a right-side stable arm if there is an orbit $\{k_t \}_{t \ge 0}$ for $k_{t+1} = g(k_t)$,  with $k_{t} > k_{t+1} > k^{\ast}$  for all $t \ge0$, approaching $k^{\ast}$. We say that 
+steady state $k^{\ast}$ has a left-side stable arm if there is an orbit $\{k_t \}_{t \ge 0}$ for $k_{t+1} = g(k_t)$, with $k_{t} < k_{t +1}< k^{\ast}$  for all $t \ge 0$,  approaching  $k^{\ast}$. We say 
+ that steady state $k^{\ast}$ has a right-side unstable arm if there is an orbit $\{k_t \}_{t \ge 0}$ for $k_{t+1} = g(k_t)$ and $k_0$ can be chosen arbitrarily close to $k^{\ast}$, with $k_{t+1} > k_t > k^{\ast}$ for all $t \ge 0$.
+ We say 
+ that steady state $k^{\ast}$ has a left-side unstable arm if there is an orbit $\{k_t \}_{t \ge 0}$ for $k_{t+1} = g(k_t)$ and $k_0$ can be chosen  arbitrarily close to $k^{\ast}$, with $k_{t+1} < k_t < k^{\ast}$ for all $t \ge0$.
+Since  function $g(k)$ is continuous from the right, every  steady state $k^{\ast}$ must have  a (stable or unstable) right-side arm. Moreover,  since  function $g(k)$ is monotone increasing  
+  if steady state $k^{\ast}$ has a (stable or unstable) left-side arm, then function $g(k)$ is continuous from the left at $k^{\ast}$. Also, the highest steady state $k^{\ast \ast} >0$ must have a right-side stable arm
+  but not necessarily a left-side stable arm, whereas the smallest steady state $k^{\ast} >0$ must have both a right-side  arm and a left-side stable arm.
+
+
+\begin{theorem}\label{arm} Suppose that $k^{\ast}$ is a steady state,  $k^{\ast} =g(k^{\ast})$. Then, the right-hand derivative  $V'_{+}(k^{\ast})$ of $V(\cdot)$ at $k^{\ast}$ is well defined (i.e., it does exist). 
+Also, the right-hand   derivative $g'_{+}(k^{\ast})$ of $g(\cdot)$ at $k^{\ast}$ is well defined. There is at most one steady state $k^{\ast \ast}$ with $g'_{+}(k^{\ast \ast}) =  1$, and  $g'_{+}(k^{\ast}) < 1$ for every other steady state $k^{\ast}$.
+
+\end{theorem}
+\begin{proof} This  is an extension of Theorems \ref{manuel3}-\ref{smooth}.  Function $g(k)$ is continuous from the right, 
+and hence it must be right continuous at a steady state $k^{\ast}$. Also, function $V(k)$ is upper semicontinuous and must be continuous from the right.  Moreover,   if the right-hand  derivative $g'_{+}(k^{\ast})$ does exist, then this derivative  will be the same as that of the  absolutely continuous part of $g(k)$ which  does not depend on possible jumps or 
+discontinuities\footnote{More precisely, a  monotone function $g(k)$  can be decomposed into the sum of an absolutely continuous function and a singular function. This decomposition is a consequence of the Lebesgue Decomposition Theorem [\citet{Rudin1974}], p. 130.}  of  function $g(k)$.
+By Corollaries \ref{manuel1} and \ref{manuel2},  functions 
+$W(k)$ and $g(k)$ are differentiable almost everywhere. Also,  by the envelope theorem, the right-hand  derivative  $W'_{+}(k^{\ast})$  is well defined  and it is the limit of the derivatives $W'(k)$ for  all 
+$k \ge k^{\ast}$ in a neighborhood of $k^{\ast}$ [i.e., the one-sided directional derivative of the envelope function  is upper semicontinuous, \citet{Clarke1975}].  Therefore, by virtue of (\ref{eq:beta_relation})-(\ref{eq:diff_beta_V}) we get that  function $V(k)$ is differentiable almost everywhere for $k \ge k^{\ast}$ in a small neighborhood of $k^{\ast}$. The proof now proceeds\footnote{Further details of this proof are presented in Lemma \ref{martin} of the Online Appendix. This proof is of independent interest
+for the study of the local dynamics in related economic models and applications.} as in 
+Theorem \ref{manuel3}. Moreover, following the same arguments of  Lemma \ref{thm:fixed_r} and Theorem \ref{smoothsteadystates} we get that there is at most one steady state $k^{\ast \ast}$ with $g'_{+}(k^{\ast \ast}) =  1$, and  $g'_{+}(k^{\ast}) < 1$ for every other steady state $k^{\ast}$.
+\end{proof}
+
+Note that  Corollary \ref{convergence} guarantees existence of a steady state $k^{\ast} = g(k^{\ast})$. We are now ready to summarize  our main results  for the steady-state dynamics.
+
+\begin{Theorem}\label{nonsmoothsteadystates}
+(i) There is at most one steady state $k^{\ast \ast}= g(k^{\ast \ast})$  with   $g'_{+}(k^{\ast \ast}) = 1$. \\
+(ii) For all other steady states,    $g'_{+}(k^{\ast}) <1$. \\
+(iii) If a steady state $k^{\ast}$ has a left-side  arm, then the   derivative $g'(k^{\ast})$ is well defined and $g'(k^{\ast}) \le 1.$\\
+(iv)  $\frac{1}{\delta} \leq f'(k^\ast) \le  \frac{1}{\beta \delta }$ for every steady state $k^{\ast} = g(k^{\ast})$.\\
+(v)  $k^{\ast} = 0$ cannot be an absorbing steady state.
+\end{Theorem}
+
+The proof of Theorem \ref{nonsmoothsteadystates}  follows from previous arguments. 
+Observe that this theorem  rules out existence of unstable arms at every steady state $k^{\ast}$. Also, we would like to remark that   Theorem \ref{unitroot}  can be of application in the present context so that 
+the linearized system over   the right-hand derivative does  not contain either  a unit root or a zero root  under general conditions.
+Figure \ref{fig:policy_func_2} presents an illustration of the global dynamics.
+The policy function  must be continuous from the right. Every steady state must have a  right-side stable arm.
+
+
+\begin{figure}[htbp]
+    \centering
+    \caption{Equilibrium Dynamics for the Neoclassical Growth Model with Quasi-Hyperbolic Discounting.}
+    \label{fig:policy_func_2}
+    
+    \includegraphics[width=0.5\textwidth]{figures/figure_2}
+    
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} The policy function is  continuous from the right. Steady states are isolated, and display local dynamic stability at points of continuity.
+     \end{minipage}
+    
+\end{figure}
+
+In a topological space, a point in a set is called  isolated if there is  a neighborhood (an open set)  containing the point and  no other points from the set.
+In contrast, a  point in a set is called a  limit point (also called an accumulation point) if  every neighborhood contains another point from the set, besides the point itself. 
+In the following result, we refer to an isolated point within the set of all steady states, $k^{\ast } = g(k^{\ast})$.
+
+\begin{corollary}\label{multiplicity}
+Every steady state $k^{\ast}$ with $g'_{+}(k^{\ast}) <1$ must be isolated. 
+\end{corollary}
+
+\begin{proof} Note that a  steady state $k^{\ast}$  with $g'_{+}(k^{\ast }) <1$  will be isolated if $k^{\ast}$ has a left-side stable arm.
+Also, a steady state is isolated if it has a downward jump.
+\end{proof}
+It follows that steady-state indeterminacy will only happen for a steady state $k^{\ast \ast}$ with $g'_{+}(k^{\ast \ast})  = 1$. Such a steady state has been ruled out above  under certain regularity conditions, which suggests that
+the condition $g'_{+}(k^{\ast \ast})  = 1$  for a steady state $k^{\ast \ast}$ may not hold  under general assumptions.
+
+
+\subsection{Numerical Simulation of the Equilibrium Dynamics}
+
+In the standard neoclassical growth model, approximation methods based on the Euler equation have proved very effective  in  the computation of equilibrium solutions.
+It is not clear, however, that such local approximations are suitable  in the present framework. Besides, there could be jumps  in the equilibrium dynamics, which calls for  numerical discretizations with good approximation properties (e.g., the $\varepsilon$-equilibrium described below).
+
+
+The generalized  Euler equation
+(\ref{eq:euler_simple}) contains an  extra term involving   the derivative of the policy function, and hence one would think that there could be a continuum of steady states.  
+Contrary to this common belief, we have shown that if the policy function $g(k)$ is a  continuous mapping then there is at most a unique steady 
+state $k^{\ast} = g(k^{\ast})$ with $g'(k^{\ast}) < 1$. In
+ the general case,  the policy function is continuous from the right.   Under general conditions,  for every  steady state $k^{\ast}$  the right-hand derivative $g'_{+}(k^{\ast}) \le 1$. There is at most one steady state
+ $k^{\ast}$ with $g'(k^{\ast}) =1$ which could be ruled out under further regularity  conditions;    all other steady states $k^{\ast}$ are isolated with  $g'_{+}(k^{\ast +}) <1$.
+
+We are not claiming that equilibrium  correspondence   $\varLambda$ is unique. There could be a multiplicity of $\varLambda$. Nonetheless,  it is worth noting that 
+our   policy function $g(k)$ is strictly monotone increasing, which strongly limits the scope of
+multiplicity  of equilibria.  The strict monotonicity of $\varLambda(k)$ occurs under rather standard  assumptions.
+Further, as illustrated in Lemma \ref{thm:fixed_r}, steady states are ranked: $k^{\ast} > k^{\ast \ast}$ implies that  $g'(k^{\ast}) > g'(k^{\ast \ast})$.
+ In the constructions  of   \citet{Krusell_Smith2003_ECTA}, it appears that the   policy function is weakly  monotone increasing---outside our analysis.  
+
+
+In the standard neoclassical growth model,  the  steady-state value is just  determined by the discount factor and the marginal productivity of capital; hence, 
+ the equilibrium law of motion can be characterized from the local dynamics; e.g.,  through  the popular use of \textit{shooting methods}.
+It seems that this computation strategy based on local approximations cannot be replicated  in the present model with quasi-hyperbolic discounting in which the first-order condition cannot pin down the  steady-state solutions $k^{\ast}$. Therefore, the computation of the equilibrium dynamics cannot proceed by local approximation methods. As discussed below, 
+ we advocate for iterating over the generalized Bellman equation (\ref{eq:beta_relation}), whereas most researchers iterate over (\ref{eq:markov_i})-(\ref{eq:markov_iii}).
+\citet{Maliar_2016} report  that some computational methods and coarse discretizations of the state space
+may generate steady-state indeterminacy. This  may occur  when approximating non-continuous equilibria over a space of continuous policy functions [e.g., \citet{peralta_santos2010}, Fig.  1]. Then,  \citet{Maliar_2016}  resort to value-function iteration to sort out the  equilibrium dynamics. 
+
+To find a steady-state $k^{\ast} = g(k^{\ast})$ and then  compute  $\varLambda(k)$, a standard  algorithm would run as follows:
+
+ \noindent \textit{STEP 1: Find steady states $k^*$ over the range of values $\frac{1}{\delta} \leq f'(k^*) \leq \frac{1}{\beta \delta}$}.\\
+\textit{STEP 2: Compute the basin of attraction for every steady state $k^{\ast}$}.\\
+\textit{STEP 3: Construct the  correspondence of equilibrium  solutions $\varLambda$}. ``Gluing'' together all  basins of attraction---ruling  out those
+paths which do not satisfy optimality while  keeping in mind that there could be some discontinuities in the equilibrium dynamics.\\
+
+
+
+ Regarding STEP 1, let us conjecture that $k^*$ is a steady-state value. Then, $k^*$ must satisfy the first-order condition:
+\begin{equation} \label{eq:foc}
+u'(c^{\ast}) = \beta \delta V'(k^*).
+\end{equation}
+
+\noindent Now, for a given $f'(k^*)$, we can get $g'(k^*)$ from (\ref{eq:steady_state}). Then, plugging in $g'(k^*)$ in equation (\ref{eq:envelope}), we can calculate $V'(k^*)$. Finally,   
+we substitute out $V'(k^*)$ in \eqref{eq:foc}, and let   $c^* = f(k^*) - k^*$.
+
+ Do those steps characterize a steady-state solution $k^{\ast} = g(k^{\ast})$? We find that all these  terms in \eqref{eq:foc} wash out. Therefore, under our proposed algorithm it  is not plausible to pin down  the set of steady-states $k^{\ast}$ from the above  expressions.
+ More specifically, from (\ref{eq:steady_state}) we obtain 
+\begin{equation} \label{eq:ss_1}
+g' = \frac{1-\beta\delta f'}{ (1-\beta) \delta}.
+\end{equation}
+
+From equation (\ref{eq:envelope}), we have 
+
+\begin{equation} \label{eq:ss_2}
+V' = \frac{u'f' - (1-\beta)u'(f'-g')}{\beta}.
+\end{equation}
+
+Once we combine equation (\ref{eq:ss_2}) with equation (\ref{eq:foc}), after plugging in $g'$ in (\ref{eq:ss_1}) we end up with a vacuous identity ($1=1$) in which  all  terms cancel out. 
+
+Therefore,
+ we have not been able to determine steady-state values $k^{\ast}$ from the generalized Euler equation. It seems that  local approximation methods based on the Euler equation may  not  be suitable  for  the computation of the equilibrium dynamics. This provides further motivation for the use of global  methods  to  cope with discontinuities in the value and policy functions. In the sequel,  we propose an approximation of the  Markov equilibrium (what we term the $\varepsilon$-equilibrium) by Lipschitz policy functions. We show that this approximation  has good convergence properties.
+
+
+
+\section{Existence of Markov Equilibria}
+ Our main purpose here  is to establish existence of a Markov equilibrium   for  a general dynamic model on    a compact domain $\Theta$  with several state variables, $\Theta \subseteq \mathbb{R}^{n}_{+},$ for
+  $n \ge 1$.  Technically, there is a clear dichotomy between the conditions required for the existence of the  fixed-point  solution for the $\varepsilon$-equilibrium  and the convergence of a sequence of   fixed-point  $\varepsilon$-equilibria  to a Markov equilibrium
+  as $\varepsilon \rightarrow 0$,  which prompts this  two-step procedure  in the method of proof.  The approximation of a Markov equilibrium by Lipschitz  policy functions appears to be new in this context, but becomes instrumental for the application of a fixed-point theorem in a Banach space---besides bypassing some technical issues related to the  convexity and completeness of the functional space. 
+
+
+\subsection{The Model}
+We present  a general dynamic  framework with quasi-hyperbolic discounting encompassing   several   economic applications [\citet{StokeyLucas}, Ch. 4]. Our results    can 
+be extended  in various ways; e.g.,   stochastic dynamics. 
+
+\textit{Preferences:}
+\begin{equation}\label{eq:preferences}
+U(\theta_{0}, \theta_{1}) + \beta \left( \delta U(\theta_{1}, \theta_{2}) + \delta^2 U(\theta_{2}, \theta_{3}) + \delta^3 U(\theta_{3}, \theta_{4}) + \cdots \right).
+\end{equation}
+
+\textit{Parameters:}
+\begin{equation}\label{eq:parameters}
+0 < \beta < 1, \quad 0 < \delta < 1.
+\end{equation}
+
+\textit{Feasibility: } Correspondence $\Gamma$ describes all  the feasibility constraints.  A sequence $\{\theta_t \}_{t\ge 0}$ is feasible if
+\begin{equation}\label{eq:production}
+\theta_{t+1} \in \Gamma(\theta_t), \quad t = 0,1,2,\cdots.
+\end{equation}
+
+
+
+\textit{Example:}  Consider a production function $f: \Theta \rightarrow \Theta$. Then, 
+
+\begin{equation}\label{eq:optimal2}
+\Gamma\!\left(\theta_{t}\right)
+  = \left\{\, 0 \le \theta_{t+1} \le f(\theta_t) \right\}.
+\end{equation}
+
+The following assumptions  will hold all throughout.
+
+\paragraph{Assumptions} 
+
+1. \textit{The State Space}:  $\Theta \subseteq \mathbb{R}^{n}_{+}$ is a convex and  compact set with nonempty interior.
+
+2. \textit{The Feasible Set}: $\Gamma : \Theta  \rightarrow \Theta$  is a continuous correspondence with  convex graph:   $A = graph(\Gamma)$ is a   convex set.  $\Gamma(\theta)$ has nonempty interior for each $\theta$. 
+
+3. \textit{The One-Period Return Function}: (i) $U: A \rightarrow \mathbb{R}$ is a continuous mapping, strongly  concave, and twice continuously differentiable.
+(ii) For given $\theta_{+}$ function 
+ $U(\cdot, \theta_{+})$ is increasing in each of the first $\theta$-coordinates, and for given $\theta$ function  $U(\theta, \cdot)$ is decreasing in each of the last $\theta_{+}$-coordinates.
+ (iii)  If $x = D_1U(\theta, \theta_{+})= D_1U(\theta, \theta'_{+})$, then  $\theta_{+} = \theta'_{+}$. (iv) $\theta_+ $ can be expressed as $\theta_+  = h(x, \theta)$ where function $h$ is of class $C^1$.\\
+
+ Apart from 3(iii)-(iv), the assumptions are quite standard (cf. \textit{op. cit.}). Regarding 3(iii)-(iv), 
+  $D_1U(\theta, \theta_{+})$ denotes the vector of partial derivatives of $U$ with respect to the first component vector $\theta$ at point $(\theta, \theta_{+}).$ Then, Assumptions 3(iii)-(iv)  entail some form of strong  concavity. For instance, in  the above  one-sector growth model,
+ $u'(f(k) -k_{+}) = u'(f(k) - k'_{+})$ implies  $k_{+} =k'_{+}$ as  $u$ and $f$ are  assumed to be monotone increasing and strongly   concave. Assumption 3(iv) will just be convenient  in the construction of the  $\varepsilon$-equilibrium.
+ 
+ \paragraph{Stationary Markov Perfect Equilibrium} As before, a Markov equilibrium is described  by a current value function $W$,  a (Markov) equilibrium correspondence  $\varLambda$, a policy function $g$ as  a selection  of  $\varLambda$, and a continuation value function $V$. 
+
+
+ These functions follow equations   (\ref{eq:markov_i})-(\ref{eq:markov_iii}) and  (\ref{eq:optimal1}), and will be further  detailed  below as we lay out  our  functional operator $\mathbb{T}$.  
+   Correspondence $\varLambda$ will be   single-valued at almost all $\theta$. Hence, the policy function $g$ and the continuation value function $V$ will be univocally defined at almost all $\theta$.
+   The current value function $W$ will be Lipschitz continuous, and continuously differentiable at almost all  points $\theta$ in which the derivative $DW(\theta)$ does exist. Moreover, we need to insure that 
+   continuation value function $V$ is   upper semicontinuous for the maximization operator  to be well defined. This may not be true  in the present setting,  and so we will take 
+   the \textit{upper closure}\footnote{\label{footnote_suc} Formally, $V^{suc}(x) = \limsup_{y \rightarrow x} V(y)$. That is, for an $\xi$-ball around $x$ we take $\sup$ $V(y)$  over  all $y \neq x$. Then, we let $\xi \rightarrow 0$.}  of $V$ (i.e., the smallest upper semicontinuous  function $V^{suc}$  majorizing $V$, also called the \textit{upper semicontinuous envelope}). Observe  that taking the upper closure of $V$ [say in (\ref{eq:markov_ii})] will not change  value function $W$  but will find   a maximizer.
+
+  
+   \paragraph{Interiority Condition} [\citet{StokeyLucas}, p. 85] The state space $\Theta$ is separated from $\theta = 0$. Moreover, let $\varLambda^{\ast}$ be a Markov equilibrium correspondence. Then, $\varLambda^{\ast}(\theta) \subseteq 
+    int[\Gamma(\theta)]$ for all $\theta \in \Theta$.\\
+
+This condition is required for the application of standard envelope theorems [\citet{StokeyLucas}, p. 85].  In  most economic applications 
+there is no restriction  of generality to limit the state space to a compact
+capture region $\Theta$ containing the ergodic set [e.g., \citet{kubler_2003}]. We should also note that approximations $(W, \varLambda )$ sufficiently close to  the  Markov equilibrium $( W^{\ast}, \varLambda^{\ast} )$ will also lie in the interior; see \citet{boldrin1989} and the Online Appendix (Remark \ref{ignacio}). 
+Hence, the condition will  hold for sufficiently close  $\varepsilon$-equilibria without imposing further regularity assumptions.
+Our main results below will  only  hinge on  the  above Assumptions (1)-(3) and the Interiority Condition. For the sake of the presentation we will  not enter as  to how  these assumptions may be weakened over the various  results.\footnote{There is certainly  some freedom in  picking the space of functions in   the approximation stage, and hence 
+some   conditions would  only apply  for the Markov equilibrium of the original model.   Indeed,  
+some adaptive procedures and safeguards are usually embedded in a numerical algorithm  for  a guess  $( W, \varLambda )$  quite far from  the true solution $( W^{\ast}, \varLambda^{\ast} )$.} The role of these assumptions to cope with   discontinuities in the equilibrium dynamics will be further discussed at the end of the section. 
+
+
+
+\subsection{Main   Results}
+
+ \paragraph{The Strategy of Proof} The   Markov equilibrium is approached as a limit point of a sequence of $\varepsilon$-equilibria. 
+ Accordingly,  we need to define some  functional spaces and operators for both  the theoretical and approximating models.
+Essentially, the method of proof rests upon  three main results.  First, Lemma \ref{Ascoli} below  states that the set of uniformly bounded
+Lipschitz functions $W:\Theta\rightarrow \mathbb{R}$ with uniform Lipschitz  constant $L >0$  is a nonempty  convex and compact
+subset of the  Banach space of continuous functions endowed with the \textit{sup norm} [e.g., \citet{Rudin1973}, p. 369]. This  uniform bound $L$ over all    value functions $W$ follows from a general  envelope theorem. 
+Second, we define an approximate operator $\tilde{W} \stackrel{\mathbb{T}^A_{\varepsilon}}{\longrightarrow} \hat{W}$ from Bellman's equation. Lemma \ref{convergence_cont} shows that this  $\varepsilon$-operator $\mathbb{T}^A_{\varepsilon}$ takes Lipschitz functions into Lipschitz functions and it is continuous. To insure this continuity property leading to a functional fixed point $W^{\ast}_{\varepsilon}$, operator $\mathbb{T}^A_{\varepsilon}$ works with a numerical computation of the derivative of the value function $W$ (some average slope that we call the $\varepsilon$-derivative). The corresponding  policy function can be computed as per Assumptions 3(iii)-(iv). One readily shows that all steps in the construction of $\mathbb{T}^A_{\varepsilon}$ preserve  uniform Lipschitz bounds for the existence of a fixed point $W^{\ast}_{\varepsilon}$. Finally, the ending part of the method of proof   is Theorem \ref{corollary_cont_Tconvergence}, which shows that a limit point $(W^{li}, \varLambda^{li})$ of a sequence of $\varepsilon$-equilibria $\left\{ (W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon})\right\}_{\varepsilon \ge 0}$ serves to identify   a  Markov equilibrium $(W^{*},\varLambda^{*})$. More precisely, we prove that $W^{\ast} = W^{li}$, and $\varLambda^{li} \subseteq \varLambda^{*}$ with equality at almost all $\theta$.  To establish  that $W^{\ast}$ is an envelope function and $\varLambda^{\ast}$ is the associated correspondence, we conjecture that $W^{\ast}$ is the current value function for the \textit{limit sup} of the sequence of continuation value functions $\left\{ V^{*}_{\varepsilon}\right\}_{\varepsilon \ge 0}$ corresponding to   $\left\{ (W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon})\right\}_{\varepsilon \ge 0}$ [see \citet{Rudin1974}, p. 15, for the definition of the lim sup]. This conjecture 
+ proves to be instrumental  for the underlying approximation arguments, and underscores  a general   upper hemi-continuity  property of   Markov equilibria  under   certain regularity properties [\citet{StokeyLucas}, Thm. 3.8]. Therefore, we cannot insure that all points of $\varLambda^{\ast}(\theta)$ are approximated as $\varepsilon$-equilibria.
+
+
+
+\paragraph{The Functional  Space}    Let   $\mathscr{W}$ be a  closed set  of uniformly bounded
+Lipschitz functions $W:\Theta\rightarrow R$ with uniformly bounded
+Lipschitz constant $L >0$. As is well known, this  is a compact space in the \textit{sup norm} $\lVert \cdot \rVert$; see \citet{Rudin1973}, p. 369.  Let 
+$\mathscr{O}$ be the set   of upper hemi-continuous correspondences $\varLambda : \Theta  \rightarrow \Theta$.
+Then, $\mathscr{O}$ is a compact space in the topology of closed-convergence under  the \textit{Hausdorff distance}
+[\citet{Hildenbrand1974},  p. 16].  We shall also refer to the metric space $\mathscr{W}^{env}\times\mathscr{O}^{env}$, where $\mathscr{W}^{env}$ is the set  of envelope functions  $W,$ which  are  Lipschitz continuous 
+on $\Theta$, and  continuously differentiable at almost all points $\theta \in \Theta$; and    $\mathscr{O}^{env}$ is the space of associated  upper hemi-continuous   correspondences  $\varLambda$, which are  single-valued at all points $\theta$ in which $W$ is differentiable.
+
+\paragraph{Operator $\mathbb{T}$}  Operator $(\tilde{W},\tilde{\varLambda})\stackrel{\mathbb{T}}{\longrightarrow}(\hat{W},\hat{\varLambda})$ is   defined in $\mathscr{W}^{env}\times\mathscr{O}^{env}$, and centers on  Bellman's equation. This operator  can be broken down into  the following steps:
+
+\begin{equation}\label{eq:iteration}
+    \begin{tikzcd}[ampersand replacement=\&]
+        (\tilde{W}, \tilde{\varLambda}) \arrow[r] \arrow[rr, bend right=30, "\mathbb{T}"']
+        \& (\tilde{g}, \tilde{V}) \arrow[r]
+        \& (\hat{W}, \hat{\varLambda}),
+    \end{tikzcd}
+\end{equation}
+
+\noindent where  $(\tilde{W},   \tilde{\varLambda})$ is our   initial guess, and $(\hat{W},   \hat{\varLambda})$ would be  the  updated guess. The policy function  $\tilde{g}$ is a selection of $\tilde{\varLambda}$ which is only defined at those points $\theta$
+in which 
+$\tilde{\varLambda}(\theta)$ is single-valued.  We first  compute our guess for $\tilde{V}(\theta)$ under the generalized Bellman equation [e.g., see (\ref{eq:beta_relation})]:
+
+\begin{equation}\label{eq:beta_relationmanuel}
+\beta \tilde{V}(\theta) = \tilde{W}(\theta) - (1 - \beta) U(\theta, \tilde{g}(\theta)).
+\end{equation}
+
+To extend $\tilde{V}(\theta)$ over  the whole domain $\Theta$  we take the upper closure $\tilde{V}^{suc}$  of $\tilde{V}$. 
+Hence, $\tilde{V}^{suc}(\theta)$ is an upper semicontinuous function; see footnote \ref{footnote_suc}.
+ With the continuation value function $\tilde{V}^{suc}$ in place, we are ready to update our  guess for 
+the current value function $W(\theta)$ and the associated correspondence of optimal solutions  $\varLambda(\theta)$. More specifically,
+
+
+\begin{equation}\label{eq:markov_iimanuel}
+\hat{W}(\theta) = \max_{\theta_{+} \in \Gamma(\theta)} \left\{ U(\theta, \theta_{+}) + \beta \delta \tilde{V}^{suc}(\theta_{+}) \right\},
+\end{equation}
+
+\begin{equation}\label{eq:optimal1manuel}
+\hat{\varLambda}\!\left(\theta \right)
+  = \left\{\,\theta_{+}\;\middle|\; \theta_{+} \text{ is a solution to } (\ref{eq:markov_iimanuel})\right\}.
+\end{equation}
+
+The following extended version of the envelope theorem shows that operator $\mathbb{T}:\mathscr{W}^{env}\times\mathscr{O}^{env}\longrightarrow\mathscr{W}^{env}\times\mathscr{O}^{env}$ is well defined. Certainly, this theorem is a main tool of our analysis.
+
+\begin{theorem}(A General  Envelope Theorem)\label{lucasz} Consider  that function $\tilde{V}^{suc}$ in (\ref{eq:markov_iimanuel}) is  upper semicontinuous on $\Theta$.  Let $\hat{W}(\theta)$ be the value function as defined in (\ref{eq:markov_iimanuel}), and $\hat{\varLambda}$ the associated correspondence as defined in (\ref{eq:optimal1manuel}). Then, under the above Assumptions 1-3 and the Interiority Condition, \\
+(1) Function $\hat{W}$ is  Lipschitz continuous on $\Theta$, and correspondence  $\hat{\varLambda}$ is  upper hemi-continuous; moreover, function $\hat{W}$  is differentiable at almost all points $\theta \in \Theta$, and $\hat{\varLambda}(\theta)$ is single-valued at all these points $\theta$ in which the derivative  $D\hat{W}(\theta)$ does exist.\\
+(2)  $ lim_{\theta' \rightarrow \theta} D\hat{W}(\theta') = D\hat{W}(\theta),$ for every  fixed $\theta \in \Theta$ with a well-defined  derivative $D\hat{W}(\theta)$;  the $limit$ is taken as in footnote \ref{footnote_suc}, over all points $\theta' \in \Theta$ in which  $D\hat{W}(\theta')$ does exist. 
+\end{theorem}
+
+\begin{proof}
+\textit{Part (1)}. Clearly, function $\hat{W}(\theta)$ is well defined since the objective is upper semicontinuous and correspondence $\Gamma(\theta)$ is compact-valued. Moreover, since $\Gamma$ is a continuous correspondence, under  the Interiority Condition we must have that $\hat{W}$ is a continuous function and $\hat{\varLambda}$ is an upper hemi-continuous correspondence; e.g., see  Theorem \ref{Clarke1975_thm} of the Online Appendix, and \citet{Ausubel1993} and  \citet{Leininger1986}
+for further discussion. Next, by the envelope theorem (Theorems \ref{Danskin} and \ref{Clarke1975_thm}  of the Online  Appendix) the directional derivatives of $\hat{W}(\theta)$ are always well defined and uniformly  bounded, since  the  vector of partial derivatives $D_1U(\theta, \theta_{+})$  over all optimal solutions $\theta_+ \in \hat{\varLambda}(\theta)$ is uniformly bounded on compact set  $graph(\hat{\varLambda}) \subseteq A$, where $A$ is defined in  Assumption 2. 
+Therefore,  function  $\hat{W}$
+is  Lipschitz continuous on $\Theta$.\\
+ Moreover,  every Lipschitz function $\hat{W}(\cdot)$ is differentiable at almost all points $\theta$; see the Online Appendix. At  points of differentiability, by the envelope theorem    the derivative $D\hat{W}(\theta) = D_1U(\theta, \theta_{+})$, where $\theta_{+}$ is the optimal choice for the given  $\theta$, and   $\theta_+$ must be unique by Assumption 3(iii). Therefore, $\hat{\varLambda}(\theta)$ is single-valued at those points $\theta$ in which the derivative $D\hat{W}(\theta)$ does exist.\\
+\indent \textit{Part (2)}. Pick a point $\theta$ with well-defined  derivative $D\hat{W}(\theta) = D_1U(\theta, \theta_{+})$. Then, $\theta_+ =\hat{ \varLambda}(\theta)$. Since $\hat{\varLambda}$ is an upper hemi-continuous correspondence and single-valued at point $\theta$, for every $\xi$-ball $B_{\xi}(\hat{\varLambda}(\theta))$  there is $\alpha >0$ such that   $ \hat{\varLambda}(\theta') \subseteq B_{\xi}(\hat{\varLambda}(\theta))$ for all $\theta'$ with  $\lVert \theta' - \theta \rVert <\alpha$. By taking a smaller $\alpha >0$ if necessary,  $\lVert D_1U(\theta', \theta'_+)  - D_1U(\theta, \theta_+ ) \rVert <\xi$ for $\theta_+= \hat{\varLambda}(\theta)$ and all $\theta'_+ \in \hat{\varLambda} (\theta')$  with $\lVert \theta' - \theta \rVert <\alpha$. Therefore,  $ \lim_{\theta' \rightarrow \theta} D\hat{W}(\theta') = D\hat{W}(\theta)$  over all points $\theta' \in \Theta$ in which the derivative $D\hat{W}(\theta')$ does exist, for every fixed $\theta$ with well-defined derivative $D\hat{W}(\theta)$. 
+\end{proof} 
+
+\begin{remark} Note that  the bound $L>0$ is only  determined by function $U(\cdot, \cdot)$, and hence this  upper bound can be inferred   from the vector of partial derivatives $D_1U(\cdot, \cdot)$ over   compact domain  $A$ as defined in  Assumption 2.
+
+\end{remark}
+
+
+
+
+
+\begin{theorem}\label{theorem_cont_T}
+
+Under  the conditions of Theorem \ref{lucasz}, operator $\mathbb{T}:\mathscr{W}^{env}\times\mathscr{O}^{env}\longrightarrow\mathscr{W}^{env}\times\mathscr{O}^{env}$
+has a fixed point $\left(W^{*},\varLambda^{*}\right)$; i.e. there
+exists $(W^{*},\varLambda^{*})$ such that $\left(W^{*},\varLambda^{*}\right)\stackrel{\mathbb{T}}{\longrightarrow}\left(W^{*},\varLambda^{*}\right)$. Moreover, every fixed-point  $(W^{*},\varLambda^{*})$ is a Markov equilibrium.
+
+\end{theorem}
+
+From the definition of operator $\mathbb{T}$ in (\ref{eq:iteration})-(\ref{eq:optimal1manuel}), one readily checks   that every fixed point $(W^{*},\varLambda^{*})$ defines a Markov equilibrium. The proof of Theorem \ref{theorem_cont_T} comprises  several preparatory results  below toward the application of the Schauder-Tychonoff fixed-point theorem (see the Online Appendix) together with a limiting argument. Operator  $\mathbb{T}$ does not seem  suitable for the application of this fixed-point theorem. 
+
+Thus, we first need to frame the fixed-point  problem under an amenable state space. Let us informally start with  an  associated  operator $\mathbb{T}^A: \mathscr{W} \longrightarrow \mathscr{W}$, where $\mathscr{W}$ is the aforementioned space of all Lipschitz functions $W$ with some  uniform  Lipschitz constant $L>0$ as defined above.  
+ Operator  $\tilde{W} \stackrel{\mathbb{T}^A}{\longrightarrow} \hat{W}$ combines  Bellman's equation with the corresponding envelope theorem  following the steps outlined above. More precisely,
+
+
+\begin{equation}\label{eq:associated_operator}
+    % inner xsep adds horizontal padding around the text
+    \begin{tikzcd}[ampersand replacement=\&, column sep=small, nodes={inner xsep=5pt}]
+        \tilde{W} \arrow[r] \arrow[rrrr, bend right=20, "\mathbb{T}^A"']
+        \& (\tilde{W}, D \tilde{W}) \arrow[r]
+        \& (\tilde{W}, \tilde{\Lambda}) \arrow[r, shorten <=-8pt, shorten >=1pt, "\mathbb{T}"]
+        \& (\hat{W}, \hat{\varLambda}) \arrow[r, shorten <=-8pt, shorten >=8pt]
+        \& \hat{W}.
+    \end{tikzcd}
+\end{equation}
+
+
+Summarizing, operator  $\mathbb{T}^A$ begins  with a Lipschitz function $\tilde{W}(\theta)$ which will be transformed to $\hat{W}$.  For this initial guess $\tilde{W}(\theta)$, the derivative $D \tilde{W}(\theta)$ exists at almost all points $\theta$. At those points of differentiability, by  the envelope theorem we can compute the policy function  $\theta_+ = \tilde{g}(\theta)$ from the relation  $D\tilde{W}(\theta) = D_1U(\theta, \theta_+)$.  After application of the above operator $\mathbb{T}$ in (\ref{eq:iteration})-(\ref{eq:optimal1manuel}), we obtain a new guess for   $\hat{W}(\theta)$. From envelope function $\hat{W}(\theta)$ we can compute the derivative function  $D \hat{W}(\theta)$, and associated  correspondence $\hat{\varLambda}(\theta)$, with all the regularity properties of Theorem \ref{lucasz}.
+
+
+Still, for an arbitrary Lipschitz function $W$, operator  $\mathbb{T}^A$ does not have good continuity properties, since the derivative function $DW(\theta)$ is defined almost everywhere, and may not be a continuous mapping over the whole domain $\Theta$.  Hence, we define a  new approximate operator $\mathbb{T}_{\varepsilon}^A$ following these same steps, but under  a weaker notion of the derivative. As in numerical analysis, the idea is to use an $\varepsilon$-approximate derivative  $f^{\prime}_{\varepsilon}(x)\approx \frac{f(x+\varepsilon /2)-f(x-\varepsilon /2)}{\varepsilon}$ (central difference), as a good estimate for  the average slope at every point; here,  $\varepsilon >0$  is a fixed  small positive number. Then,  \textit{both  $f^{\prime}_{\varepsilon}(x)$ and   $f(x)$ share the same continuity properties}. Observe that for every Lipschitz function, $f(b) - f(a) = \int^b_a f'(s)ds$, where the derivative $f'(s)$ is well defined almost everywhere.
+We therefore need to  confirm that operator $\mathbb{T}^A_{\varepsilon}$ fulfills all the required conditions of the   Schauder-Tychonoff fixed-point theorem.
+ 
+ 
+ 
+
+ 
+  \subsection{ Approximation of  Markov Equilibria over  Lipschitz   Continuous Functions}
+
+
+\paragraph{An $\varepsilon$-Derivative   $D_{\varepsilon}W$}  
+This  approximation of the derivative is obtained  by averaging over nearby values.
+Let $\Theta^{W}$ the set of points $\theta$ in which $DW(\theta)$ does exist.  Observe that  $\Theta^{W}$ is a set of full measure.
+Let  $B_{\varepsilon}(\theta)  \subseteq \Theta$ be the $\varepsilon$-ball about $\theta$ in  the metric of the \textit{max norm} in  $\mathbb{R}^{n}_{+}.$ Then, let
+ \begin{equation} \label{average}
+  D_{\varepsilon}W(\theta) = \frac{1}{(2 \varepsilon)^n} \int_{B_{\varepsilon}(\theta) \cap \Theta^{W}} DW(s) ds,
+  \end{equation}
+  
+ \noindent where the integral is defined coordinatewise and  over the Lebesgue measure. In other words,  $D_{\varepsilon}W(\theta)$ is computed  for each coordinate as  the average value over all points $s$ in a fixed small neighborhood 
+ $B_{\varepsilon}(\theta)$ of $\theta$ in which  $DW(s)$ 
+ does exist.  Incidentally, observe that  $B_{\varepsilon}(\theta)$ varies continuously with $\theta$,  and $DW(\theta)$ is uniformly bounded. Hence,  by  a mere application of the  Lebesgue dominated convergence theorem,  function $  D_{\varepsilon}W$ is Lipschitz continuous on $\Theta$. 
+
+
+\paragraph{Operator $\mathbb{T}_{\varepsilon}^A$ }
+The   associated $\varepsilon$-operator  $\tilde{W} \stackrel{\mathbb{T}_{\varepsilon}^A}{\longrightarrow} \hat{W}$  can be broken down into the following steps:
+
+\begin{equation}\label{eq:associated_operatorepsilon}
+    \begin{tikzcd}[ampersand replacement=\&, column sep=small]
+        \tilde{W} \arrow[r] \arrow[rrrrr, bend right=25, "\mathbb{T}_{\varepsilon}^A"']
+        \& \left(\tilde{W}, D \tilde{W} \right) \arrow[r]
+        \& \left(\tilde{W}, \tilde{\Lambda}_{\varepsilon}\right) \arrow[r] \arrow[rr, bend left=30, "\mathbb{T}_{\varepsilon}"]
+        \& \left(\hat{W},D\hat{W}\right) \arrow[r, shorten <=-8pt, shorten >=8pt]
+        \& \left(\hat{W}, \hat{\varLambda}_{\varepsilon} \right) \arrow[r, shorten <=-8pt, shorten >=8pt]
+        \& \hat{W}.
+    \end{tikzcd}
+\end{equation}
+
+
+More specifically, starting with a guess for the value function, $\tilde{W}$, we first compute the derivative $D\tilde{W}$ and the  $\varepsilon$-approximate derivative, $D_{\varepsilon}W$, from (\ref{average}). Then, we let $D_{\varepsilon}\tilde{W}(\theta) = D_1U(\theta, \theta_+)$ to get an estimate for the optimal choice  $\theta_{+}$, and  construct     correspondence $\tilde{\varLambda}_{\varepsilon}$, which is single-valued at all points $\theta \in \Theta$. For  given $(\tilde{W}, \tilde{\varLambda}_{\varepsilon})$, we can get a new guess, $\hat{W}$,  from  (\ref{eq:iteration})-(\ref{eq:optimal1manuel}), as well as the derivative $D\hat{W}$ and  the   $\varepsilon$-derivative $D_{\varepsilon}\hat{W}$ together with correspondence $\hat{\varLambda}_{\varepsilon}$. Observe from  this  expression (\ref{eq:associated_operatorepsilon}) that in analogy with (\ref{eq:associated_operator})  we can define the corresponding operator  
+$\mathbb{T}_{\varepsilon}:\mathscr{W}^{env}\times\mathscr{O}^{env}\rightarrow\mathscr{W}^{env}\times\mathscr{O}^{env}$ from Bellman's equation,  $\left(\tilde{W}, \tilde{\varLambda}_{\varepsilon}\right)\stackrel{\mathbb{T}_{\varepsilon}}{\longrightarrow}\left(\hat{W},\hat{\varLambda}_{\varepsilon}\right)$.
+
+
+
+The following result is well known,  and it is stated for convenience of the presentation.
+
+\begin{lemma}\label{Ascoli}  [e.g., \citet{Rudin1973}, p. 369]
+Let   $\mathscr{W}$ be a  closed set  of uniformly bounded
+Lipschitz functions $W:\Theta\rightarrow R$ with uniform Lipschitz  constant $L >0$. Then,   $\mathscr{W}$ is a nonempty  convex and compact
+subset of the  Banach space of continuous functions endowed with the sup norm $\lVert \cdot \rVert$.
+
+\end{lemma}
+
+Next, we establish that operator  $\tilde{W} \stackrel{\mathbb{T}_{\varepsilon}^A}{\longrightarrow} \hat{W}$ is well defined in the space of Lipschitz  functions $\mathscr{W}$,   and it is a continuous mapping.
+
+
+\begin{lemma}\label{convergence_cont} Let the conditions of Theorem \ref{lucasz} be satisfied. Then,\\
+(1) Operator $\mathbb{T}_{\varepsilon}^A:\mathscr{W} \longrightarrow\mathscr{W}$ is well defined.\\ 
+ (2) Let the sequence of functions $\{\tilde{W}_n \}_{n \ge 0}$ converge to $\tilde{W}$ in the  sup norm $\lVert \cdot \rVert$. 
+Let $\hat{W}_{n} = \mathbb{T}_{\varepsilon}^A(\tilde{W}_{n})$, for all $n \ge 0$, and $\hat{W} = \mathbb{T}_{\varepsilon}^A(\tilde{W})$. Then, $\{ \hat {W_n} \}_{n \ge 0}$ converges to $\hat{W}$ in the sup norm $\lVert \cdot \rVert$.
+
+\end{lemma} 
+
+
+
+\begin{proof}
+\textit{Part (1). We need to show that operator $\tilde{W} \stackrel{\mathbb{T}_{\varepsilon}^A}{\longrightarrow} \hat{W}$ takes Lipchitz functions into Lipschitz functions}. As noted above, this follows from a simple application of  
+the  envelope theorem.   Theorems \ref{Danskin} and \ref{Clarke1975_thm} of the Online Appendix bound the directional derivatives of every function $\hat{W}$ by  the vector of partial derivatives $D_1U(\theta, \theta_{+})$, which is uniformly bounded over compact set $A$.
+Therefore, the bound $L$ applies to all our value functions $W$. Besides, all functions $W$ can be uniformly bounded, since return function $U$ is uniformly bounded.
+
+
+
+\textit{Part (2). Proof of  uniform convergence over  all various steps defining operator $\mathbb{T}_{\varepsilon}^A$ in (\ref{eq:associated_operatorepsilon})}.
+
+\textit{(i)  The $\varepsilon$-approximate derivative $D_{\varepsilon}\tilde{W}$ in (\ref{average}) converges uniformly with the sequence $\{\tilde{W}_n \}_{n \ge 0}$.} As already observed, for fixed $\varepsilon >0$ the numerical derivative inherits  the same continuity and convergence properties as the original function. This statement is basically a consequence of Rademacher's theorem (see the Online Appendix), Fubini's theorem [\citet{billingsley1979probability} p. 199], and the fundamental theorem of calculus.   Indeed,  for every absolutely continuous function $f$ the difference between two values $f(a)$ and $f(b)$ is equal to the integral of the derivatives $f'(s)$ over the segment joining the two points $b$ and $a$. That is, $f(b) - f(a) = \int^b_a f'(s)ds$.
+
+\textit{(ii) Correspondence $\tilde{\varLambda}_{\varepsilon}$ is single-valued and converges uniformly with the sequence $\{\tilde{W}_n \}_{n \ge 0}$}. This statement follows from  Assumption 3(iv). In particular, this is the only step in which we consider that $\theta_+$ can be expressed as $\theta_+ = h(x, \theta)$. Note that  $x$ refers to the value of the derivative $D_{\varepsilon}W(\theta)$, and $h$ is a $C^1$-function on  a compact set. Hence, we can write:  $\theta_+ = h(D_{\varepsilon}W(\theta), \theta)$, and $h$ has bounded derivatives, preserving the uniform convergence of $D_{\varepsilon}W(\theta)$ in part (i).
+
+
+\textit{(iii) Continuation value function  $\tilde{V}_{\varepsilon}$ converges uniformly with the sequence $\{\tilde{W}_n \}_{n \ge 0}$.} Again, we first note that in this construction, $\tilde{\varLambda}_{\varepsilon} $ is single-valued. Moreover, plugging $\tilde{\varLambda}_{\varepsilon}$ in (\ref{eq:beta_relationmanuel}), we can see that 
+$\beta \tilde{V}_{\varepsilon}(\theta) = \tilde{W}(\theta) - (1 - \beta) U(\theta, \tilde{g}_{\varepsilon}(\theta))$ converges uniformly---preserving the uniform convergence of $\tilde{\varLambda}_{\varepsilon}$ in part (ii).
+
+\textit{(iv)  The \textit{max} operator in (\ref{eq:markov_iimanuel}) preserves the   uniform convergence of  $\tilde{V}$.}  Indeed, the contraction property of Bellman's equation under the \textit{max} operator is well known.
+Bellman's   operator  is a contraction mapping with modulus  $0 <\beta \delta <1$. 
+
+Therefore,   Part (1) of this proof  establishes   that  $\hat{W}$ belongs to $\mathscr{W}$, and Part (2)  details   the convergence of  $\{ \hat {W_n} \}_{n \ge 1}$  to $\hat{W}$ in the sup norm $\lVert \cdot \rVert$.
+\end{proof}
+
+
+These two lemmas insure that all the required conditions of the Schauder-Tychonoff fixed-point theorem are met; see Theorems \ref{Schauder's Fixed Point Theorem}-\ref{Tychonoff's Fixed Point Theorem} of the Online Appendix.
+
+\begin{proposition}
+
+Operator $\mathbb{T}^A_{\varepsilon}:\mathscr{W}\rightarrow\mathscr{W}$
+has a fixed point $W^{*}_{\varepsilon}$; i.e.,  there
+exists $W^{*}_{\varepsilon}$ such that $W^{*}_{\varepsilon}\stackrel{\mathbb{T}^A_{\varepsilon}}{\longrightarrow}W^{*}_{\varepsilon}$.
+
+
+
+\end{proposition} 
+
+
+ 
+Observe that every fixed point  $W^{*}_{\varepsilon}= \mathbb{T}^A_{\varepsilon}(W^{*}_{\varepsilon})$ must lie in  $\mathscr{W}^{env}$ and the associated correspondence $\varLambda^{*}_{\varepsilon}$ must lie in $\mathscr{O}^{env}$.
+
+
+
+\begin{corollary}\label{corollary_cont_Tapprox}
+
+Operator $\mathbb{T}_{\varepsilon}:\mathscr{W}^{env}\times\mathscr{O}^{env}\rightarrow\mathscr{W}^{env}\times\mathscr{O}^{env}$ as defined in (\ref{eq:associated_operatorepsilon})
+has a fixed point $\left(W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon}\right)$; i.e., there
+exists $(W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon})$ such that $\left(W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon}\right)\stackrel{\mathbb{T}_{\varepsilon}}{\longrightarrow}\left(W^{*}_{\varepsilon},\varLambda^{*}_{\varepsilon}\right)$.
+\end{corollary}
+
+\paragraph{Existence of A Markov Equilibrium} The proof of Theorem \ref{theorem_cont_T} will be  complete  under  the following approximation result.
+ 
+
+
+\begin{theorem}\label{corollary_cont_Tconvergence} 
+
+
+Let all conditions of Theorem \ref{lucasz} be satisfied. Let $\varepsilon_n \rightarrow 0$ as $n \rightarrow  \infty $. Consider an infinite sequence of fixed points $\left\{ (W^{*}_{\varepsilon_{n}},\varLambda^{*}_{\varepsilon_{n}})\right\}_{n \ge 0}$
+from Corollary \ref{corollary_cont_Tapprox}. Then, $\left\{ (W^{*}_{\varepsilon_n},\varLambda^{*}_{\varepsilon_n})\right\}_{n \ge 0}$ has a limit point $\left(W^{li},\varLambda^{li}\right).$  Moreover,  we can find a continuation value function $V^{\ast}$ such that 
+$ W^{\ast} = W^{li}$ is the current value function for $V^{\ast}$, and $\varLambda^{\ast}$ is the associated correspondence [see  (\ref{eq:iteration})-(\ref{eq:optimal1manuel})] with  $\varLambda^{\ast}(\theta) = \varLambda^{li}(\theta)$ at almost all $\theta \in \Theta$. 
+The pair  $\left(W^{*},\varLambda^{*}\right)$ defines  a Markov equilibrium  $\left(W^{*},\varLambda^{*}\right)\stackrel{\mathbb{T}}{\longrightarrow}\left(W^{*},\varLambda^{*}\right)$.
+
+\end{theorem}
+
+
+\begin{proof} 
+
+\textit{(i).  Convergence of a subsequence of $\left\{ (W^{*}_{\varepsilon_n},\varLambda^{*}_{\varepsilon_n})\right\}_{n \ge 0}$ to some $\left(W^{li},\varLambda^{li}\right).$}  Obviously,  some limit point $(W^{*}, \varLambda^{*})$  does exist, since $\mathscr{W}\times\mathscr{O}$ is a compact metric space. Moreover, the convergence of $\left\{W^{*}_{\varepsilon_n}\right\}_{n \ge 0}$ to   $W^{li}$ is  in the  topology of the  \textit{sup norm}, and the convergence of $\left\{ \varLambda^{*}_{\varepsilon_n}\right\}_{n \ge 0}$   to $\varLambda^{li}$ is in the topology of closed-convergence of the \textit{Hausdorff distance}.  Observe that  $\varLambda^{li}$ is nonempty since the domain $\Theta$ is compact. 
+
+\textit{(ii)  $W^{\ast}= W^{li}  \in \mathscr{W}^{env}.$}
+ Let $\left\{V^{*}_{\varepsilon_n}\right\}_{n \ge 0}$ be the corresponding  subsequence of continuation value functions,  where every $V^{\ast}_{\varepsilon_n}$ is  defined from (\ref{eq:iteration}) for given  $W^{\ast}_{\varepsilon_n}$ and $\varLambda^{\ast}_{\varepsilon_n}$. Then,  let  $V^{\ast} =$  \textit{lim sup}  $\left\{V^{*}_{\varepsilon_n}\right\}_{n \ge 0}$.  As before, we  take the upper closure of $V^{\ast}$ if necessary.\footnote{For the definition of lim sup, see \citet{Rudin1974}, p. 15. The limit superior  (lim sup) of a sequence of real functions $\{f_{n}(x)\}$ is a function, denoted as $\{ \lim \sup _{n\rightarrow \infty }f_{n}(x)\},$ defined pointwise for each $x$ in the domain of the functions. We first let $h_j(x) = \sup_{n \ge j} f_n(x) $, and then make $\limsup f(x) = \inf_j h_j(x)$. Observe that we are picking a ``greedy'' guess for $V^{\ast}$ as we are working with the \textit{max} operator. In our view, part (ii) is the hardest step in the proof of this theorem. All other steps follow related arguments
+ and are deferred to the Online Appendix.}  Next, we claim that $W^{\ast}$ is the value function under  $V^{\ast}$; see (\ref{eq:markov_iimanuel}). First, let us  show that 
+$W^{\ast}(\theta) \ge \max_{\theta_+ \in \Gamma(\theta)} U(\theta, \theta_{+}) + \beta \delta V^{\ast}(\theta_{+})$  for all $\theta \in \Theta.$ The proof of this inequality in the other direction follows related arguments and will be provided in the Online Appendix
+(Lemma \ref{jpablo}). Thus, for given $\theta_0$, suppose that $\theta_1^{\ast} = \arg \max_{\theta_+ \in \Gamma(\theta_0)} \{U(\theta_0, \theta_{+}) + \beta \delta V^{\ast}(\theta_+)\}$. Next, let $\alpha >0$ be an arbitrarily small constant. By the definition of $\lim \sup$, for given $\alpha >0$ we can always find
+ $V^{\ast}_{\varepsilon_n}(\theta_1^{\ast})$ for arbitrarily large $n$ such that $|V^{\ast}_{\varepsilon_n}(\theta_1^{\ast}) - V^{\ast}(\theta_1^{\ast})| < \alpha$ and $\lVert W^{\ast}_{\varepsilon_n} - W^{\ast} \rVert < \alpha$. This proves the required inequality since $\alpha > 0$ is chosen arbitrarily small.
+ Indeed, $W^{\ast} (\theta_0)  + \alpha \ge W^{\ast}_{\varepsilon_n}(\theta_0) \ge U(\theta_0, \theta_{1}^{\ast}) + \beta \delta V^{\ast}_{\varepsilon_n}(\theta_1^{\ast}) \ge U(\theta_0, \theta_{1}^{\ast}) + \beta \delta V^{\ast}(\theta_1^{\ast}) -\alpha$.
+ 
+ 
+ \textit{(iii)  $\varLambda^{*} \in  \mathscr{O}^{env}$.} Let $\varLambda^{\ast}$ be defined as the associated correspondence of optimal solutions for continuation value function $V^{\ast}$ and current value function $W^{\ast}$; see (\ref{eq:markov_iimanuel})-(\ref{eq:optimal1manuel}).  Then, $\varLambda^{*} \in  \mathscr{O}^{env}$. We next show that  $\varLambda^{\ast} (\theta)= \varLambda^{li}(\theta)$ at almost all $\theta$.  In fact, note that from (\ref{eq:associated_operatorepsilon}) there are two operators    $\mathbb{T}_{\varepsilon}$ (the equivalent of  $\mathbb{T}$) and $\mathbb{T}_{\varepsilon}^A$.  These two  approximations    are further discussed in the Online Appendix (Lemmas \ref{psanchez} and \ref{blanca}, respectively) to yield  the  equality  $\varLambda^{\ast} = \varLambda^{li}$ at almost all points. Operator $\mathbb{T}_{\varepsilon}^A$ is of interest for numerical work, and will be addressed presently.
+ 
+ 
+ \textit{(iv)   $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ converges to  $\varLambda^{\ast}$ in the topology of closed-convergence at almost all points $\theta$.}
+First, recall that every Lipschitz function $W(\theta)$ is differentiable almost everywhere. Let $\Theta^{W^{\ast}}$ be the subset of $\Theta$ such that  function  $W^{\ast}(\theta)$ is differentiable for every $\theta \in \Theta^{W^{\ast}}$. Then, 
+$\Theta^{W^{\ast}}$  is a set of full measure. Let $ \Theta^{W^{\ast}}_{cd}  \subseteq \Theta^{W^{\ast}}$ be a \textit{countable and dense subset} of $\Theta$. Second, for a fixed  $\theta_0 \in \Theta^{W^{\ast}}_{cd}$ consider the sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}(\theta_0)\right\}_{n \ge 0}$. By Lemma \ref{blanca} of the Online Appendix,  for every $\theta_0$ the sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}(\theta_0)\right\}_{n \ge 0}$ must converge  to some  point in the set  $\varLambda^{\ast}(\theta_0), $ where $\varLambda^{\ast}$ is the correspondence of optimal solutions\footnote{As shown  in the Online Appendix, Lemma \ref{blanca},  this convergence follows from a similar reasoning as in part (ii) of this proof together with the fact  that the derivative function $DW^{\ast}(\theta)$ is continuous at all $\theta_0 \in \Theta^{W^{\ast}}$.}   defined in part (iii).  Moreover,  $\varLambda^{\ast}(\theta_0),$ must be a singleton since $W^{\ast}$ is differentiable at every $\theta \in \Theta^{W^{\ast}}_{cd}.$ Third,  by the diagonal method [\citet{billingsley1979probability}, p. 292] and taking a subsequence if necessary,   \textit{for all} $\theta_0 \in \Theta^{W^{\ast}}_{cd}$ the
+sequence  $\{\varLambda^{\ast}_{\varepsilon_n}(\theta_0)\}_{n\ge 0}$ converges pointwise to $\varLambda^{\ast}(\theta_0)$ at every $\theta_0  \in \Theta^{W^{\ast}}_{cd}.$  Fourth, following \citet{Hildenbrand1974},  p. 15,  the convergence of  $\{\varLambda^{\ast}_{\varepsilon_n}\}_{n\ge 0}$ extends  over a closed set containing  $\Theta^{W^{\ast}}_{cd}$, and so such convergence applies to the    whole compact domain $\Theta$. Since $\varLambda^{\ast}(\theta_0)$ is single-valued for every $\theta_0 \in \Theta^{W^{\ast}},$ and given the aforementioned convergence property of the sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}(\theta_0)\right\}_{n \ge 0}$ as established in Lemma \ref{blanca} of the Online Appendix, it  follows that $lim$ $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0} =  \varLambda^{\ast}$ on $\Theta^{W^{\ast}}$. 
+
+
+
+
+
+
+
+
+  
+
+  
+  \textit{(v) Existence of a Markov equilibrium.} \textit{(sketch)} By equation (\ref{eq:beta_relationmanuel}) and the above part (iv) of this theorem, we can actually attest that $\left\{V^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ converges to $V^{\ast}$ at almost all points. 
+  After taking  the upper semicontinuous  envelope of $V^{\ast}$,  by the above  part (ii) of this theorem  we get that $W^{\ast}$ is the current value function for $V^{\ast}$. Again, by the above part (iv) we have that  $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ converges to  $\varLambda^{\ast}$ as defined in (\ref{eq:optimal1manuel}) at almost all points $\theta$.  Therefore, 
+$(W^{\ast}, V^{\ast}, \varLambda^{\ast})$ is a fixed point for the equation system (\ref{eq:iteration})-(\ref{eq:optimal1manuel}) under operator  $\mathbb{T}$. It follows that  $\left(W^{\ast},\varLambda^{\ast}\right)\stackrel{\mathbb{T}}{\longrightarrow}\left(W^{\ast},\varLambda^{\ast}\right)$, and   $\left(W^{\ast},\varLambda^{\ast}\right)$ is a Markov equilibrium.
+
+\end{proof}
+
+
+
+
+ 
+The Online Appendix goes into more detail regarding  the proof of part (iv) of Theorem \ref{corollary_cont_Tconvergence}. Note that every sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ must have a convergent subsequence or may be empty [\citet{Hildenbrand1974},  p. 16]. As $\Theta$ is a compact domain, such limit must be well-defined at all $\theta$. Therefore,  $lim$  $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0} = \varLambda^{\ast}$ over the set $\Theta^{W^{\ast}}$, which is a set of full measure.
+
+Theorem \ref{corollary_cont_Tconvergence} attests that  operator $\mathbb{T}^A_{\varepsilon}$ has  good convergence properties. The lack of concavity of the optimization problem precludes  further control of the error bound [\citet{santos_1998}]; we are simply  establishing  asymptotic convergence.
+ 
+ 
+ 
+
+
+
+\subsection{Overview of  the  Assumptions}
+
+Conceptually, our proof of  existence of the  Markov equilibrium is fairly straightforward. We use an approximation argument over Lipschitz continuous $\varepsilon$-equilibria to circumvent some technicalities of the underlying Markov equilibria. 
+Therefore, it   may be worth summarizing  the role played   by  our  assumptions leading to  the various  properties of the pair $(W^{\ast},  \varLambda^{\ast})$ in Theorem \ref{lucasz}. Moreover, we would like to remark that  all these assumptions are met in   the one-sector growth model, which provides   a useful benchmark for many other applications.
+
+ \textit{Interiority condition: }
+   First and foremost,  we assume that all optimal    solutions [e.g., see (\ref{eq:markov_ii})]  lie in the interior of the feasible set. This is a standard assumption  for the application of classical envelope theorems. The interiority of optimal solutions can be more problematic over domains  $ \Theta$  with several state variables, but   can hold   if  the  utility and production functions are additively separable. The necessity of this condition    is  well understood in the economics literature  from the envelope theorem for concave optimization of  \citet{Benveniste_Scheinkman_1979}.  For the neoclassical growth model of the previous section,  this interiority property was established in  Theorem \ref{smoothsteadystates}, part (iii), and holds generally in many related models and  applications.  
+    Another simple way to guarantee interiority [e.g., \citet{kubler_2003}] is to assume that the utility function is unbounded below and the consumer  is endowed at all times with a small positive amount of the good, which is bounded away from zero.    
+    Certainly, this interiority condition may be weakened [e.g., \citet{RINCONZAPATERO20091948}] but this is not our primary objective. Roughly, the  differentiability of $W(\theta)$ may be hard to come by if the optimal solution hits the boundary of the state space $\Theta$,  while differentiability   may still be preserved    if some  individual rationality and borrowing constraints are binding.
+    
+     \textit{Strong concavity of utility and production functions.}    In our reduced-form model of the present section, we interpret  that Assumption 3(iii)-(iv) is a strengthening of such strong concavity of the underlying utility and production functions so that the equilibrium correspondence $\varLambda(\theta)$ is single-valued at almost all $\theta$. In classical envelope theorems, the value function is differentiable if the optimal solution is unique.  Paradoxically, the envelope theorem of \citet{Benveniste_Scheinkman_1979} establishes differentiability of  the value function under  multiplicity of  optimal solutions, which implies that the objective function is weakly concave.
+     
+     Also, let us refer to  two technical issues underlying the proof of Theorems \ref{theorem_cont_T} and \ref{corollary_cont_Tconvergence}: 
+
+    
+    
+ \textit{Upper semicontinuity of continuation value function $V$.} The  time-consistent policy rule $g$ and  continuation value function $V$ are only univocally  defined and continuous at almost all points $\theta$.
+Therefore, with jumps in the equilibrium dynamics  the optimization problem of the present  ``self'' may not be well defined if function $V$ fails to be upper semicontinuous. As discussed in footnote \ref{footnote_suc}, taking the \textit{upper closure} of $V$ will not change the value function $W$ [say in  (\ref{eq:markov_ii})], but the use of \textit{``max''} rather than \textit{``sup''} will be justified.
+Operator $\mathbb{T}_{\varepsilon}$    circumvents the continuity of  $V$ in (\ref{eq:beta_relationmanuel}),  since  the associated   functions $\varLambda_{\varepsilon}$ and $V_{\varepsilon} $ are   continuous mappings on the whole domain $\Theta$. 
+
+ 
+ \textit{Convergence of the sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ to   $\varLambda^{\ast}$ in the topology of closed-convergence at almost all points $\theta$.} This result has already been clarified. Theorem \ref{theorem_cont_T}  
+  states existence of a Markov equilibrium $(W^{\ast}, \varLambda^{\ast}).$ In Theorem \ref{corollary_cont_Tconvergence}, we were not able to show that  all equilibrium points of $\varLambda^{\ast}$ can be approximated as limits of $\varepsilon$-equilibria. This upper hemi-continuity property of equilibrium correspondence $\varLambda^{\ast}$ holds in many other economic models. 
+ We can  only insure the convergence of the sequence $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ at those points $\theta$ in which $\varLambda^{\ast}(\theta)$ is single-valued, which is a set of full measure.
+The definition of function $g^{\ast}$  for operator $\mathbb{T}$ remains unchanged, since such function is  only evaluated at those points $\theta$ in which $\varLambda^{\ast}(\theta)$ is single-valued. 
+
+In Figure \ref{fig:equm_corrpd}, the left panel [panel (a)] is intended to display  the limit of a sequence of  equilibrium correspondences; the  center panel [panel (b)] illustrates what it could be   the actual correspondence associated with  the limit functions $W$ and $V$, which  may contain additional optimal solutions attesting for  a general  upper hemi-continuity property of the equilibrium correspondence $\varLambda^{\ast}$ in the proof of Theorem \ref{corollary_cont_Tconvergence}. The  right  panel  [panel (c)] exemplifies an approach  not pursued in our method of proof:  correspondence $\varLambda$ should be  \textit{redefined}  as  the convex hull over the limit of all elements in which $\varLambda(\theta)$ is single-valued. This is just  Clarke's construction of the generalized gradient (see (\ref{gen_gradient}) in the Online Appendix) which provides a unified approach  to non-smooth optimization. The correspondence in  panel (a) is a subset of   the correspondence in panel (b). The   correspondence in panel (c) must be convex-valued, but  eliminates point $x$ that  cannot be approached as the limit of a sequence  of  convex combinations of image points in which the correspondence in panel (b) is  single-valued.  In sum, the correspondence in panel (c) is just generated by the set of points $\theta$ in which  $\varLambda(\theta)$ is single-valued. In this latter family of correspondences under Clarke's construction, it seems  possible to establish convergence of the sequence  $\left\{\varLambda^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}$ to  $\varLambda^{\ast}$ over the whole domain $\Theta$. In our case,  convergence  
+ is bound to  fail at those points $\theta$ in which $\varLambda^{\ast}(\theta)$  may display  ``explosions''; i.e., 
+  the image set suddenly  becomes much larger at those   points of the domain with  jumps in the equilibrium dynamics.
+
+
+
+
+
+\begin{figure}[htbp]
+    \centering
+\caption{Convergence to the Markov Equilibrium Correspondence.}
+    \label{fig:equm_corrpd}
+
+    % Left Panel
+    \begin{subfigure}[b]{0.32\textwidth} %<-- Adjusted width
+        \centering
+        \includegraphics[width=\textwidth]{figures/figure_3.png} %<-- Specific filename
+        \caption{}
+        \label{fig:policy_func_limit}
+    \end{subfigure}
+    \hfill % Adds space
+    % Center Panel
+    \begin{subfigure}[b]{0.32\textwidth} %<-- Adjusted width
+        \centering
+        \includegraphics[width=\textwidth]{figures/figure_4.png} %<-- Specific filename
+        \caption{}
+        \label{fig:policy_func_correspondence}
+    \end{subfigure}
+    \hfill % Adds space
+    % Right Panel (NEW)
+    \begin{subfigure}[b]{0.32\textwidth} %<-- Added third panel
+        \centering
+        % You will need to create and name this third figure
+        \includegraphics[width=\textwidth]{figures/figure_5.png} 
+        \caption{}
+        \label{fig:policy_func_clarke}
+    \end{subfigure}
+	
+     \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} Panel (a) is intended to display  the limit of a sequence of  equilibrium correspondences. Panel (b) represents  what it could be the  actual correspondence of the limit functions $W$ and $V$ which  may contain additional optimal solutions  (points $x$, $y$, $z$). Panel (c) presents a regularized correspondence following  Clarke's construction; hence, this latter correspondence is convex-valued but does  not contain point $x$ of the center panel, since this point  cannot  be approached by a sequence of convex combinations of image points in panel (b)   over the set of elements   in which such  correspondence is single-valued.
+     \end{minipage}
+     	
+\end{figure}
+
+
+
+
+
+
+
+
+ \section{The  $(\beta, \delta)$-Tradeoff: A Quantitative Exploration}
+ In the context of the neoclassical growth model of Section 2, we want  to evaluate the interaction  of  $\beta$ and  $\delta$ in the steady-state dynamics.
+ The current ``self''
+ uses backward induction and picks the policy function $g(k)$ for all the future ``selves''. 
+The problem of time-inconsistency arises because 
+ the current ``self'' faces  the overall discount factor $\beta \delta$, whereas future ``selves'' face  $\delta$ only.  Two important issues will be addressed in this section.
+ 
+ First, there has been some discussion as to whether  models with  quasi-hyperbolic  and exponential  discounting 
+ are observationally equivalent [e.g.,  \citet{Barro1999} and \citet{Maliar_2016}]. It is worth noting that the quantitative importance of the
+   asymmetric effects  of these two discount factors is bound to depend on the range of  parameters values.
+Time-inconsistency has been manifested  in various  macro settings, and hence the present analysis can be of interest for the study of  other economies. As is commonly known, in the absence of commitment  the time-consistent policy  entails higher inflation [\citet{BARRO1983}, \citet{kydland1977}] and higher public debt and taxation [\citet{Alesina_1990},  \citet{Klein_2008},  \citet{persson_svensson_1989}].
+
+And second, another hanging issue is whether   models with quasi-hyperbolic discounting have good explanatory power. In particular,  if $\beta$ is sufficiently low (say an annual discount factor $\beta$ around 0.80), then  we would like to know    the   range of long-term interest rates  that the model can plausibly deliver.  This obviously requires a good understanding of the effects of $\beta$ and $\delta$ in the steady state dynamics. A related matter is the steady-state  volatility of  macro aggregates generated in this framework.
+
+
+
+\subsection{Functional Forms and Parameter Values} 
+ \paragraph{Functional Forms}
+ 
+ \textit{Preferences: Constant Relative Risk Aversion (CRRA) utility function}
+\begin{equation}\label{eq:preferences}
+u(c) = \frac{c^{1-\sigma}}{1-\sigma},
+\end{equation}
+for  $\sigma >0$.
+
+
+\textit{Production: A Stochastic Cobb-Douglas Production Function}
+\begin{equation}\label{eq:production}
+Y= A k^{\alpha},
+\end{equation}
+for  $ 0 < \alpha <1.$ Then, $k_{t+1} = A_{t} k_t^{\alpha} + (1 - \pi) k_t - c_t.$
+
+\textit{Total Factor Productivity: Exogenous Autoregressive Process in Log Values}
+\begin{equation}\label{eq:production}
+\log A_{t} = \rho_A \log A_{t-1} + \epsilon_t
+\end{equation}
+for $0<\rho_A <1$ and $\epsilon \sim N(0, \sigma_{\epsilon}^2)$.
+
+
+\paragraph{Calibration} See Table~\ref{tab:parameters}. We fix the relative risk aversion coefficient, $\sigma =3$, the capital income share coefficient, $\alpha = 0.34$, the depreciation rate, $\pi =0.06$, 
+the $TFP$ persistence parameter, $\rho_A = 0.90$, and the  standard deviation for the noise, $\sigma_{\epsilon} = 0.007$. Regarding the discount factors, we let $0.80  \le \beta \le 1$; within this feasible range for $\beta$, parameter $\delta$ 
+will move inversely so that  $\beta \cdot \delta =0.75$. Hence,   we will be mostly concerned with  the  $(\beta, \delta)$-tradeoff,  for   $\delta = 0.75/ \beta$.   The standard neoclassical growth model 
+ (i.e.,  optimal planning problem) corresponds to 
+  $(\beta, \hat{\delta}) =(1, \hat{\delta})$. Accordingly, $\hat{\delta}$ refers to the   discount factor for  the model with  a constant rate of time preference or exponential discounting. 
+  
+  \begin{table}[htbp]
+    \centering
+    \caption{Parameter Values}
+    \label{tab:parameters}
+    \begin{tabular}{lll}
+        \hline\hline
+        \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
+        \hline
+        \multicolumn{3}{l}{\textit{Preferences and Technology}} \\
+        $\sigma$ & Coefficient of relative risk aversion & $3.0$ \\
+        $\alpha$ & Capital share & $0.34$ \\
+        $\pi$ & Depreciation rate  & $0.06$ \\
+        
+        \hline
+        \multicolumn{3}{l}{\textit{Exogenous Productivity Process}} \\
+        $\rho_A$ & TFP persistence parameter & $0.9$ \\
+        $\sigma_{\epsilon}$ & Standard deviation of TFP shock & $0.007$ \\
+        \hline
+        \multicolumn{3}{l}{\textit{Discounting Factors}} \\
+        $\beta$ & Present-bias discount factor & Variation: $[0.80, 1.00]$ \\
+        $\delta$ & Long-term discount factor & Variation: $\delta = 0.75/\beta$ \\
+        $\beta\delta$ & Overall discount factor & $0.75$ (held constant) \\
+        \hline\hline
+    \end{tabular}
+    \begin{minipage}{\textwidth}
+        \vspace{0.1cm}
+        \footnotesize
+        \textit{Notes:} The table reports parameter values for the baseline calibration. Preferences and technology  parameters follow standard values from the macroeconomics literature. In our numerical exercises, we  vary   parameter $\beta$ while fixing  the overall discount factor, $\beta\delta = 0.75,$  as a way to isolate the influence  of  the present-time  bias.
+    \end{minipage}
+\end{table}
+
+
+
+  Before getting into our numerical experiments, let us   reexamine a well-known parameterization with a closed-form solution together with    the generalized Euler equation \eqref{eq:euler_simple}.
+  
+  \paragraph{A Parameterezation with a Closed-Form Solution}
+For log utility ($\sigma=1$) and full physical capital depreciation, $\pi =1$, the model admits a closed-form solution; see \citet{Krusell_Smith2003} and \citet{Maliar_2016}.
+Then, the law of motion for physical capital takes the form:
+
+\begin{equation}\label{eq:ks}
+k_{+} = \frac{\beta \delta \alpha}{1 - \delta \alpha + \beta \delta \alpha} Ak^{\alpha}.
+\end{equation}
+Observe that  for $\hat{\delta} =  \frac{\beta \delta}{1 - \delta \alpha + \beta \delta \alpha}$, the laws of motion are identical for the model with $(\beta, \delta)$-discounting, with $0< \beta <1$, 
+and the model with $\beta =1$ and  a constant discount factor $\hat{\delta}$. Hence, for log utility and full capital depreciation both models are observational equivalent; there are no further restrictions to be imposed on  all other parameters.  The slope coefficient in  \eqref{eq:ks} also attests that parameter  $\beta$ is always coupled  with $\delta$, since $\beta \delta$  is the discount factor of the current ``self''. Parameter $\delta$, however, appears in an extra term 
+that goes in the direction of  stimulating  capital accumulation as  future ``selves'' would be more patient.
+
+
+
+
+From equation (\ref{eq:ks}), we get the steady-state capital value,  $k_{ss}^{1-\alpha} = \beta \delta \alpha / (1 - \delta \alpha + \beta \delta \alpha)$. This expression reveals a direct tradeoff between the short-term discount factor, $\beta$, and the long-term discount factor, $\delta$. By implicitly differentiating the steady-state condition, we can  provide a simple, exact expression for the $(\beta, \delta)$-tradeoff:
+
+\begin{equation} \label{eq:beta_delta_ss}
+\frac{d\delta}{d\beta} = -\frac{\delta(1-\delta\alpha)}{\beta}. 
+\end{equation} 
+
+ Letting  the discount factors  $\beta=\delta=(0.75)^{1/2}$  and $\alpha = 0.34$, the derivative in  (\ref{eq:beta_delta_ss}) is  approximately $-0.71$. In other words, a $1\%$ increase in the  present-time  bias (a lower $\beta$) can  be offset by a $0.71\%$ decrease  in the long-term discount factor  (a higher $\delta$). Our subsequent  analysis reveals that the magnitude of this tradeoff becomes substantially smaller under a more realistic depreciation schedule and higher  values for the risk-aversion coefficient $\sigma$.
+
+
+
+
+
+\paragraph{The Generalized Euler Equation at the Stationary Solution}
+
+Another way to see this interplay between $\beta$ and $\delta$ is to go back to the generalized Euler equation (\ref{eq:euler_simple}). Evaluating this latter equation at the stationary solution, and rearranging terms, we get
+
+\begin{equation}\label{eq:steady_statemanuel}
+1 = \beta \delta  f'(k^{\ast})    - \beta \delta g'(k^{\ast}) + \delta g'(k^{\ast}).
+\end{equation}
+
+Again, $\beta$ is always coupled with $\delta$. For  fixed $\beta \delta$,   as we vary  $\beta$ there is no direct effect from $\beta$  on   equation
+(\ref{eq:steady_statemanuel}). The extra effect comes through the  last term  $\delta g'(k^{\ast})$. Hence, a lower $\beta$ generates an inverse move in $\delta$, 
+which in turn leads to  a higher steady-state capital value $k^{\ast}$ through the extra term  $\delta g'(k^{\ast})$.  Obviously, the required change  in $k^{\ast}$ will depend on the curvature of $f(\cdot)$.
+To get further insights into the  $(\beta, \delta)$-tradeoff underlying equation \eqref{eq:steady_statemanuel} we now go over  a few numerical experiments.
+
+
+
+\subsection{Numerical Experiments}
+
+\paragraph{The $(\beta, \delta)$-Tradeoff}   We first look at the $(\beta, \delta)$-tradeoff without  restricting  $\beta  \delta$  to a constant value. Let us start with  the mean value of these two discount factors; that is, 
+ $\beta =0.75^{1/2} =  \delta $. Then, fixing   the other  parameter values in Table~\ref{tab:parameters}, we get the steady-state mean value  $E(k^{\ast}) = 1.60$. Obviously, as we lower $\beta$ we need to increase $\delta$ to get the same steady-state mean value. The blue dashed-line in  Figure \ref{fig:beta_delta_constantK}  traces down the set of pairs $(\beta, \delta)$ generating such a  steady-state  mean value $E(k^{\ast}) = 1.60$. For reference, the solid line is the $45^{o}$-line projecting $\beta$-values, and the orange dotted-line with markers  projects the actual $\beta \delta$-values.   Observe that the slope of the blue  curve is about 
+ $-0.17$, which means a decrease of one-percentage point in $\beta$ (say from $\beta=0.86$ to $\beta =0.85$) necessitates a smaller compensatory increment in $\delta$ (in this case $\delta$ goes from 0.86 to 0.862). 
+ Because of the low sensitivity of $\delta$, the overall discount factor $\beta \delta$ portrayed in the orange dotted-line with markers follows closely the $\beta$-values as portrayed in the solid line. Indeed, the orange line would be flat if the $(\beta, \delta)$-tradeoff were equal to one. 
+We would like to remark that this  $(\beta, \delta)$-tradeoff  centers on a fixed  $E(k^{\ast}) = 1.60$.  We now  make  further comparisons over steady-state mean values and  volatilities  for  a constant  overall discount factor, $\beta \delta = 0.75$.
+
+
+\begin{figure}[htbp]
+    \centering
+    \caption{Relative Changes in Discount Factors $\beta$ and $\delta$ for a Fixed Steady-State Value   $E(k^{\ast}) = 1.60$.}
+    \label{fig:beta_delta_constantK}
+    
+   \includegraphics[width=0.5\textwidth,
+                 height=0.5\textheight,
+                 keepaspectratio]{figures/indexed_parameter_changes}
+    
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} The figure illustrates the $(\beta, \delta)$-tradeoff for a fixed steady-state mean value $E(k^{\ast}) = 1.60$. The blue dashed-line   traces down the set of pairs $(\beta, \delta)$ generating such a  steady-state  mean value $E(k^{\ast}) = 1.60$.  Observe that the slope of this latter curve is about 
+ $-0.17$. For reference, the solid line is the $45^{o}$-line projecting $\beta$-values, and the orange dotted-line with markers projects the actual $\beta \delta$-values.   Hence, the orange dotted-line with markers is increasing, and quite close to the  $45^{o}$-line projecting  $\beta$-values.
+     \end{minipage}
+\end{figure}
+
+
+
+
+
+\paragraph{A Comparison with the Standard Growth  Model $(\beta =1)$}
+Figure \ref{fig:beta_delta} portrays three discount values. The green dashed-line with cross markers  is simply $\beta   \delta =0.75$ as a function of $\beta$. Similarly, the blue solid-line plots  $\delta$ as a function of  $\beta$ for  $\beta \delta= 0.75$. The orange  dashed-line, however,  refers to an equivalent discount factor $\hat{\delta}$ for the standard neoclassical growth model (i.e., the model in which $\beta =1$). The way $\hat{\delta}$ is computed is a bit more subtle. 
+For each $(\beta, \delta)$ with $\beta \delta= 0.75$ we get a steady-state mean value $E(k^{\ast})$. Then,  we calculate $\hat{\delta}$ for the model with $(1, \hat{\delta})$ that generates the same $E(k^{\ast})$. Hence, to  determine $\hat{\delta}$ we follow these  steps:
+
+\begin{equation}\label{eq:comparisonzhig}
+ (\beta, \delta) \rightarrow E(k^{\ast}) \rightarrow (1,\hat{\delta}), 
+\end{equation}
+
+\noindent where $E(k^{\ast})$ must be equal under  the two pairs $ (\beta, \delta)$ and $(1,\hat{\delta})$. In other words, both $(\beta, \delta)$ and $(1,\hat{\delta})$ must generate the same steady-state mean value $E(k^{\ast})$. We can see from  Figure \ref{fig:beta_delta}  that $\hat{\delta}$ trails  $\delta$, which confirms that parameter $\beta$ tends to fade away in the determination of steady-state mean values. Therefore, this exercise confirms that the above baseline model with quasi-hyperbolic discounting can generate plausible long-term interest rates even if $\beta$ is quite low---simply because the effects of  $\beta$ tend to fade away in the determination of steady-state values. 
+
+
+\begin{figure}[htbp]
+    \centering
+    \caption{Capital Accumulation with Exponential  and Quasi-Hyperbolic  Discounting.}
+    \label{fig:beta_delta}
+    \includegraphics[width=0.5\textwidth,
+                 height=0.5\textheight,
+                 keepaspectratio]{figures/beta_delta}
+    
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} The figure displays various discount factors as we vary $\beta$ leading to the same value for steady-state capital accumulation. The blue solid-line represents the actual long-run discount factor $\delta = 0.75/\beta$, the orange dashed-line shows the implied  discount factor $\hat{\delta}(\beta)$ as defined in (\ref{eq:comparisonzhig}) which  rationalizes the same expected steady-state capital value, and the green dashed-line with cross markers indicates the constant overall discount factor $\beta\delta = 0.75$. 
+     \end{minipage}
+\end{figure}
+
+
+
+
+Figure \ref{fig:mean_cv} Panel A provides yet a third way to illustrate the role  of $\delta$ in configuring  the steady-state solution. The figure plots steady-state mean values for physical capital,  $k,$  consumption, $c,$ and output, $ Y,$ over $\beta$, where $\delta$ is implicitly defined as $\beta \cdot \delta =0.75$. As already discussed, for a   lower 
+$\beta$ (and higher  $\delta$), the steady-state values go up. The blue lines in Figure \ref{fig:mean_cv} panel B plot the volatilities for $k, c, Y$ over $\beta$  under the condition   $\beta  \delta =0.75$. The orange solid-lines with cross markers plot the respective volatilities for the $(1, \hat{\delta})$ model, where $(1, \hat{\delta})$ is determined from $(\beta, \delta)$ as outlined in  (\ref{eq:comparisonzhig}). While the orange solid-lines with cross-markers are roughly constant, we can see that  the blue lines increase as we lower $\beta$. This suggests that a lower $\beta$ (a higher present-time bias) makes the policy function more sensitive to unexpected productivity shocks and changes in the capital stock. Observe that  the volatility of consumption stands out: the volatility of consumption goes up with  the present-time bias. In contrast in the model with a constant rate of time preference or exponential  discounting, such volatility of consumption  goes down as we increase the discount factor $\hat{\delta}$.
+
+
+\begin{figure}[htbp]
+    \centering
+     \caption{Business Cycle Volatility  with   Quasi-Hyperbolic and Exponential  Discounting.}
+    \label{fig:mean_cv}
+    \includegraphics[width=0.5\textwidth,
+                 height=0.5\textheight,
+                 keepaspectratio]{figures/mean_cv}
+   
+    \begin{minipage}{0.9\textwidth}
+        \footnotesize
+        \textit{Notes:} The left panel shows steady-state mean values for  physical capital $k$, consumption  $c$, and output $Y,$  as a function of  $\beta$, holding the overall discount factor $\beta\delta = 0.75$. The right panel displays  the associated coefficients of variation  for $k$, $c$, and $Y$. The orange solid-lines with cross-markers belong  to  the model with $\beta = 1$ for  $\hat{\delta}$ generating the same   steady-state mean  value for $k$ as outlined in (\ref{eq:comparisonzhig}). 
+    \end{minipage}
+\end{figure}
+
+
+In conclusion, for  fixed   $\beta \delta = 0.75$,  steady-state mean  values  move positively with $\delta$, highlighting an extra channel for  $\delta$ (as compared to $\beta$)  in the determination of   these steady-state values. The present-time bias (i.e., a lower   $\beta$), however, seems to have a greater impact on business-cycle volatility. As the present-time bias becomes more pronounced (i.e., $\beta$ decreases from $1.0$ to $0.80$), the volatility (measured by coefficient variation, CV) of the capital stock doubles from $2.2$ to $4.4$, while consumption volatility increases from $1.98$ to $2.18$. This finding contrasts sharply with the standard neoclassical model ($\beta=1$), where lowering the constant discount factor, $\hat{\delta}$, has the opposite effect, reducing consumption volatility from $1.98$ to $1.89$. Therefore, these results exemplify that  the neoclassical growth model with quasi-hyperbolic discounting can generate plausible steady-state interest rates (mainly determined by $\delta$)---together with more pronounced overreactions of economic aggregates to external shocks (mainly determined by $\beta$).
+
+Finally, this volatility gap between the two models is mediated by risk aversion. While not reported here, 
+the volatility of consumption goes down in both models as we increase the coefficient of risk aversion $\sigma$. Furthermore, the difference in volatility for aggregate variables between the  models with quasi-hyperbolic and exponential discounting narrows as the coefficient of risk aversion rises. This suggests that the classic consumption-smoothing motive, which strengthens with risk aversion, begins to dominate the behavioral effects of the present-time  bias, aligning the outcomes of the two frameworks.
+
+
+
+
+
+
+
+
+
+
+
+\section{Concluding Remarks}
+
+We  provide a fairly complete characterization of the equilibrium dynamics for  the neoclassical growth model with time-inconsistency.
+Under general conditions, we show that steady states are saddle-path stable and isolated.
+Then,  we  prove  existence of a Markov equilibrium in  an infinite-horizon model  over a multidimensional state space. Our   existence  result is  a substantial departure from previous  work on this topic, mostly  limited to  a single predetermined state variable and  specific assumptions (e.g.,  linear technologies, monotone dynamics, extrinsic  uncertainty  to smooth out  expected values, lottery-based mechanisms to regain   concavity of  the continuation value function). Economic policy is usually concerned with the interaction of  multiple state variables.
+
+
+ We first show existence of an arbitrarily defined  $\varepsilon$-equilibrium over Lipschitz  policy functions. Then,  the Markov equilibrium is obtained as a limit of those approximate equilibria.
+This  method  of proof  is based on a  general  envelope theorem requiring the interiority of equilibria, and can be quite useful for the construction of numerical algorithms.  Certainly,  it seems challenging to dispense with  this interiority assumption  to accommodate jumps in the equilibrium dynamics.
+
+Neoclassical growth theory is usually the starting point  of many other 
+related dynamic models.
+  In our numerical experiments we attempted  to evaluate the influence of  the  present-time bias on
+long-term physical capital accumulation and   macroeconomic volatility. 
+As discussed in the preceding section, researchers have long struggled to understand   deviations from  efficiency and optimal  welfare originating   from various forms of   behavioral discounting and time-inconsistency. This is obviously a broad subject encompassing many economic applications. Based on the present work, in  a companion paper [\citet{Feng_Santos_2025}] we are extending these analytical  methods\footnote{This study supersedes in a more general way our earlier unpublished research [\citet{Feng_Santos_2022}] addressing  some deficiencies of our previous results.}  on existence and computation of Markov equilibria to a   macroeconomic framework  of government  policy.
+
+
+\bibliographystyle{ecta-fullname}
+\bibliography{reference_v1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- START APPENDIX ---
+\newpage
+\pagenumbering{arabic}
+\renewcommand{\thepage}{A-\arabic{page}}
+
+\renewcommand{\appendixpagename}{} % This removes the default "Appendices" text
+
+\begin{appendices}
+
+% --- Custom Title Block (Styled to precisely match the main paper) ---
+\begin{center}
+    % TITLE: Sans-serif, Large, All Caps, Regular Weight
+    {\sffamily\Large\MakeUppercase{Online Appendix: Markov Equilibria with Quasi-Hyperbolic Discounting}\par}
+
+    \vspace{1.0cm} % Space between title and first author
+
+    % AUTHOR 1: Sans-serif, Large, All Caps, Regular Weight
+    {\sffamily\large\MakeUppercase{Zhigang Feng}\par}
+    % AFFILIATION 1: Serif, Normal Size, Regular Weight
+    {Department of Economics, University of Nebraska-Omaha\par}
+
+    \vspace{0.5cm} % Space between author blocks
+
+    % AUTHOR 2: Sans-serif, Large, All Caps, Regular Weight
+    {\sffamily\large\MakeUppercase{Manuel S. Santos}\par}
+    % AFFILIATION 2: Serif, Normal Size, Regular Weight
+    {Department of Economics, University of Miami\par}
+\end{center}
+
+\vspace{1.0cm} % Generous space before the first section begins
+% --- End of Custom Title Block ---
+
+
+\section{Some Definitions}
+
+%%%%%%%%%%%%%%%
+\paragraph{Lipschitz Functions}
+
+A function $f: D \to \mathbb{R}$ with $D \subseteq \mathbb{R}^n$  is called \textbf{Lipschitz continuous} (or simply Lipschitz)  on $D$ if there exists a real constant $L \ge 0$, known as the \textbf{Lipschitz constant}, such that for all $x_1, x_2 \in D$,
+\[
+|f(x_1) - f(x_2)| \le L \lVert x_1 - x_2 \rVert .
+\]
+Geometrically, this means that the slope of the line segment connecting any two points on the graph of the function is bounded in absolute value by $L$. A fundamental result, \textbf{Rademacher's theorem}, states that any Lipschitz function defined on an open subset of $\mathbb{R}^n$ is differentiable almost everywhere. 
+
+%%%%%%%%%%%%%%%
+\paragraph{The Generalized Gradient}
+
+For locally Lipschitz functions, which may not be differentiable everywhere, the concept of the derivative can be extended to the \textbf{generalized gradient}, also known as the \textbf{Clarke subdifferential}.  The formal definition is based on the \textbf{generalized directional derivative}. For a locally Lipschitz function $f: \mathbb{R}^n \to \mathbb{R}$ at a point $x_0$, the generalized directional derivative in the direction $h$ is:
+\begin{equation}\label{martin2}
+f^\circ(x_0; h) = \limsup_{y \to x_0, t \to 0^+} \frac{f(y+th) - f(y)}{t}.
+\end{equation}
+The generalized gradient, denoted $\partial f(x_0)$, is then the set of vectors $\zeta \in \mathbb{R}^n$ such that $\langle \zeta, h \rangle \le f^\circ(x_0; h)$ for all $h \in \mathbb{R}^n$. A more intuitive characterization of $\partial f(x_0)$ is in terms of the traditional gradient $\nabla f(x)$. Then, $\partial f(x_0)$ is the convex hull of the set of all limit points $\nabla f(x_i)$ for all sequences $x_i \to x_0$ where $\nabla f(x_i)$ exists:
+\begin{equation}\label{gen_gradient}
+    \partial f(x_0) = \text{co} \left\{ \lim_{i \to \infty} \nabla f(x_i) \mid x_i \to x_0, \nabla f(x_i) \text{ exists} \right\}.
+\end{equation}
+For example, for $f(x) = |x|$ at $x_0=0$, the derivatives near the origin are either $1$ or $-1$. The set of limit points is $\{-1, 1\}$, and its convex hull is the interval $[-1, 1]$. Thus, $\partial f(0) = [-1, 1]$. If $f$ is continuously differentiable at $x_0$, the generalized gradient reduces to a single point, $\partial f(x_0) = \{\nabla f(x_0)\}$.
+
+
+
+
+\begin{proposition}(\citet{Clarke1975}, Proposition 1.13).\label{Clarke1975_prop}
+
+\textit{The following are equivalent:}
+\begin{enumerate}
+    \item[(a)] $\partial f(x) = \{\zeta\}$, \textit{a singleton}.
+    \item[(b)] $\nabla f(x)$ exists, $\nabla f(x) = \zeta$, and $\nabla f$ \textit{is continuous at} $x$ \textit{relative to the set upon which it exists}.
+\end{enumerate}
+
+\end{proposition}
+
+%%%%%%%%%%%%%%%
+\paragraph{The Dini Derivative}
+
+Dini derivatives are  a generalization of the standard derivative used to study functions with limited differentiability, such as continuous but non-differentiable functions; e.g.  \citep{Saks1937}. Their primary advantage is that they always exist for any function (though they may take on the values $\pm\infty$). Dini derivatives  are fundamental in real analysis and optimization for characterizing the local behavior and optimality conditions of non-smooth functions.
+
+Let $f: \mathbb{R} \to \mathbb{R}$ be a real-valued function. The four Dini derivatives at a point $x_0$ in its domain are defined using one-sided limits:
+
+\begin{itemize}
+    \item The \textbf{upper right Dini derivative}:
+    \[ D^{+}f(x_0) = \limsup_{h \to 0^+} \frac{f(x_0+h) - f(x_0)}{h}. \]
+    \item The \textbf{lower right Dini derivative}:
+    \[ D_{+}f(x_0) = \liminf_{h \to 0^+} \frac{f(x_0+h) - f(x_0)}{h}. \]
+    \item The \textbf{upper left Dini derivative}:
+    \[ D^{-}f(x_0) = \limsup_{h \to 0^-} \frac{f(x_0+h) - f(x_0)}{h}. \]
+    \item The \textbf{lower left Dini derivative}:
+    \[ D_{-}f(x_0) = \liminf_{h \to 0^-} \frac{f(x_0+h) - f(x_0)}{h}. \]
+\end{itemize}
+
+A function is differentiable at $x_0$ if and only if all four Dini derivatives exist, are finite, and are equal to each other. A powerful result that describes the relationship between these derivatives for any function is the \textit{Denjoy-Young-Saks} theorem.
+
+\begin{theorem}(The Denjoy-Young-Saks Theorem).
+Let $f: \mathbb{R} \to \mathbb{R}$ be an arbitrary function. Then, at almost every point $x$ in its domain, exactly one of the following four possibilities holds:
+\begin{enumerate}
+    \item $f$ is differentiable at $x$ (i.e., all four Dini derivatives are finite and equal).
+    \item $D^{+}f(x) = D^{-}f(x) = \infty$ and $D_{+}f(x) = D_{-}f(x) = -\infty$.
+    \item $D^{+}f(x) = \infty$, $D_{-}f(x) = -\infty$, and $D_{+}f(x)$ and $D^{-}f(x)$ are finite and equal.
+    \item $D^{-}f(x) = \infty$, $D_{+}f(x) = -\infty$, and $D^{+}f(x)$ and $D_{-}f(x)$ are finite and equal.
+\end{enumerate}
+\end{theorem}
+
+Two other results on Dini derivatives are of interest for this paper.
+\begin{theorem} (\citet{Giorgi1992}, Theorem 1.16).\label{GioLipschitz}
+Let $f(x)$ be defined and continuous on $(a,b)$. If some of its Dini derivatives is bounded (above and below)  on $(a,b)$ then $f(x)$ is
+Lipschitz continuous on $(a,b)$.
+\end{theorem}
+
+\begin{theorem}(\citet{Giorgi1992}, Theorem 1.17).\label{Giooptimum}
+Let $f(x)$ be defined  on $(a,b)$ and let $x_0 \in (a,b)$. If  $f(x)$ attains  a local maximum at $x_0$ then $D^{+}f(x_0) \le 0$ and $D_{-}f(x_0) \ge 0$.
+\end{theorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Danskin's Envelope Theorem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\citet{Danskin_1967} proves a general envelope theorem, which  applies to our framework under interiority
+of equilibrium solutions [e.g., \citet{RINCONZAPATERO20091948}]. We shall follow \citet{Bernhard_Rapaport1995}
+and \citet{Clarke1975}, and present a simplified variant of this
+classical result.
+
+Let $\mathbb{U}$ be a compact topological space, and $g$ a map from
+$\mathbb{R}^{n}\times\mathbb{U}$ into $\mathbb{R}$, assumed to be
+jointly continuous and $C^{1}$ with respect to the first variable.
+Let 
+\[
+J(x)=\max_{u\in\mathbb{U}}g(x,u)
+\]
+and 
+\[
+M(x)=\left\{ u\in\mathbb{U}|g(x,u)=J(x)\right\} .
+\]
+
+\begin{theorem}(The Envelope Theorem)\label{Danskin}. Function
+$J$ has a directional derivative at $x$ in the direction $h$,
+\begin{equation}
+DJ(x;h)=\max_{u \in M(x)}\sum_{i=1}^{n}h_{i}\cdot D_{i}g(x,u)\label{Danskin:equ}
+\end{equation}
+for every $x$ and $h$ in $\mathbb{R}^{n}$, where $D_{i}g$ stands
+for the partial derivative with respect to component $x_{i}$ of $x$,
+and $u$ is fixed.
+
+\end{theorem}
+
+
+
+
+
+A vast literature
+has extended Danskin's  theorem in several dimensions: weaker continuity
+and differentiability assumptions, constrained optimization, and infinite-dimensional
+spaces. Here, we present an extension of these classical results under weaker continuity conditions.
+
+Let $\partial J(x)$ stand for the generalized gradient in the
+sense of \citet{Clarke1975}, and $D_{x}J(x,u)$ stand for the derivative of mapping $J(\cdot, u)$ 
+with respect to component $x$ for fixed $u$.
+
+
+\begin{theorem}(\citet{Clarke1975}, Theorem 2.1)\label{Clarke1975_thm}
+Let $\mathbb{U}$ be a sequentially compact space, and let $g:\mathbb{R}^n \times \mathbb{U} \to \mathbb{R}$ have the following properties:
+\begin{enumerate}
+    \item $g(x, u)$ is upper semicontinuous  in $(x, u)$.
+    \item $g$ is locally Lipschitz in $x$, uniformly for $u$ in $U$.
+    \item $g_x^\circ(x, u; \cdot) = D_xg(x, u; \cdot)$, the derivatives being with respect to $x$.
+    \item $\partial_x g(x, u)$ is upper semicontinuous  in $(x, u)$.
+\end{enumerate}
+Then, if we let $J(x) = \max\{g(x, u) : u \in \mathbb{U}\}$,
+\begin{enumerate}
+    \item $J$ is locally Lipschitz.
+    \item $D_xJ(x; h)$ exists.
+    \item $D_xJ(x; h) = J^\circ(x; h) = \max\{\zeta \cdot h : \zeta \in \partial_x g(x, u), u \in M(x)\}$, where $M(x) = \{u \in \mathbb{U} : g(x, u) = J(x)\}$.
+    \item $\partial J(x)$ is the convex hull of $\{\partial_x g(x, u) : u \in M(x)\}$.
+\end{enumerate}
+\end{theorem}
+
+\begin{lemma}[Addendum to Proof of Theorem \ref{arm}]\label{martin}
+Let $k^{\ast} = g(k^{\ast})$ be an interior steady state. Then, under the above Assumptions for the Economic Growth Model (Section 2)
+the right-hand derivative  $V'_{+}(k^{\ast})$ of $V(\cdot)$ at $k^{\ast}$ is well defined, 
+and  the right-hand   derivative $g'_{+}(k^{\ast})$ of $g(\cdot)$ at $k^{\ast}$ is also well defined. 
+\end{lemma}
+
+\begin{proof}
+The proof is divided into three parts, and builds on Theorems \ref{Danskin} and \ref{Clarke1975_thm} of the Online Appendix (and consequently Theorem \ref{lucasz} of the paper).
+Furthermore, Bellman's equation, $\beta V(k) = W(k) - (1 - \beta) u(f(k) - g(k)),$ entails that the derivative of $V$ is bounded if and only if the derivative of $g$ is bounded, for all $k$ where such derivatives exist.
+This is quite relevant at a steady state solution $k^{\ast}$, where $k^{\ast} = g(k^{\ast})$  and $g$ maps points of an  interval into itself.\\
+\textit{Part (1). The current value function $W$ has a well-defined right-hand derivative  $W'_{+}(k^{\ast})$.} This  is just a consequence of Theorem \ref{Danskin}.
+Observe that by Theorem \ref{Clarke1975_thm}, function $W$ is  Lipschitz continuous. 
+Therefore, by the Lipschitz property we can write $W(k^{\ast} +a) - W(k^{\ast}) = \int^{k^{\ast}+a}_{k^{\ast}} W'(k)dk$ for all $a >0$. Since  $\lim_{a \to 0^+} W'(k^* + a) = W'_{+}(k^*)$, the right-hand  derivative $W'_{+}(k^{\ast})$ is obviously well defined; further, for every $\xi >0$ there is $\alpha >0$ such that $|W'_{+}(k^{\ast}) - \frac{\int^{k^{\ast}+a}_{k^{\ast}} W'(k)dk}{a}| <\xi$ for all $0 < a<\alpha$.
+Hence,  possible discontinuities in the policy function $g(k^{\ast}+a)$ do not have a first-order effect on the continuity properties of the term $\frac{\int^{k^{\ast}+a}_{k^{\ast}} W'(k)dk}{a}$ as a function of $a$ for sufficiently small $a$, and such term  defines  the right-hand derivative $W'_{+}(k^{\ast})$.  Finally, let us note that by  the envelope theorem,  $\int^{k^{\ast} +a}_{k^{\ast}} W'(k)dk = \int^{k^{\ast}+a}_{k^{\ast}} u'(f(k)- g(k))f'(k)dk.$
+
+\textit{Part (2). The continuation value function $V$ has a well-defined right-hand derivative  $V'_{+}(k^{\ast})$.} This part is an extension of Theorem \ref{manuel3}, using first-order condition $u'(f(k) - g(k)) = \beta \delta V'(g(k))$ at points of existence of 
+$V'(g(k))$. 
+As already discussed, both $W(k)$ and $g(k)$ are differentiable at almost all $k$, and so $V(k)$ is differentiable at almost all $k$. In addition, at a maximum point Clarke's  generalized directional derivative [see (\ref{martin2})] must be less than or equal to zero. This
+ means that for fixed $\xi >0$ we have   $V'(k^{\ast} +a) \le \frac{u'(c^{\ast})}{\beta \delta}+\xi$ for all $a>0$ small enough; recall that $V'(k^{\ast} +a)$ exists at almost all points. Further,
+ by Bellman's equation, $\beta V(k) = W(k) - (1 - \beta) u(f(k) - g(k)),$ the derivative of $g$ must be bounded at all points $k^{\ast} +a$ for  all $a>0$ sufficiently small, whenever $g'(k^{\ast} +a)$ does exist.
+ 
+ Observe that  $k^{\ast} = g(k^{\ast})$ is an interior steady state, and $g$ is strictly monotone increasing and continuous from the right.  Consequently, $lim$ $sup_{a \rightarrow 0^{+}} V'(k^{\ast} +a) \ge \frac{u'(c^{\ast})}{\beta \delta} $, where again the $lim$ $sup$ is taken over those
+ points of existence of $V'(k^{\ast} +a)$. 
+ By way of contradiction, assume that  there is a subsequence such that  $lim_{a_j \rightarrow 0^{+}} V'(k^{\ast} +a_j) \le \frac{u'(c^{\ast})}{\beta \delta} -\xi$, for some $\xi >0$. Since  the policy function $g$ is monotonically increasing, along this subsequence function $g$  must have unbounded slope 
+ (or be discontinuous) at  some points $k$ arbitrarily close to $k^{\ast}$ with $k >k^{\ast}$. Accordingly, the continuation  value function $V$ should also have unbounded slope for points $k$ arbitrarily close to $k^{\ast}$. This can be ruled out by
+ similar arguments as in  the previous paragraph. Taken all these inequalities together about the limiting behavior of the derivative $V'(k)$,  as we approach $k^{\ast}$ from the right the generalized gradient of $V$ at $k^{\ast}$ as defined in (\ref{gen_gradient})
+ must be unique (from the right side). Then,  by Proposition  \ref{Clarke1975_prop} of the Online Appendix  the right-hand derivative $V'_{+}(k^{\ast})$ must be well defined, and must be equal to $\frac{u'(c^{\ast})}{\beta \delta}$.
+
+ 
+ Therefore, we can write:
+$V(k^{\ast} +a) - V(k^{\ast} )= \int^{k^{\ast}}_{k^{\ast}+a} V'(k)dk$ $+$ $high$-$order$ $terms$, where  $\int^{k^{\ast}+a}_{k^{\ast}} V'(k)dk = \frac{1}{\beta \delta} \int^{k^{\ast}+a}_{k^{\ast}} u'(f(k) -g(k))dk$.  Thus, we can  conclude that if the right-hand derivative $W'_+(k^{\ast})$ is well defined, then the right-hand derivative $V'_{+}(k^{\ast})$ should also be well defined. Indeed, one can readily see  that $\frac{\int^{k^{\ast}+a}_{k^{\ast}} u'(f(k) -g(k))dk}{a}$ shares the same continuity properties as a function of $a$ approaching $a=0$ as the integral $\frac{\int^{k^{\ast}+a}_{k^{\ast}} u'(f(k) -g(k))f'(k)dk}{a}$ in 
+Part (1).
+
+\textit{Part (3). The policy function  $g$ has a well-defined right-hand derivative  $g'_{+}(k^{\ast})$.} As in Theorem \ref{smooth}, by  the inverse function theorem and the chain rule applied to utility function $u$ in 
+Bellman's equation $\beta V(k) = W(k) - (1 - \beta) u(f(k) - g(k))$ and Parts (1)-(2) of this proof,  
+we  get  that  the right-hand derivative $g'_{+}(k^{\ast})$ is well defined.
+\end{proof}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Results for Theorem \ref{theorem_cont_T} }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{lemma}[Addendum to Proof, Part (ii) of Theorem \ref{corollary_cont_Tconvergence}]\label{jpablo}
+Under the conditions of Theorem \ref{corollary_cont_Tconvergence}, we must have
+\[
+W^{\ast}(\theta) \le \max_{\theta_+ \in \Gamma(\theta)} U(\theta, \theta_{+}) + \beta \delta V^{\ast}(\theta_{+})
+\]
+for all $\theta \in \Theta$.
+\end{lemma}
+
+\begin{proof}
+We break the proof in a few simple steps.
+
+\textit{(i) Let us define a new function $\hat{V}^{\ast}_n(\theta) \ge V^{\ast}_{\varepsilon_{n'}}(\theta)$ for all $\theta$ in $\Theta$ and all $n' \ge n$.}
+More specifically, let 
+ $\hat{V}^{\ast}_n(\theta) = \sup_{n' \ge n} \{V^{\ast}_{\varepsilon_{n'}} (\theta) \}$ for 
+each $\theta$ in $\Theta$. Then, $\hat{V}^{\ast}_n(\theta) \ge V^{\ast}_{\varepsilon_{n'}}(\theta)$ for all $\theta$ in $\Theta$ and $n' \ge n$, where  $V^{\ast}_{\varepsilon_{n'}}(\theta)$ refers to a  continuation value function for an $\varepsilon$-equilibrium (for some $\varepsilon_{n '})$  as defined in part (ii) of the proof of Theorem  \ref{corollary_cont_Tconvergence}.
+Incidentally, note that $\hat{V}^{\ast}_n(\theta)$ is lower semicontinuous, since it is the $sup$ of an infinite sequence of continuous functions $V^{\ast}_{\varepsilon_n}(\theta)$. As already discussed, there is no restriction of generality to take the upper closure of 
+$\hat{V}^{\ast}_n(\theta)$. Hence, we suppose that $\hat{V}^{\ast}_n(\theta)$ is a continuous mapping. Moreover, observe that  $\hat{V}^{\ast}_n(\theta)$ is  non-increasing in $n$ for every $\theta$.
+
+\textit{(ii) Accordingly,  let us define a new current value  function $\hat{W}^{\ast}_n(\theta) \ge W^{\ast}_{\varepsilon_{n'}}(\theta)$ for all $\theta$ in $\Theta$} and all $n' \ge n$.
+Certainly,    $\hat{W}^{\ast}_{n}(\theta) =  \max_{\theta_+ \in \Gamma(\theta)} U(\theta, \theta_{+}) + \beta \delta \hat{V}^{\ast}_{n}(\theta_{+})$ for all $\theta$ in $\Theta$, satisfies these properties. 
+Moreover,   $\hat{W}^{\ast}_{n}(\theta)$ is Lipschitz continuous.
+
+
+
+\textit{(iii) For each $\theta_{0}$ we can choose a subsequence of maximizers $\{\hat{\theta}^{\ast}_{1n}(\theta_0)\}_{n \ge 0}$ converging to some $\theta^{\ast}_1(\theta_0)$ because $\Theta$ is a compact set.}
+Here,
+\[
+\hat{\theta}^{\ast}_{1n}(\theta_0) = \arg \max_{\theta_+ \in \Gamma(\theta_0)} \{U(\theta_0, \theta_{+}) + \beta \delta \hat{V}^{\ast}_{n}(\theta_{+})\}.
+\]
+That is, $\hat{\theta}^{\ast}_{1n}(\theta_0)$ is a maximizer under value function $\hat{V}^{\ast}_{n}(\theta_{+})$ and initial condition $\theta_0$.
+
+\textit{(iv) Finally, we claim that  $ \max_{\theta_+ \in \Gamma(\theta)} U(\theta, \theta_{+}) + \beta \delta V^{\ast}(\theta_{+}) \ge W^{\ast}(\theta) $ for all $\theta$ in $\Theta$,} which proves the lemma.
+Let $\alpha >0$ be an arbitrarily small number. Then, we first claim that $V^{\ast}(\theta^{\ast}_{1}(\theta_0)) +  \alpha > \hat{V}^{\ast}_{n'}(\theta_{+})$ for $\theta_{+}$ in a neighborhood of   $\theta^{\ast}_{1}(\theta_0)$ and all $n' \ge n$.
+Observe that $\{\hat{V}_n^{\ast}(\theta^{\ast}_{1}(\theta_0))\}_{n\ge 0}$ converges to $V^{\ast}(\theta^{\ast}_{1}(\theta_0))$ for fixed $\theta_0$, as $n \rightarrow \infty$; moreover,  $\hat{V}_n^{\ast}(\theta_{+})$ is a continuous function. Since $\hat{V}_n^{\ast}(\theta_{+})$ is also nonincreasing in $n$, we must have $V^{\ast}(\theta^{\ast}_{1}(\theta_0))  + \alpha >  \hat{V}_{n'}^{\ast}(\theta_1)$ for all $\theta_1$ in a neighborhood of $\theta^{\ast}_{1}(\theta_0)$ for all $n' \ge n$ for 
+$n$ sufficiently large. Therefore, 
+\begin{equation}\label{eq:associated_operators}
+    \alpha + U(\theta_0, \theta^{\ast}_{1}(\theta_0)) + \beta \delta V^{\ast}(\theta^{\ast}_{1}(\theta_0)) \ge U(\theta_0, \hat{\theta}^{\ast}_{1n'}(\theta_0)) + \beta \delta \hat{V}^{\ast}_{n'}(\hat{\theta}^{\ast}_{1n'}(\theta_0)),
+\end{equation}
+ for all $n' \ge n$ and $n$ large enough. Then, 
+\begin{align*}
+    \max_{\theta_+ \in \Gamma(\theta_0)} \{U(\theta_0, \theta_{+}) + \beta \delta V^{\ast}(\theta_{+})\} + \alpha 
+    &\ge U(\theta_0, \hat{\theta}^{\ast}_{1n'}(\theta_0)) + \beta \delta \hat{V}^{\ast}_{n'}(\hat{\theta}^{\ast}_{1n'}(\theta_0)) \\
+    &\ge \hat{W}^{\ast}_{n'}(\theta_0) \\
+    &\ge W^{\ast}(\theta_0) - \alpha
+\end{align*}
+   Since our choices $\theta_0$ and $\alpha >0$ were arbitrary, it must hold true  that $\max_{\theta_+ \in \Gamma(\theta)} \{U(\theta, \theta_{+}) + \beta \delta V^{\ast}(\theta_{+})\} \ge W^{\ast}(\theta)$ for all $\theta \in \Theta$.
+ \end{proof}
+ 
+ 
+ \begin{lemma}\label{psanchez}
+Under the conditions of Theorem \ref{corollary_cont_Tconvergence},\\
+ (i) Let $V^{\ast}$ be the $lim$ $sup$ of  the sequence $\left\{V^{*}_{\varepsilon_{n}}\right\}_{n \ge 0}$.\\
+(ii) Let $W^{\ast}_{\varepsilon_{n}}$ be the value function for $V^{\ast}_{\varepsilon_{n}}$ for each $n \ge 0$, and $W^{\ast}$ be the value function for $V^{\ast}$; see \eqref{eq:markov_iimanuel}.\\
+ (iii) Let the sequence $\left\{W^{*}_{\varepsilon_{n}}\right\}_{n \ge 0}$ converge to $W^{\ast}$ in the sup norm.\\
+ (iv) For given  $\theta_0$, let  $\theta^{\ast}_{1\varepsilon_n}(\theta_0)$ be an optimal point  for function $W^{\ast}_{\varepsilon_n}$ under continuation value function $V^{\ast}_{\varepsilon_n}$.\\
+ Suppose that $\theta^{\ast}_1(\theta_0)$ is a limit point of  a  sequence of optimal points  $\{\theta^{\ast}_{1\varepsilon_n}(\theta_0)\}_{n\ge 0}$.
+  Then,   $\theta^{\ast}_1(\theta_0)$ is an optimal point  for value function $W^{\ast}$ under continuation value function $V^{\ast}.$
+ \end{lemma}
+
+\begin{proof} For every  $\alpha >0$ there is some $n$ large enough such that
+\begin{align*}
+W^{\ast}(\theta_0) & \ge U(\theta_0, \theta^{\ast}_1(\theta_0)) + \beta \delta V^{\ast}(\theta^{\ast}_1(\theta_0)) \\
+& \ge U(\theta_0, \theta^{\ast}_{1 \varepsilon_n}(\theta_0)) + \beta \delta V^{\ast}_{\varepsilon_{n}}(\theta^{\ast}_{1 \varepsilon_n}(\theta_0)) -\alpha \\
+& \ge W^{\ast}_{\varepsilon_{n}} (\theta_0) - \alpha \\
+& \ge W^{\ast}(\theta_0) - 2\alpha,
+\end{align*}
+where the first inequality comes from the definition of $W^{\ast}$, see (ii) in the statement of this lemma;  the second inequality comes from the definition of $V^{\ast}$ as the limit sup; see (i) in the statement of this lemma, and 
+equation (\ref{eq:associated_operators}) in the proof of Lemma \ref{jpablo}; the third inequality comes from (ii) in the statement of this lemma;  and the fourth inequality comes from (iii) in the statement of this lemma for $n$ large enough. Since $\alpha >0$ has been chosen arbitrarily small, the proof is thus established.
+
+
+
+\end{proof}
+
+Let $\tilde{\varLambda}^{\ast}_{\varepsilon_n}$ be the correspondence of optimal solutions for value functions $W^{\ast}_{\varepsilon_n}$ and $V^{\ast}_{\varepsilon_n}$; see (\ref{eq:markov_iimanuel}). Note that correspondence  $\tilde{\varLambda}^{\ast}_{\varepsilon_n}$ should be distinguished from $\varLambda^{\ast}_{\varepsilon_n}$, which is computed after the $\varepsilon_n$-derivative in (\ref{eq:associated_operatorepsilon}).
+
+\begin{corollary}\label{pascualin} Under the conditions of the previous Lemma \ref{psanchez}, we must have:\\
+ $\limsup$  $\left\{\tilde{\varLambda}^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}  \subseteq \varLambda^{\ast}.$
+
+\end{corollary}
+
+ 
+ The proof of  Corollary  \ref{pascualin} follows as a simple extension of Lemma \ref{psanchez} since $\Theta$ is a compact set. Hence, every sequence of optimal points  $\{\theta^{\ast}_{1\varepsilon_n}(\theta_{n})\}_{n\ge 0}$
+must have a convergent subsequence over both $\theta^{\ast}_{1\varepsilon_n}$ and $\theta_{n}$.
+ 
+  \begin{remark}\label{ignacio}
+ 
+Following [\citet{Hildenbrand1974},  p. 16], note that $lim$ $sup$  $\left\{\tilde{\varLambda}^{\ast}_{\varepsilon_{n}}\right\}_{n \ge 0}  \subseteq \varLambda^{\ast}$ 
+entails that for every $\alpha >0$, there is $n$ such that 
+\begin{equation}\label{remark_app}
+    \tilde{\varLambda}^{\ast}_{\varepsilon_{n'}} \subseteq B_{\alpha}(\varLambda^{\ast})
+\end{equation}
+
+\noindent for all $n' \ge n$, where $B_{\alpha}(\varLambda^{\ast})$ denotes the $\alpha$-neighborhood of set $\varLambda^{\ast}$.
+
+  
+ \end{remark}
+ 
+ \begin{lemma}[Addendum to Proof,  Part (iv) of Theorem \ref{corollary_cont_Tconvergence}]\label{blanca}
+ For every $\theta_0 \in \Theta^{W^{\ast}}$, the sequence $\left\{\varLambda_{\varepsilon_n}^{\ast}(\theta_0)\right\}_{n\ge 0}$ converges to $\theta^{\ast}_1(\theta_0)$.
+ \end{lemma}
+ 
+ 
+ \begin{proof}
+ Note that $W^{\ast}(\theta)$ is  differentiable at $\theta_0  \in \Theta^{W^{\ast}}$, and the derivative $DW^{\ast}(\theta)$   varies continuously with $\theta$. Further, by the previous Remark \ref{ignacio}
+ for every $\alpha >0$, there is  $\varepsilon_n$ small enough such that the  $\varepsilon$-derivative as  defined  in (\ref{average}) is computed  within the  set $ B_{\alpha}(\varLambda^{\ast}),$ and  is roughly equal to  $DW(\theta_0).$ 
+ In other words,  by the envelope theorem all   derivatives in the integrand of (\ref{average}) take the form  $DW^{\ast}_{\varepsilon_n} (\theta) = D_1U(\theta, \theta^{\ast}_{1\varepsilon_n}(\theta))$, and all   $\theta^{\ast}_{1\varepsilon_n}(\theta)$ 
+ become  arbitrarily close to $\theta^{\ast}_1(\theta_0)$ 
+ for $\theta$ closed enough to $\theta_0$ for $n$ sufficiently large, since $\varLambda^{\star}$ is an upper hemi-continuous correspondence that is single-valued at $\theta_0$.  Therefore, by Assumption 3(iv) we must have that 
+the sequence $\left\{\varLambda_{\varepsilon_n}^{\ast}(\theta_0)\right\}_{n\ge 0}$ converges to $\theta^{\ast}_1(\theta_0)$.
+ \end{proof}
+ 
+ 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Fixed-Point Theorems}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In 1912, Brouwer proved the first fixed-point theorem in Euclidean
+spaces: Every continuous mapping from the $n$-$simplex$ to itself
+has a fixed point. In 1930, Schauder extended Brouwer's fixed-point
+theorem from Euclidean spaces to Banach spaces.
+
+\begin{theorem}(Schauder's Fixed Point Theorem)\label{Schauder's Fixed Point Theorem}. Let $\Sigma$ be
+a nonempty closed convex subset of a Banach space $\mathbb{X}$. If
+$f:\Sigma\rightarrow\Sigma$ is continuous with a compact image, then
+$f$ has a fixed point.
+
+\end{theorem}
+
+Schauder also came up with the well-known conjecture: Every continuous
+function, from a nonempty compact and convex set in a (Hausdorff)
+topological vector space into itself, has a fixed point.
+
+R. Cauty provided an answer to Schauder's Conjecture. In the international
+conference of Fixed Point Theory and its Applications in 2005, T.
+Dobrowolski remarked that there is a gap in the proof. Therefore,
+Schauder's Conjecture is still unsolved.
+
+In 1934, Tychonoff extended Schauder's fixed-point theorem from a
+Banach space to a locally convex topological vector space.
+
+\begin{theorem}(Tychonoff's Fixed Point Theorem)\label{Tychonoff's Fixed Point Theorem}. Let $\mathbb{X}$
+be a Hausdorff locally convex topological vector space. Assume that
+$\Sigma$ is a compact convex subset of $\mathbb{X}$. Then, every
+continuous function $f:\Sigma\rightarrow\Sigma$ has a fixed point.
+
+\end{theorem}
+
+Our discussion here follows \citet{li2019}, where one can find further
+applications and extensions of these theorems. Theorem \ref{Schauder's Fixed Point Theorem} applies
+directly to our framework.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Numerical Algorithm for Computing  the Markov  Equilibrium}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The following algorithm details a numerical procedure for computing the Markov equilibrium in the quasi-hyperbolic discounting model. The iteration is performed on the pair $(V, g)$---the continuation value function and the policy function, respectively. This iteration  includes a smoothing step to handle potential discontinuities in the policy function and ensure numerical stability.
+
+\vspace{1em}
+
+\begin{breakablealgorithm}
+\captionof*{algorithm}{MPE Solver with $\varepsilon$-Approximate Derivatives}
+\label{alg:mpe_solver_eps}
+\begin{algorithmic}[1]
+    \State \textbf{Tolerances and Initialization}
+    \State Tolerances: $\texttt{tol} > 0$, jump threshold $\tau > 0$, derivative radius $\varepsilon>0$ (initial), target $\varepsilon_{\min}>0$.
+    \State Base state grid $\Theta=\{\theta_1,\ldots,\theta_N\}$ and initial envelope guess $W_{\text{guess}}$ (bounded, Lipschitz).
+    \State Initial correspondence/policy guess $\varLambda_{\text{guess}}$ (defined where single-valued).
+    \State Weight kernel $w(\theta,\theta')$ for local averaging; let $\omega(\theta,\theta') := \dfrac{w(\theta,\theta')}{\sum_{\theta''\in \mathcal{N}_\varepsilon(\theta)} w(\theta,\theta'')}$.
+    \Statex
+
+    \State \textit{Outer continuation loop on $\varepsilon$}
+    \Repeat
+        \State $(W_{\text{new}}, \varLambda_{\text{new}}) \gets (W_{\text{guess}}, \varLambda_{\text{guess}})$
+
+        \State \textit{Inner fixed-point loop at fixed $\varepsilon$}
+        \Repeat
+            \State $W_{\text{old}} \gets W_{\text{new}}$
+
+            \State \textbf{Step 1: $\varepsilon$-approximate derivative and implied policy}
+            \For{each $\theta \in \Theta$}
+                \State Neighborhood: $\mathcal{N}_\varepsilon(\theta) := \{\theta'\in\Theta:\ \|\theta'-\theta\| \le \varepsilon\}$
+                \State Compute finite-difference derivative estimates $\widehat{DW}(\theta' \mid W_{\text{old}})$ at each $\theta' \in \mathcal{N}_\varepsilon(\theta)$.
+                \State Weighted finite average:
+                \[
+                    D_\varepsilon W_{\text{old}}(\theta) \;:=\; \sum_{\theta'\in \mathcal{N}_\varepsilon(\theta)} \omega(\theta,\theta')\, \widehat{DW}(\theta' \mid W_{\text{old}})
+                \]
+                \State Recover next state from the gradient relation:
+                \[
+                   \tilde{g}_\varepsilon(\theta) \;\gets\; h\!\big(D_\varepsilon W_{\text{old}}(\theta),\,\theta\big),
+                \]
+                where $h(x,\theta)$ satisfies $x=D_1U(\theta,\theta_+)$ and returns $\theta_+=h(x,\theta)$.
+                \State Define guess for  single-valued correspondence $\tilde{\varLambda}_\varepsilon(\theta)=\{\tilde{g}_\varepsilon(\theta)\}$.
+            \EndFor
+
+            %%%%%%%%%%%%%  STEP 2 (tight)  %%%%%%%%%%%%%
+\State \textbf{Step 2: Continuation value (upper closure)}
+\For{each $\theta \in \Theta$}
+  \State $\tilde{V}_{\mathrm{raw}}(\theta) \gets \dfrac{1}{\beta}\Big(W_{\mathrm{old}}(\theta) - (1-\beta)\,U(\theta,\tilde{g}_\varepsilon(\theta))\Big)$
+\EndFor
+\State \textit{Upper envelope on $\Theta$ (local-sup majorant)}
+\For{each $\theta \in \Theta$}
+  \State $\mathcal{N}_\rho(\theta) \gets \{\theta' \in \Theta:\ \|\theta'-\theta\| \le \rho(\theta)\}$
+  \State $\tilde{V}^{suc}(\theta) \gets \max\limits_{\theta' \in \mathcal{N}_\rho(\theta)} \tilde{V}_{\mathrm{raw}}(\theta')$
+\EndFor
+\State $\Theta_+ \gets \Theta$
+%%%%%%%%%%%%%  END STEP 2  %%%%%%%%%%%%%
+
+            \State \textbf{Step 3: Bellman update and maximizers}
+            \For{each $\theta \in \Theta$}
+                \State $\hat{W}(\theta) \gets \max_{\theta_+ \in \Gamma(\theta)} \Big\{ U(\theta,\theta_+) + \beta\delta\,\tilde{V}^{suc}(\theta_+) \Big\}$
+                \State $\hat{\varLambda}(\theta) \gets \arg\max_{\theta_+ \in \Gamma(\theta)} \Big\{ U(\theta,\theta_+) + \beta\delta\,\tilde{V}^{suc}(\theta_+) \Big\}$
+            \EndFor
+
+            \State \textbf{Value update}
+            \State $W_{\text{new}} \gets \hat{W}$
+
+            \State \textbf{Convergence check}
+            \If{$\sup_{\theta\in\Theta}|W_{\text{new}}(\theta)-W_{\text{old}}(\theta)|<\texttt{tol}$}
+                \State \textbf{break}
+            \EndIf
+
+        \Until{convergence is reached}
+
+        \State \textbf{Continuation step:} $\varepsilon \gets \varepsilon/2$; \; $(W_{\text{guess}},\varLambda_{\text{guess}})\gets (W_{\text{new}},\hat{\varLambda})$
+    \Until{$\varepsilon \le \varepsilon_{\min}$}
+
+    \State \textbf{Outputs:} $W(\cdot)$, $V(\cdot)=\tilde{V}^{suc}(\cdot)$, $\varLambda(\cdot)$, and policy $g(\cdot)$.
+\end{algorithmic}
+\end{breakablealgorithm}
+
+\end{appendices}
+
+
+
+\end{document}

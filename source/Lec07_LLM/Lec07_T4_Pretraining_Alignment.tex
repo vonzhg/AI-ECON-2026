@@ -1,0 +1,761 @@
+%% FullCourse_10Lecs -- Lecture 7, Act 4 (PRETRAIN): Pretrained LMs, Fine-tuning & Alignment
+%% ch14 rebuild (2026-07-07), per Lec07_ch14_Rebuild_Plan_2026-07-07.md.
+%% Reused frames copied verbatim (with renumbered cross-references) from
+%%   archive_pre_split/pre_ch14_rebuild_2026-07-07/Lec07_T3a_How_LLMs_Work.tex
+%% Pricing snapshot REFRESHED 2026-07 (web-checked; see frame note).
+%% New frames follow chapter14 sec. 14.5: family-tree figure, BERT-vs-GPT table,
+%% version-as-instrument, open-weights menu (incl. Qwen/DeepSeek + PIPL/DSL);
+%% Bradley-Terry/KL econ analogies folded into the RLHF frame; MLM corpus-choice
+%% thinkbox folded into the fine-tuning frame.
+
+\input{../shared_preamble.tex}
+
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{../../MiniCourse_8hr/Slides/Module3_LLM_Text/pic/}{../}}
+
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, backgrounds}
+
+\input{lec07_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 7.4: Pretrained Language Models and Alignment}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Lecture 7 in One Map}
+\LecSevenMap{4}
+\end{frame}
+
+%=============================================================================
+\section{From Architecture to Model}
+\sectiondivider{From Architecture to Model}{Products vs.\ architectures: a three-layer family tree}
+
+\begin{frame}{Products vs.\ Architectures: The Family Tree}
+\textbf{ChatGPT is not a model family --- it is the aligned product of one.} Three layers to keep straight:
+\begin{center}
+\begin{tikzpicture}[
+    every node/.style={font=\scriptsize},
+    box/.style={rectangle, draw, rounded corners, align=center, minimum height=0.75cm, inner sep=3pt},
+    archbox/.style={box, fill=gray!15, text width=3.4cm},
+    model/.style={box, fill=blue!12, text width=2.6cm},
+    prod/.style={box, fill=green!10, text width=7.8cm},
+    note/.style={rectangle, draw=gray!60, rounded corners, fill=gray!10, align=center, text width=2.2cm, inner sep=2pt, font=\tiny},
+    arr/.style={-{Latex[length=1.8mm]}, thick},
+    fatarr/.style={-{Latex[length=2.4mm]}, line width=1.2pt},
+    lab/.style={font=\tiny, fill=white, inner sep=1pt}
+]
+\node[archbox] (arch) at (5.0, 0) {\textbf{Transformer architecture}\\ (Vaswani et al., 2017)};
+\node[model] (bert) at (1.2, -1.65) {\textbf{BERT}\\ bidirectional encoder};
+\node[model, text width=2.4cm] (t5) at (5.0, -1.65) {\textbf{T5 / BART}\\ encoder--decoder};
+\node[model] (gpt) at (8.8, -1.65) {\textbf{GPT line}\\ causal decoder};
+\node[model, text width=3.3cm] (bertkids) at (1.2, -3.15) {RoBERTa $\cdot$ FinBERT\\ EconBERT};
+\node[model, text width=3.0cm] (gptkids) at (8.8, -3.15) {LLaMA $\cdot$ Qwen\\ DeepSeek};
+\node[prod] (products) at (5.6, -4.7) {\textbf{Chat products:} ChatGPT $\cdot$ Claude $\cdot$ Gemini $\cdot$ Qwen-Chat $\cdot$ DeepSeek-Chat};
+\node[note] (ann1) at (12.0, 0) {architecture layer\\ (Act 3)};
+\node[note] (ann2) at (12.0, -2.4) {pretrained-model layer\\ (this act)};
+\node[note] (ann3) at (12.0, -4.7) {aligned-product layer\\ (this act, end)};
+\draw[arr] (arch.south) -- (bert.north);
+\draw[arr] (arch.south) -- (t5.north);
+\draw[arr] (arch.south) -- (gpt.north);
+\draw[arr] (bert) -- node[lab, right=1pt] {domain adaptation} (bertkids);
+\draw[arr] (gpt) -- node[lab, right=1pt] {open weights} (gptkids);
+\draw[fatarr] (gptkids.south) -- node[lab, left=2pt, align=center] {instruction alignment\\ (SFT $+$ RLHF/DPO)} (gptkids.south |- products.north);
+\end{tikzpicture}
+\end{center}
+\smallskip
+{\footnotesize \textbf{Encoders} (left branch) are the measurement workhorses --- classification, embeddings, similarity. \textbf{Decoders} (right branch) generate; alignment turns them into assistants. Calling ChatGPT means using all three layers at once: decoder Transformer $+$ causal pretraining $+$ instruction alignment.}
+\end{frame}
+
+\begin{frame}{Pretraining: Self-Supervised Language Modeling}
+\begin{itemize}
+\item \textbf{Data:} hundreds of billions to trillions of tokens of natural text and code (web pages, books, papers, code repositories, filings, news, $\ldots$).
+
+\medskip
+\item \textbf{Objectives:}
+\begin{itemize}
+    \item \textbf{Causal LM} (GPT family): $\mathcal{L}(\theta) = -\sum_{s}\sum_{i} \log P_{\theta}\bigl(t_{s}^{(i+1)} \mid t_{s}^{(1:i)}\bigr)$.
+    \emph{In words:} at every position in every training sequence, the model outputs a vocabulary distribution; we penalize it by the negative log-probability of the token that \emph{actually} appeared.
+    \item \textbf{Masked LM} (BERT family): hide a random subset of tokens and predict them bidirectionally, $\mathcal{L}(\theta) = -\sum_{i \in \text{masked}} \log P_{\theta}\bigl(t^{(i)} \mid t^{(\setminus i)}\bigr)$.
+\end{itemize}
+
+\medskip
+\item \textbf{This is maximum-likelihood estimation} of a conditional distribution. The novelty vs.\ classical statistics is the parameterization ($10^{11}$-parameter neural network) and the scale of the data --- not the statistical objective.
+
+\medskip
+\item \textbf{Optimization:} Adam/AdamW, large batches, warmup + cosine LR, gradient clipping, mixed precision. \textbf{Compute:} weeks--months on thousands of accelerators, $10^{23}$--$10^{25}$ FLOPs. No human labels --- the next token \emph{is} the label.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Pretraining Objectives: MLM vs.\ CLM}
+\textbf{Fill in hidden words from both sides, or predict strictly left to right --- the objective determines what the model is good for.}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\footnotesize
+\begin{tabular}{p{2.8cm} p{4.7cm} p{4.7cm}}
+\toprule
+ & \textbf{BERT (masked LM)} & \textbf{GPT (causal LM)} \\
+\midrule
+Objective & mask $\sim$15\% of tokens; predict them from \emph{both} sides & predict \emph{every} next token from the left context \\
+Context direction & bidirectional & causal (left-to-right) \\
+Training signal & masked positions only & every position \\
+Natural strength & understanding: disambiguation, classification, embeddings & generation: continuation, summarization, dialogue \\
+Typical econ use & stance scoring, 10-K classification, similarity, retrieval & summaries, structured extraction, zero-shot labeling \\
+Adaptation cost & low: linear head on \texttt{[CLS]} & prompt design or instruction tuning \\
+\bottomrule
+\end{tabular}
+\end{center}
+\smallskip
+\textbf{Where bidirectionality pays:} disambiguation needs the \emph{right-hand} context too --- \emph{rate} (policy instrument vs.\ unemployment statistic), \emph{liability} (accounting line vs.\ everyday negative). For pure measurement tasks on fixed text, the older BERT family is often still the better \emph{instrument}: cheaper, deterministic, auditable.
+\end{frame}
+
+\begin{frame}{Generating the Next Token}
+\begin{itemize}
+\item \textbf{After pretraining} we have a trained $\theta$. Generation uses that $\theta$ to extend a prompt.
+
+\medskip
+\item Given a prompt $t^{(1)}, \ldots, t^{(n)}$, run the Transformer to obtain $e'^{(n)}$.
+
+\medskip
+\item Compute logits and softmax:
+\[
+   P\bigl(t^{(n+1)} = w \mid t^{(1)}, \ldots, t^{(n)}\bigr) \;=\; \mathrm{softmax}\bigl(W_{\text{vocab}}\, e'^{(n)}\bigr)_{w}.
+\]
+
+\medskip
+\item \textbf{Pick} a token according to a sampling strategy, \textbf{append} it to the context, and \textbf{repeat} until a stop token, a length limit, or an end-of-sequence marker.
+
+\medskip
+\item \textbf{Cost:} naively, generating $n$ tokens is $O(n^{2})$ in attention; practical implementations cache keys and values.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tokens, Cost, and Reproducibility}
+\small
+\begin{columns}[T]
+\column{0.55\textwidth}
+\textbf{Frontier-LLM economics (list prices checked 2026-07):}
+\medskip
+
+\renewcommand{\arraystretch}{1.2}
+\footnotesize
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Model} & \textbf{In \$/M} & \textbf{Out \$/M} \\
+\hline
+Claude Opus 4.8 & 5 & 25 \\
+\hline
+GPT-5.4 & 2.50 & 15 \\
+\hline
+Gemini 3.1 Pro & 2 & 12 \\
+\hline
+Qwen / DeepSeek / LLaMA (local) & \multicolumn{2}{c|}{GPU-hours, not API fees} \\
+\hline
+\end{tabular}
+
+\smallskip
+\scriptsize Frontier context windows now span $\sim$200k--1M tokens. This is a \emph{dated snapshot}: list prices, context limits, and the flagship generation move every quarter. \textbf{Lock the snapshot --- model id, prices, and date --- the day you run the study.}
+
+\column{0.42\textwidth}
+\textbf{What this means for measurement:}
+\footnotesize
+\begin{itemize}
+\item Yin--Vu--Persico (T5a/T5b) run 18{,}797 O*NET tasks $\times$ 3 frontier annotators $\approx$ 56{,}000 calls. At $\sim$2k tokens/call $\Rightarrow$ $\sim$110M tokens per provider. \emph{Per-call} cost is trivial; \emph{per-study} cost is not.
+
+\medskip
+\item \textbf{Reproducibility budget.} A pinned model version + frozen prompt + fixed seed (where supported) + recorded date is one ``equipment item.'' Treat it as you would a survey instrument.
+
+\medskip
+\item \textbf{Three things to archive} so a referee can re-run you:
+\begin{itemize}\itemsep0pt
+\item the exact API call (model id, temperature, seed),
+\item the inputs (hashes),
+\item the raw outputs \emph{before} any post-processing.
+\end{itemize}
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Sampling Strategies}
+\begin{itemize}
+\item \textbf{Greedy:} pick $\arg\max_w P(w \mid \cdot)$. Deterministic, but often repetitive and bland.
+
+\medskip
+\item \textbf{Top-$k$ sampling:} restrict to the $k$ most likely tokens, renormalize, then sample. Cuts off the long tail of low-probability nonsense.
+
+\medskip
+\item \textbf{Top-$p$ (nucleus) sampling:} restrict to the smallest set of tokens whose cumulative probability exceeds $p$ (e.g.\ $0.9$). Adapts to how peaked the distribution is.
+
+\medskip
+\item \textbf{Temperature $\tau$:} rescale logits by $1/\tau$ before softmax.
+\begin{itemize}
+    \item $\tau \rightarrow 0$: deterministic, like greedy
+    \item $\tau = 1$: model's natural distribution
+    \item $\tau > 1$: more diverse, more creative, more risky
+\end{itemize}
+
+\medskip
+\item \textbf{For empirical research, set $\tau = 0$} (and report it). Reproducibility is more valuable than creativity when measuring something. For generative tasks (drafting, synthetic-text experiments), $\tau \in [0.7, 1.0]$ with top-$p \in [0.9, 0.95]$ is the usual compromise --- but record the parameters and seed even then.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Steering Without Training}
+\sectiondivider{Steering Without Training}{Prompting, in-context learning, and schema-constrained output}
+
+\begin{frame}{Prompting: Zero-Shot, Few-Shot, In-Context Learning}
+\small
+\begin{columns}[T]
+\column{0.32\textwidth}
+\textbf{Zero-shot.} No examples in the prompt.
+\begin{tcolorbox}[colback=blue!3, colframe=RedTitle!50, boxrule=0.3mm, arc=1mm, left=1.5mm, right=1.5mm, top=0.8mm, bottom=0.8mm]
+\scriptsize\ttfamily
+Classify this FOMC sentence as hawkish, dovish, or neutral:\\
+"Inflation remains elevated and the Committee is highly attentive."\\
+Label:
+\end{tcolorbox}
+\scriptsize
+$\to$ model: \texttt{hawkish}. Works when the task name is in the pretraining distribution; brittle on rare or domain-specific tasks.
+
+\column{0.32\textwidth}
+\textbf{Few-shot.} 2--8 exemplars in the prompt.
+\begin{tcolorbox}[colback=green!3, colframe=green!45!black, boxrule=0.3mm, arc=1mm, left=1.5mm, right=1.5mm, top=0.8mm, bottom=0.8mm]
+\scriptsize\ttfamily
+"Inflation is too high."\\
+Label: hawkish\\[-1pt]
+"Risks are tilted to the downside."\\
+Label: dovish\\[-1pt]
+"...highly attentive."\\
+Label:
+\end{tcolorbox}
+\scriptsize
+$\to$ accuracy jumps without retraining --- the model infers the label space and the decision rule from the demonstrations.
+
+\column{0.32\textwidth}
+\textbf{In-context learning (ICL).}
+\scriptsize
+\begin{itemize}\itemsep0pt
+\item No gradient updates.
+\item Demonstrations act as a temporary ``task vector'' inside the forward pass.
+\item Empirically: accuracy scales with the number and quality of exemplars; ordering, label format, and class balance all matter.
+\item This is the workhorse pattern for LLM-as-rater measurement (T5a/T5b, Eloundou et al.).
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{In-Context Learning as Implicit Bayesian Inference}
+\begin{itemize}
+\item \textbf{Xie, Raghunathan, Liang, Ma} (ICLR 2022; arXiv 2111.02080) frame ICL as Bayesian inference over a latent ``task'' variable $\tau$:
+\[
+   P\bigl(y_{\text{target}} \mid x_{\text{target}}, \text{demos}\bigr) \;=\; \int P\bigl(y_{\text{target}} \mid x_{\text{target}}, \tau\bigr)\;\underbrace{P\bigl(\tau \mid \text{demos}\bigr)}_{\text{posterior over task}}\,d\tau.
+\]
+The prompt's demonstrations \emph{update} the model's beliefs about \emph{which} task to perform.
+
+\medskip
+\item \textbf{Three predictions, all observed empirically:}
+\begin{itemize}
+    \item More (relevant) demonstrations $\Rightarrow$ posterior $P(\tau \mid \text{demos})$ concentrates on the intended task $\Rightarrow$ accuracy rises.
+    \item Demonstration \emph{ordering} and \emph{label format} are not nuisances --- they shape the posterior.
+    \item Out-of-distribution exemplars push the posterior toward the wrong $\tau$; ICL accuracy collapses.
+\end{itemize}
+
+\medskip
+\item \textbf{Take-away.} \emph{Your prompt is your prior.} The very mechanism that lets a frontier LLM adapt to a new economic measurement task without retraining is the same mechanism that produces sycophancy, prior-contamination, and template sensitivity. Lec09 returns to this as the \emph{context dilemma} --- the conditioning that helps also biases.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Structured Output: JSON as a Measurement Tool}
+\small
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Free-text answers are unstable.} A rubric that asks for ``hawkish / dovish / neutral'' may produce \texttt{Hawkish.}, \texttt{`hawkish'}, \texttt{The label is hawkish.}, or worse. Post-processing such variation is brittle and undermines reproducibility.
+
+\medskip
+\textbf{Solution.} Force the model to emit a fixed-schema JSON object. Every provider exposes a ``structured output'' / ``tool use'' API that constrains decoding (logit masking over disallowed tokens) so the output is \emph{guaranteed} to parse.
+
+\medskip
+\textbf{Mechanism.} The model is still next-token predicting. The provider's API simply masks tokens that would violate the schema --- the next-token distribution is restricted to syntactically valid continuations.
+
+\medskip
+\textbf{Why it bridges to Lec09.} An ``agent'' is just an LLM whose schema names \emph{tools to call}, not labels to output. The same machinery.
+
+\column{0.46\textwidth}
+\textbf{Sentiment-extraction schema:}
+\begin{lstlisting}[language={},basicstyle=\scriptsize\ttfamily,frame=single,backgroundcolor=\color{gray!8}]
+{
+  "stance": "hawkish|dovish|neutral",
+  "confidence": 0.0,
+  "evidence_phrase": ""
+}
+\end{lstlisting}
+
+\medskip
+\textbf{Tool-call schema (Lec09 preview):}
+\begin{lstlisting}[language={},basicstyle=\scriptsize\ttfamily,frame=single,backgroundcolor=\color{gray!8}]
+{
+  "tool": "fred_query",
+  "args": {
+    "series": "UNRATE",
+    "start": "2020-01"
+  }
+}
+\end{lstlisting}
+
+\smallskip
+\scriptsize
+\textbf{For econ research:} schemas \emph{enforce} the rubric (no off-rubric labels), expose the model's evidence (auditable), and let you compute Cohen's $\kappa$ on parseable output. Every data-extraction pipeline in T5b ships with one.
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\section{Fine-Tuning for Economics}
+\sectiondivider{Fine-Tuning for Economics}{From general representations to your domain, at single-GPU cost}
+
+\begin{frame}{Fine-Tuning for Economics}
+\begin{itemize}
+\item A pretrained LLM has \emph{general} linguistic knowledge. Economic tasks often benefit from a small, targeted update.
+
+\medskip
+\item \textbf{Three common strategies:}
+\begin{itemize}
+    \item \textbf{Full fine-tuning:} update every parameter. Highest quality, highest cost. Risks overwriting general knowledge with limited task data (catastrophic forgetting below $\sim$1{,}000 labels).
+    \item \textbf{Adapters / LoRA} (Low-Rank Adaptation): freeze the original weight $W$ and learn a low-rank update $A B^{\top}$. Trains $\sim 0.1\%$ of the parameters at near full-FT quality. \emph{Preferred} for most economics applications.
+    \item \textbf{Domain Adaptive Pretraining (DAPT):} continue pretraining on a domain corpus (FOMC statements, MD\&A texts, central bank speeches) before fine-tuning on the labeled task.
+\end{itemize}
+
+\medskip
+\item \textbf{Examples:} sentiment classification on FOMC statements, 10-K segment labeling, NER for corporate filings, summarization of monetary policy reports.
+\end{itemize}
+\smallskip
+\begin{cautionbox}
+\textbf{Corpus choice is a validity decision, not a tuning trick.} Scoring ``financing pressure'' in Chinese MD\&A with generic BERT-Chinese vs.\ after DAPT on five years of filings is not just an accuracy difference: the generic model's confusion over disclosure jargon (``liquidity management'', ``refinancing risk'') becomes measurement error in $m(x_i)$, attenuating $\hat\beta$ exactly like a badly chosen proxy --- the same logic as arguing an instrument's validity. Validate against a hand-coded subsample either way.
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Why LoRA Works: The Low-Rank Intuition}
+\begin{itemize}
+\item \textbf{The empirical fact} (Hu et al.\ 2021, Fig.\ 3): the task-specific weight update $\Delta W = W_{\text{fine-tuned}} - W_{\text{pretrained}}$ is \emph{nearly low-rank}. Most of the singular-value mass lives in $\le 10$ directions.
+
+\medskip
+\item \textbf{Economic analogy.} The cross-sectional variation in FOMC sentence stance is not 7B-dimensional. It lives on a small number of latent dimensions: hawk--dove, topic (inflation vs.\ employment), tense (description vs.\ forecast), and a handful of speaker idioms. \emph{The fine-tuning task lives in a low-rank subspace; the parameter update should too.}
+
+\medskip
+\item \textbf{When rank $r$ matters:}
+\begin{itemize}
+    \item \emph{Rank 4--8 suffices} for stance/sentiment classification, NER, paraphrasing --- tasks that re-weight existing knowledge.
+    \item \emph{Rank 16--64} for instruction following, multi-turn dialogue --- tasks that compose existing skills in new ways.
+    \item \emph{LoRA fails} when the task demands broad lexical change (e.g.\ adapting a generic LLM to medieval Latin) or memorizing new factual associations --- those need full DAPT or RAG, not a low-rank patch.
+\end{itemize}
+
+\medskip
+\item \textbf{Why this matters for empirical economists.} The compute cost of fine-tuning a 70B model on a single GPU is essentially the rank-$r$ cost --- a few hours, not a few weeks. The next slide makes the algebra explicit.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fine-Tuning: LoRA Mechanics}
+\begin{itemize}
+\item \textbf{Idea:} instead of updating every weight matrix $W$ in the model, freeze $W$ and learn a \emph{low-rank correction}:
+\[
+   W_{\text{eff}} \;=\; W \;+\; A\,B^{\top}, \qquad A \in \mathbb{R}^{d \times r},\; B \in \mathbb{R}^{k \times r},\; r \ll \min(d, k).
+\]
+Only $A$ and $B$ are trainable during fine-tuning; the original $W$ stays fixed.
+
+\medskip
+\item \textbf{Parameter savings} (LLaMA-7B):
+\begin{itemize}
+    \item Full fine-tuning updates $\sim\!7 \times 10^{9}$ parameters.
+    \item LoRA with $r = 8$ on attention projections updates $\sim\!4 \times 10^{6}$ parameters ($\approx 0.06\%$ of the model).
+    \item Near-equivalent task quality for most classification, sentiment, and style tasks.
+\end{itemize}
+
+\medskip
+\item \textbf{Why it matters for economists:} a 7B or even 70B base model can be adapted on a single GPU or a modest cloud instance --- no industrial-scale hardware required.
+
+\medskip
+\item \textbf{Inference:} after training, merge the update back into the weights ($W \leftarrow W + A B^{\top}$); deployment cost is identical to the base model. The adapter itself is tens of MB --- swap it per task, version it, share it.
+
+\medskip
+\item \textbf{Tooling:} HuggingFace \texttt{peft} wraps any pretrained model with LoRA adapters in a few lines of code.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fine-Tuning: Workflow for an Economics Task}
+\textbf{Running example: classify FOMC statements as hawkish / dovish / neutral.}
+\begin{itemize}
+\item \textbf{Dataset:} $500$--$2{,}000$ hand-coded statements (e.g.\ Hansen--Kazinnik, 2023). Split by \emph{meeting date} --- train on 1994--2015, validate on 2016--2019, test on 2020--2024 --- to avoid leaking future regimes into training.
+
+\medskip
+\item \textbf{Base model:} an encoder (BERT / RoBERTa) with a classification head is usually enough and cheaper than decoder fine-tuning for three-way classification.
+
+\medskip
+\item \textbf{Task formatting:} prepend \texttt{[CLS]}, tokenize and pad to a fixed length, attach a softmax head over 3 classes to the \texttt{[CLS]} output vector.
+
+\medskip
+\item \textbf{Hyperparameters (LoRA defaults):} learning rate $1$--$3 \times 10^{-4}$, rank $r = 8$, batch size 16--32, 3--5 epochs, early stopping on validation macro-F1.
+
+\medskip
+\item \textbf{Evaluation:} report macro-F1 and a per-class confusion matrix; hand-audit 20--30 misclassifications --- most errors reveal label noise or systematic biases worth fixing before scaling.
+
+\medskip
+\item \textbf{Reference template:} CentralBankRoBERTa (T5b) follows exactly this recipe, with a DAPT pass on the FOMC corpus preceding the labeled fine-tuning.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Alignment}
+\sectiondivider{Alignment}{From ``completes text'' to ``answers questions'' --- and what that does to measurement}
+
+\begin{frame}{From Base Model to Assistant: Three Stages}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.8cm and 1.0cm,
+  every node/.style={font=\footnotesize},
+  stage/.style={rectangle, rounded corners=2pt, draw=blue!60!black, fill=blue!10,
+                minimum width=2.7cm, minimum height=1.1cm, align=center},
+  arr/.style={-{Latex[length=2mm]}, thick}
+]
+\node[stage] (pt) {\textbf{Pre-train}\\[2pt]\scriptsize next-token MLE\\\scriptsize $\sim$$10^{13}$ tokens};
+\node[stage, right=of pt] (sft) {\textbf{SFT}\\[2pt]\scriptsize labeled (prompt, response)\\\scriptsize $\sim$$10^{4}$--$10^{6}$ examples};
+\node[stage, right=of sft] (rlhf) {\textbf{RLHF / DPO}\\[2pt]\scriptsize human preference data\\\scriptsize $\sim$$10^{5}$ comparisons};
+\node[stage, right=of rlhf, fill=green!15, draw=green!50!black] (dep) {\textbf{Deployed model}\\[2pt]\scriptsize ChatGPT, Claude,\\\scriptsize Gemini, Qwen-Chat};
+\draw[arr] (pt) -- (sft);
+\draw[arr] (sft) -- (rlhf);
+\draw[arr] (rlhf) -- (dep);
+\node[below=0.3cm of pt, font=\scriptsize, text=gray]  {Step 1};
+\node[below=0.3cm of sft, font=\scriptsize, text=gray] {Step 2};
+\node[below=0.3cm of rlhf, font=\scriptsize, text=gray]{Step 3};
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item \textbf{Pre-training} alone gives a model that completes text. It does \emph{not} answer questions or follow instructions reliably --- ask a base model a question and its most likely continuation is \emph{another phrasing of the question}.
+\item \textbf{SFT + RLHF} is what turns a base model into a ChatGPT-style assistant.
+\item Each stage uses progressively less data but more targeted human effort; step 1 consumes $>$90\% of the compute, steps 2--3 determine \emph{how the model answers}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Supervised Fine-Tuning (SFT) and Instruction Tuning}
+\begin{itemize}
+\item \textbf{Setup:} hand-curated dataset of (instruction, ideal response) pairs --- often $10{,}000$--$1{,}000{,}000$ examples.
+
+\medskip
+\item \textbf{Loss:} same next-token cross-entropy as pre-training, but only on the response tokens, conditional on the instruction.
+\[
+   \mathcal{L}_{\text{SFT}}(\theta)
+   = -\sum_{(x,y)} \sum_{t=1}^{|y|} \log P_\theta\bigl(y_t \,\big|\, x, y_{<t}\bigr).
+\]
+
+\medskip
+\item \textbf{What this does:}
+\begin{itemize}
+\item Teaches format: ``when asked a question, return an answer, not a continuation.''
+\item Teaches refusal patterns and helpfulness conventions.
+\item Often combined with diverse instruction collections (FLAN, Alpaca, ShareGPT).
+\end{itemize}
+
+\medskip
+\item \textbf{What it cannot do:} each instruction carries \emph{one} demonstration answer, so the model never learns which of two decent answers is \emph{better} --- that gap is what preference learning (next slide) fills.
+
+\medskip
+\item \textbf{Connection to economics fine-tuning above:} full FT and LoRA from earlier slides are also used here --- SFT is just fine-tuning with a particular kind of data (instruction-response pairs) rather than labeled classification targets.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{RLHF: Aligning to Human Preferences}
+\begin{itemize}
+\item \textbf{Reinforcement Learning from Human Feedback} (Christiano et al., 2017; Ouyang et al., 2022):
+\begin{enumerate}
+\item For each prompt, sample two responses $y_A$, $y_B$ from the SFT model.
+\item A human labels which is better: $y_A \succ y_B$.
+\item Train a \textbf{reward model} $r_\phi(x, y)$ on these comparisons (Bradley--Terry):
+\[
+P(y_A \succ y_B \mid x) = \sigma\bigl(r_\phi(x, y_A) - r_\phi(x, y_B)\bigr).
+\]
+\item Fine-tune the LLM with \textbf{PPO} to maximize $\mathbb{E}[r_\phi(x, y)]$ subject to a KL penalty against the SFT policy:
+\[
+\max_\theta \; \mathbb{E}_{x, y \sim \pi_\theta}\bigl[r_\phi(x, y)\bigr]
+\;-\; \beta\, \mathrm{KL}\bigl(\pi_\theta \,\|\, \pi_{\text{SFT}}\bigr).
+\]
+\end{enumerate}
+
+\medskip
+\item \textbf{The KL penalty is essential:} without it, the policy over-optimizes the reward model and ``hacks'' it (Goodhart's law in action --- repetitive phrasing, over-apologizing).
+
+\medskip
+\item \textbf{DPO} (Rafailov et al.\ 2023) skips the reward model entirely: a supervised pairwise loss on the same preference data --- no PPO rollouts, much cheaper, numerically stable. Most open-weights chat models (LLaMA-Instruct, Qwen-Chat, Mistral-Instruct) now ship with DPO or a variant (IPO, KTO, ORPO). The algorithm moves fast; the goal does not.
+\end{itemize}
+\smallskip
+\begin{conceptbox}
+\textbf{Economists already know this math.} Bradley--Terry \emph{is} a two-alternative logit --- Luce--McFadden random utility with $r_\phi$ as the value function and Type-I extreme-value errors. And the KL penalty is ridge-style shrinkage toward the SFT baseline: $\beta$ plays exactly the role of $\lambda$ --- the dial between instruction-following and staying close to natural language.
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{Why Alignment Matters: Helpful, Honest, Harmless}
+\begin{itemize}
+\item Anthropic's ``HHH'' framing (Askell et al.\ 2021) is the standard rubric:
+\begin{itemize}
+\item \textbf{Helpful}: actually solves the user's task.
+\item \textbf{Honest}: does not assert things it has no basis for; expresses calibrated uncertainty.
+\item \textbf{Harmless}: refuses to produce content that materially harms others.
+\end{itemize}
+
+\medskip
+\item \textbf{Tensions are real:}
+\begin{itemize}
+\item Helpfulness can pull against harmlessness (over-refusal vs.\ over-compliance).
+\item Honesty can pull against helpfulness (``I don't know'' is honest but may be unhelpful).
+\item Alignment is a multi-objective trade-off, not a scalar.
+\end{itemize}
+
+\medskip
+\item \textbf{For research use:}
+\begin{itemize}
+\item Aligned models are easier to use for first-pass tasks.
+\item But alignment can suppress edge-case completions you might want (e.g.\ negative sentiment templates). Sometimes a base model is preferable for measurement.
+\item Constitutional AI (Bai et al.\ 2022): replace human comparisons with AI-generated critiques against a written constitution --- scales the alignment budget.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Alignment's Measurement Consequence: The Version Is the Instrument}
+\textbf{What preference tuning adds, preference tuning can silently change.}
+\begin{itemize}
+\item SFT demonstrations and preference data are \emph{proprietary, rolling} assets. From outside, all you observe is a version string: \texttt{gpt-4-0613} vs.\ \texttt{gpt-4-2024-08-06}.
+\item Two versions can score the same FOMC sentence differently --- not ``smarter'' or ``dumber'', just a different internal prior about what a good answer looks like.
+\item Evidence: GPT-4's zero-shot hawk--dove labels agree with expert coders \emph{better than fine-tuned encoders do} --- and shift with prompt wording and API version (Hansen \& Kazinnik 2023). The capability and the instability arrive together.
+\item Minimum disclosure whenever an aligned LLM produces a variable: provider, model name, exact version, call date, sampling parameters --- and archive the raw outputs. (T5b turns this into a full workflow.)
+\end{itemize}
+\medskip
+\begin{takeawaybox}
+An aligned LLM used for scoring is a \textbf{time-varying measurement instrument}. Version-pin it like lab equipment, and treat a version change as an instrument change --- because it is one.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{Scale}
+\sectiondivider{Scale}{Power laws, compute-optimal training, and the emergence debate}
+
+\begin{frame}{Kaplan Scaling Laws (2020): Loss is a Power Law}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\begin{itemize}
+\item Kaplan et al.\ (2020) trained dozens of GPT-style models varying $N$ (params), $D$ (data), $C$ (compute).
+\item \textbf{Test loss falls as a power law in each:}
+\[
+   L(N) \approx \left(\frac{N_c}{N}\right)^{\alpha_N},
+   \quad
+   L(D) \approx \left(\frac{D_c}{D}\right)^{\alpha_D},
+\]
+with $\alpha_N \approx 0.076$, $\alpha_D \approx 0.095$.
+
+\medskip
+\item \textbf{Why this is striking:} no plateau over 7 orders of magnitude. Loss keeps falling smoothly with scale.
+
+\medskip
+\item \textbf{Implication:} for fixed compute $C \sim 6 N D$, you can predict optimal $(N, D)$ allocation \emph{before} training.
+
+\medskip
+\item \textbf{For an economist:} a production function for capability --- parameters and data as complementary inputs.
+\end{itemize}
+
+\column{0.42\textwidth}
+\begin{center}
+\begin{tikzpicture}[scale=0.78]
+\begin{axis}[
+  width=6.2cm, height=5cm,
+  xmode=log, ymode=log,
+  xlabel={Scale (log)},
+  ylabel={Test loss $L$ (log)},
+  xtick={1e7,1e9,1e11},
+  xticklabels={$10^{7}$,$10^{9}$,$10^{11}$},
+  ytick={2,4,8},
+  yticklabels={2,4,8},
+  grid=both,
+  grid style={gray!20},
+  tick label style={font=\scriptsize},
+  label style={font=\scriptsize},
+  legend style={font=\tiny, at={(0.97,0.97)}, anchor=north east, draw=none, fill=white, fill opacity=0.85, text opacity=1},
+  legend cell align={left},
+]
+\addplot[blue, thick, domain=1e6:1e12, samples=40] {8 * (1e7/x)^0.076};
+\addlegendentry{$L(N)\!\propto\!N^{-\alpha_N}$, $\alpha_N\!=\!0.076$}
+\addplot[red, thick, dashed, domain=1e6:1e12, samples=40] {8 * (1e7/x)^0.095};
+\addlegendentry{$L(D)\!\propto\!D^{-\alpha_D}$, $\alpha_D\!=\!0.095$}
+\addplot[green!50!black, thick, dotted, domain=1e6:1e12, samples=40] {8 * (1e7/x)^0.050};
+\addlegendentry{$L(C)\!\propto\!C^{-\alpha_C}$, $\alpha_C\!=\!0.050$}
+% Mark a stylized Chinchilla "compute-optimal" point
+\addplot[mark=*, only marks, mark size=2pt, mark options={fill=black}] coordinates {(2e10, 2.4)};
+\node[font=\tiny, anchor=south west] at (axis cs:2e10, 2.4) {Chinchilla opt.};
+\end{axis}
+\end{tikzpicture}\\
+{\scriptsize Three power-laws on one set of axes: parameters $N$, data $D$, compute $C$. Chinchilla optimum is where the $N$-curve and the $D$-curve cross under a fixed compute budget.}
+\end{center}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Chinchilla (Hoffmann et al.\ 2022): Data $\propto$ Params}
+\begin{itemize}
+\item Kaplan suggested ``mostly scale parameters.'' Chinchilla revisited the question with a different fitting method and found:
+\[
+   \text{compute-optimal} \;\Longrightarrow\; D^* \approx 20 \cdot N^*.
+\]
+For each parameter, you want $\sim$20 training tokens.
+
+\medskip
+\item \textbf{Earlier models were undertrained.} GPT-3 (175B params, 300B tokens) used $\sim$$1.7$ tokens/param. A Chinchilla-optimal model at 175B would need $\sim$3.5T tokens.
+
+\medskip
+\item \textbf{Chinchilla itself}: 70B params trained on 1.4T tokens --- beat 280B Gopher on most benchmarks.
+
+\medskip
+\item \textbf{Modern overtraining:} for inference cost reasons, frontier models now go \emph{past} Chinchilla-optimal --- e.g.\ Llama-3 8B trained on 15T tokens ($\sim$1{,}900 tokens/param). Smaller, more-overtrained model = cheaper to deploy.
+
+\medskip
+\item \textbf{The economic frame:} pre-train compute is a one-time fixed cost; inference compute is a recurring marginal cost. Optimal allocation depends on expected serving volume --- a marginal-vs-fixed-cost substitution any economist will recognize.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Emergent Capabilities --- and the ``Mirage'' Critique}
+\begin{itemize}
+\item \textbf{Wei et al.\ (2022):} on certain tasks (multi-step arithmetic, BIG-Bench, in-context learning), accuracy is near random for small models and then \emph{jumps} sharply at a critical scale.
+\item Examples cited: 3-digit addition, word-in-context disambiguation, instruction-following.
+\item Coined the term \emph{emergent capabilities}: not present in smaller siblings, suddenly present in larger ones.
+
+\medskip
+\item \textbf{Schaeffer, Miranda \& Koyejo (2023, ``Are Emergent Abilities a Mirage?''):}
+\begin{itemize}
+\item The sharp jumps may be artifacts of \emph{discontinuous metrics} (exact-match accuracy).
+\item Switch to a continuous metric (e.g.\ token edit distance, partial credit) and the curves become smooth power-laws.
+\item ``Emergence'' may be in our metrics, not in the underlying loss.
+\end{itemize}
+
+\medskip
+\item \textbf{Where this leaves us:}
+\begin{itemize}
+\item Capability \emph{does} grow with scale --- empirically robust.
+\item Whether it grows ``smoothly'' or ``in jumps'' depends on how you measure.
+\item For an economist: never infer ``the model can do my annotation task'' from a parameter count --- test it \emph{on that task}, against a gold standard.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Open-Weights Menu --- and Where It Runs}
+\textbf{For confidential text, the model comes to the data --- not the reverse.}
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\scriptsize
+\begin{tabular}{l l r r r l}
+\toprule
+\textbf{Model} & \textbf{Type} & $L$ & $d$ & \textbf{Params} & \textbf{Pretraining corpus} \\
+\midrule
+BERT-Base & encoder & 12 & 768 & 110M & books $+$ Wikipedia (16GB) \\
+RoBERTa & encoder & 24 & 1024 & 355M & 160GB multi-source \\
+BERT-wwm-ext (HIT) & encoder & 12 & 768 & 110M & Chinese wiki $+$ Baidu Baike $+$ news \\
+GPT-3 & decoder & 96 & 12288 & 175B & filtered web (570GB) \\
+Qwen-7B & decoder & 32 & 4096 & 7B & Chinese-heavy, $\sim$3T tokens \\
+DeepSeek-V3 & decoder (MoE) & 61 & 7168 & 671B (37B active) & $\sim$14.8T tokens, zh$+$en \\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item \textbf{Compliance driver (China):} the Personal Information Protection Law (PIPL, 2021) and Data Security Law regulate cross-border transfer of personal data --- sending firm filings with personal information or survey text to an offshore API is a legal exposure. Locally deployed Qwen / DeepSeek / ChatGLM / LLaMA is the audit-safe default.
+\item Long-context variants (128k tokens) now cover complete annual reports; MoE models (DeepSeek-V3: 671B total, 37B active per token) infer at mid-size dense cost.
+\item Same logic elsewhere: IRB-restricted transcripts, proprietary bank data, unpublished co-author drafts --- local open weights or explicit data-handling sign-off.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Synthesis}
+\sectiondivider{Synthesis}{Old friends, new engine --- and the one equation, revisited}
+
+\begin{frame}{Transformer vs.\ LDA Topic Models}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{tcolorbox}[colback=blue!5, colframe=blue!50!black, title=\textbf{LDA / topic models}]
+\begin{itemize}
+\item Document = mixture of latent topics
+\item Bag of words: ignores order
+\item Output: topic-word and document-topic distributions
+\item Strength: interpretable themes
+\item Weakness: cannot generate coherent prose
+\end{itemize}
+\end{tcolorbox}
+
+\column{0.48\textwidth}
+\begin{tcolorbox}[colback=green!5, colframe=green!40!black, title=\textbf{Transformers}]
+\begin{itemize}
+\item Token-by-token, order-aware
+\item Captures syntax and long-range dependencies
+\item Output: contextual embeddings + a generative model
+\item Strength: rich generation, fluent prose, classification
+\item Weakness: less directly interpretable
+\end{itemize}
+\end{tcolorbox}
+\end{columns}
+
+\medskip
+\textbf{When to use what:} LDA is still excellent for thematic structure and quick descriptive analysis on small corpora (it powered Hansen--McMahon--Prat, T1). Transformers dominate when you need generation, classification, or context-aware embeddings.
+\end{frame}
+
+\begin{frame}{Three Ways to Adapt an LLM}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{p{3.2cm} p{4.2cm} p{4.5cm}}
+\toprule
+\textbf{Method} & \textbf{What changes} & \textbf{Best for} \\
+\midrule
+Prompt engineering & Only the input text & Quick experiments, zero-cost adaptation \\
+Fine-tuning (LoRA / DAPT) & Some model weights & New behavior or style on a fixed domain \\
+Retrieval-Augmented Generation (RAG) & Relevant external context injected at inference time & New \emph{facts} the model never saw \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}
+\item All three are non-exclusive. In practice you often combine them.
+\item RAG addresses the limit we meet head-on in Act 5: \emph{the model's knowledge has a cutoff date}.
+\item Lecture 8 is dedicated to RAG.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Revisiting: Why One Equation Enables So Much}
+\begin{itemize}
+\item Now that we understand pretraining, fine-tuning, and generation, T1's opening claim makes mechanical sense:
+\[
+   p\bigl(t^{(n+1)} \mid t^{(1)}, \ldots, t^{(n)}\bigr) \quad \text{is all there is.}
+\]
+
+\medskip
+\item \textbf{Summarizing a 10-K filing:} the prompt carries the document and the instruction; the model predicts summary tokens one by one because pretraining exposed it to millions of (long-document, summary) pairs.
+
+\medskip
+\item \textbf{Extracting FOMC stance:} fine-tuning on labeled central bank text shifts the next-token distribution so that stance-label tokens are most probable after a monetary-policy sentence.
+
+\medskip
+\item \textbf{Generating scenario forecasts:} condition on macro variables and a scenario description; next-token prediction fills in the narrative consistently with the conditioning.
+
+\medskip
+\item \textbf{Writing and debugging code:} the training corpus included billions of code tokens; the objective is identical --- next token, given context.
+
+\medskip
+\item \textbf{The unifying insight:} all tasks are the same computation. Pretraining provides the knowledge; prompts and fine-tuning steer \emph{which} next-token distribution we sample from. Every capability is a special case of the one equation.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\begin{frame}{Bridge: A Capable Model Is Still a Fallible Instrument}
+\textbf{Everything an LLM does is the one equation --- including its failures.}
+\begin{itemize}
+\item The same next-token engine that summarizes a 10-K also \emph{hallucinates} plausible fictions, drifts across API versions, and loses facts buried mid-context.
+\item \textbf{Act 5 turns the lens around:} first the five structural limits and what each does to research (T5a); then what embeddings and validated LLM calls can already measure --- and the workflow that makes the measure defensible (T5b).
+\end{itemize}
+\bigskip
+\centering\footnotesize\textit{Arc: T1 FRAME $\to$ T2 REPRESENT $\to$ T3 ATTEND $\to$ \textbf{T4 PRETRAIN} $\to$ T5 MEASURE.}
+\end{frame}
+
+\end{document}

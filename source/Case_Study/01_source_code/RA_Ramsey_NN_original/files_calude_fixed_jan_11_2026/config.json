@@ -1,0 +1,184 @@
+{
+  "_README": "Configuration file for Ramsey Optimal Taxation Neural Network Solver",
+  
+  "model_io": {
+    "_comment": "Model input/output settings",
+    "model_number_input": 101,
+    "model_number_output": 102,
+    "use_txt_pretraining": true,
+    "txt_data_file": "policy_v6_out_61.txt",
+    "flag_value": -500
+  },
+
+  "economic_parameters": {
+    "_comment": "Core economic model parameters",
+    "beta": 0.9,
+    "gamma_l": 0.3,
+    "zagg_vec": [[0.045], [0.155]],
+    "pi_zagg": [[0.8, 0.2], [0.2, 0.8]]
+  },
+
+  "state_bounds": {
+    "_comment": "Bounds for state variables (mu = marginal utility of consumption)",
+    "mu_min": 1.27015,
+    "mu_max": 2.5136,
+    "v_min": -25,
+    "v_max": 0
+  },
+
+  "penalty_params": {
+    "_comment": "Bounds and epsilon values for penalty functions in value simulation",
+    "tau_min": 0.0,
+    "tau_max": 1.0,
+    "b_min": -1.5,
+    "b_max": 5.25,
+    "tau_eps": 0.001,
+    "b_eps": 0.001,
+    "l_eps": 0.01
+  },
+
+  "training_iterations": {
+    "_comment": "Main training loop parameters",
+    "num_iter": 10,
+    "warmup_iterations": 5,
+    "history_size": 5
+  },
+
+  "sampling": {
+    "_comment": "Sample generation parameters",
+    "num_samples_value": 5000,
+    "num_samples_expand_p": 1.2,
+    "num_samples_expand_v": 1.25
+  },
+
+  "policy_training": {
+    "_comment": "Policy network training hyperparameters",
+    "num_epochs_p": 10,
+    "num_epochs_p_stage2": 20,
+    "lr_policy": 0.0005,
+    "batch_size_p": 128,
+    "n_p_sim": 50
+  },
+
+  "value_training": {
+    "_comment": "Value network training hyperparameters",
+    "num_epochs_v": 10,
+    "num_epochs_draw": 5,
+    "lr_value": 0.0002,
+    "batch_size_v": 128,
+    "n_v_sim": 50,
+    "v_threshold": -50
+  },
+
+  "network_architecture": {
+    "_comment": "Neural network layer sizes",
+    "n1_p": 64,
+    "n2_p": 64,
+    "n1_v": 64,
+    "n2_v": 64,
+    "n1_d": 64,
+    "n2_d": 64
+  },
+
+  "learning_rate_scheduler": {
+    "_comment": "Learning rate decay settings",
+    "lr_factor": 0.99,
+    "lr_patience": 50
+  },
+
+  "data_loading": {
+    "_comment": "DataLoader configuration",
+    "num_worker": 0
+  },
+
+  "pretraining": {
+    "_comment": "Pre-training from TXT file hyperparameters",
+    "epochs": 1000,
+    "lr_value": 0.0005,
+    "lr_policy": 0.0005,
+    "batch_size": 256,
+    "eps_scaler": 1e-7
+  },
+
+  "adaptive_sampling": {
+    "_comment": "Adaptive sampling system configuration",
+    "cache_update_frequency": 1,
+    "cache_grid_size": 5000,
+    "plot_admissibility_frequency": 5,
+    "verbose_cpp_analysis": false,
+    "candidate_multiplier": 10
+  },
+
+  "admissibility_thresholds": {
+    "_comment": "Thresholds for categorizing admissibility scores A(B,λ,g)",
+    "strong_admissible": 0.85,
+    "inadmissible": 0.5,
+    "sampling_threshold": 0.85
+  },
+
+  "admissibility_weights": {
+    "_comment": "Weights for combining component scores: w_tau*A_tau + w_mu*A_mu + w_debt*A_debt",
+    "w_tau": 0.4,
+    "w_lambda": 0.0,
+    "w_debt": 0.6
+  },
+
+  "scoring_parameters": {
+    "_comment": "Parameters for admissibility scoring and boundary detection",
+    "use_dynamic_debt_bounds": true,
+    "use_two_stage_training": false,
+    "boundary_method": "quantile",
+    "boundary_quantile_low": 0.05,
+    "boundary_quantile_high": 0.95,
+    "dynamic_debt_percentile": 0.01,
+    "score_at_medium_bound": 0.01
+  },
+
+  "alpha_shape": {
+    "_comment": "Alpha-shape geometry parameters for feasible set boundary detection",
+    "alpha_param": 1.5,
+    "min_points_for_hull": 50,
+    "min_points_per_shock": 10,
+    "jitter_std": 0.0001
+  },
+
+  "buffer_parameters": {
+    "_comment": "Buffer zones for soft boundaries (fraction of variable range)",
+    "tau_buffer_fraction": 0.1,
+    "debt_buffer_fraction": 0.1,
+    "mu_buffer_fraction": 0.05,
+    "kappa": 4.0
+  },
+
+  "hard_bounds": {
+    "_comment": "Hard bounds for clipping (beyond these, score = 0)",
+    "tau_hard_bound_low": -0.1,
+    "tau_hard_bound_high": 5.0,
+    "debt_hard_bound_low": -1.0,
+    "debt_hard_bound_high": 6.0
+  },
+
+  "safe_bands": {
+    "_comment": "Safe bands for boundary detection",
+    "tau_band_safe": 0.005,
+    "b_band_safe": 0.02,
+    "tau_band": 0.001,
+    "b_band": 0.005,
+    "mu_band": 0.1
+  },
+
+  "simulation": {
+    "_comment": "Simulation parameters for post-training analysis",
+    "T_sim": 100,
+    "num_starting_points": 3
+  },
+
+  "visualization": {
+    "_comment": "Plotting and figure generation settings",
+    "n_grid_heatmap": 50,
+    "n_grid_surface": 10,
+    "figure_dpi": 150
+  },
+
+  "n_lam_bin": 15
+}

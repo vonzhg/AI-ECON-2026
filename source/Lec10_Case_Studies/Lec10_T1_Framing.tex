@@ -1,0 +1,155 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.1: Framing
+%% Source: ./archive_pre_split/Lec10_Case_Studies_v2.tex (section 1)
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{./Exercise10_ES_Fellows/plots/}{../../MiniCourse_8hr/Slides/Module4_Agentic_AI/pic/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\lstdefinestyle{markdownstyle}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!40},
+    backgroundcolor=\color{gray!8},
+    breaklines=true,
+    showstringspaces=false,
+    numbers=none,
+}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.1: Case Studies --- Framing}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.1 Agenda}
+\begin{enumerate}
+  \item \textbf{Framing} --- why case studies, what they show, road map for the lecture
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Framing}
+%===========================================================
+
+\sectiondivider{Framing}{From Lec.~9 concepts to complete research workflows}
+
+\begin{frame}{Where We Are in the Course}
+\begin{center}
+\begin{tikzpicture}[
+    node distance=0.25cm,
+    lecture/.style={rectangle, rounded corners, draw=gray!60, fill=gray!10,
+        minimum width=3.5cm, minimum height=0.45cm, font=\footnotesize, text=DarkText},
+    current/.style={rectangle, rounded corners, draw=RedTitle, fill=blue!8,
+        minimum width=3.5cm, minimum height=0.45cm, font=\footnotesize\bfseries, text=RedTitle},
+]
+\node[lecture] (l1) {1--6: models + AI/ML tools};
+\node[lecture, right=0.3cm of l1] (l2) {7--8: LLMs + RAG};
+\node[lecture, right=0.3cm of l2] (l3) {9: agentic AI workflow};
+\node[current, below=0.25cm of l2] (l4) {10: case studies};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.3cm}
+\begin{itemize}
+    \item Lec.~9 gave the workflow: specification, structure, validation, and human oversight
+    \item Lec.~10 shows how that workflow changes shape across different research jobs
+    \item The core question is no longer ``what is a skill?'' It is ``what workflow should I build for this task?''
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Lab Readiness Check}
+
+Before today's exercises, verify all five:
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Terminal agent ready} --- one of Claude Code, Codex, Gemini CLI, Cursor, or a course-approved equivalent can run
+
+    \vspace{0.1cm}
+
+    \item \textbf{Access confirmed} --- login, quota, and model access checked before class
+
+    \vspace{0.1cm}
+
+    \item \textbf{Git initialized in your project} --- \texttt{git status} runs without error
+
+    \vspace{0.1cm}
+
+    \item \textbf{Working Python or R environment} --- \texttt{which python} or \texttt{which R} returns a path
+
+    \vspace{0.1cm}
+
+    \item \textbf{Project memory created} --- \texttt{AGENTS.md}, \texttt{CLAUDE.md}, \texttt{CODEX.md}, or equivalent rules file with project name, language, and goal
+\end{enumerate}
+
+\vspace{0.3cm}
+
+\textbf{If any box is unchecked,} open Appendix~A now. The exercises in this lecture require all five. If setup takes more than 10 minutes, pair with a neighbor and share one working project.
+\end{frame}
+
+\begin{frame}{Why Case Studies After Lec.~9}
+\begin{itemize}
+    \item Knowing the vocabulary of agentic AI does not tell you how to design a research workflow
+    \item The difficult step is decomposition: where to split the task, where to validate, and what stays human
+    \item Different tasks need different harnesses:
+    paper review is not the same as MEPS harmonization, AI-exposure measurement, OLG homotopy, or public-web metadata collection
+    \item Today is about design judgment, not product loyalty
+\end{itemize}
+
+\vspace{0.35cm}
+\textbf{Question for every case:} what is the artifact, what is the failure mode, and what must the economist still verify?
+\end{frame}
+
+\begin{frame}{Three Research Patterns}
+\small
+\begin{tabular}{p{3.0cm}p{4.1cm}p{5.2cm}}
+\toprule
+\textbf{Pattern} & \textbf{Representative task} & \textbf{Main risk if you use the wrong workflow} \\
+\midrule
+Reusable skill & Referee-style paper review & Generic comments, hallucinated quotes, missing quality gate \\
+Empirical pipeline & MEPS harmonization and figures & Wrong crosswalk, dropped survey weights, silent validation failure \\
+Public-web dataset & Econometric Society fellows metadata & Broken source discipline, missing provenance, hidden missingness \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.3cm}
+\textbf{All three use agents, but the harness is different.}
+\end{frame}
+
+\begin{frame}{What Remains Human Across All Three}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{You still own}
+\begin{itemize}
+    \item the research question
+    \item the coding rules
+    \item the validation target
+    \item the interpretation
+    \item the decision to trust or reject the output
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{The agent accelerates}
+\begin{itemize}
+    \item repetitive execution
+    \item file handling
+    \item promptable decomposition
+    \item re-runs after fixes
+    \item draft diagnostics and plots
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.35cm}
+\textbf{Lec.~9 still governs this lecture:} specification and validation are not optional just because the execution is faster.
+\end{frame}
+
+\end{document}

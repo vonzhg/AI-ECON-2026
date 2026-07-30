@@ -1,0 +1,182 @@
+%% Shared preamble for the FullCourse_10Lecs topic decks.
+%%
+%% Each topic .tex \input's this file, then defines its own \title, \date
+%% override (if any), \graphicspath, and \begin{document}.
+%%
+%% Reconstructed verbatim from the inlined copy preserved in
+%% Lec10_Case_Studies/Lec10_T8_Case6_DeepRamsey.tex (lines 23-190), which is
+%% explicitly annotated there as "from ../shared_preamble.tex, copied verbatim".
+%% Base preamble matches MiniCourse_8hr/Slides/shared_preamble.tex; this version
+%% additionally provides \sectiondivider, the conceptbox/cautionbox/examplebox/
+%% takeawaybox tcolorboxes, and \compacttables used across the split decks.
+
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage{ae,aecompl}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{datetime2}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{amsmath, amssymb, amsthm, graphicx}
+\usepackage{booktabs, multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+}
+
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{blue!80!black}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{orange!80!black},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numbersep=5pt,
+    numberstyle=\tiny\color{gray},
+    backgroundcolor=\color{gray!8},
+    rulecolor=\color{gray!40}
+}
+
+\ifx\hypersetup\undefined
+  \AtBeginDocument{%
+    \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},colorlinks=true,
+      linkcolor=DarkText,urlcolor=RedTitle}%
+  }
+\else
+  \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},colorlinks=true,
+    linkcolor=DarkText,urlcolor=RedTitle}%
+\fi
+
+\makeatletter
+\newcommand\makebeamertitle{%
+  \begin{frame}[plain]
+    \vspace*{1.0cm}
+    \centering
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \vspace{1.0cm}
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \vspace{0.2cm}
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+  \end{frame}}%
+\AtBeginDocument{%
+  \let\origtableofcontents=\tableofcontents
+  \def\tableofcontents{\@ifnextchar[{\origtableofcontents}{\gobbletableofcontents}}
+  \def\gobbletableofcontents#1{\origtableofcontents}%
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{author}{fg=DarkText}
+\setbeamercolor{date}{fg=DarkText}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+\setbeamerfont{title}{size=\large}
+
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+\newcommand{\reducevspace}{\vspace{-0.5cm}}
+
+% Shared section divider and box styles for split topic decks.
+\newcommand{\sectiondivider}[2]{%
+\begin{frame}[plain,noframenumbering]
+\begin{center}
+\vfill
+{\Large\textbf{#1}\par}
+\vspace{0.35cm}
+{\normalsize #2\par}
+\vfill
+\end{center}
+\end{frame}
+}
+
+\newtcolorbox{conceptbox}[1][]{
+  colback=blue!3,
+  colframe=RedTitle!55,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{cautionbox}[1][]{
+  colback=red!3,
+  colframe=red!50!black,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{examplebox}[1][]{
+  colback=green!3,
+  colframe=green!45!black,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{takeawaybox}[1][]{
+  colback=VeryLightGray,
+  colframe=RedTitle!55,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newcommand{\compacttables}{\renewcommand{\arraystretch}{1.15}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+\makeatother
+
+\author{Zhigang Feng}
+% "date with time": compile timestamp so each build is identifiable.
+\date{\today\ \DTMcurrenttime}

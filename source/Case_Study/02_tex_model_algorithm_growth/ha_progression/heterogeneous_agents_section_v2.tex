@@ -1,0 +1,562 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Extension: Heterogeneous Agents Model}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This section extends the Deep Ramsey Algorithm to a model with heterogeneous agents facing idiosyncratic employment risk. The key methodological innovations from the representative agent case—two-level fixed-point iteration, adaptive sampling, and boundary marking—carry over, with modifications to handle the higher-dimensional state space and occasionally binding borrowing constraints.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Economic Environment}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{State Variables}
+The economy is characterized by the state vector:
+\begin{equation}
+    s = (K, a^e, a^u, c^e, c^u)
+\end{equation}
+where:
+\begin{itemize}
+    \item $K \in \mathbb{R}_+$: Aggregate capital stock.
+    \item $a^e, a^u \in \mathbb{R}$: Individual asset holdings for employed and unemployed agents.
+    \item $c^e, c^u \in \mathbb{R}_{++}$: Consumption levels, serving as co-state variables encoding past commitments (analogous to $\mu$ in the RA model).
+\end{itemize}
+
+\subsubsection{Transition Probabilities}
+Employment status follows a Markov process with stationary distribution $(\pi^e, \pi^u)$ and transition matrix:
+\begin{equation}
+    \Pi = \begin{pmatrix} \pi^{ee} & \pi^{eu} \\ \pi^{ue} & \pi^{uu} \end{pmatrix}
+\end{equation}
+where $\pi^{ij} = \Pr(\text{status } j \text{ next period} \mid \text{status } i \text{ this period})$.
+
+\subsubsection{Functional Forms}
+The utility function is separable:
+\begin{equation}
+    u(c, n) = \frac{c^{1-\sigma}}{1-\sigma} - \frac{n^{1+\gamma}}{1+\gamma}
+\end{equation}
+The production function is Cobb-Douglas:
+\begin{equation}
+    F(K, N) = K^\alpha N^{1-\alpha}
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Ramsey Planner's Problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The planner maximizes social welfare subject to implementability constraints ensuring the allocation constitutes a competitive equilibrium.
+
+\subsubsection{Bellman Equation}
+For $t > 0$:
+\begin{equation}\label{eq:bellman_ha}
+    V(s) = \max_{\{n^e, c'^e, c'^u\}} \left\{ \pi^e u(c^e, n^e) + \pi^u u(c^u, 0) + \beta V(s') \right\}
+\end{equation}
+
+\subsubsection{Control Variables and Explicit Reductions}
+We select $y = (n^e, c'^e, c'^u)$ as the policy outputs. This choice enables \textbf{explicit (non-iterative) transition dynamics} by using the following relationships to determine all other quantities:
+
+\paragraph{Resource Constraint.}
+Given $(n^e, c^e, c^u, K)$, next-period capital is determined:
+\begin{equation}\label{eq:resource_ha}
+    K' = F(K, n^e \pi^e) + (1-\delta)K - \pi^e c^e - \pi^u c^u
+\end{equation}
+
+\paragraph{Equilibrium Prices.}
+From household optimality conditions:
+\begin{align}
+    \hat{w} &= (n^e)^\gamma (c^e)^\sigma \quad &\text{(After-tax wage)} \label{eq:wage_ha}\\
+    Q &= \beta (c^e)^\sigma \left[ (c'^e)^{-\sigma} \pi^{ee} + (c'^u)^{-\sigma} \pi^{ue} \right] \quad &\text{(Bond price)} \label{eq:bondprice_ha}
+\end{align}
+
+\paragraph{Budget Constraints.}
+Given prices, next-period assets are determined:
+\begin{align}
+    a'^e &= \frac{1}{Q} \left[ \frac{a^e \pi^e \pi^{ee} + a^u \pi^u \pi^{eu}}{\pi^e} + \hat{w} n^e - c^e \right] \label{eq:asset_e}\\
+    a'^u &= \frac{1}{Q} \left[ \frac{a^e \pi^e \pi^{ue} + a^u \pi^u \pi^{uu}}{\pi^u} - c^u \right] \label{eq:asset_u}
+\end{align}
+
+These reductions eliminate $(K', \hat{w}, Q, a'^e, a'^u)$ as independent choice variables, leaving only $(n^e, c'^e, c'^u)$ as policy outputs.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Implementability Constraints}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The implementability constraints ensure the allocation can be supported as a competitive equilibrium. In this model, they take the form of occasionally binding borrowing constraints.
+
+\subsubsection{Borrowing Constraints}
+Agents face borrowing constraints:
+\begin{equation}
+    a'^e \geq 0, \quad a'^u \geq 0
+\end{equation}
+
+\subsubsection{Euler Conditions}
+The Euler equations may hold with inequality when borrowing constraints bind. Define the Euler discrepancy:
+\begin{equation}\label{eq:euler_discrepancy}
+    \phi^i = Q (c^i)^{-\sigma} - \beta \left[ (c'^e)^{-\sigma} \pi^{ie} + (c'^u)^{-\sigma} \pi^{iu} \right], \quad i \in \{e, u\}
+\end{equation}
+
+\subsubsection{Complementarity Conditions}
+The optimal allocation must satisfy:
+\begin{equation}\label{eq:complementarity}
+    a'^i \geq 0, \quad \phi^i \geq 0, \quad \phi^i \cdot a'^i = 0, \quad i \in \{e, u\}
+\end{equation}
+
+\subsubsection{Fischer-Burmeister Formulation}
+To handle the complementarity conditions in gradient-based optimization, we use the smoothed \textbf{Fischer-Burmeister (FB) function}:
+\begin{equation}\label{eq:fb_function}
+    \Phi_\epsilon(a, b) = a + b - \sqrt{a^2 + b^2 + \epsilon^2}
+\end{equation}
+where $\epsilon > 0$ is a smoothing parameter. The condition $\Phi_\epsilon(a, b) = 0$ is equivalent to $(a \geq 0, b \geq 0, ab = 0)$ as $\epsilon \to 0$.
+
+The FB penalty is incorporated into training:
+\begin{equation}\label{eq:fb_penalty}
+    \mathcal{L}_{\text{FB}} = \lambda_{\text{FB}}^{(k)} \sum_{i \in \{e, u\}} \Phi_\epsilon(\phi^i, a'^i)^2
+\end{equation}
+
+\subsubsection{Augmented Lagrangian Schedule}
+The penalty weight $\lambda_{\text{FB}}^{(k)}$ increases during training:
+\begin{equation}
+    \lambda_{\text{FB}}^{(k+1)} = \begin{cases}
+        \rho \cdot \lambda_{\text{FB}}^{(k)} & \text{if } \|\Phi_\epsilon\|_{\text{avg}} > \tau_{\text{FB}} \\
+        \lambda_{\text{FB}}^{(k)} & \text{otherwise}
+    \end{cases}
+\end{equation}
+where $\rho > 1$ is the growth factor (e.g., $\rho = 1.5$). This augmented Lagrangian approach starts with moderate penalty to allow exploration, then progressively enforces stricter feasibility.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Unified Optimization Problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We now present the complete optimization problem combining all elements. The key constraint is that states must lie in the \textbf{admissible set} $\Omega$, which is unknown a priori and must be learned jointly with the policy.
+
+\subsubsection{Networks}
+\begin{enumerate}
+    \item \textbf{Policy Network} $\pi_\theta: s \mapsto (n^e, c'^e, c'^u)$
+    
+    Outputs are transformed to ensure positivity:
+    \begin{align}
+        n^e &= \sigma(\ell_n) \cdot (n_{\max} - n_{\min}) + n_{\min} \\
+        c'^i &= \exp(\ell_{c^i}) \cdot c_{\text{scale}}, \quad i \in \{e, u\}
+    \end{align}
+    where $\sigma$ is sigmoid and $\ell$ denotes raw logits.
+    
+    \item \textbf{Value Network} $V_\phi: s \mapsto \mathbb{R}$
+    
+    Approximates the planner's continuation value.
+\end{enumerate}
+
+\subsubsection{Complete Forward Pass and Loss}
+
+\begin{center}
+\fbox{\parbox{0.95\textwidth}{
+\textbf{Unified Ramsey Optimization (Heterogeneous Agents)}
+
+\vspace{0.5em}
+\textit{Input (State):} $s = (K, a^e, a^u, c^e, c^u) \in \Omega$ \quad (admissible) \\
+\textit{Output (Policy):} $(n^e, c'^e, c'^u) = \pi_\theta(s)$
+
+\vspace{0.5em}
+\textbf{1. Explicit Transition (No Iteration Required):}
+\begin{align}
+    K' &= K^\alpha (n^e \pi^e)^{1-\alpha} + (1-\delta)K - c^e \pi^e - c^u \pi^u \tag{Capital}\\[4pt]
+    \hat{w} &= (n^e)^\gamma (c^e)^\sigma \tag{Wage}\\[4pt]
+    Q &= \beta (c^e)^\sigma \left[ (c'^e)^{-\sigma} \pi^{ee} + (c'^u)^{-\sigma} \pi^{ue} \right] \tag{Bond Price}\\[4pt]
+    a'^e &= \frac{1}{Q} \left[ \frac{a^e \pi^e \pi^{ee} + a^u \pi^u \pi^{eu}}{\pi^e} + \hat{w} n^e - c^e \right] \tag{Asset: Employed}\\[4pt]
+    a'^u &= \frac{1}{Q} \left[ \frac{a^e \pi^e \pi^{ue} + a^u \pi^u \pi^{uu}}{\pi^u} - c^u \right] \tag{Asset: Unemployed}
+\end{align}
+
+\vspace{0.3em}
+\textbf{2. Euler Discrepancies:}
+\begin{align}
+    \phi^e &= Q (c^e)^{-\sigma} - \beta \left[ (c'^e)^{-\sigma} \pi^{ee} + (c'^u)^{-\sigma} \pi^{ue} \right] \\
+    \phi^u &= Q (c^u)^{-\sigma} - \beta \left[ (c'^e)^{-\sigma} \pi^{eu} + (c'^u)^{-\sigma} \pi^{uu} \right]
+\end{align}
+
+\vspace{0.3em}
+\textbf{3. Fischer-Burmeister Residuals:}
+\begin{align}
+    \Phi^e &= \phi^e + a'^e - \sqrt{(\phi^e)^2 + (a'^e)^2 + \epsilon^2} \\
+    \Phi^u &= \phi^u + a'^u - \sqrt{(\phi^u)^2 + (a'^u)^2 + \epsilon^2}
+\end{align}
+
+\vspace{0.3em}
+\textbf{4. Current Period Welfare:}
+\begin{equation}
+    U(s, n^e) = \pi^e \left[ \frac{(c^e)^{1-\sigma}}{1-\sigma} - \frac{(n^e)^{1+\gamma}}{1+\gamma} \right] + \pi^u \frac{(c^u)^{1-\sigma}}{1-\sigma}
+\end{equation}
+
+\vspace{0.3em}
+\textbf{5. Training Loss:}
+\begin{equation}
+    \mathcal{L} = -\underbrace{\left[ U(s, n^e) + \beta V_\phi(s') \right]}_{\text{Bellman Value (maximize)}} + \underbrace{\lambda_{\text{FB}}^{(k)} \left[ (\Phi^e)^2 + (\Phi^u)^2 \right]}_{\text{FB Penalty}}
+\end{equation}
+
+\vspace{0.3em}
+\textbf{6. Admissibility Requirement:}
+\begin{equation}
+    s \in \Omega, \quad s' = (K', a'^e, a'^u, c'^e, c'^u) \in \Omega
+\end{equation}
+The admissible set $\Omega$ is unknown and learned via the procedure in Section 5.5.
+}}
+\end{center}
+
+\vspace{0.5em}
+\textit{Key Property:} All quantities in the forward pass are computed via explicit formulas—no iterative solvers are required. This enables efficient batched computation and end-to-end gradient flow.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Admissibility and Boundary Learning in High Dimensions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The admissible set $\Omega \subset \mathbb{R}^5$ is the set of states from which a competitive equilibrium can be sustained. As in the RA model, $\Omega$ is unknown a priori and depends on the policy—creating a two-level fixed-point problem. The key challenge is representing and updating $\Omega$ in five dimensions.
+
+\subsubsection{The Two-Level Fixed-Point Structure}
+
+The same nested structure from the RA model applies:
+
+\begin{itemize}
+    \item \textbf{Level 1 (Inner):} For fixed policy $\pi_\theta$, iterate between:
+    \begin{enumerate}
+        \item Score states using current boundary estimate $\hat{\Omega}$
+        \item Update $\hat{\Omega}$ from admissible points
+    \end{enumerate}
+    Until boundary estimates stabilize.
+    
+    \item \textbf{Level 2 (Outer):} Alternate between:
+    \begin{enumerate}
+        \item Train $(\pi_\theta, V_\phi)$ on states sampled from current $\hat{\Omega}$
+        \item Run inner loop to update $\hat{\Omega}$ based on improved policy
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{Admissibility Score Components}
+
+Using the power barrier function $\mathcal{S}(x; [x_{\min}, x_{\max}], \delta)$ from Section 3.2:
+
+\begin{enumerate}
+    \item \textbf{Capital Feasibility ($A_K$):}
+    \begin{equation}
+        A_K = \mathcal{S}(K'; [K_{\min}, K_{\max}], \delta_K)
+    \end{equation}
+    
+    \item \textbf{Asset Feasibility ($A_a$):}
+    \begin{equation}
+        A_a = \min_{i \in \{e, u\}} \mathcal{S}(a'^i; [0, K'], \delta_a)
+    \end{equation}
+    
+    \item \textbf{Consumption Feasibility ($A_c$):}
+    \begin{equation}
+        A_c = \min_{i \in \{e, u\}} \mathcal{S}(c'^i; [\underline{c}(s'), \bar{c}(s')], \delta_c)
+    \end{equation}
+    where $\underline{c}(s'), \bar{c}(s')$ are learned boundary functions.
+\end{enumerate}
+
+\textbf{Global Score:}
+\begin{equation}
+    \mathcal{A}(s) = w_K A_K + w_a A_a + w_c A_c
+\end{equation}
+
+\subsubsection{The Core Challenge: High-Dimensional Boundary Estimation}
+
+In the RA model, we estimated boundaries $B_{\min}(\mu, g), B_{\max}(\mu, g)$ by:
+\begin{enumerate}
+    \item Binning admissible points by $(\mu, g)$
+    \item Computing quantile bounds within each bin
+    \item Fitting interpolation functions
+\end{enumerate}
+
+This approach faces the \textbf{curse of dimensionality} in 5D: with 20 bins per dimension, we would need $20^5 = 3.2$ million bins, most of which would be empty.
+
+\subsubsection{Proposed Solutions for High-Dimensional Boundaries}
+
+We consider several approaches, each with trade-offs:
+
+\paragraph{Approach 1: Projection-Based Bounds (Recommended for Initial Implementation)}
+
+Estimate bounds on \textit{marginal projections} conditioned on key state variables:
+\begin{align}
+    K' &\in [K_{\min}, K_{\max}] \quad \text{(global bounds)} \\
+    c'^i &\in [\underline{c}(K'), \bar{c}(K')] \quad \text{(1D conditioning)} \\
+    a'^i &\in [0, \min(K', \bar{a}(K'))] \quad \text{(1D conditioning)}
+\end{align}
+
+\textit{Implementation:}
+\begin{enumerate}
+    \item Collect points with $\mathcal{A}(s) > \tau_{\text{high}}$
+    \item Bin by $K'$ only (manageable: 20-50 bins)
+    \item Within each $K'$-bin, compute quantile bounds for $c'^e, c'^u, a'^e, a'^u$
+    \item Fit 1D interpolation functions: $\underline{c}^e(K'), \bar{c}^e(K')$, etc.
+\end{enumerate}
+
+\textit{Limitation:} Ignores correlations between state variables. May be overly conservative (excluding valid states) or overly permissive (including invalid states).
+
+\paragraph{Approach 2: Principal Component Conditioning}
+
+Reduce dimensionality via PCA before binning:
+\begin{enumerate}
+    \item Compute principal components of admissible states
+    \item Bin along top 2-3 principal components
+    \item Estimate bounds in PC space, transform back
+\end{enumerate}
+
+\textit{Advantage:} Captures dominant correlations.
+\textit{Limitation:} Nonlinear boundaries poorly approximated.
+
+\paragraph{Approach 3: Neural Network Boundary Classifier}
+
+Train a classifier network $\mathcal{B}_\psi: \mathbb{R}^5 \to [0, 1]$ to predict admissibility:
+\begin{equation}
+    \mathcal{B}_\psi(s') \approx \mathbf{1}\{s' \in \Omega\}
+\end{equation}
+
+\textit{Training data:}
+\begin{itemize}
+    \item Positive examples: States with $\mathcal{A}(s) > \tau_{\text{high}}$ in current iteration
+    \item Negative examples: States with $\mathcal{A}(s) < \tau_{\text{low}}$
+\end{itemize}
+
+\textit{Advantage:} Can represent arbitrary nonlinear boundaries.
+\textit{Limitation:} Introduces another network to train; may have calibration issues.
+
+\paragraph{Approach 4: Support Vector Domain Description}
+
+Fit a one-class SVM or SVDD to admissible points:
+\begin{equation}
+    \hat{\Omega} = \{s : \|s - c\|_{\mathcal{H}} \leq R\}
+\end{equation}
+in a kernel-induced feature space.
+
+\textit{Advantage:} Principled density-based boundary.
+\textit{Limitation:} Computational cost for large datasets.
+
+\paragraph{Approach 5: Convex Hull / $\alpha$-Shape Approximation}
+
+Compute the convex hull (or $\alpha$-shape for non-convex sets) of admissible points:
+\begin{equation}
+    \hat{\Omega} = \text{ConvexHull}(\{s : \mathcal{A}(s) > \tau_{\text{high}}\})
+\end{equation}
+
+\textit{Advantage:} Geometric interpretation.
+\textit{Limitation:} Convex hull may be too loose; $\alpha$-shapes expensive in high dimensions.
+
+\subsubsection{Recommended Strategy: Hierarchical Projection}
+
+For practical implementation, we recommend starting with \textbf{Approach 1 (Projection-Based)} with the following refinements:
+
+\begin{enumerate}
+    \item \textbf{Primary conditioning variable:} $K'$ (aggregate capital)
+    \item \textbf{Secondary conditioning:} Within each $K'$-bin, further condition on $(c'^e + c'^u)/2$ (average consumption)
+    \item \textbf{Quantile estimation:} Use $\alpha = 0.05$ quantiles for robustness
+    \item \textbf{Fallback:} If a bin has fewer than $N_{\min}$ points, use bounds from neighboring bins
+\end{enumerate}
+
+This creates a 2D grid of bounds (manageable: $50 \times 50 = 2500$ cells) while capturing the key economic relationship between capital and sustainable consumption.
+
+\subsubsection{Iterative Refinement Procedure}
+
+\begin{algorithm}[H]
+\caption{Boundary Refinement in High Dimensions}
+\label{alg:boundary_hd}
+\begin{algorithmic}[1]
+\Require Grid of candidates $\mathcal{G}$, Current policy $\pi_\theta$, Refinement steps $N_{\text{refine}}$
+\State Initialize bounds: $\underline{c}(K) \gets c_{\min}^{\text{global}}$, $\bar{c}(K) \gets c_{\max}^{\text{global}}$
+
+\For{$n = 1$ \textbf{to} $N_{\text{refine}}$}
+    \State \textbf{// Score all candidates with current bounds}
+    \For{$s \in \mathcal{G}$}
+        \State Compute $s' = \text{Transition}(s, \pi_\theta(s))$
+        \State Compute $\mathcal{A}(s)$ using current $\underline{c}(\cdot), \bar{c}(\cdot)$
+    \EndFor
+    
+    \State \textbf{// Identify admissible points}
+    \State $\mathcal{G}_{\text{adm}} \gets \{s \in \mathcal{G} : \mathcal{A}(s) > \tau_{\text{high}}\}$
+    
+    \State \textbf{// Update bounds via projection}
+    \State Bin $\mathcal{G}_{\text{adm}}$ by $(K', \bar{c}')$ where $\bar{c}' = (c'^e + c'^u)/2$
+    \For{each bin $(k, \bar{c})$}
+        \If{count $\geq N_{\min}$}
+            \State $\underline{c}^e(k, \bar{c}) \gets Q_\alpha(c'^e)$, $\bar{c}^e(k, \bar{c}) \gets Q_{1-\alpha}(c'^e)$
+            \State (similarly for $c'^u, a'^e, a'^u$)
+        \EndIf
+    \EndFor
+    \State Fit interpolation functions from bin statistics
+\EndFor
+
+\State \Return Updated boundary functions
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Training Procedure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Two-Phase Structure}
+As in the RA model:
+\begin{itemize}
+    \item \textbf{Phase 1 (Warmup)}: Uniform sampling; boundary learning disabled
+    \item \textbf{Phase 2 (Adaptive)}: Boundary-focused sampling with nested fixed-point
+\end{itemize}
+
+\subsubsection{Policy Training (Two-Stage with FB Penalty)}
+
+\paragraph{Stage 1: Optimality with FB Regularization.}
+Train $\pi_\theta$ on $\mathcal{S}_{\text{safe}}$ by minimizing:
+\begin{equation}
+    \mathcal{L} = -\mathbb{E}_{s_0 \sim \mathcal{S}_{\text{safe}}} \left[ \sum_{t=0}^{T} \beta^t U(s_t, n_t^e) + \beta^{T+1} V_\phi(s_{T+1}) \right] + \sum_{t=0}^{T} \mathcal{L}_{\text{FB}}^{(t)}
+\end{equation}
+
+\paragraph{Stage 2: Boundary Marking.}
+As in the RA model, train on $\mathcal{S}_{\text{safe}} \cup \mathcal{S}_{\text{fail}}$ with MSE loss to mark infeasible states.
+
+\subsubsection{Value Training}
+Train $V_\phi$ on Bellman-consistent targets (including continuation value):
+\begin{equation}
+    \mathcal{D}_{\text{value}} = \{(s, V_{\text{sim}}(s)) : s \in \mathcal{S}_{\text{safe}}\} \cup \{(s, V_{\text{penalty}}) : s \in \mathcal{S}_{\text{fail}}\}
+\end{equation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Algorithm Summary}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{algorithm}[H]
+\caption{Deep Ramsey Algorithm for Heterogeneous Agents}
+\label{alg:het_agent_v2}
+\begin{algorithmic}[1]
+\Require Config $\mathcal{C}$, Networks $\pi_\theta, V_\phi$, Iterations $K$, Warmup $K_w$, FB smoothing $\epsilon$
+\State Initialize: Scorer $\mathcal{A}$, Sampler, History $\mathcal{H} \gets \emptyset$
+\State Initialize: Boundary functions $\underline{c}(K), \bar{c}(K)$ to global bounds
+\State Initialize: $\lambda_{\text{FB}}^{(0)} \gets \lambda_{\text{FB}}^{\text{init}}$
+
+\For{$k = 1$ \textbf{to} $K$} \Comment{\textbf{Outer Fixed-Point Loop}}
+    
+    \State \textbf{// Phase Transition}
+    \If{$k = K_w$}
+        \State Set phase to ADAPTIVE
+        \State Run boundary refinement (Algorithm \ref{alg:boundary_hd})
+    \EndIf
+    
+    \State
+    \State \textbf{// Step 1: Sampling}
+    \If{$k < K_w$}
+        \State $\mathcal{S}_{\text{train}} \gets$ uniform samples or from history $\mathcal{H}$
+        \State $\mathcal{S}_{\text{fail}} \gets \emptyset$
+    \Else
+        \State Generate candidates; compute $\mathcal{A}(s)$ (vectorized)
+        \State $\mathcal{S}_{\text{train}} \gets$ weighted resample (high $\mathcal{A}$)
+        \State $\mathcal{S}_{\text{fail}} \gets \{s : \mathcal{A}(s) < \tau_{\text{low}}\}$
+    \EndIf
+    
+    \State
+    \State \textbf{// Step 2: Policy Training}
+    \State \textit{Stage 1:} Gradient ascent on welfare minus $\mathcal{L}_{\text{FB}}$
+    \If{\texttt{use\_two\_stage\_training}}
+        \State \textit{Stage 2:} MSE boundary marking
+    \EndIf
+    
+    \State
+    \State \textbf{// Step 3: Value Training}
+    \State Train $V_\phi$ on simulated Bellman targets
+    
+    \State
+    \State \textbf{// Step 4: History Update}
+    \State $\mathcal{H} \gets \mathcal{H} \cup \{\text{trajectories}\}$; trim to $H_{\max}$
+    
+    \State
+    \State \textbf{// Step 5: Boundary Refinement (Adaptive Phase)}
+    \If{$k \geq K_w$ \textbf{and} $(k - K_w) \mod f_{\text{cache}} = 0$}
+        \State Run Algorithm \ref{alg:boundary_hd} (inner fixed-point)
+    \EndIf
+    
+    \State
+    \State \textbf{// Step 6: Augmented Lagrangian Update}
+    \If{$\|\Phi\|_{\text{avg}} > \tau_{\text{FB}}$}
+        \State $\lambda_{\text{FB}}^{(k+1)} \gets \rho \cdot \lambda_{\text{FB}}^{(k)}$
+    \EndIf
+    
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Period $t=0$ Problem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+At $t=0$, the planner solves a constrained optimization given initial conditions $(K_0, a_0^e, a_0^u)$:
+\begin{equation}
+    \max_{n_0^e, c'^e_0, c'^u_0} \left[ \pi^e u(c_0^e, n_0^e) + \pi^u u(c_0^u, 0) + \beta V(s_1) \right]
+\end{equation}
+subject to resource constraint, budget constraints, borrowing constraints, and FB complementarity conditions. This is solved via L-BFGS-B or interior-point methods using the trained $V_\phi$ for continuation values.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Parameter Values}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcl}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\midrule
+\multicolumn{3}{l}{\textit{Economic Parameters}} \\
+$\alpha$ & $1/3$ & Capital share in production \\
+$\delta$ & $0.1$ & Capital depreciation rate \\
+$\sigma$ & $2$ & Coefficient of relative risk aversion \\
+$\gamma$ & $2$ & Inverse Frisch elasticity of labor \\
+$\beta$ & $0.8$ & Time discount factor \\
+$\pi^{ee}$ & $0.5$ & Probability: employed $\to$ employed \\
+$\pi^{uu}$ & $0.5$ & Probability: unemployed $\to$ unemployed \\
+\midrule
+\multicolumn{3}{l}{\textit{Fischer-Burmeister / Augmented Lagrangian}} \\
+$\epsilon$ & $0.01$ & FB smoothing parameter \\
+$\lambda_{\text{FB}}^{\text{init}}$ & $1.0$ & Initial FB penalty weight \\
+$\rho$ & $1.5$ & Penalty growth factor \\
+$\tau_{\text{FB}}$ & $0.01$ & FB residual tolerance \\
+\midrule
+\multicolumn{3}{l}{\textit{Admissibility Scoring}} \\
+$\kappa$ & $4$ & Power barrier sharpness \\
+$\tau_{\text{high}}$ & $0.7$ & Safe threshold \\
+$\tau_{\text{low}}$ & $0.3$ & Fail threshold \\
+\bottomrule
+\end{tabular}
+\caption{Baseline parameter values for the heterogeneous agents model.}
+\label{tab:params_ha}
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Discussion: Comparison and Open Questions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Aspect} & \textbf{Representative Agent} & \textbf{Heterogeneous Agents} \\
+\midrule
+State dimension & 3: $(B, \mu, g)$ & 5: $(K, a^e, a^u, c^e, c^u)$ \\
+Policy outputs & 2: $(\mu'_{g_L}, \mu'_{g_H})$ & 3: $(n^e, c'^e, c'^u)$ \\
+Occasionally binding & Tax bounds (soft) & Borrowing constraints \\
+Constraint handling & Admissibility score only & FB penalty + score \\
+Boundary estimation & 2D binning: $B(\mu, g)$ & Projection-based (Section 5.5) \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of RA and HA model implementations.}
+\label{tab:comparison}
+\end{table}
+
+\paragraph{Open Questions for High-Dimensional Implementation:}
+\begin{enumerate}
+    \item \textbf{Boundary representation:} Is projection-based conditioning sufficient, or do we need neural network boundaries?
+    \item \textbf{Sample efficiency:} How many samples are needed to reliably estimate 5D boundaries?
+    \item \textbf{Boundary marking targets:} What are appropriate ``failure signal'' values for $(n^e, c'^e, c'^u)$ in Stage 2?
+    \item \textbf{Computational cost:} How does the nested fixed-point scale with dimension?
+\end{enumerate}
+
+These questions will be addressed through numerical experimentation.
+

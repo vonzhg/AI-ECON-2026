@@ -1,0 +1,35 @@
+% Retrieval over the graph: match query to seed nodes -> propagate (PageRank /
+% community search) -> ranked papers + features -> cited answer.
+\begin{tikzpicture}[
+  font=\footnotesize,
+  q/.style       ={draw,rounded corners=1pt,inner sep=3pt,minimum width=20mm,minimum height=8mm,fill=gray!8,align=center},
+  pstep/.style    ={draw,rounded corners=1pt,inner sep=3pt,minimum width=20mm,minimum height=10mm,fill=blue!12,align=center},
+  graph/.style   ={draw,rounded corners=1pt,inner sep=3pt,minimum width=22mm,minimum height=18mm,fill=green!14,align=center},
+  ans/.style     ={draw,rounded corners=1pt,inner sep=3pt,minimum width=22mm,minimum height=10mm,fill=yellow!22,align=center,font=\footnotesize\itshape},
+  arr/.style     ={-{Latex[length=1.6mm]},semithick},
+  subcap/.style     ={font=\scriptsize\itshape,text=gray!55!black,align=center,text width=30mm},
+  gnode/.style   ={circle,inner sep=0pt,minimum size=1.6mm,fill=green!60!black},
+  seed/.style    ={circle,inner sep=0pt,minimum size=2.4mm,fill=red!75!black},
+]
+\node[q]    (q)   at (0,0) {query};
+\node[pstep] (ent) at (2.6,0) {match query\\to seed nodes};
+\node[graph](kg)  at (5.7,0) {};
+\node[gnode] (g1) at ($(kg.center)+(-5mm,-3mm)$) {};
+\node[seed]  (g2) at ($(kg.center)+(0mm,-3mm)$) {};
+\node[gnode] (g3) at ($(kg.center)+(5mm,-3mm)$) {};
+\node[seed]  (g4) at ($(kg.center)+(-3mm,2mm)$) {};
+\node[gnode] (g5) at ($(kg.center)+(3mm,2mm)$) {};
+\node[gnode] (g6) at ($(kg.center)+(0mm,5mm)$) {};
+\foreach \a/\b in {g1/g4, g2/g4, g2/g5, g3/g5, g4/g6, g5/g6}
+  \draw[gray!55,thin] (\a) -- (\b);
+\node[subcap,below=1mm of kg] {seeds (red) $\to$ PageRank / community search};
+\node[pstep] (chk) at (8.7,0) {top papers\\$+$ features};
+\node[ans]  (ans) at (11.7,0) {cited\\answer};
+
+\foreach \a/\b in {q/ent, ent/kg, kg/chk, chk/ans} \draw[arr] (\a) -- (\b);
+
+% Below: filter callout
+\node[draw,dashed,rounded corners=2pt,fill=red!8,inner sep=3pt,below=10mm of kg,text width=50mm,align=center,font=\scriptsize]
+  (filt) {Inadmissible methods sit far in the graph, get low rank, and are \emph{filtered before} the \LLM{} reads context.};
+\draw[->,dashed,gray!60] (filt) -- (chk);
+\end{tikzpicture}

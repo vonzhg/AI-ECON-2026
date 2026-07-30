@@ -1,0 +1,244 @@
+%% FullCourse_10Lecs -- Lecture 1, Topic 1.2: Equilibrium Concepts + Two Classical Approaches
+%% Source: ./archive_pre_split/Lec01_Quant_Macro.tex (sections 3-4)
+%% Pass A mechanical split (verbatim content preserved).
+
+\input{../shared_preamble.tex}
+
+\graphicspath{{./pic/}{../../FullCourse_10Lecs/Lec01_Quant_Macro/pic/}{../}}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 1.2: Equilibrium Concepts \& Two Classical Approaches}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 1.2 Agenda}
+\begin{enumerate}
+  \item \textbf{Equilibrium Concepts} --- competitive, recursive
+  \medskip
+  \item \textbf{Two Classical Approaches} --- VFI, Euler equation iteration
+\end{enumerate}
+\end{frame}
+
+%=============================================================================
+\section{Equilibrium Concepts}
+
+\begin{frame}{Competitive Equilibrium: Definition}
+\begin{itemize}
+\item \textbf{A competitive equilibrium} consists of:
+\begin{enumerate}
+    \item \emph{Prices:} $\{r_t, w_t\}_{t=0}^\infty$ (rental rate and wage)
+    \item \emph{Allocations:} $\{c_t, k_{t+1}, n_t\}_{t=0}^\infty$
+\end{enumerate}
+such that: (i) households optimize, (ii) firms optimize, (iii) markets clear.
+
+\medskip
+\item \textbf{Key Equilibrium Conditions:}
+\begin{itemize}
+    \item Factor prices: $r_t = \alpha A k_t^{\alpha-1} - \delta$, \quad $w_t = (1-\alpha)A k_t^\alpha$
+    \item Household Euler equation: $u'(c_t) = \beta \mathbb{E}_t[u'(c_{t+1})(1 + r_{t+1})]$
+    \item Resource constraint: $c_t + k_{t+1} = A k_t^\alpha + (1-\delta)k_t$
+\end{itemize}
+
+\medskip
+\item \textbf{Recursive (Markov) Equilibrium:} An equilibrium where decisions depend only on \emph{payoff-relevant} state variables, not on calendar time or history.
+\begin{itemize}
+    \item Representative agent: state = $(k, z)$
+    \item Policy rules: $c = \sigma(k,z)$, $k' = g(k,z)$, prices $r = r(k,z)$, $w = w(k,z)$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{From Competitive Equilibrium to Social Planner}
+\begin{itemize}
+\item \textbf{First Welfare Theorem:} Under complete markets and no externalities, a competitive equilibrium is Pareto optimal.
+
+\medskip
+\item \textbf{Implication for Computation:}
+\begin{itemize}
+    \item For representative agent models, solve the social planner's problem
+    \item Recover prices from planner's marginal conditions
+    \item Avoids fixed-point problem over prices
+\end{itemize}
+
+\medskip
+\item \textbf{When the Theorem Fails:}
+\begin{itemize}
+    \item Incomplete markets (Aiyagari, Bewley): no Pareto optimality
+    \item Externalities, taxes, monopolistic competition
+    \item Must solve for equilibrium prices \emph{explicitly}
+\end{itemize}
+
+\medskip
+\item \textbf{Practical Implication:}
+\begin{itemize}
+    \item Representative agent models: ``easy'' (solve planner's problem)
+    \item Heterogeneous agent models: ``hard'' (must iterate on distribution + prices)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Two Roads to Equilibrium}
+\begin{itemize}
+\item We have two constructive algorithms for computing equilibrium:
+
+\bigskip
+\item \textbf{Approach 1: Dynamic Programming (Value Function Iteration)}
+\begin{itemize}
+    \item Iterate on the Bellman equation: $v_{n+1} = Tv_n$
+    \item Convergence via \emph{contraction mapping}
+    \item Recovers both value function and policy
+\end{itemize}
+
+\bigskip
+\item \textbf{Approach 2: Euler Equation Iteration (Greenwood-Huffman)}
+\begin{itemize}
+    \item Iterate directly on the policy function via Euler equation
+    \item Convergence via \emph{monotonicity}
+    \item Works directly with equilibrium conditions
+\end{itemize}
+
+\bigskip
+\item Both approaches are \emph{constructive}---they provide algorithms, not just existence proofs.
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Two Classical Approaches}
+
+\begin{frame}{Dynamic Programming: The Classical Framework}
+\begin{itemize}
+\item \textbf{Dynamic Programming (Bellman, 1957):} Solve sequential decision problems by exploiting recursive structure.
+
+\medskip
+\item \textbf{Core Idea:} Value of any state = max over (immediate reward + discounted continuation):
+\[
+v(s) = \max_{a \in \Gamma(s)} \left\{ r(s, a) + \beta \, \mathbb{E}\left[ v(s') \mid s, a \right] \right\}
+\]
+
+\medskip
+\item \textbf{Value Function Iteration (VFI):}
+\begin{enumerate}
+    \item Discretize state space into finite grid $\{s_1, \ldots, s_N\}$
+    \item Initialize $v_0(s_i)$ for each grid point
+    \item Iterate: $v_{n+1}(s_i) = \max_{a} \{ r(s_i, a) + \beta \sum_j P(s_j|s_i,a) v_n(s_j) \}$
+    \item Stop when $\|v_{n+1} - v_n\| < \varepsilon$
+\end{enumerate}
+
+\medskip
+\item \textbf{Requirement:} Complete knowledge of the environment---$P(s'|s,a)$ and $r(s,a)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Euler Equation Approach: Setup}
+\begin{itemize}
+\item \textbf{Alternative:} Work directly with first-order conditions (Euler equations).
+
+\medskip
+\item The Euler equation for the optimal growth model:
+\[
+u'(c_t) = \beta \, \mathbb{E}_t \left[ u'(c_{t+1}) \cdot F_k(k_{t+1}, z_{t+1}) \right]
+\]
+
+\medskip
+\item In a competitive equilibrium with $k = K$:
+\begin{multline*}
+u_c(c(k,K,k',z)) = \\
+\beta \, \mathbb{E} \left[ u_c(c(k',K',k'',z')) \cdot F_k(k',K',z') \mid z \right]
+\end{multline*}
+
+\medskip
+\item \textbf{Equilibrium Requirement:} Find policy $g$ and aggregate law of motion $G$ such that:
+\begin{itemize}
+    \item The Euler equation holds for all $(k, K, z)$
+    \item Consistency: $G(K, z) = g(K, K, z)$ (individual = aggregate)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Greenwood-Huffman Operator}
+\begin{itemize}
+\item \textbf{Idea:} Construct a sequence of policy functions that converges to equilibrium.
+
+\medskip
+\item Let $H^{0}(K,z) = 0$. Define $H^{j+1}(K,z)$ as the $x$ solving:
+\[
+u_c(c(K,K,x,z)) = \beta \, \mathbb{E} \left[ u_c(c(x,x,H^{j}(x,z'),z')) \cdot F_k(x,x,z') \right]
+\]
+
+\medskip
+\item \textbf{Interpretation:}
+\begin{itemize}
+    \item Given a conjecture $H^j$ for future policy, solve for today's optimal $x$
+    \item The solution $x = H^{j+1}(K,z)$ becomes the new conjecture
+    \item Iterate until convergence: $H^{j+1} \approx H^j$
+\end{itemize}
+
+\medskip
+\item \textbf{Convergence via Monotonicity:}
+\begin{itemize}
+    \item $\{H^j\}$ is monotone (increasing from $H^0 = 0$)
+    \item Bounded by resource constraint $H^j(K,z) \leq F(K,K,z)$
+    \item Monotone + bounded $\Rightarrow$ limit $H^*$ exists
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Comparing the Two Approaches}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \textbf{Value Function Iteration} & \textbf{Euler Equation Iteration} \\
+\hline
+\textbf{Object} & Value function $v(k)$ & Policy function $H(K,z)$ \\
+\textbf{Iteration} & $v_{n+1} = Tv_n$ & $H^{j+1} = TH^j$ \\
+\textbf{Convergence} & Contraction & Monotonicity \\
+\textbf{Theory} & Banach fixed point & Monotone convergence \\
+\hline
+\textbf{Strength} & General, robust & Direct equilibrium \\
+\textbf{Weakness} & Indirect (need to extract $g$) & Requires monotonicity \\
+\hline
+\end{tabular}
+\end{center}
+
+\bigskip
+\textbf{Both provide:}
+\begin{itemize}
+    \item Constructive algorithms (not just existence proofs)
+    \item Theoretical guarantees for convergence
+    \item Foundation for numerical implementation
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why Classical Macro Models Are ``Easy''}
+\begin{itemize}
+\item \textbf{Representative Agent + First Welfare Theorem:}
+\begin{itemize}
+    \item Competitive equilibrium $\Leftrightarrow$ Social planner's solution
+    \item No need to explicitly compute prices to find allocations
+\end{itemize}
+
+\medskip
+\item \textbf{The Key Simplification:} Individual capital $k$ = Aggregate capital $K$
+\begin{itemize}
+    \item Prices are deterministic functions of a single state variable:
+    \[
+    r(K) = \alpha A K^{\alpha - 1} - \delta, \qquad w(K) = (1-\alpha) A K^{\alpha}
+    \]
+    \item The agent \emph{knows} how prices evolve because $K' = g(K)$
+\end{itemize}
+
+\medskip
+\item \textbf{By Design, Not by Accident:}
+\begin{itemize}
+    \item Economists constructed this framework for tractability
+    \item The ``environment'' is fully specified by $(A, \alpha, \beta, \delta)$
+    \item State space is low-dimensional (often just $k$ or $(k, z)$)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\end{document}
