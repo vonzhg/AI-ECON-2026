@@ -1,15 +1,26 @@
 # AI for Economic Research: Dynamic Models, Language, and Agents
 
-Course site by **Zhigang Feng** — ten lectures (~24 hours) on solving high-dimensional dynamic
-models with deep learning and reinforcement learning, turning economic text into measurement with
-language models, and running a research pipeline with agentic AI.
+Course site by **Zhigang Feng** — ten lectures (~24 hours) on what modern AI changes about how
+economic research is actually done. Six modules: foundations and what AI is; machine-learning
+essentials for macroeconomists; deep learning for solving dynamic models; reinforcement learning and
+heterogeneous-agent models; large language models and text as economic data, including
+retrieval-augmented generation; and agentic AI with case studies. The organizing premise is that as
+AI absorbs more of the implementation, the economist's edge shifts to designing algorithms and
+validating results.
 
 🔗 **Live site:** https://vonzhg.github.io/AI-ECON-2026/
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1)
 
-The material is organized in **six modules rather than calendar dates**, so it works both as a taught
-course and as self-study. The schedule of the July 2026 offering is kept for reference at
+**Prerequisites and where to start.** The course assumes you are comfortable with dynamic
+macroeconomic models and basic Python. Students who want the classical computational methods first —
+dynamic programming, perturbation, projection, and parallel computing — should start with the
+foundation half of the pair, [**Quantitative Macroeconomics with AI and Machine
+Learning**](https://vonzhg.github.io/Quant_Macro/), which also carries extensive recordings from
+previous offerings. The two courses are designed as one sequence: classical methods → machine
+learning → agentic AI research.
+
+The schedule of the July 2026 offering is kept for reference at
 [`archive/summer-2026.html`](archive/summer-2026.html).
 
 > **Unlisted, not secret.** Every page carries `noindex, nofollow` and `robots.txt` disallows
@@ -33,7 +44,9 @@ course and as self-study. The schedule of the July 2026 offering is kept for ref
   jupyter lab
   ```
 
-  Every notebook is CPU-only and runs offline once its data is bundled. No API keys, no GPU.
+  Every notebook runs on CPU alone and works offline once its data is bundled — no API keys, no GPU
+  required. In practice the deep-learning and reinforcement-learning labs train noticeably faster on
+  a GPU, so use one if you have access.
 
 ## Structure
 
