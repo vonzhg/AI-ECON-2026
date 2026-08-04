@@ -13,15 +13,13 @@ validating results.
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1)
 
 **Prerequisites and where to start.** The course assumes you are comfortable with dynamic
-macroeconomic models; Python experience helps but is not required — Module 1 builds what you need.
-Students who want the classical computational methods first — dynamic programming, perturbation,
-projection, and parallel computing — should start with the foundation half of the pair,
+macroeconomic models. Python experience helps but is not required: the companion course,
 [**Quantitative Macroeconomics with AI and Machine
-Learning**](https://vonzhg.github.io/Quant_Macro/), which also carries extensive recordings from
-previous offerings; its [Topic 3, Programming Basics for
-Economists](https://vonzhg.github.io/Quant_Macro/syllabus.html#topic-3) is the place to pick up
-Python from scratch. The two courses are designed as one sequence: classical methods → machine
-learning → agentic AI research.
+Learning**](https://vonzhg.github.io/Quant_Macro/), teaches it from scratch in [Topic 3, Programming
+Basics for Economists](https://vonzhg.github.io/Quant_Macro/syllabus.html#topic-3), and covers the
+classical computational methods — dynamic programming, perturbation, projection, parallel
+computing — with extensive recordings from previous offerings. The two are designed as one sequence:
+classical methods → machine learning → agentic AI research.
 
 The schedule of the July 2026 offering is kept for reference at
 [`archive/summer-2026.html`](archive/summer-2026.html).
