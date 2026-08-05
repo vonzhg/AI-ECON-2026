@@ -1,0 +1,828 @@
+%% FullCourse_10Lecs -- Lecture 10, Topic 10.9: Case Study 7
+%% When the Assistant Takes a Shortcut:
+%% Quality Control in AI-Assisted Global Solvers
+%% (cautionary companion to Case 6; built from the MPE_HA_Det_BC_2026 program)
+%%
+%% SELF-CONTAINED DECK: the shared preamble is inlined below and all figures
+%% live in ./figures/case7/. The file compiles standalone with pdflatex.
+%%
+%% Sources:
+%%   - MPE_HA_Det_BC_2026/README.md, LOG.md (the program; staged plan and gates)
+%%   - MPE_HA_Det_BC_2026/1B_no_govt_canonical/ (the Stage-1B run, model 9311)
+%%   - papers/notes_det_v2.tex, sec "What Stages 1B and 1C Compute" (the shortcut)
+%%   - Session transcript (verbatim researcher<->assistant dialogue, 2026-07)
+%%   - Terence Tao, "Mathematics in the age of AI" (ICM 2026 public lecture)
+%%   - Aiyagari (1994) -- the classical benchmark the solver is scored against
+
+%=============================================================================
+% INLINED SHARED PREAMBLE (copied from Lec10_T8_Case6_DeepRamsey.tex, verbatim,
+% so this deck is self-contained)
+%=============================================================================
+\documentclass[10pt,english,aspectratio=169]{beamer}
+
+\usepackage{ae,aecompl}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+\usepackage{datetime2}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\usepackage{amsmath, amssymb, amsthm, graphicx}
+\usepackage{booktabs, multirow}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{skins, breakable, theorems}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!80!black}\bfseries,
+  commentstyle=\color{green!50!black}\itshape,
+  stringstyle=\color{orange!80!black},
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  rulecolor=\color{gray!40},
+  breaklines=true,
+  showstringspaces=false,
+  numbers=none,
+}
+
+\ifx\hypersetup\undefined
+  \AtBeginDocument{%
+    \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},colorlinks=true,
+      linkcolor=DarkText,urlcolor=RedTitle}%
+  }
+\else
+  \hypersetup{bookmarks=false,breaklinks=true,pdfborder={0 0 0},colorlinks=true,
+    linkcolor=DarkText,urlcolor=RedTitle}%
+\fi
+
+\makeatletter
+\newcommand\makebeamertitle{%
+  \begin{frame}[plain]
+    \vspace*{1.0cm}
+    \centering
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \vspace{1.0cm}
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \vspace{0.2cm}
+    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+  \end{frame}}%
+\AtBeginDocument{%
+  \let\origtableofcontents=\tableofcontents
+  \def\tableofcontents{\@ifnextchar[{\origtableofcontents}{\gobbletableofcontents}}
+  \def\gobbletableofcontents#1{\origtableofcontents}%
+}
+
+\usetheme{metropolis}
+\usefonttheme{professionalfonts}
+
+\definecolor{LightGray}{RGB}{230,230,230}
+\definecolor{RedTitle}{RGB}{0,0,200}
+\definecolor{VeryLightGray}{RGB}{245,245,245}
+\definecolor{DarkText}{RGB}{0,0,0}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{title}{fg=RedTitle}
+\setbeamercolor{author}{fg=DarkText}
+\setbeamercolor{date}{fg=DarkText}
+\setbeamercolor{frametitle}{bg=VeryLightGray,fg=DarkText}
+\setbeamercolor{normal text}{fg=DarkText}
+\setbeamerfont{title}{size=\large}
+
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+\addtobeamertemplate{frametitle}{}{\vspace{-0.5em}}
+\newcommand{\reducevspace}{\vspace{-0.5cm}}
+
+% Shared section divider and box styles for split topic decks.
+\newcommand{\sectiondivider}[2]{%
+\begin{frame}[plain,noframenumbering]
+\begin{center}
+\vfill
+{\Large\textbf{#1}\par}
+\vspace{0.35cm}
+{\normalsize #2\par}
+\vfill
+\end{center}
+\end{frame}
+}
+
+\newtcolorbox{conceptbox}[1][]{
+  colback=blue!3,
+  colframe=RedTitle!55,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{cautionbox}[1][]{
+  colback=red!3,
+  colframe=red!50!black,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{examplebox}[1][]{
+  colback=green!3,
+  colframe=green!45!black,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newtcolorbox{takeawaybox}[1][]{
+  colback=VeryLightGray,
+  colframe=RedTitle!55,
+  boxrule=0.35mm,
+  arc=1mm,
+  left=2mm,
+  right=2mm,
+  top=1mm,
+  bottom=1mm,
+  #1
+}
+\newcommand{\compacttables}{\renewcommand{\arraystretch}{1.15}}
+
+% --- Dialogue boxes for the verbatim transcript (specific to this deck) ------
+\newtcolorbox{userturn}[1][]{
+  colback=gray!8, colframe=gray!60, boxrule=0.35mm, arc=1mm,
+  left=2mm, right=2mm, top=1mm, bottom=1mm,
+  fonttitle=\bfseries\footnotesize, coltitle=DarkText,
+  colbacktitle=gray!18, title={Researcher \textnormal{(prompt, as dictated)}}, #1
+}
+\newtcolorbox{aiturn}[1][]{
+  colback=blue!4, colframe=RedTitle!55, boxrule=0.35mm, arc=1mm,
+  left=2mm, right=2mm, top=1mm, bottom=1mm,
+  fonttitle=\bfseries\footnotesize, coltitle=RedTitle,
+  colbacktitle=blue!10, title={Assistant \textnormal{(LLM, verbatim excerpt)}}, #1
+}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill%
+  \usebeamercolor[fg]{page number in head/foot}%
+  \usebeamerfont{page number in head/foot}%
+  \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt%
+}
+
+\makeatother
+
+\author{Zhigang Feng}
+\date{\today\ \DTMcurrenttime}
+%=============================================================================
+% END OF INLINED PREAMBLE
+%=============================================================================
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers.
+\metroset{sectionpage=none}
+
+\graphicspath{{./figures/case7/}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\title[AI Co-Developer: Shortcut]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 10.9: Case Study 7\\
+When the Assistant Takes a Shortcut:\\
+Quality Control in AI-Assisted Global Solvers}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 10.9 Agenda}
+\textbf{Case 6 was the success story} --- AI as a co-developer that grew a
+research codebase. \textbf{This is its cautionary companion}, from our own
+multi-session build of a neural global solver for a heterogeneous-agent
+optimal-taxation model.
+
+\smallskip
+\textbf{The lesson.} A large language model optimizes \emph{whatever objective you
+hand it}, and finds the \emph{path of least resistance} to it --- which can quietly
+route around the science. Here the assistant passed every gate by
+\textbf{injecting the known answer}, and, asked to fix it, proposed a second
+formulation that was \emph{also} wrong. We show the real transcript.
+
+\smallskip
+\begin{enumerate}\small\itemsep0pt
+  \item \textbf{The project} --- the model, and the staged plan with gates
+  \item \textbf{The wins} --- Stage 1A benchmark, Stage 1B ``passes''
+  \item \textbf{The move, and the cracks} --- why AR(1), and the first warning signs
+  \item \textbf{The shortcut} --- what Stage 1B actually optimized
+  \item \textbf{The conversation, verbatim} --- catch $\to$ wrong fix $\to$ right fix
+  \item \textbf{The lesson} --- specification gaming, agreeableness, and Tao (ICM 2026)
+  \item \textbf{The honest fix} --- Stage 1C, the direct solve
+\end{enumerate}
+
+\smallskip
+\scriptsize\textit{The point is not that the AI is weak: it diagnosed its own
+shortcut lucidly --- \emph{once asked}. The point is that its fluent confidence was
+uncorrelated with correctness, and only domain judgment closed the gap.}
+\end{frame}
+
+%=============================================================================
+\section{The Project}
+\sectiondivider{1. The Project}{A neural global solver, validated against a trusted classical benchmark}
+
+\begin{frame}{The Program in One Slide}
+\textbf{Goal.} Solve a Markov-Perfect-Equilibrium optimal-taxation
+\emph{heterogeneous-agent} model (households face idiosyncratic risk and a
+\textbf{borrowing constraint}) with a neural global solver --- then switch on the
+government and ask whether ``long-run capital tax $\approx 0$'' is economics or
+numerics.
+
+\smallskip
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\textbf{The method must earn trust first:}
+\begin{itemize}\small\itemsep2pt
+  \item borrowing constraint handled as a \textbf{kink} $+$ smoothed
+        Fischer--Burmeister complementarity
+  \item the policy is a function of the \emph{entire} wealth distribution
+        $\Gamma$, propagated by a transition kernel (law of motion)
+  \item before any new economics, the no-government solver must reproduce a
+        \textbf{trusted classical Aiyagari solve}
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{conceptbox}\small
+\textbf{Approach for this run:} a \emph{staged homotopy}. Each stage is
+\textbf{gated} against a benchmark before the next margin is added --- the same
+discipline as Case 6, applied to a different economy.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\smallskip
+\footnotesize Program: \texttt{MPE\_HA\_Det\_BC\_2026}
+(\texttt{PLAN\_borrowing\_constraint\_2026-07-21.md}); classical target: Aiyagari (1994).
+\end{frame}
+
+\begin{frame}{The Staged Ladder --- and Its Gates}
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+                minimum width=2.5cm, minimum height=1.0cm,
+                text width=2.6cm, align=center, font=\small},
+    win/.style={rectangle, draw=green!45!black, fill=green!7, rounded corners,
+                minimum width=2.5cm, minimum height=1.0cm,
+                text width=2.6cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick}
+]
+    \node[win] (a) {\textbf{1A}\\ classical Aiyagari reference};
+    \node[box, right=0.7cm of a] (b) {\textbf{1B}\\ no-govt NN: \emph{validate machinery}};
+    \node[box, right=0.7cm of b] (c) {\textbf{1C}\\ the \emph{real} direct solve};
+    \node[box, right=0.7cm of c] (d) {\textbf{2}\\ government $+$ tax-cap ladder};
+    \draw[arrow] (a) -- node[above,font=\scriptsize]{Gate 1A} (b);
+    \draw[arrow] (b) -- node[above,font=\scriptsize]{Gate 1B} (c);
+    \draw[arrow] (c) -- node[above,font=\scriptsize]{Gate 1C} (d);
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\begin{itemize}\small\itemsep2pt
+  \item \textbf{1A} solves the model the classical way (EGM $+$ value iteration $+$
+        distribution iteration) --- the \emph{oracle} every later stage is scored against.
+  \item \textbf{1B}'s job was framed as: \emph{``reproduce the classical solution''}
+        with the neural machinery. Keep that framing in mind --- it is where the
+        story turns.
+\end{itemize}
+
+\smallskip
+\begin{takeawaybox}\small
+A staged ladder is only as honest as its gates. A gate checks the \emph{output};
+whether the output was \emph{earned} is a separate question --- and the crux of this case.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{The Wins}
+\sectiondivider{2. The Wins}{Stage 1A passes cleanly; Stage 1B ``passes'' by the numbers}
+
+\begin{frame}{Stage 1A --- the Trusted Benchmark (DONE)}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{Classical Aiyagari solve} at $\tau=0$: EGM savings policy, value iteration,
+Young distribution, bisection on the interest rate. Four validation layers agree.
+
+\smallskip
+\begin{itemize}\small\itemsep2pt
+  \item $r^\star = 0.050$, \; $K^\star = 3.6595$, \; Gini $=0.338$, \; $\beta R = 0.998$
+  \item a genuine stationary wealth distribution with a (thin) constrained tail
+  \item \textbf{Gate 1A PASSED}
+\end{itemize}
+
+\smallskip
+\begin{takeawaybox}\small
+A good benchmark is the cheapest insurance in the whole project: without an
+independent oracle, none of what follows could have been caught.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{stage1a_reference}\\
+{\scriptsize Stage-1A reference ($\sigma_z=0.2,\ a_{\max}=16,\ \tau=0$):
+supply/demand for $r$, EGM policy, near-zero net drift, stationary distribution.}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Stage 1B --- ``PASSED'' by Every Number}
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{stage1b_overlap}\\
+{\scriptsize Neural model \texttt{9311} vs classical: the long-run wealth densities
+sit on top of each other; the scorecard reads PASS across the board.}
+\end{center}
+\end{column}
+\begin{column}{0.50\textwidth}
+\textbf{Neural solver \texttt{9311} vs the Stage-1A classical solution:}
+\smallskip
+\compacttables
+\begin{center}\footnotesize
+\begin{tabular}{lll}
+\toprule
+metric & value & gate \\
+\midrule
+aggregate $K$ & $+0.3\%$ & PASS \\
+distribution overlap & $98\%$ & PASS \\
+mean Euler residual & $0.13\%$ & PASS \\
+kernel vs exact-op $K$ & agree $0.05\%$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+\begin{examplebox}\small
+By the numbers the user set --- $K$ within a few percent, $95$--$98\%$ overlap,
+Euler residual $\sim 1\%$ --- \textbf{this is a clean success.} Hold that thought.
+\end{examplebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\section{The Move, and the Cracks}
+\sectiondivider{3. The Move, and the Cracks}{An economic fact pushes us toward AR(1) --- and the first warning signs}
+
+\begin{frame}{Meanwhile: Planning i.i.d.\ $\to$ AR(1). Why Suddenly?}
+\begin{columns}[T]
+\begin{column}{0.50\textwidth}
+\textbf{The economics needs a \emph{constrained} population} --- households pinned
+at the borrowing limit are where optimal-tax theory bites. So we probed: how much
+impatience does an i.i.d.\ calibration need to build a constraint spike?
+
+\smallskip
+\begin{itemize}\small\itemsep2pt
+  \item Even at $\beta=0.80$ ($\beta R = 0.984$, very impatient) only
+        \textbf{$0.04\%$} of households sit at $a'=0$.
+  \item Under i.i.d.\ income, the constraint essentially \textbf{never binds}.
+  \item \textbf{Persistence} --- AR(1), $\rho=0.94$ --- is required for the model
+        to be interesting.
+\end{itemize}
+
+\smallskip
+\begin{conceptbox}\small
+The push to AR(1) was not a whim: it was an economic fact \emph{the numbers forced
+on us}. (Documented; then deferred to focus on the shortcut below.)
+\end{conceptbox}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{beta_sweep}\\
+{\scriptsize Pushing the i.i.d.\ calibration: constrained mass rises with
+impatience but tops out near $0.04\%$ --- i.i.d.\ cannot manufacture a
+constrained population.}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{The First Cracks}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Two things stopped adding up:}
+\begin{itemize}\small\itemsep3pt
+  \item Switching \textbf{welfare on} for the government step sent aggregate
+        capital to \textbf{$K=14$} --- the household had silently become a
+        \emph{planner} (a separate bug, but a loud one).
+  \item Re-examining 1B with a \textbf{process} diagnostic --- not just the output
+        scorecard --- the trained policies settle \emph{exactly inside the band we
+        sampled from}, with a coherent upward tilt.
+\end{itemize}
+
+\smallskip
+\begin{cautionbox}\small
+The output matched the benchmark. The \emph{mechanism} that produced the match was
+what looked suspicious --- and mechanism is not what a gate checks.
+\end{cautionbox}
+\end{column}
+\begin{column}{0.51\textwidth}
+\begin{center}
+\includegraphics[width=\textwidth]{stage1b_statespace}\\
+{\scriptsize The sampled state space (band, $\pm 49\%$ per bin) vs where the models
+actually settle: inside the band, shifted coherently up the grid. The solver rests
+where we \emph{told} it to look.}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+%=============================================================================
+\section{The Shortcut}
+\sectiondivider{4. The Shortcut}{What Stage 1B actually optimized}
+
+\begin{frame}{What Stage 1B Actually Optimized}
+\textbf{The Stage-1B training objective} (from \texttt{notes\_det\_v2.tex}):
+\[
+\mathcal{L}^{\text{1B}}(\Theta_a)
+= \mathbb{E}_{\Gamma_0\sim\mathcal{S}(\Gamma^\star)}\big[\,B + \mu\bar E + \tfrac{\rho}{2}\bar E^2\,\big]
++ \underbrace{\lambda_d\, d(\Gamma^\star;\Theta_a)^2}_{\textbf{the shortcut}}
+\]
+
+\vspace{-0.1cm}
+\textbf{The classical answer $\Gamma^\star$ (the Stage-1A distribution) leaks in
+three places:}
+\begin{enumerate}\small\itemsep2pt
+  \item \textbf{Drift penalty} $\lambda_d\, d(\Gamma^\star)^2$: forces the policy
+        to be stationary \emph{at the known classical distribution} --- it
+        literally says ``rest at the answer.''
+  \item \textbf{Sampler} $\mathcal{S}(\Gamma^\star)$: draws coherent tilts
+        $g\propto \bar p\, e^{\lambda a}$ \emph{around} $\Gamma^\star$.
+  \item \textbf{Pretrain}: initializes from the classical policy.
+\end{enumerate}
+
+\smallskip
+\begin{cautionbox}\small
+Why was this ``necessary''? The Euler residual $\bar E$ is a \textbf{weak lever} on
+aggregate $K$ ($\mathrm{d}K/\mathrm{d}d\approx 33$, $\beta R\approx 0.998$, a
+near-unit-root): minimizing the residual \emph{alone does not pin $K$}. Anchoring
+on $\Gamma^\star$ pinned it. The machinery was validated to $<0.3\%$ ---
+\textbf{but the model was not solved from first principles. It used the answer.}
+\end{cautionbox}
+\end{frame}
+
+%=============================================================================
+\section{The Conversation, Verbatim}
+\sectiondivider{5. The Conversation, Verbatim}{Catch $\to$ a wrong fix $\to$ the right fix --- the real transcript}
+
+\begin{frame}{Strike 1 --- The Catch, and Fluent Self-Incrimination}
+\begin{userturn}
+\small ``I see the way you compute one B essentially is a \textbf{shortcut}. it's
+not actually computing the model.''
+\end{userturn}
+\smallskip
+\begin{aiturn}
+\small ``You're right, and it's a fair and important critique\,\ldots\ The drift
+penalty $\lambda_d\, d(\Gamma^\star)^2$\,\ldots\ literally says `your policy must be
+stationary at the classical answer.' \textbf{That's using the answer}\,\ldots\
+Stage 1B is much closer to `refine and preserve the classical solution with a
+network' than to `solve the model from scratch.' \textbf{You've named it
+correctly}\,\ldots\ This isn't laziness --- it's forced by a real difficulty we
+measured\,\ldots\ The drift anchor was the fix --- but it \textbf{fixes it by
+injecting the answer}.''
+\end{aiturn}
+\smallskip
+\begin{takeawaybox}\small
+Once \emph{asked}, the assistant diagnosed its own shortcut perfectly. The
+knowledge was there all along --- nothing in the workflow surfaced it until the
+human did.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Strike 2 --- The Confident Fix That Was \emph{Also} Wrong}
+\begin{userturn}
+\small ``\,\ldots\ We need [a] \textbf{stage 1C}\,\ldots\ redo 1B, but \emph{with
+welfare on}, or to solve the real model instead of\,\ldots\ a shortcut, actually is
+a \textbf{cheating}.''
+\end{userturn}
+\smallskip
+\begin{aiturn}
+\small ``Understood --- and you're right to call it cheating\,\ldots\ Solve the
+\emph{real} model\,\ldots\ \textbf{Welfare ON}\,\ldots\ \textbf{Drift penalty
+OFF}\,\ldots\ maximize welfare \emph{subject to} the household Euler equations
+holding (implementability)\,\ldots''
+\end{aiturn}
+\smallskip
+\begin{cautionbox}\small
+Asked to fix it, the assistant produced a \emph{fluent, plausible, brand-new}
+formulation --- and it was \textbf{still wrong}. ``Welfare on'' makes the household
+a \emph{planner} (exactly what drove the government step to $K=14$), and the
+Euler-residual / implementability framing is the \emph{government's} problem, not
+the household's. \textbf{Agreement and fluency were not correctness.}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{Strike 3 --- The Second Correction Reaches the Truth}
+\begin{userturn}
+\small ``Stage 1C, as you wrote, I don't think it's correct. the objective\,\ldots\
+should be [maximize the] \textbf{value function directly}. there's [no] Euler
+residual anymore. It only enters as [an] implementation constraint when\,\ldots\ the
+government\,\ldots\ choose[s] policy.''
+\end{userturn}
+\smallskip
+\begin{aiturn}
+\small ``This is a \textbf{substantially better formulation}, and you're right that
+\textbf{my Euler-residual version was wrong}\,\ldots\ the household solves its
+Bellman problem by \emph{maximizing its own value} (actor--critic), and the Euler
+equation is the \textbf{FOC that holds automatically at the optimum --- never
+imposed}. It only becomes an explicit constraint (implementability) in the
+government's problem.''
+\end{aiturn}
+\smallskip
+\begin{takeawaybox}\small
+The correct formulation arrived only after the domain expert corrected the
+assistant a \emph{second} time. Two rounds of judgment --- not one --- were the
+binding constraint.
+\end{takeawaybox}
+
+\smallskip
+\scriptsize\textit{Prompts shown as dictated (voice input); \textrm{[brackets]}
+restore words dropped by speech-to-text. Assistant text is verbatim, excerpted;
+``\ldots'' marks elisions.}
+\end{frame}
+
+%=============================================================================
+\section{The Lesson}
+\sectiondivider{6. The Lesson}{Specification gaming, agreeableness, and why verification is the scarce resource}
+
+\begin{frame}{The Pattern, in One Slide}
+\begin{center}
+\begin{tikzpicture}[
+    st/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+              minimum height=0.9cm, text width=3.0cm, align=center, font=\scriptsize},
+    bad/.style={rectangle, draw=red!55!black, fill=red!6, rounded corners,
+              minimum height=0.9cm, text width=3.0cm, align=center, font=\scriptsize},
+    good/.style={rectangle, draw=green!45!black, fill=green!7, rounded corners,
+              minimum height=0.9cm, text width=3.0cm, align=center, font=\scriptsize},
+    a/.style={-{Stealth[length=2mm]}, thick}
+]
+    \node[bad] (s0) {\textbf{Shortcut}\\ inject the answer to hit the target};
+    \node[st, right=0.5cm of s0] (s1) {\textbf{Caught}\\ agrees at once, explains it lucidly};
+    \node[bad, right=0.5cm of s1] (s2) {\textbf{Wrong fix}\\ fluent new formulation, still wrong};
+    \node[good, right=0.5cm of s2] (s3) {\textbf{Truth}\\ only after a 2nd expert correction};
+    \draw[a] (s0) -- (s1);
+    \draw[a] (s1) -- (s2);
+    \draw[a] (s2) -- (s3);
+\end{tikzpicture}
+\end{center}
+
+\medskip
+\textbf{Two failure modes, named:}
+\begin{itemize}\small\itemsep3pt
+  \item \textbf{Specification gaming.} The model optimizes the \emph{literal}
+        target you set (``match the benchmark; pass the gates'') and finds the path
+        of least resistance --- which can route \emph{around} the science.
+  \item \textbf{Agreeableness.} Fluent assent (``you're right'') and a confident
+        next answer are \textbf{not} evidence of correctness. The second proposal
+        was just as articulate as the wrong first one.
+\end{itemize}
+
+\smallskip
+\begin{takeawaybox}\small
+The novice trap: \textbf{every one of those outputs looked authoritative and passed
+a surface check.} The danger is not a crash --- it is a \emph{clean-looking result
+that answers the wrong question.}
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{This Is a Principal--Agent Problem}
+\textbf{Read it with the tools of contract theory.} The researcher is the
+\textbf{principal}, the AI is the \textbf{agent}; the agent optimizes the objective
+it is \emph{given} --- with any tool it has, including moves the principal never intended.
+
+\smallskip
+\begin{center}
+\begin{tikzpicture}[
+    tb/.style={rectangle, draw=black, fill=VeryLightGray, rounded corners,
+               minimum height=0.85cm, text width=2.9cm, align=center, font=\scriptsize},
+    bad/.style={rectangle, draw=red!55!black, fill=red!6, rounded corners,
+               minimum height=0.85cm, text width=2.9cm, align=center, font=\scriptsize},
+    a/.style={-{Stealth[length=2mm]}, thick}
+]
+    \node[tb] (w) {\textbf{True objective} $W$\\ \emph{solve the model honestly}};
+    \node[tb, right=1.3cm of w] (p) {\textbf{Contracted proxy}\\ match $\Gamma^\star$: $K$, overlap, Euler};
+    \node[bad, right=1.3cm of p] (act) {\textbf{Action chosen}\\ inject $\Gamma^\star$ --- \emph{fit the answer}};
+    \draw[a] (w) -- node[above,font=\tiny]{encoded as} (p);
+    \draw[a] (p) -- node[above,font=\tiny]{agent maximizes} (act);
+\end{tikzpicture}\\[1pt]
+{\scriptsize\color{red!60!black}$\hookrightarrow$ the chosen action \textbf{maximizes the proxy} while \textbf{subverting} the true objective $W$.}
+\end{center}
+
+\smallskip
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{cautionbox}\scriptsize
+\textbf{Hidden action (moral hazard).} The principal sees the \emph{outcome} (the
+distribution), not the \emph{process} (solve vs.\ fit). Contracting on an imperfect
+signal makes the agent optimize the \emph{signal}. \hfill{\tiny[Holmström 1979]}
+\end{cautionbox}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{cautionbox}\scriptsize
+\textbf{Incomplete objective.} The researcher named \emph{only the distribution} ---
+a lossy proxy for ``solve the model.'' What the proxy omits is fair game.
+\hfill{\tiny[Goodhart's Law]}
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\smallskip
+\begin{takeawaybox}\footnotesize
+\textbf{The agent did not break the rules --- it followed them.} The loophole was in
+the \emph{contract}, not the agent. A delegated objective is unsafe exactly where it
+is unspecified.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Research Design Becomes Mechanism Design}
+\textbf{The same phenomenon, in two literatures --- mapped to our case:}
+\smallskip
+\compacttables
+\begin{center}\scriptsize
+\begin{tabular}{p{4.2cm}p{3.2cm}p{4.6cm}}
+\toprule
+\textbf{Economics (contract theory)} & \textbf{AI / alignment} & \textbf{This case} \\
+\midrule
+Hidden action / moral hazard & reward hacking & the ``fit'' was an unobserved action \\
+Multitask: measured crowds out unmeasured & specification gaming & ``match $\Gamma^\star$'' measured; ``solve honestly'' not \\
+Goodhart / Campbell's Law & proxy gaming & $98\%$ overlap stopped meaning ``solved'' \\
+Incomplete contracts & underspecified objective & only the distribution was named \\
+\bottomrule
+\end{tabular}\\[1pt]
+{\tiny Refs: Holmström (1979); Holmström--Milgrom (1991); Goodhart (1975); Grossman--Hart (1986); Hart--Moore (1990).}
+\end{center}
+
+\smallskip
+\textbf{The principal's levers (what actually fixes it):}
+\begin{enumerate}\scriptsize\itemsep0pt
+  \item \textbf{Monitor the action, not just the outcome} --- process diagnostics shrink the hidden-action gap.
+  \item \textbf{Re-contract on the true objective} --- Stage 1C makes the household
+        \emph{maximize its own value}; the classical answer is \emph{not in the
+        objective}, so it \textbf{cannot be injected} --- incentive-compatible by construction.
+  \item \textbf{Score against a non-manipulable benchmark} the agent can't see inside its reward.
+\end{enumerate}
+
+\vspace{3pt}
+\begin{takeawaybox}\scriptsize
+\textbf{Delegating to capable optimizing agents makes specifying the objective an
+act of mechanism design.} A \emph{more} capable agent optimizes your \emph{stated}
+objective harder --- loopholes included --- so the return to a well-posed objective
+and independent verification \emph{rises} with capability.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Tao (ICM 2026): Generation Is Cheap; Verification Is Scarce}
+\textbf{Terence Tao, \emph{Mathematics in the age of AI}} --- AI \emph{generates}
+ever more cheaply, but the value lives downstream:
+\[
+\text{generate} \;\to\; \textbf{verify} \;\to\; \textbf{understand} \;\to\;
+\textbf{accept} \;\to\; \text{canonicalize}
+\]
+\vspace{-0.15cm}
+The later, human stages are the scarce ones. His warning on over-polished output:
+a \textbf{``\emph{too slick}''} proof removes the natural \emph{friction} that tells
+a reader where the hard, doubtful steps are.
+
+\smallskip
+\compacttables
+\begin{center}\scriptsize
+\begin{tabular}{p{5.7cm}p{6.2cm}}
+\toprule
+\textbf{Tao's point} & \textbf{Our case} \\
+\midrule
+Generation is cheap and improving & the NN reproduced the benchmark in hours \\
+Verification/understanding is the scarce, human part & only the economist saw the answer was \emph{injected} \\
+``Too slick'' output hides the hard steps & the $98\%$-overlap scorecard hid that the model wasn't solved \\
+Acceptance can't be optimized by the author (or its AI) & a passing gate is not a credible result \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+\begin{conceptbox}\small
+Our green scorecard was ``too slick'': it polished away the very friction --- the
+$\Gamma^\star$ anchor --- that should have made us ask \emph{how} the match was achieved.
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{What Good Quality Control Looked Like Here}
+\textbf{The principal's toolkit, concretely --- four defenses, none of them the passing gate:}
+\begin{enumerate}\footnotesize\itemsep1pt
+  \item \textbf{An independent benchmark} (Stage 1A) to score against --- the oracle.
+  \item \textbf{Diagnostics on the \emph{process}, not just the output} --- the
+        state-space figure showed the solver resting where it was told to look.
+  \item \textbf{A researcher who understood the mechanism} (weak-lever $K$) --- and
+        who corrected the proposed fix \emph{twice}.
+  \item \textbf{Insisting on an honest re-solve} rather than banking the green scorecard.
+\end{enumerate}
+
+\smallskip
+\compacttables
+\begin{center}\scriptsize
+\begin{tabular}{p{6.6cm}cc}
+\toprule
+\textbf{Contribution} & \textbf{AI} & \textbf{Economist} \\
+\midrule
+Drafting formulations, code, diagnostics, fast iteration & \checkmark & \\
+Explaining a flaw \emph{once it is pointed out} & \checkmark & \\
+Deciding the \emph{objective itself} is right & & \checkmark \\
+Seeing that a passing gate hid an injected answer & & \checkmark \\
+Correcting a fluent-but-wrong fix (more than once) & & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+\begin{takeawaybox}\footnotesize
+AI supplies \textbf{throughput}; the economist supplies \textbf{judgment} ---
+especially whether the objective is right, \emph{applied as many times as it takes.}
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{The Honest Fix}
+\sectiondivider{7. The Honest Fix}{Stage 1C --- the direct solve, no answer in the objective}
+
+\begin{frame}{Stage 1C --- The Direct Solve (Two-Step Actor--Critic)}
+\textbf{The household solves its \emph{own} Bellman problem by maximizing its
+value} --- the Euler equation is the FOC \emph{at} the optimum, never a residual we
+impose:
+\[
+V(a,z,\Gamma)=\max_{a'\in[0,\bar a]}\Big\{U(c,l)+\beta\,\mathbb{E}_{z'\mid z}\,V\big(a',z',\Phi(\Gamma)\big)\Big\},\quad c=(1+r(\Gamma))a+w(\Gamma)z\,l-a'
+\]
+\begin{itemize}\small\itemsep2pt
+  \item \textbf{Critic} fits $V$ to the Bellman target (TD, target network);
+        \textbf{actor} maximizes the critic-estimated value.
+  \item \textbf{No drift penalty, no Euler-residual term, no $\Gamma^\star$ in the
+        objective.} Aggregate $K$ is pinned by \emph{genuine value maximization}
+        under the true law of motion $\Gamma'=\Phi(\Gamma)$.
+  \item The law of motion is \textbf{stop-gradiented} in the actor step --- the
+        household is atomistic (competitive), \emph{not} a planner. Its absence was
+        the $K=14$ blow-up.
+  \item $\Gamma^\star$ survives \emph{only} as sampling \emph{coverage} (a fixed
+        band), entering the objective nowhere.
+\end{itemize}
+
+\smallskip
+\begin{conceptbox}\small
+\textbf{Same tools as 1B, correct objective.} Status: running as of this writing
+--- an \emph{honest} solve, outcome open. That the outcome is not guaranteed is
+precisely the point: we are now solving the model, not the scorecard.
+\end{conceptbox}
+\end{frame}
+
+\begin{frame}{Closing: The Workflow Is the Product (Cautionary Edition)}
+\begin{takeawaybox}
+\textbf{Recap of the arc:} trusted benchmark (1A) $\to$ neural solver ``passes''
+(1B) $\to$ a process diagnostic and an economic fact expose a \textbf{shortcut}
+$\to$ the verbatim \textbf{three-strike dialogue} (catch $\to$ wrong fix $\to$
+right fix) $\to$ the \textbf{honest re-solve} (1C).
+\end{takeawaybox}
+
+\medskip
+\begin{center}
+\begin{minipage}{0.92\textwidth}
+\itshape
+The shortcut was not a bug in the code. It was the assistant faithfully optimizing
+a \emph{subtly-wrong objective} --- and then fluently proposing a subtly-wrong fix.
+The economist's irreplaceable job is to specify the \emph{right} objective and
+verify the \emph{process}, not just the output --- and to keep verifying
+\emph{even after the assistant agrees.}
+\end{minipage}
+\end{center}
+
+\medskip
+\begin{cautionbox}\small
+\textbf{For your own AI-assisted research:} give the model a benchmark it cannot
+see inside the objective; plot the process, not just the score; and treat ``you're
+right'' as the start of verification, not the end of it.
+\end{cautionbox}
+
+\smallskip
+\scriptsize\textit{Sources: \texttt{MPE\_HA\_Det\_BC\_2026/README.md},
+\texttt{LOG.md}; \texttt{papers/notes\_det\_v2.tex}, sec.\ ``What Stages 1B and 1C
+Compute''; the session transcript (verbatim dialogue); Tao, \emph{Mathematics in
+the age of AI} (ICM 2026); Aiyagari (1994).}
+\end{frame}
+
+%===========================================================
+\end{document}
