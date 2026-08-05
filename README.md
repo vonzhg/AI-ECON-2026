@@ -97,9 +97,16 @@ add a `res-row` to `labs/index.html` keyed by lecture, and mention it in the mat
 
 ### Run the course again
 
-Nothing on the live pages needs editing — they carry no dates. Record the offering instead: copy
-`archive/summer-2026.html` to `archive/<term>.html`, fill in the meeting table, and add it to the
-footer link list on the main pages.
+The live pages carry a **Class Meetings** table for the current offering — one copy in `index.html`
+(above the Course Map) and an identical copy in `syllabus.html` (below the Format box). Two steps:
+
+1. Update both tables with the new term's dates, times, rooms, and the `<h2>` term label. Keep the
+   two copies byte-identical so the next edit stays a straight copy-paste.
+2. When the offering ends, retire it: copy `archive/summer-2026.html` to `archive/<term>.html`, move
+   the finished meeting table into it, and add it to the footer link list on the main pages.
+
+Everything else on the live pages is deliberately generic — modules and lectures, no dates — so the
+meeting tables are the only place a term shows up.
 
 *Deployment options, the watermark script, and other private notes live in the git-ignored
 `DEPLOY_NOTES.local.md`.*
