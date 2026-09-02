@@ -323,29 +323,121 @@ Five steps run \textbf{before you type your first message} --- each one loads a 
 \footnotesize\textit{Zone 1's \texttt{[Read ...]} traces are the JSON tool calls of the earlier frame, printed for you --- the audit trail is on screen by default. Layout details differ across products and versions; the four zones are durable.}
 \end{frame}
 
-\begin{frame}{Commands, Modes, Keys: The Control Surface}
+\begin{frame}{Commands That Earn Their Keep (1): Framing and Steering}
+\textbf{These six decide what the agent attempts --- and how hard it thinks.}
+
+\vspace{0.15cm}
 
 \begin{center}
-\footnotesize
-\begin{tabular}{|l|p{5.0cm}|p{3.3cm}|}
+\scriptsize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{|l|p{9.4cm}|}
 \hline
-\textbf{Control} & \textbf{What it does} & \textbf{When to use} \\ \hline
-\multicolumn{3}{|l|}{\textbf{Modes} (cycle with \texttt{Shift+Tab})} \\ \hline
-Plan mode & Read-only: the agent explores and drafts a plan, executes \textbf{nothing} until you approve & Start every non-trivial task here \\ \hline
-Accept-edits & Auto-approves routine file edits & Only after trust is earned \\ \hline
-\multicolumn{3}{|l|}{\textbf{Slash commands}} \\ \hline
-\texttt{/effort max} & Maximum reasoning depth: best quality, slower, costlier & Novel problems, economic correctness \\ \hline
-\texttt{/effort default} & Balanced quality and speed & Routine work \\ \hline
-\texttt{/cost} & Tokens used + estimated USD this session & Budget check before long tasks \\ \hline
-\texttt{/compact}, \texttt{/clear} & Manage the context window & Next section of this deck \\ \hline
-\multicolumn{3}{|l|}{\textbf{Keys}} \\ \hline
-\texttt{Esc} & Interrupt the agent mid-task immediately & When it's going the wrong way \\ \hline
+\textbf{Command} & \textbf{What it does --- and why it earns a place} \\ \hline
+\multicolumn{2}{|l|}{\textbf{Before the work starts}} \\ \hline
+\texttt{/init} & Writes a first \texttt{CLAUDE.md} from the repo --- the brief that is re-read every session (T4). Generating it beats writing it cold \\ \hline
+\texttt{/plan} & Explores and drafts; executes \textbf{nothing} until you approve --- so a wrong turn costs a re-read, not a \texttt{git reset} \\ \hline
+\multicolumn{2}{|l|}{\textbf{How hard it thinks}} \\ \hline
+\texttt{/model} & Switches model mid-session, context preserved. A derivation and a variable rename do not deserve the same engine \\ \hline
+\texttt{/effort} & Five levels, \texttt{low} $\to$ \texttt{max}: the biggest quality--cost dial you hold. Raise it for a proof or a subtle bug; lower it for mechanical edits \\ \hline
+\texttt{/fast} & Toggles fast mode: same model, faster output --- \textbf{not} a downgrade to a smaller one. For when latency, not depth, is the bottleneck \\ \hline
+\multicolumn{2}{|l|}{\textbf{How you get words in}} \\ \hline
+\texttt{/voice} & Dictation (\texttt{hold} / \texttt{tap} / \texttt{off}). You specify a task far faster than you type it --- and thin prompts are where these tools underperform \\ \hline
 \end{tabular}
 \end{center}
 
-\vspace{0.05cm}
+\vspace{0.1cm}
 
-\textbf{The effort--cost tradeoff:} maximum-effort modes plus long context can be an order of magnitude more expensive than default. Spend effort on \textit{decisions}; save it on \textit{execution}.
+\footnotesize\textbf{Spend effort on \textit{decisions}, save it on \textit{execution}:} max effort on a long context can cost an order of magnitude more than the default.
+\end{frame}
+
+\begin{frame}{Commands That Earn Their Keep (2): Context, Cost, and Undo}
+\textbf{The other six manage your two budgets --- the window and the meter --- and undo mistakes.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{|l|p{9.4cm}|}
+\hline
+\textbf{Command} & \textbf{What it does --- and why it earns a place} \\ \hline
+\multicolumn{2}{|l|}{\textbf{Mind the window}} \\ \hline
+\texttt{/context} & Draws current context use as a colored grid. Makes the invisible constraint visible: you see what is eating the window \textit{before} quality degrades \\ \hline
+\texttt{/compact} & Summarizes the conversation to free space. Keeps the thread, drops the detail --- one you choose beats one that fires mid-derivation \\ \hline
+\texttt{/clear} & New session, empty context; the old one stays on disk. The right move \textit{between} unrelated tasks, which otherwise contaminate each other \\ \hline
+\multicolumn{2}{|l|}{\textbf{Mind the meter --- and the undo button}} \\ \hline
+\texttt{/usage} & Session cost, plan usage, activity (alias \texttt{/cost}). Turns an invisible meter into a number: check \textit{before} a long agentic run, not after \\ \hline
+\texttt{/rewind} & Restores files to an earlier checkpoint --- the safety net that makes accept-edits mode reasonable \\ \hline
+\texttt{/resume} & Reopens an earlier conversation. Research is not one sitting; yesterday's context is an asset, not something to re-explain \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.02cm}
+
+\begin{takeawaybox}
+\scriptsize
+\textbf{Four dials, not twelve commands.} What it reads (\texttt{/context}, \texttt{/compact}, \texttt{/clear}) $\cdot$ how hard it thinks (\texttt{/model}, \texttt{/effort}, \texttt{/fast}) $\cdot$ how much it may do unasked (modes, \texttt{/permissions}) $\cdot$ what it costs (\texttt{/usage}).
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Modes, Keys, and the Rest of the Surface}
+\textbf{Commands are only one of three ways to steer. The other two are faster.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{Modes} --- cycle with \texttt{Shift+Tab}:
+
+\vspace{0.1cm}
+{\scriptsize
+\begin{tabular}{|l|p{3.8cm}|}
+\hline
+Plan & Read-only: explores and drafts, executes \textbf{nothing} until you approve. Start every non-trivial task here \\ \hline
+Accept-edits & Auto-approves routine file edits. Only after trust is earned \\ \hline
+Default & Asks before each action \\ \hline
+\end{tabular}
+}
+
+\vspace{0.2cm}
+\textbf{Keys:}
+
+\vspace{0.1cm}
+{\scriptsize
+\begin{tabular}{|l|p{3.8cm}|}
+\hline
+\texttt{Esc} & Interrupt the agent mid-task, immediately \\ \hline
+\texttt{Esc Esc} & Rewind to an earlier checkpoint \\ \hline
+\texttt{!} & Run a shell command yourself; the output joins the context \\ \hline
+\texttt{@} & Point at a file by path \\ \hline
+\texttt{Ctrl+R} & Search your prompt history \\ \hline
+\end{tabular}
+}
+\end{column}
+\begin{column}{0.49\textwidth}
+\textbf{Worth knowing, reached for less often:}
+
+\vspace{0.1cm}
+{\scriptsize
+\begin{tabular}{|l|p{3.7cm}|}
+\hline
+\texttt{/memory} & Edit \texttt{CLAUDE.md} and memory settings directly \\ \hline
+\texttt{/permissions} & Manage allow and deny rules --- next frame \\ \hline
+\texttt{/status} & Version, model, account, connectivity \\ \hline
+\texttt{/export} & Save the conversation to a file: an audit trail of how a result was produced \\ \hline
+\texttt{/hooks} & Inspect what runs automatically on tool events (T4) \\ \hline
+\texttt{/doctor} & Health-check the install when something is off \\ \hline
+\end{tabular}
+}
+
+\vspace{0.15cm}
+\footnotesize \texttt{/help} lists every command; typing \texttt{/} alone opens the menu.
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+\footnotesize\textit{Durable vs.\ dated: the four dials --- context, effort, permission, cost --- outlive any release. Exact command names, effort levels, and model aliases are dated detail $\to$ \texttt{/help} and the official docs.}
 \end{frame}
 
 \begin{frame}[fragile]{Permissions: The Blast-Radius Dial}
