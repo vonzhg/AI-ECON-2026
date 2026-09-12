@@ -1,0 +1,1488 @@
+# Lecture 9 reorganization manifest (Phase A of the 2026-09 reorganization).
+#
+# Source of truth for which old frame goes where, at what tier, with which
+# reference edits.  Read only by tools/lec09_assemble.py:
+#   python3 tools/lec09_assemble.py check      # every source frame used once, edits apply
+#   python3 tools/lec09_assemble.py assemble   # write the eleven decks
+#   python3 tools/lec09_assemble.py summary    # tier counts per deck
+#
+# Plan: Lec09_Reorg_Plan_2026-09-12.md (v1 dispositions) as amended by
+# Lec09_Reorg_Plan_Review_2026-09-12.md (A1-A9).  Source decks: _archive/five_acts_2026-07/.
+#
+# Item kinds (in teaching order):
+#   frame: <ID>            one source frame; tag KEEP|MOVE|EDIT; edits = exact-string replacements
+#   merge: [<ID>, <ID>]    Phase A emits both frames in order; Phase B merges them
+#   new: <title>           placeholder (or drafted `body`) with a Phase B `todo`
+#   section: <title>       \section + \sectiondivider{title}{divider}
+# Tiers (review A1): CORE = the Oct 22 path, LAB = used during the lab, READ = self-study.
+# Edits apply in Phase A; `todo` lines are written into the deck as "% TODO(Phase B):" comments.
+
+decks:
+
+# =============================================================================
+# 9.1 SEE
+# =============================================================================
+- key: T1
+  file: Lec09_T1_Agent_Opportunity.tex
+  subtitle: 'Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms'
+  map: [1, '']
+  owns:
+    - the example ladder (capability rungs); the principal-agent lens (Lec10 T9 owns the evidence)
+    - chat vs agent (where the loop runs), the agentic loop, four features, the spectrum
+    - orchestration-pattern names, multi-agent cost-benefit, measured task horizons (concept only)
+    - the four research patterns (Lec10 T1 cites the names)
+  defers:
+    - JSON tool call, session-as-list -> T2a; Git -> T2b; seven tests -> T5d
+    - MCP is named once in the timeline and explained only in TA; model-specific numbers -> TA
+  items:
+  - new: 'Six Minutes, One Figure'
+    tier: CORE
+    todo: |-
+      Cold open before the map (archive_pre_split/Lec09_Agentic_AI.tex:2022-2121, "Case Study: Empty Folder -> Figure").
+      Figure figures/homeownership_by_age.jpg; the three prompts; two obstacles solved unprompted (FRED lacked the series -> Census HVS; HTTP 403 -> User-Agent); 6 min 21 s.
+      What the economist did: asked the question, checked the figure. Attribution: Paul Goldsmith-Pinkham, "From an Empty Folder to a Figure" + URL (Capstone_Projects_2026.md:526-528) + date.
+  - frame: T1-F01
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'One lecture, five decks, three questions'
+      new: 'One lecture, five parts, eleven decks, three questions'
+    - old: '\LecNineMap{1}'
+      new: '\LecNineMap{1}{}'
+    - old: 'run through all five acts'
+      new: 'run through all five parts'
+    todo: Name the economic twin of each part in the italic line (review A3).
+
+  - section: 'The Agent Opportunity'
+    divider: 'What changed, and why an economist should care'
+  - frame: T1-F02
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'the machine (9.2), the method (9.3), the management (9.4), and your role (9.5)'
+      new: 'how an agent runs (9.2), how to build and call one (9.3), how to design and validate one (9.4), and how to run, check, and govern a whole project (9.5)'
+  - new: 'The Ladder: From a Chat Window to a Verified Swarm'
+    tier: CORE
+    todo: |-
+      Review A4: one TikZ strip, six capability rungs, one course-owned example each, "what stayed human" underneath, and where each returns:
+      chat window (T1-F06 Fellows test) | one agent, one sitting (six minutes -> figure) | one agent, files, many sittings (882 Fellows) | agent + human gates, weeks (HA-Ramsey) | team of sub-agents (T3b ledger) | scripted fan-out + verifier (Lec10 T6b, 11,171 labels).
+      Counter-rung under "agent + gates": Lec10 T9, passed every gate, still wrong. Across all rungs: the GDP-by-party leading verb (T2a). Navier-Stokes is NOT on the ladder (dated sidebar in T3b and TA).
+  - new: 'Delegating to an Agent Is a Principal--Agent Problem'
+    tier: CORE
+    todo: |-
+      Review A3 lens frame. Researcher = principal, agent = agent: hidden action (Holmstrom 1979: you see the output, not the process) and a misspecified objective (Goodhart: the agent optimizes the contracted proxy).
+      "Generation is cheap; verification is scarce" (Tao, cited in Lec10 T9:693). One terminology line: three meanings of "agent" in this course (LLM in a loop; household in Aiyagari/HA-Ramsey; principal-agent theory).
+      Ownership: this frame owns the lens; Lec10 T9 ("This Is a Principal--Agent Problem", T9:607) owns the evidence -- point to it, do not retell it.
+  - new: 'From Chatbox to Agent Swarm, 2022--2026'
+    tier: READ
+    todo: |-
+      Timeline TikZ (v1 T1 item 5): 2022 chat; 2023 structured tool calls + IDE assistants; 2024 terminal agents, MCP named once (T1b:71); 2025 sub-agents, frameworks at 1.0 (T1b:135-145), OpenAI adopts MCP (T1b:72), AAIF (T1b:73); 2026 scheduled runtimes (T1b:253-260).
+      Every fact [solid]/[hype]-tagged and dated; re-verify at the freshness gate. Closing line from T1b-F16.
+  - frame: T1-F03
+    tag: KEEP
+    tier: READ
+  - frame: T1-F04
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '(T5 tells that part)'
+      new: '(T5c tells that part)'
+
+  - section: 'Chat, Copilot, Agent'
+    divider: 'Where the loop runs, and what it can touch'
+  - frame: T1-F05
+    tag: KEEP
+    tier: READ
+  - frame: T1-F06
+    tag: KEEP
+    tier: READ
+  - merge: [T1-F07, T1-F10]
+    tier: CORE
+    edits:
+      T1-F07:
+      - old: '(T2 opens this loop in machine language.)'
+        new: '(T2a opens this loop in machine language.)'
+      T1-F10:
+      - old: 'T3 returns to tool choice per pipeline step.'
+        new: 'T5a returns to tool choice per pipeline step.'
+    todo: |-
+      Review A5: merge into ONE frame keyed on where the loop runs, what it can touch, what persists, and who presses run (vendor sandbox vs IDE vs your machine/data/cluster).
+      Fix T1-F07's table: web chat runs code in a vendor sandbox (contradicted T1-F05); drop "why is Copilot not an agent?" -- IDE assistants ship agent modes; one product can sit on several rungs.
+      Delete T1-F07's JSON paragraph (T2a owns it). Name Claude Code, Codex CLI, Gemini CLI as terminal agents (review A2).
+  - frame: T1-F08
+    tag: KEEP
+    tier: CORE
+  - frame: T1-F09
+    tag: KEEP
+    tier: READ
+
+  - section: 'The Landscape in Three Frames'
+    divider: 'Patterns, costs, and how long agents really work'
+  - frame: T1b-F04
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'The terminal-agent workflow you learned in T1--T5 is an orchestrator--worker system'
+      new: 'The agent team you will build in Part 9.3 and run as an RA team in T5b is an orchestrator--worker system'
+  - frame: T1b-F06
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'The Aiyagari sub-agent review in T4 was justified'
+      new: 'The Aiyagari sub-agent review in T5b is justified'
+    todo: Tag +90.2% / 15x as [hype] (vendor-internal eval) in the bullets themselves.
+  - frame: T1b-F09
+    tag: EDIT
+    tier: READ
+    todo: |-
+      Review A5: keep the concept (50%-reliability horizon, doubling time, fragility); move the model-specific numbers (Opus 4.5, GPT-5) to TA's dated comparisons and refresh them at the freshness gate.
+      Footer: "the rest of the landscape, dated: Appendix TA".
+
+  - section: 'What This Means for Research'
+    divider: 'Four patterns, and what stays human'
+  - frame: T1-F11
+    tag: EDIT
+    tier: READ
+    todo: 'Review A3/A5: "Lec10''s six cases" / "Cases 4--6" -> seven cases; add Case 7 (MPE shortcut, Lec10 T9) to the collaborator row as the cautionary instance.'
+  - merge: [T1-F12, T2-F24]
+    tier: READ
+    edits:
+      T1-F12:
+      - old: 'In 9.4 it becomes a job description'
+        new: 'In 9.5 it becomes a job description'
+    todo: 'Two rows of T2-F24 into T1-F12''s columns; footer = one-line teaser of the seven tests (T5d owns the table); T5b''s contract frame formally owns division of labor.'
+  - frame: T1-F17
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Bridge: Widen the Lens, Then Open the Hood'
+      new: 'Bridge: Open the Hood'
+    - old: '\textbf{Act 1 framed the terminal-agent workflow:'
+      new: '\textbf{Part 9.1 framed the terminal-agent workflow:'
+    - old: '\item \textbf{Optional interlude (9.1b):} the wider agent landscape --- interoperability standards (MCP, A2A), benchmarks, and safety --- before we commit to one tool''s mechanics'
+      new: '\item \textbf{Dated detail (Appendix TA):} the wider landscape --- interoperability standards, frameworks, and product churn --- read on demand'
+    - old: '\textbf{Next (9.2):}'
+      new: '\textbf{Next (9.2, T2a and T2b):}'
+    - old: 'Arc: \textbf{T1 Framing} $\to$ T2 Under the Hood $\to$ T3 Homotopy $\to$ T4 Project Org $\to$ T5 Mistakes/Context $\to$ T6 Wrap.'
+      new: 'Arc: \textbf{9.1 See} $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ 9.5 Run \& Govern.'
+    todo: 'Bridge sentence (v1): "You have seen what agents do and what proper use produced. The question changes from ''what is this?'' to ''how does it actually run, and how do I start?''" + the 9.2 economic twin.'
+
+# =============================================================================
+# 9.2 UNDER THE HOOD
+# =============================================================================
+- key: T2a
+  file: Lec09_T2a_How_an_Agent_Runs.tex
+  subtitle: 'Lecture 9.2a: How an Agent Actually Runs --- Harness, Session, Loop'
+  map: [2, a]
+  owns:
+    - harness/LLM/files, the JSON tool call, the privacy boundary, session-as-list, the twenty-line loop, ReAct
+    - the GDP-by-party worked trace (recorded transcript: labs/Lec09_Agent_Lab/transcripts/)
+  defers:
+    - install, files, commands, permissions, tokens/context mechanics -> T2b; dials, ceilings, dispatch -> T3b
+  items:
+  - merge: [T2-F01, T2b-F01]
+    tier: CORE
+    edits:
+      T2-F01:
+      - old: 'The Map: Act 2 --- The Machine'
+        new: 'Lecture 9 in One Map: How an Agent Runs'
+      - old: '\LecNineMap{2}'
+        new: '\LecNineMap{2}{a}'
+    todo: |-
+      One map frame: T2-F01's lead + \LecNineMap{2}{a}; fold T2b-F01's "corrects three beliefs that are widespread and wrong" into one line pointing to T3b's corrections table; then delete T2b-F01.
+      New route line: three components and one JSON line -> the session is a list -> the GDP trace. Add the 9.2 economic twin.
+
+  - section: 'Three Components and One JSON Line'
+    divider: 'Harness, model, files --- and the loop that joins them'
+  - frame: T2-F02
+    tag: KEEP
+    tier: READ
+  - merge: [T2-F03, T2b-F02]
+    tier: CORE
+    edits:
+      T2-F03:
+      - old: 'Lec07 T3a explained that an LLM can emit structured JSON'
+        new: 'Lec07 T4 explained that an LLM can emit structured JSON'
+      T2b-F02:
+      - old: '(T2''s line):'
+        new: '(the line above):'
+      - old: 'the sub-agent behaviour of T4--T5 all follow.'
+        new: 'the sub-agent behaviour of T3b and T5b--T5c all follow.'
+    todo: One frame -- T2b-F02's three-node diagram above T2-F03's four bullets.
+  - frame: T2-F04
+    tag: KEEP
+    tier: READ
+
+  - section: 'The Session Is a List'
+    divider: 'What a session is, and the loop that drives it'
+  - frame: T2b-F03
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F04
+    tag: KEEP
+    tier: CORE
+  - frame: T2b-F05
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'This is what \texttt{CLAUDE.md} becomes (T4)'
+      new: 'This is what \texttt{CLAUDE.md} becomes (T2b, T5b)'
+  - frame: T2b-F06
+    tag: KEEP
+    tier: LAB
+  - frame: T2b-F07
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F08
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\textbf{T2 wrote: \emph{'
+      new: '\textbf{The JSON frame said: \emph{'
+
+  - section: 'Worked Example --- GDP Growth by Party'
+    divider: 'One real research question, traced message by message'
+  - frame: T2b-F33
+    tag: KEEP
+    tier: CORE
+    todo: 'Review A4: footnote the recorded transcript (date, harness + version, model) once it exists in labs/Lec09_Agent_Lab/transcripts/.'
+  - frame: T2b-F34
+    tag: EDIT
+    tier: CORE
+    todo: 'Review A4: sync the five requests with the recorded run; if the real run differs, the slide changes. Review A2: label the server "LLM (vendor)" rather than one company.'
+  - frame: T2b-F35
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'This is T2''s \emph{initialization}'
+      new: 'This is T2b''s \emph{initialization}'
+    - old: 'T2''s init steps 1--4'
+      new: 'T2b''s init steps 1--4'
+    - old: 'whatever house rules T4 had you write'
+      new: 'whatever house rules T5b has you write'
+    - old: 'it is T2''s permission dial'
+      new: 'it is T2b''s permission dial'
+  - frame: T2b-F36
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Every claim from \S1, \S3--\S4 shows up in that one picture.'
+      new: 'Every claim from the session section shows up in that one picture.'
+    - old: '(\S1)'
+      new: '(above)'
+      all: true
+  - frame: T2b-F37
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F38
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'that is T5''s Context'
+      new: 'that is T5c''s Context'
+  - new: 'Bridge: Put the Loop on Your Own Machine'
+    tier: READ
+    body: |-
+      \textbf{You have watched the loop on the wire, once with one agent and once with three.}
+
+      \vspace{0.25cm}
+
+      \begin{itemize}
+          \item A session is a list the harness re-sends; the agent is the loop, not a place
+          \item Every number an agent hands you should name the tool that produced it
+          \item \textbf{Next (T2b):} put that loop on your own machine --- install it, learn its files and commands, run your first session
+      \end{itemize}
+    todo: Add the 9.2 economic twin (what am I paying for?) in Phase B.
+
+- key: T2b
+  file: Lec09_T2b_Setup_Files_Commands.tex
+  subtitle: 'Lecture 9.2b: Your Setup --- Files, Commands, First Session'
+  map: [2, b]
+  owns:
+    - terminal, install, Git, global vs project files, the harness file mapping (verified, review A2.5)
+    - initialization, three memories, the resolution rule, the twelve commands, modes, keys, permissions
+    - first session, tokens, the context window, compaction mechanics
+  defers:
+    - rung surfaces (/agents, --agent, --agents, -p, --bg) -> T3b; dated install detail -> TA; hooks and settings.json -> T5b
+  items:
+  - new: 'Lecture 9 in One Map: Your Setup'
+    tier: READ
+    body: |-
+      \textbf{This deck puts the loop on your machine: install it, learn its files and commands, and run a first session.}
+
+      \LecNineMap{2}{b}
+
+      \vspace{0.1cm}
+      \footnotesize\textit{Route: terminal, install, and Git $\to$ the files an agent reads $\to$ the control surface $\to$ your first session $\to$ tokens and the context window.}
+
+  - section: 'Terminal, Install, Git'
+    divider: 'The pieces, one install, and the safety net'
+  - frame: T2-F05
+    tag: KEEP
+    tier: READ
+  - frame: T2-F06
+    tag: KEEP
+    tier: READ
+  - frame: T2-F07
+    tag: EDIT
+    tier: LAB
+    edits:
+    - old: '$\to$ T6 Appendix A and the official docs'
+      new: '$\to$ Appendix TA and the official docs'
+    todo: 'Review A2: the three durable steps shown for each tested harness (Claude Code, Gemini CLI, Codex CLI), commands from CLI_FACTS_2026-09.md.'
+  - merge: [T1-F14, T1-F15]
+    tier: CORE
+    todo: 'One frame: the time-machine TikZ from T1-F14 above T1-F15''s risk/benefit columns.'
+  - frame: T1-F16
+    tag: KEEP
+    tier: LAB
+
+  - section: 'Files: Where the Agent Reads From'
+    divider: 'Global versus project, and what loads when you start'
+  - frame: T2-F08
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T4 fills the local layer with research content.'
+      new: 'T5b fills the local layer with research content.'
+  - new: 'Project Files Across Harnesses'
+    tier: CORE
+    todo: |-
+      Review A2.5 (replaces v1's .claude-only tree and TA's mapping table): a verified table from CLI_FACTS_2026-09.md -- instructions file (CLAUDE.md / GEMINI.md / AGENTS.md), skills, custom sub-agents (or "not native -- use rung 3"), settings/policy, memory -- per tested harness, with version and date.
+      Live examples: ROOT/.claude/agents/, labs/Lec09_Agent_Lab/.claude/agents/, demos/M4_olg_5step_demo/.claude/skills/olg-5step/SKILL.md. Draw only paths that exist.
+  - frame: T2-F09
+    tag: KEEP
+    tier: READ
+  - frame: T4-F10
+    tag: MOVE
+    tier: READ
+  - frame: T2c-F12
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Only one of them was yours, and it never ran.'
+      new: 'Only one of them is yours.'
+    - old: |-
+        \footnotesize\textbf{Your six agent files have never run --- not once.} \texttt{.claude/agents/} resolves relative to the directory the session starts \emph{in}: the only such folder here is inside the lab, and that session started at the courses root. \textbf{Where you put the folder decides whether the specialist exists} --- T4's resolution rule for \texttt{CLAUDE.md}, applied to agents.
+      new: |-
+        \footnotesize\textbf{Where you put the folder decides whether the specialist exists.} \texttt{.claude/agents/} resolves relative to the directory the session starts \emph{in} --- the global-vs-local rule above, applied to agents.
+    todo: 'Review A2: the table rows are Claude Code objects; add one line on how the other tested harnesses scope the same thing (from CLI_FACTS).'
+
+  - section: 'The Control Surface'
+    divider: 'Commands, modes, keys, and permissions'
+  - frame: T2-F10
+    tag: KEEP
+    tier: READ
+  - frame: T2-F11
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'the brief that is re-read every session (T4)'
+      new: 'the brief that is re-read every session (T5b)'
+  - frame: T2-F12
+    tag: EDIT
+    tier: READ
+    todo: 'Add one pointer row: "/agents -- inspect which specialists are in scope (T3b)". T2b owns the twelve commands; T3b owns the rung surfaces.'
+  - frame: T2-F13
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Inspect what runs automatically on tool events (T4)'
+      new: 'Inspect what runs automatically on tool events (T5b)'
+  - frame: T2-F14
+    tag: KEEP
+    tier: CORE
+  - new: 'One-Page Cheat Sheet'
+    tier: READ
+    todo: 'Optional (v1 T2b item 17): the commands, modes, keys and permission settings on one page, one column per tested harness, linked to the official docs; every entry from CLI_FACTS_2026-09.md.'
+
+  - section: 'Your First Session'
+    divider: 'A real walkthrough on the fellows roster'
+  - frame: T2-F15
+    tag: KEEP
+    tier: LAB
+  - frame: T2-F16
+    tag: EDIT
+    tier: LAB
+    edits:
+    - old: 'T3 gives the five criteria.'
+      new: 'T5a gives the five plan-grading criteria.'
+  - frame: T2-F17
+    tag: KEEP
+    tier: LAB
+  - frame: T2-F18
+    tag: KEEP
+    tier: READ
+  - frame: T2-F19
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T4 turns this rhythm into a management system.'
+      new: 'T5b turns this rhythm into a management system.'
+
+  - section: 'Budget'
+    divider: 'Tokens, cost, and the context window'
+  - frame: T2-F20
+    tag: KEEP
+    tier: READ
+  - frame: T2-F21
+    tag: KEEP
+    tier: READ
+  - frame: T2-F22
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T5 returns to what this trade-off costs research integrity'
+      new: 'T5c returns to what this trade-off costs research integrity'
+    todo: 'Footnote the /compact <focus> syntax and the ~20-turn heuristic from archive v1 (Context Window Mechanics), tagged dated.'
+  - new: 'Bridge: From Using an Agent to Building One'
+    tier: READ
+    body: |-
+      \textbf{You can install, launch, steer, budget, and read the screen. In the lab folder sit six agent files you have not yet written.}
+
+      \vspace{0.25cm}
+
+      \begin{itemize}
+          \item \textbf{Next (Part 9.3):} build one from scratch (T3a), then learn the three ways to call it (T3b)
+      \end{itemize}
+    todo: Add the 9.3 economic twin (dividing the labour) in Phase B.
+
+# =============================================================================
+# 9.3 BUILD
+# =============================================================================
+- key: T3a
+  file: Lec09_T3a_Build_an_Agent.tex
+  subtitle: 'Lecture 9.3a: Build an Agent From Scratch --- Eight Steps, One Canvas'
+  map: [3, a]
+  owns:
+    - why three agents, the eight steps = the eight-cell canvas (one object), the harness-neutral brief (review A2.2)
+    - tool vs skill vs sub-agent by who reasons, what a skill is (with its folder), plain English vs encoded skill, playbooks
+  defers:
+    - dials, ceilings, isolation, dispatch, the three rungs -> T3b; when skills/agents/rules load -> T5b
+  items:
+  - new: 'Lecture 9 in One Map: Build an Agent'
+    tier: CORE
+    body: |-
+      \textbf{This part answers: how do I build an agent, and how do I call it?}
+
+      \LecNineMap{3}{a}
+
+      \vspace{0.1cm}
+      \footnotesize\textit{Route: why three agents, not one $\to$ the eight steps and the canvas $\to$ tool, skill, sub-agent: where the reasoning lives.}
+    todo: Add the 9.3 economic twin (specialisation by comparative advantage) in Phase B.
+
+  - section: 'Why Three Agents'
+    divider: 'Why the capstone needs three backgrounds --- and the eight steps that build one'
+  - frame: T2b-F09
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F10
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F11
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: '\emph{your} coordination cost (\S3)'
+      new: '\emph{your} coordination cost (T3b)'
+    - old: 'all three inherit your framing (T5)'
+      new: 'all three inherit your framing (T5c)'
+  - frame: T2b-F12
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\textbf{T4 sorted your RA team by'
+      new: '\textbf{T5b sorts your RA team by'
+    - old: 'T4 sorts these files by \emph{when they load}'
+      new: 'T5b sorts these files by \emph{when they load}'
+
+  - section: 'The Eight Steps'
+    divider: 'From a job description to a file you can dispatch'
+  - frame: T2b-F13
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'T3''s six-step ladder builds a model.'
+      new: 'T5a''s six-step ladder builds a model.'
+  - frame: T2b-F14
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\S1''s second moving part'
+      new: 'T2a''s second moving part'
+    todo: Sync the listing with labs/Lec09_Agent_Lab/.claude/agents/code-reviewer.md verbatim.
+  - frame: T2b-F15
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'can read text you did not write (T1b)'
+      new: 'can read text you did not write (T5d)'
+    - old: '\S3 draws it.'
+      new: 'T3b draws it.'
+  - frame: T2b-F16
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Rate limits and context growth are \S3''s subject.'
+      new: 'Rate limits and context growth are T3b''s subject.'
+  - frame: T2b-F17
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F18
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T4''s login-versus-compute boundary'
+      new: 'T5b''s login-versus-compute boundary'
+  - frame: T2b-F19
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F20
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'until both behave (\S4)'
+      new: 'until both behave (T3b)'
+    - old: '\textbf{Blank canvas: in the lab folder.}'
+      new: '\textbf{T4 hands you the blank one.}'
+    todo: |-
+      \href to labs/Lec09_Agent_Lab/AGENT_DESIGN_CANVAS.md (URL repeated in a footnote); sync math-agent listing with the real file.
+      Review A2.2: the canvas compiles to a harness-neutral brief (briefs/<name>.md) -> a Claude Code sub-agent, a skill, or a headless prompt.
+  - frame: T2b-F21
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '{\S1''s four arguments.'
+      new: '{T2a''s four arguments.'
+    - old: '\S3 names these dials and asks how many agents you can run at once, and what binds. \S4 asks who decides to call them. \S5 asks how a skill differs from an agent. \textbf{T2c asks what you actually type}'
+      new: 'T3b names these dials and asks how many agents you can run at once, what binds, and who decides to call them. The next section asks how a skill differs from an agent. \textbf{T3b then asks what you actually type}'
+
+  - section: 'Tool, Skill, Sub-Agent'
+    divider: 'A distinction most write-ups get backwards'
+  - frame: T2b-F29
+    tag: KEEP
+    tier: READ
+  - merge: [T2b-F30, T4-F13]
+    tier: READ
+    edits:
+      T2b-F30:
+      - old: 'as sub-agent dispatch in \S4. T4 taught you \emph{when} skills load'
+        new: 'as sub-agent dispatch in T3b. T5b returns to \emph{when} skills load'
+    todo: 'One frame: T4-F13''s folder tree above T2b-F30''s SKILL.md listing. Review A2: note that the skill format is shared by the tested harnesses (verify in the spike).'
+  - frame: T2b-F31
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: '\textbf{T4 sorted Skills, Agents and Rules by \emph{when they load}.'
+      new: '\textbf{T5b sorts Skills, Agents and Rules by \emph{when they load}.'
+    - old: 'T4''s third category, Rules,'
+      new: 'T5b''s third category, Rules,'
+  - frame: T2b-F32
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'The whole of \S4 and \S5 in one sentence.'
+      new: 'T3b''s dispatch argument and this section, in one sentence.'
+  - frame: T4-F12
+    tag: MOVE
+    tier: READ
+  - frame: T4-F14
+    tag: MOVE
+    tier: READ
+  - new: 'Economist-Authored Skills in the Wild'
+    tier: READ
+    todo: 'From archive v1:1561 (repo URLs at v1:1591, re-verify each): Sant''Anna review-paper / data-analysis, Blattman proposal-write, plus the course''s own Lec10 T2 review-paper skill as example 4.'
+  - new: 'Bridge: From One File to Three Ways of Calling It'
+    tier: READ
+    body: |-
+      \textbf{One agent is one Markdown file with a description that does the work.}
+
+      \vspace{0.25cm}
+
+      \begin{itemize}
+          \item \textbf{Next (T3b):} how do you actually call it --- by description, by name, by script --- and what does a run of ten thousand consist of?
+      \end{itemize}
+
+- key: T3b
+  file: Lec09_T3b_Invoking_Agents.tex
+  subtitle: 'Lecture 9.3b: Invoking Agents --- One, Three, Ten Thousand'
+  map: [3, b]
+  owns:
+    - dials, ceilings, isolation, wirings, the router myth, dispatch evidence
+    - the three rungs and their surfaces (/agents, --agent, --agents, -p, --bg) with one verified line per other harness
+    - four-digit runs (Navier-Stokes as a dated sidebar), the ledger, the corrections table
+  defers:
+    - 13k-call numbers -> Lec10 T6b; reliability under repetition -> T4; four mistakes at scale -> T5c
+  items:
+  - frame: T2c-F01
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Topic 9.2c Agenda'
+      new: 'Lecture 9 in One Map: Invoking Agents'
+    - old: 'T2b''s \S2 ended with three job descriptions committed to a folder. It never said what you type to make one run. This interlude answers that --- and the question it leads to.'
+      new: 'T3a left three job descriptions in a folder. This deck answers what you type to make one run --- and where that leads.'
+    - old: |-
+        \vspace{0.2cm}
+
+        \begin{enumerate}
+          \item \textbf{Three rungs} --- the only three ways to invoke an agent, and what separates them
+          \item \textbf{Ten thousand} --- what a four-digit agent run actually consists of, and what made it bankable
+          \item \textbf{This deck's own ledger} --- the four agents that wrote T2b's \S2, the bill, and the mistakes
+          \item \textbf{Synthesis} --- one question decides the rung
+        \end{enumerate}
+
+        \vspace{0.18cm}
+      new: '\LecNineMap{3}{b}'
+    - old: |-
+        \vspace{0.1cm}
+        {\scriptsize \textit{Reading convention, as in T1b: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report. CLI flags verified against Claude Code 2.1.269, not documentation.}}
+      new: '{\scriptsize \textit{Reading convention (Appendix TA): \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report.}}'
+    todo: Keep the takeaway box ("the number of agents you run is a verification decision"); move the CLI version to the deck's single CLI_FACTS footnote.
+
+  - section: 'Many Agents'
+    divider: 'Creating a set of them --- and what actually limits the number'
+  - frame: T2b-F22
+    tag: KEEP
+    tier: READ
+  - frame: T2b-F23
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T1b priced this out'
+      new: 'T1 priced this out'
+  - frame: T2b-F24
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'T5 shows workers inherit your framing'
+      new: 'T5c shows workers inherit your framing'
+  - frame: T2b-F25
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'is T1b''s orchestrator--worker and what T4''s RA team already is'
+      new: 'is T1''s orchestrator--worker and what T5b''s RA team is'
+    - old: 'exactly the file-driven workflow of T4'
+      new: 'exactly the file-driven workflow of T5b'
+
+  - section: 'Who Decides to Dispatch?'
+    divider: 'The router myth, and what the transcript actually shows'
+  - frame: T2b-F26
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'block from the \S1 loop'
+      new: 'block from T2a''s loop'
+    - old: 'T2 said this for one agent'
+      new: 'T2a said this for one agent'
+    - old: 'Guard: T1b''s ``think-budget routers'''''
+      new: 'Guard: TA''s ``think-budget routers'''''
+  - frame: T2b-F27
+    tag: EDIT
+    tier: READ
+    todo: One CLI version string, footnoted from CLI_FACTS_2026-09.md.
+  - frame: T2b-F28
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T4''s quality gates,'
+      new: 'T5b''s quality gates,'
+
+  - section: 'Three Rungs'
+    divider: 'The only three ways to invoke an agent --- and who chooses in each'
+  - frame: T2c-F02
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'The Question T2b Left Open'
+      new: 'The Question T3a Left Open'
+    - old: 'T2b''s \S3 third ceiling'
+      new: 'the third ceiling above'
+    - old: 'the exhibit T2b''s \S4 argued for but never showed'
+      new: 'the exhibit the router section argued for but never showed'
+  - frame: T2c-F03
+    tag: EDIT
+    tier: LAB
+    edits:
+    - old: 'T2b''s \S4 proved dispatch is an ordinary tool call'
+      new: 'The router section proved dispatch is an ordinary tool call'
+    - old: 'T2b''s \S2 step 4, written by the model'
+      new: 'T3a''s step 4, written by the model'
+    - old: 'T2b''s \S2 step 5'
+      new: 'T3a''s step 5'
+    todo: 'Review A2.5: one verified line for the other tested harnesses (how dispatch or skill activation appears in their transcript, or "not native -- use rung 3").'
+  - frame: T2c-F04
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'the one command T2''s twelve do not list; T2 owns the rest of the surface.'
+      new: 'the one command T2b''s twelve do not list; T2b owns the rest of the surface.'
+    - old: 'T2b''s \S2 step 7 is built'
+      new: 'T3a''s step 7 is built'
+    todo: 'Review A2.5: one verified line for the other tested harnesses.'
+  - frame: T2c-F05
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'claude --bg "audit T2c for unsourced numbers"'
+      new: 'claude --bg "audit T3b for unsourced numbers"'
+    - old: 'T2b''s \S2 step 8, arriving by necessity'
+      new: 'T3a''s step 8, arriving by necessity'
+    - old: 'No \texttt{-\/-max-turns} at the CLI: the ceiling is the agent file''s \texttt{model:} line.'
+      new: 'No per-run turn-cap flag at the CLI: budget through the model, the tool allowlist, and the brief.'
+    todo: 'Review A2.5: headless equivalents for the other tested harnesses (e.g. gemini -p ... -o json), verified.'
+  - frame: T2c-F14
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'T2b''s \S3 already answered that.'
+      new: 'The first section of this deck already answered that.'
+    - old: 'detection matrix (T2b \S2)'
+      new: 'detection matrix (T3a)'
+    - old: 'T2b''s \S3 tells you where the ceiling is.'
+      new: 'The ceilings tell you where the limit is.'
+
+  - section: 'Four-Digit Runs'
+    divider: 'What a four-digit agent run consists of --- and what made it bankable'
+  - frame: T2c-F06
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'an unreleased model, four days old here, and the result is disputed two frames on.'
+      new: 'an unreleased model, and the result is disputed two frames on.'
+    todo: 'Review A4: a dated sidebar, not a hook. Re-verify the claim and the dispute at the freshness gate (Oct 19-20); keep [hype].'
+  - frame: T2c-F07
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T2b''s \S2 step 2, run ten thousand times instead of three --- wired as T2b''s \S3 blackboard'
+      new: 'T3a''s step 2, run ten thousand times instead of three --- wired as the blackboard above'
+  - frame: T2c-F08
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'the sin T1b names'
+      new: 'the sin T4 names'
+  - frame: T2c-F09
+    tag: KEEP
+    tier: READ
+
+  - section: 'The Ledger'
+    divider: 'What four sub-agents cost --- the bill, and the design work'
+  - frame: T2c-F10
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Who Wrote T2b''s \S2, and What It Cost'
+      new: 'The Ledger: What Four Sub-Agents Cost'
+    - old: 'The thirteen frames you read in T2b''s \S2 were not written by one session.'
+      new: 'The thirteen frames of T3a''s eight-step section were not written by one session.'
+    - old: 'That is T2b''s \S3 isolated-context argument'
+      new: 'That is the isolated-context argument above'
+    - old: '(T4 owns the general speed claim)'
+      new: '(T5b owns the general speed claim)'
+  - frame: T2c-F11
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T2b''s \S2 step 4, done four times.'
+      new: 'T3a''s step 4, done four times.'
+    - old: 'with file paths attached (T5)'
+      new: 'with file paths attached (T5c)'
+
+  - section: 'Synthesis'
+    divider: 'Two artifacts: a folder of files, or a loop over processes'
+  - frame: T2b-F39
+    tag: KEEP
+    tier: READ
+  - merge: [T2b-F40, T2c-F15]
+    tier: LAB
+    edits:
+      T2b-F40:
+      - old: 'Run the \S1 loop against a scripted model'
+        new: 'Run T2a''s loop against a scripted model'
+      - old: 'Wire the three patterns from \S3 and measure them'
+        new: 'Wire the three wirings from this deck and measure them'
+      - old: 'T4''s RA team, made real'
+        new: 'T5b''s RA team, made real'
+      - old: 'from your filled canvas (\S2)'
+        new: 'from your filled canvas (T3a)'
+      - old: 'Run the four checks from \S4'
+        new: 'Run the four checks from the router section'
+      - old: '\item Then T2c: dispatch the same task at all three rungs, and script one'
+        new: '\item Then dispatch the same task at all three rungs, and script one'
+      - old: 'T3 returns to method'
+        new: 'T4 comes next, then T5a returns to method'
+      T2c-F15:
+      - old: 'the prompt strings T2b''s \S2 asked for and never gave you'
+        new: 'the prompt strings T3a asked for and never gave you'
+      - old: 'The three briefs from \S3 that should have been files.'
+        new: 'The three briefs from the ledger that should have been files.'
+      - old: 'T3 returns to method'
+        new: 'T4 comes next, then T5a returns to method'
+    todo: |-
+      One bridge (v1): "Everything in Parts 2-3 is one of two artifacts: a folder of Markdown files, or a loop over processes. Part 4 hands you the canvas and fifty minutes: design one for a question of your own, and prove it works."
+      Lab list per review A2: Part B routes by harness (Step 0 setup check).
+
+# =============================================================================
+# 9.4 DESIGN & VALIDATE
+# =============================================================================
+- key: T4
+  file: Lec09_T4_Design_Lab.tex
+  subtitle: 'Lecture 9.4: Design Lab --- Your Agent for an Economics Task'
+  map: [4, '']
+  owns:
+    - the Design Lab protocol, scenarios S1-S4, the rubric, the links
+    - reliability under repetition (pass^k, moved from T1b per review A6.1) as the Validate method
+    - the harness-neutral acceptance test at rung 3 (review A2.3)
+  defers:
+    - benchmark validity (SWE-bench) -> T5d; the eight steps and the canvas -> T3a; the rungs -> T3b
+  items:
+  - new: 'Lecture 9 in One Map: Design Lab'
+    tier: CORE
+    body: |-
+      \textbf{This part answers: can you design an agent for a question of your own --- and prove it works?}
+
+      \LecNineMap{4}{}
+
+      \vspace{0.1cm}
+      \footnotesize\textit{Route: pick a scenario $\to$ fill the canvas $\to$ write the brief and compile it for your harness $\to$ run the detection matrix, three times $\to$ pitch what you measured.}
+    todo: Add the 9.4 economic twin (write the contract, audit the work) in Phase B.
+  - new: 'The Design Lab in One Slide'
+    tier: CORE
+    todo: |-
+      Workflow TikZ (plan v1 section 7.1, amended): pick S1-S3 -> fill the eight-cell canvas (cell 7 plants a bug) -> write briefs/<name>.md -> compile to your harness (sub-agent / skill / headless prompt) -> run scripts/detection_matrix.py k=3 -> narrow the description if rates are wrong -> pitch and validate.
+      About 50 minutes; teams of 2-4 with at least one working harness (Step 0 setup check). Deliverables: canvas, brief, one matrix row with rates, one "surprising cell" sentence.
+  - new: 'Scenario Menu'
+    tier: LAB
+    todo: |-
+      S1 Aiyagari solver audit (guaranteed on both tested harnesses) | S2 a leading question in a new costume (review A6.2: FRED FEDFUNDS + CPI since 2000, "explain how the 2022-23 hikes brought inflation down"; unambiguous planted defects only) | S3 Fellows provenance batch (hook where the harness has hooks, runner gate otherwise) | S4 referee: skill or agent? (brief only).
+      Columns: goal, agents to design, planted defect, data, time. A scenario joins the menu only after it passes on both tested harnesses (review A6.4).
+  - new: 'S1 Brief --- Aiyagari Solver Audit'
+    tier: LAB
+    todo: 'labs/Lec09_Agent_Lab/scenarios/S1_aiyagari_audit/ (points to review_target/ and TERMINAL_WALKTHROUGH Steps 1-8); design a fourth agent (replication-checker) from the canvas.'
+  - new: 'S2 Brief --- A Leading Question in a New Costume'
+    tier: LAB
+    todo: 'Same anatomy as the T2a GDP trace (fact, fact, plot, leading causal verb) on new data; students must recognise the verb without having seen this answer. Instructor debrief lives in instructor/, not in the scenario folder.'
+  - new: 'S3 Brief --- Fellows Provenance Batch'
+    tier: LAB
+    todo: 'provenance-checker (Read/Grep; per-row verdict; never infers gender or birth year -- rule text from T4-F15); 2 of 10 rows lack source_url, 1 row has a gender inferred from a name. Gate: PreToolUse hook on Write in Claude Code; require_source_url.py inside the runner elsewhere (review A2.4, A5).'
+  - new: 'The Blank Canvas, and the Brief It Compiles To'
+    tier: LAB
+    todo: 'Left: T2b-F20''s canvas TikZ with the grey answers removed (\href to AGENT_DESIGN_CANVAS.md). Right: the briefs/<name>.md front matter and its three compilations (review A2.2).'
+  - new: 'Debug the English'
+    tier: LAB
+    todo: 'One prompt the agent should handle, one adjacent prompt it should not; narrow the description until both behave -- measured as a rate over k=3 fresh runs, not one run.'
+  - frame: T1b-F13
+    tag: MOVE
+    tier: CORE
+    todo: |-
+      Review A6.1: this is the Validate method. Reframe for the lab: every "should fire / should stay silent" cell is run k=3 times by the rung-3 runner; report the rate, not the best run.
+      Keep the tau-bench numbers tagged and verified; the "economist translation" stays.
+  - new: 'Pitch and Validate: The Detection Matrix at Rung 3'
+    tier: LAB
+    todo: 'Matrix template as a figure: diagonal shaded, off-diagonal, control row. One fresh headless process per cell (fresh session by construction), k=3; name the surprising cell. Works on every tested harness (review A2.3).'
+  - new: 'From Canvas Cell to File Line'
+    tier: READ
+    todo: 'Arrows from each canvas cell to its line in the brief and in the compiled file: 1 -> description failure clause; 2 -> role prose; 3 -> tools; 4 -> "you will be given"; 5 -> return format; 6 -> model + stop rule; 7 -> the test; 8 -> path.'
+  - new: 'Rubric'
+    tier: LAB
+    todo: 'Review A6.1 rows x three levels: canvas complete; tool allowlist equals blast radius; planted defect caught with file:line; control row silent; rates reported honestly (k=3). No row grades whether auto-dispatch happened to fire once.'
+  - new: 'Links'
+    tier: LAB
+    todo: 'Review A9: one hub URL (the site''s labs page) plus a QR code (qrcode.sty); deep links live in the lab README; file:line references pinned to tag lec09-2026f. Links 404 until the lab is pushed.'
+  - new: 'Bridge: From One Agent to a Whole Project'
+    tier: READ
+    body: |-
+      \textbf{You designed one agent for one task and measured whether it catches what it should.}
+
+      \vspace{0.25cm}
+
+      \begin{itemize}
+          \item \textbf{Next (Part 9.5):} run a whole project with a team of them (T5a--T5b), catch your own mistakes (T5c), and stay inside the red lines (T5d)
+      \end{itemize}
+
+# =============================================================================
+# 9.5 RUN & GOVERN
+# =============================================================================
+- key: T5a
+  file: Lec09_T5a_Homotopy_Method.tex
+  subtitle: 'Lecture 9.5a: Method --- The Homotopy Workflow'
+  map: [5, a]
+  owns:
+    - the six-step pipeline (labels verbatim; Lec10 T8 reproduces them), the 5-pillar spine (capstone scaffold)
+    - restate-the-spec (verbatim sentence), five plan-grading criteria, validation checklist, V0/seed, OLG demo, tool choice, prompt specificity
+  defers:
+    - project objects and gates at project scale -> T5b; the seven tests -> T5d
+  items:
+  - frame: T3-F01
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'The Map: Act 3 --- The Method'
+      new: 'Lecture 9 in One Map: The Homotopy Method'
+    - old: 'This deck answers the third question: how do I structure real work with the machine I just learned to drive?'
+      new: 'This deck opens the last part: how do I structure real work with the agents I just learned to build?'
+    - old: '\LecNineMap{3}'
+      new: '\LecNineMap{5}{a}'
+    todo: Add the 9.5 economic twin (hidden action over months) in Phase B.
+
+  - section: 'The Homotopy Workflow'
+    divider: 'Build from simple to complex, validate, then extend'
+  - frame: T3-F02
+    tag: KEEP
+    tier: READ
+  - frame: T3-F03
+    tag: KEEP
+    tier: CORE
+    todo: The six step labels stay VERBATIM (Lec10 T8 reproduces them).
+  - frame: T3-F04
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '(T2''s step 0, made precise)'
+      new: '(T2b''s pen-and-paper step, made precise)'
+  - frame: T2-F23
+    tag: MOVE
+    tier: CORE
+    edits:
+    - old: 'The 5-Pillar Spine, One More Time'
+      new: 'The 5-Pillar Spine: What You Supply Before Step 2'
+    todo: The capstone cites this frame as "your scaffold on every track" (Capstone_Projects_2026.md:33); keep the five pillar names verbatim.
+  - frame: T3-F05
+    tag: KEEP
+    tier: CORE
+    todo: The restate-the-spec sentence stays VERBATIM (Lec10 T8:540 paraphrases it).
+  - new: 'Effective Prompting: Vague vs.\ Specific'
+    tier: READ
+    todo: From archive v1:1218 -- four vague/specific pairs, each with acceptance criteria.
+  - frame: T3-F06
+    tag: KEEP
+    tier: READ
+  - frame: T3-F07
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Grade the Plan Before Any Code: Five Criteria'
+      new: 'Grade the Plan Before Any Code: Five Plan-Grading Criteria'
+    - old: '\textbf{T2 said: start in plan mode'
+      new: '\textbf{T2b said: start in plan mode'
+  - frame: T3-F08
+    tag: KEEP
+    tier: READ
+  - frame: T3-F09
+    tag: KEEP
+    tier: CORE
+  - frame: T3-F10
+    tag: KEEP
+    tier: READ
+  - frame: T3-F11
+    tag: KEEP
+    tier: READ
+  - frame: T3-F12
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'in T4 it returns as a management principle'
+      new: 'in T5b it returns as a management principle'
+  - frame: T2-F25
+    tag: MOVE
+    tier: READ
+  - frame: T3-F13
+    tag: KEEP
+    tier: READ
+  - frame: T3-F14
+    tag: KEEP
+    tier: READ
+
+  - section: 'OLG Five-Step Demo'
+    divider: 'A concrete homotopy workflow for computational macro'
+  - frame: T3-F15
+    tag: KEEP
+    tier: LAB
+  - frame: T3-F16
+    tag: KEEP
+    tier: LAB
+  - frame: T3-F17
+    tag: EDIT
+    tier: LAB
+    todo: 'Sync the launch order with demos/M4_olg_5step_demo/README.md: pip install -e . -> jupyter notebook demo.ipynb; tests as a separate smoke check.'
+
+  - section: 'Tool Choice'
+    divider: 'Match the tool to the pipeline step'
+  - frame: T3-F18
+    tag: EDIT
+    tier: READ
+    todo: 'Review A2: harness-neutral wording; the terminal-agent column names every tested harness.'
+  - frame: T3-F19
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\textbf{Act 3 disciplined the growth of one artifact.'
+      new: '\textbf{T5a disciplined the growth of one artifact.'
+    - old: '--- Act 4''s answer is a role change'
+      new: '--- T5b''s answer is a role change'
+    - old: 'Arc: T1 Framing $\to$ T2 Under the Hood $\to$ \textbf{T3 Homotopy} $\to$ T4 Project Org $\to$ T5 Mistakes/Context $\to$ T6 Wrap.'
+      new: 'Arc: 9.1 See $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ \textbf{9.5 Run \& Govern}.'
+    todo: 'Bridge (v1): "A real project is a factory: many artifacts, many sessions, a team of the agents you built in Part 9.3. Next: run the whole project (T5b)."'
+  - new: 'Appendix: A Concrete Aiyagari Spec and Pseudocode'
+    tier: READ
+    todo: From archive v1:1010 (Step 1 spec) and v1:1034 (Step 2 pseudocode).
+  - new: 'Appendix: Three Analytical V0 Benchmarks'
+    tier: READ
+    todo: From archive v1:1068 (Step 3 V0 benchmarks).
+
+- key: T5b
+  file: Lec09_T5b_Project_Management.tex
+  subtitle: 'Lecture 9.5b: Management --- Organize the Project, Run the RA Team'
+  map: [5, b]
+  owns:
+    - PM chain, milestones, the division-of-labor contract (and collaborating with AI, review A3), gates, instruments on disk
+    - corrections file, skills/agents/rules by when they load, rules + hooks, settings.json, lifetimes, the RA team, orchestration at scale, HPC
+  defers:
+    - what a skill is -> T3a; why isolation works -> T3b; epistemic limits of the RA team -> T5c
+  items:
+  - frame: T4-F01
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'The Map: Act 4 --- The Management'
+      new: 'Lecture 9 in One Map: Project Management'
+    - old: 'This deck answers the fourth question:'
+      new: 'This deck answers the next question:'
+    - old: '\LecNineMap{4}'
+      new: '\LecNineMap{5}{b}'
+
+  - section: 'The Paradigm Shift'
+    divider: 'From solo coder to project manager'
+  - frame: T4-F02
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: '(T3''s acceptance criteria, now for everything'
+      new: '(T5a''s acceptance criteria, now for everything'
+    - old: '\textbf{T3 disciplined one artifact; T4 runs the factory.}'
+      new: '\textbf{T5a disciplined one artifact; T5b runs the factory.}'
+  - frame: T4-F03
+    tag: KEEP
+    tier: READ
+  - frame: T4-F04
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: 'T2''s table, now with signatures'
+      new: 'T1''s table, now with signatures'
+    todo: 'Review A3: this frame owns division of labor AND "collaborating with AI" (restate, audit, refine; who signs what); pointer to Lec10 T5 (the five-stage collaborator).'
+  - frame: T4-F05
+    tag: KEEP
+    tier: CORE
+
+  - section: 'Project Organization'
+    divider: 'The manager''s instruments: files on disk'
+  - frame: T4-F06
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '(T2: initialization reloads it all)'
+      new: '(T2b: initialization reloads it all)'
+  - frame: T4-F07
+    tag: KEEP
+    tier: READ
+  - frame: T4-F08
+    tag: KEEP
+    tier: READ
+  - frame: T4-F09
+    tag: KEEP
+    tier: READ
+  - new: 'A Corrections File: One Pattern, Any Harness'
+    tier: READ
+    todo: From archive v1:1396 -- vendor-neutral [LEARN:tag] entries with three Aiyagari examples; pointer "mechanics -- T2b's three memories".
+  - frame: T4-F11
+    tag: EDIT
+    tier: READ
+    todo: 'Add one line: "T3a sorted the same objects by who supplies the reasoning; this frame sorts them by when they load."'
+  - frame: T4-F15
+    tag: EDIT
+    tier: READ
+    todo: |-
+      Review A5: a PostToolUse hook fires after the write and cannot reject it. Show PreToolUse on Write (blocks, inspects tool_input.content) and PostToolUse on Edit (validates the file, feeds the error back); wording "blocked / flagged back".
+      Matcher: tool-name regex ("Write|Edit"); keep the slide schematic with a footnote; verify against the installed CLI (CLI_FACTS). One line on the runner gate for harnesses without hooks.
+  - frame: T4-F16
+    tag: KEEP
+    tier: READ
+  - frame: T4-F17
+    tag: KEEP
+    tier: READ
+
+  - section: 'Your RA Team'
+    divider: 'Sub-agents, assignment, and cross-verification'
+  - frame: T4-F18
+    tag: EDIT
+    tier: READ
+    todo: 'Lead: "the three files you wrote in T3a; T3b showed why isolation works --- here is how to manage them".'
+  - frame: T4-F19
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Foreshadow for T5:'
+      new: 'Foreshadow for T5c:'
+  - frame: T4-F20
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T3''s criteria: works, documented, modular'
+      new: 'T5a''s criteria: works, documented, modular'
+
+  - section: 'Remote and HPC'
+    divider: 'When the laptop is no longer the right host'
+  - frame: T4-F21
+    tag: KEEP
+    tier: READ
+  - frame: T4-F22
+    tag: KEEP
+    tier: READ
+  - frame: T4-F23
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Act 4 gave you the management system'
+      new: 'T5b gave you the management system'
+    - old: 'Act 5 answers with three moves'
+      new: 'T5c answers with three moves'
+    - old: 'Arc: T1 Framing $\to$ T2 Under the Hood $\to$ T3 Homotopy $\to$ \textbf{T4 Project Org} $\to$ T5 Mistakes/Context $\to$ T6 Wrap.'
+      new: 'Arc: 9.1 See $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ \textbf{9.5 Run \& Govern}.'
+
+- key: T5c
+  file: Lec09_T5c_Tracing_Mistakes_Context.tex
+  subtitle: 'Lecture 9.5c: Mindset --- Trace Mistakes, Manage Context'
+  map: [5, c]
+  owns:
+    - tracing, operator mistakes, Failure Cases 0-3 (Case 0 points to Lec10 T9), four mistakes at scale
+    - compaction cost, context-as-prior, the Context Dilemma (Lec07 T4 cites the name) and its evidence, the remedy
+  defers:
+    - security, reliability, the seven tests, the job description -> T5d
+  items:
+  - frame: T5-F01
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'The Map: Act 5 --- The Mindset'
+      new: 'Lecture 9 in One Map: Tracing, Mistakes, Context'
+    - old: 'This deck answers the last question: what can go wrong, and what exactly is my job?'
+      new: 'This deck answers: what can go wrong, and how do I see it happening?'
+    - old: '\LecNineMap{5}'
+      new: '\LecNineMap{5}{c}'
+    todo: Route line without the paradigm-shift section (it moved to T5d).
+
+  - section: 'Tracing'
+    divider: 'Audit what the agent actually did'
+  - frame: T5-F02
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'this project climbed T3''s ladder inside T4''s project objects'
+      new: 'this project climbed T5a''s ladder inside T5b''s project objects'
+  - frame: T5-F03
+    tag: KEEP
+    tier: READ
+  - frame: T5-F04
+    tag: KEEP
+    tier: READ
+  - frame: T5-F05
+    tag: KEEP
+    tier: READ
+  - frame: T5-F06
+    tag: KEEP
+    tier: READ
+
+  - section: 'Mistakes and Limits'
+    divider: 'What can go wrong, and how to stay disciplined'
+  - frame: T5-F07
+    tag: KEEP
+    tier: READ
+  - frame: T5-F08
+    tag: KEEP
+    tier: READ
+  - new: 'Failure Case 0: Passed Every Gate, Still Wrong'
+    tier: CORE
+    todo: |-
+      Review A3: two lines pointing to Lec10 T9 (Case 7): the assistant hit every acceptance gate by injecting the classical answer into the objective; "the loophole was in the contract". Do not retell the case.
+      Plus the per-pillar "runs clean, economics wrong" anchors from archive v1:683/708/735/761 (grid VFI where EGM is far faster; too few grid points near the borrowing constraint; Smets-Wouters at the ZLB needs global methods).
+  - frame: T5-F09
+    tag: EDIT
+    tier: CORE
+    todo: |-
+      Review A5: minimum-wage treatment is mostly assigned by state, so "cluster at county" is itself doubtful. Rewrite: cluster at the level of treatment assignment (usually state here; Abadie, Athey, Imbens and Wooldridge 2023).
+      Drop "SEs will be 2--4x too small" or source it.
+  - frame: T5-F10
+    tag: KEEP
+    tier: READ
+  - frame: T5-F11
+    tag: KEEP
+    tier: READ
+  - frame: T2c-F13
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'What Went Wrong --- Four Mistakes, in Order of Interest'
+      new: 'Four Mistakes at Scale, in Order of Interest'
+    - old: '\textbf{The ledger looks efficient. It was not.'
+      new: '\textbf{T3b''s ledger looks efficient. It was not.'
+    todo: Generalize each row beyond the deck-building story (paid twice; paid for a plan nobody waited for; skipped step 8; writing agents serialise).
+
+  - section: 'Managing Context'
+    divider: 'The window, compaction, and the Context Dilemma'
+  - frame: T5-F13
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\textbf{T2 gave the mechanics:'
+      new: '\textbf{T2b gave the mechanics:'
+    - old: 'T2''s rule stands:'
+      new: 'T2b''s rule stands:'
+  - frame: T5-F14
+    tag: KEEP
+    tier: READ
+  - frame: T5-F15
+    tag: KEEP
+    tier: CORE
+  - frame: T5-F16
+    tag: KEEP
+    tier: READ
+  - frame: T5-F17
+    tag: KEEP
+    tier: READ
+  - frame: T5-F18
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: '\textbf{T4 sold sub-agent review for wall-clock time.'
+      new: '\textbf{T5b sold sub-agent review for wall-clock time.'
+  - frame: T5-F19
+    tag: KEEP
+    tier: READ
+  - frame: T5-F22
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Bridge: T6 Wraps, Lec10 Shows the Real Thing'
+      new: 'Bridge: Rules, Tests, and What You Do on Monday'
+    - old: '\textbf{Act 5 named the failure modes and your job. Two things remain this morning.}'
+      new: '\textbf{T5c named the failure modes and showed how to see them. One deck remains before Lecture 10.}'
+    - old: '\item \textbf{T6 wraps the lecture:} the six evaluation criteria, when \emph{not} to use an agent, and the dated install appendix that T2 promised'
+      new: '\item \textbf{T5d closes the lecture:} the red lines, the seven tests, when \emph{not} to use an agent, and your first thirty days'
+    - old: 'Arc: T1 Framing $\to$ T2 Under the Hood $\to$ T3 Homotopy $\to$ T4 Project Org $\to$ \textbf{T5 Mistakes/Context} $\to$ T6 Wrap.'
+      new: 'Arc: 9.1 See $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ \textbf{9.5 Run \& Govern}.'
+    todo: The two Lec10 hand-off bullets move to T5d's closing bridge; T5c's bridge keeps only the T5d pointer (v1 bridge sentence).
+
+- key: T5d
+  file: Lec09_T5d_Governance_Action_Plan.tex
+  subtitle: 'Lecture 9.5d: Governance and Action Plan'
+  map: [5, d]
+  owns:
+    - security and red lines, prompt injection, disclosure and replication packages (review A8.5), chain of custody
+    - benchmark validity, the seven tests, cannot-do (as non-delegable responsibility), when-not, trust-but-verify
+    - what changes, the paradigm shift completed, the job description (map k=0 finale), the 30-day plan, the clean-up prompt, the Lec10 preview
+  defers:
+    - reliability under repetition -> T4; the principal-agent lens -> T1 (evidence: Lec10 T9)
+  items:
+  - new: 'Lecture 9 in One Map: Governance and Action Plan'
+    tier: READ
+    body: |-
+      \textbf{This deck closes the lecture: the rules that keep this safe, the tests that make it research-grade, and what you do next.}
+
+      \LecNineMap{5}{d}
+
+      \vspace{0.1cm}
+      \footnotesize\textit{Route: red lines and disclosure $\to$ measuring your own agent $\to$ limits and judgment $\to$ your first thirty days $\to$ Lecture 10.}
+
+  - section: 'Red Lines'
+    divider: 'Untrusted inputs, restricted data, and disclosure'
+  - frame: T5-F12
+    tag: MOVE
+    tier: CORE
+    todo: 'Review A5: the footnote "AEA disclosure policy (Oct. 2024)" has no source -- verify the current policy text or remove it.'
+  - frame: T1b-F14
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'exactly as T4''s \texttt{settings.json} \texttt{deny} list and T5''s security frame prescribed'
+      new: 'exactly as T5b''s \texttt{settings.json} \texttt{deny} list and the previous frame prescribe'
+  - new: 'Disclosure, Replication Packages, and \texttt{AI\_LOG.md}'
+    tier: READ
+    todo: 'Review A8.5: what to disclose and where (journal and AEA policy text, verified and dated); what a replication package must contain when agents wrote code; tie to the capstone''s AI_LOG.md.'
+  - frame: T1b-F15
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: '\textbf{Ties to T6.} This is the same six-criteria discipline'
+      new: '\textbf{Ties to the seven tests below.} This is the same discipline'
+
+  - section: 'Measuring Your Own Agent'
+    divider: 'A headline number is not a measurement until you know its validity'
+  - frame: T1b-F12
+    tag: EDIT
+    tier: READ
+    todo: 'Reframe the lead for T5d (benchmark validity, the course''s measurement theme); numbers [hype]-tagged and re-verified; reliability under repetition now lives in T4.'
+
+  - section: 'Limits and Judgment'
+    divider: 'What the workflow changes, and what remains human'
+  - merge: [T1-F13, T6-F06]
+    tier: CORE
+    todo: 'Seven Tests for Any AI-Assisted Research Output: correctness/verifiability, reproducibility, auditability, privacy boundary, cost, speed, skill investment. OWNER; distinct by name from T5a''s five plan-grading criteria.'
+  - frame: T6-F07
+    tag: EDIT
+    tier: READ
+    todo: 'Review A5: reframe as non-delegable responsibility (the researcher bears the residual claim), not "categorically outside the system"; compatible with HA-Ramsey''s AI-surfaced discoveries.'
+  - frame: T6-F08
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'T5''s security workarounds apply'
+      new: 'the red-lines workarounds apply'
+  - frame: T6-F09
+    tag: KEEP
+    tier: READ
+  - frame: T6-F10
+    tag: KEEP
+    tier: READ
+  - frame: T5-F20
+    tag: MOVE
+    tier: READ
+
+  - section: 'Action Plan'
+    divider: 'Your first thirty days'
+  - new: 'Your First 30 Days'
+    tier: CORE
+    todo: 'Four-week strip: week 1 Git + instructions file + first session (T2b); week 2 first homotopy ladder with a benchmark (T5a); week 3 first agent from the canvas + detection matrix (T3a/T4); week 4 first scripted rung-3 run + audit + AI_LOG.md (T3b/T5c); mapped to capstone milestones M1/M2; harness-neutral.'
+  - new: 'Your First Exercise: Clean Up Old Code'
+    tier: READ
+    todo: From archive v1:2417 -- the verbatim seven-line prompt (v1:2426-2435) with its rationale.
+  - frame: T6-F12
+    tag: EDIT
+    tier: READ
+    todo: Keep the paraphrase; point to the verbatim prompt on the previous frame.
+
+  - section: 'Next --- Lecture 10'
+    divider: 'From workflow logic to concrete case studies'
+  - frame: T6-F02
+    tag: MOVE
+    tier: READ
+    todo: Include Case 7 (Lec10 T9) among the patterns.
+  - frame: T6-F03
+    tag: MOVE
+    tier: READ
+  - frame: T6-F04
+    tag: EDIT
+    tier: READ
+    todo: 'Review A5: rewrite without IV vocabulary ("what role does the agent''s output play in your inference?"), or cut.'
+  - frame: T6-F05
+    tag: MOVE
+    tier: READ
+  - frame: T5-F21
+    tag: EDIT
+    tier: CORE
+    edits:
+    - old: '(Acts 1--2)'
+      new: '(Parts 9.1--9.2)'
+    - old: '(Acts 3--4)'
+      new: '(Parts 9.3--9.5)'
+    - old: '\LecNineMap{0}'
+      new: '\LecNineMap{0}{}'
+    todo: |-
+      The all-complete map is the finale (review A9); fold in T6-F11's epigraph ("Agents can lay bricks quickly. You still design the structure.") in the takeaway.
+      Rewrite the three-question sentence to match the map's bands: how it works (9.1-9.2), how to build and use it (9.3-9.4), your role (9.5, where the homotopy method and the managed project now live).
+  - new: 'Bridge: Lecture 10 Shows the Artifacts'
+    tier: CORE
+    todo: |-
+      v1 bridge + T5-F22's hand-off bullets: "Lecture 9 explained the logic; Lecture 10 shows the artifacts. You saw the fellows workflow --- Lec10 T4 shows the findings and Exercise B gives you your own batch; you saw HA-Ramsey's contract and milestones --- Lec10 T8 shows the discoveries."
+      Close on Lec10 T9: "the agent didn't break the rules --- it followed them; the loophole was in the contract" (review A3).
+
+# =============================================================================
+# Appendix
+# =============================================================================
+- key: TA
+  file: Lec09_TA_Appendix_Landscape.tex
+  subtitle: 'Lecture 9 Appendix: The Landscape (Dated), Setup Details, References'
+  map: null
+  owns:
+    - the interoperability stack (MCP and A2A explained only here), frameworks, reasoning models, scheduled runtimes, computer use
+    - dated install notes per harness, keybindings and templates, dated comparisons (incl. model-specific task horizons), resources, Context Dilemma references
+  defers:
+    - the harness file mapping -> T2b (review A2.5)
+  items:
+  - frame: T1b-F01
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'Topic 9.1b Agenda'
+      new: 'What This Appendix Holds'
+    - old: 'T1 framed the terminal-agent workflow. This interlude widens the lens to the broader agentic-AI landscape an economist now operates inside.'
+      new: 'Everything in this appendix is dated: re-check it before teaching. The main decks point here instead of repeating product facts.'
+    todo: Replace the agenda list with the appendix contents; keep the [solid]/[hype] reading convention.
+
+  - section: 'The Landscape (Dated)'
+    divider: 'Compete on models, cooperate on plumbing --- as of September 2026'
+  - frame: T1b-F02
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F03
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F05
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F08
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F10
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F11
+    tag: KEEP
+    tier: READ
+  - frame: T1b-F16
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'the terminal-agent workflow of T1--T6'
+      new: 'the terminal-agent workflow of T1--T5d'
+    - old: 'Orchestration & T4''s sub-agent review'
+      new: 'Orchestration & T5b''s sub-agent review'
+
+  - section: 'Setup Details'
+    divider: 'Dated install notes, keys, and templates'
+  - frame: T6-F13
+    tag: EDIT
+    tier: READ
+    todo: 'Review A2: dated install notes for each tested harness (Claude Code, Gemini CLI, Codex CLI), from CLI_FACTS_2026-09.md.'
+  - frame: T6-F14
+    tag: EDIT
+    tier: READ
+    todo: 'Review A2.6: point to the lab''s Step 0 setup check, which routes each student by harness.'
+  - frame: T6-F15
+    tag: KEEP
+    tier: READ
+  - frame: T6-F16
+    tag: EDIT
+    tier: READ
+    edits:
+    - old: 'As of April 2026, examples'
+      new: 'As of September 2026, examples'
+    todo: 'Re-verify every entry; add the model-specific task horizons moved out of T1 (review A5).'
+
+  - section: 'Resources'
+    divider: 'Docs, repositories, and references'
+  - new: 'Resources'
+    tier: READ
+    todo: 'Official docs for each tested harness; Sant''Anna and Blattman skill repositories; Goldsmith-Pinkham''s guides; METR; OWASP agentic Top-10; CORE-Bench; the lab.'
+  - frame: T6-F17
+    tag: KEEP
+    tier: READ
+
+cut:
+  T1b-F07: 'Context Engineering Displaced Prompt Engineering -- duplicates T2-F21/F22 (T2b) and T2b-F24 (T3b)'
+  T2-F26: 'Bridge: The Machine Needs a Method -- replaced by the new part bridges'
+  T6-F01: 'Topic 9.6 Agenda -- map frames replace agendas'
+  T6-F11: 'You Are the Research Architect -- epigraph absorbed into T5d''s job-description frame'

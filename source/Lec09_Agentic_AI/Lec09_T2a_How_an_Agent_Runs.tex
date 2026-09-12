@@ -1,0 +1,678 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.2a
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: harness/LLM/files, the JSON tool call, the privacy boundary, session-as-list, the twenty-line loop, ReAct
+%% Owns: {'the GDP-by-party worked trace (recorded transcript': 'labs/Lec09_Agent_Lab/transcripts/)'}
+%% Defers: install, files, commands, permissions, tokens/context mechanics -> T2b; dials, ceilings, dispatch -> T3b
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.2a: How an Agent Actually Runs --- Harness, Session, Loop}
+
+\begin{document}
+
+\makebeamertitle
+
+% ---- T2-F01 · MERGE-PENDING(T2-F01+T2b-F01) · TIER: CORE · from T2:31
+% TODO(Phase B): One map frame: T2-F01's lead + \LecNineMap{2}{a}; fold T2b-F01's "corrects three beliefs that are widespread and wrong" into one line pointing to T3b's corrections table; then delete T2b-F01.
+% TODO(Phase B): New route line: three components and one JSON line -> the session is a list -> the GDP trace. Add the 9.2 economic twin.
+\begin{frame}{Lecture 9 in One Map: How an Agent Runs}
+\textbf{This deck answers the second question: how does it actually work, and how do I start?}
+
+\LecNineMap{2}{a}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: the three physical components and the tool-call loop $\to$ install and initialize $\to$ the shape of the CLI $\to$ your first session (on the fellows roster) $\to$ tokens, the context window, and the pillars that keep you honest.}
+\end{frame}
+
+% ---- T2b-F01 · MERGE-PENDING(T2-F01+T2b-F01) · TIER: CORE · from T2b:36
+\begin{frame}{Topic 9.2b Agenda}
+\textbf{T2 opened the hood on one agent. This interlude answers the six questions students actually ask once they have run a session --- and corrects three beliefs that are widespread and wrong.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+  \item \textbf{One agent, written out} --- what a ``session'' physically is, and the loop in twenty lines of Python
+  \item \textbf{Three backgrounds, three agents} --- the eight steps that turn a job description into a file you can dispatch
+  \item \textbf{Many agents} --- how you create a \emph{set} of them, and what actually limits the number
+  \item \textbf{Who decides to dispatch?} --- the router myth, and what really happens
+  \item \textbf{Agent vs.\ skill} --- a distinction most write-ups get backwards
+  \item \textbf{Synthesis} --- and a lab where you design and dispatch your own agents
+\end{enumerate}
+
+\vspace{0.18cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Why a separate deck.} T1b surveyed the \emph{landscape} of multi-agent systems; T4 taught you to \emph{use} sub-agents. Neither showed the machinery, and neither had you \emph{build} one. Everything here is checkable on your own machine --- and the lab makes you check it.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Reading convention, as in T1b: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report.}}
+\end{frame}
+
+
+%=============================================================================
+\section{Three Components and One JSON Line}
+%===========================================================
+
+\sectiondivider{Three Components and One JSON Line}{Harness, model, files --- and the loop that joins them}
+
+% ---- T2-F02 · KEEP · TIER: READ · from T2:46
+\begin{frame}{Three Components: Harness, LLM, Your Files}
+
+A terminal agent has three physically distinct parts --- the same anatomy in Claude Code, Codex CLI, Gemini CLI, or Aider:
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{enumerate}
+    \item \textbf{The Harness} (lives on your machine)\\
+    \small CLI software you install. Reads your files, runs shell commands, manages the conversation loop.
+
+    \vspace{0.2cm}
+
+    \item \textbf{The LLM} (lives on the provider's servers)\\
+    \small Every message is bundled with conversation history and sent via HTTPS to the API. The ``thinking'' happens in the cloud.
+
+    \vspace{0.2cm}
+
+    \item \textbf{Your Files} (live on your machine)\\
+    \small Python scripts, data CSVs, LaTeX---all on your disk. Code executes on your hardware with your packages.
+\end{enumerate}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    macbox/.style={rectangle, draw=blue!60, fill=blue!8, rounded corners,
+                   minimum width=3.2cm, minimum height=1.0cm,
+                   text width=3.0cm, align=center, font=\small},
+    cloudbox/.style={rectangle, draw=orange!70, fill=orange!10, rounded corners,
+                     minimum width=3.2cm, minimum height=1.0cm,
+                     text width=3.0cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick, gray}
+]
+    \node[macbox] (harness) {Harness + Files\\{\footnotesize Your machine}};
+    \node[cloudbox, below=1.4cm of harness] (llm) {LLM\\{\footnotesize Anthropic API}};
+    \draw[arrow, bend left=15] (harness) to node[right,font=\tiny] {prompt + context} (llm);
+    \draw[arrow, bend left=15] (llm) to node[left,font=\tiny] {tool calls + text} (harness);
+\end{tikzpicture}
+\end{center}
+\vspace{0.15cm}
+\footnotesize
+\textbf{Key:} code can run locally and many project files stay on your machine. That does \textit{not} mean the whole workflow is automatically private.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- T2-F03 · MERGE-PENDING(T2-F03+T2b-F02) · TIER: CORE · from T2:93
+% TODO(Phase B): One frame -- T2b-F02's three-node diagram above T2-F03's four bullets.
+\begin{frame}[fragile]{The Loop in Machine Language: JSON Tool Calls}
+\textbf{Lec07 T4 explained that an LLM can emit structured JSON via schema-constrained decoding. In a terminal agent, every tool call uses that mechanism.}
+
+\textbf{Example.} When the agent decides to read a file, it emits:
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+{"tool": "Read", "args": {"file_path": "fellows_seed.csv"}}
+\end{lstlisting}
+
+The harness parses the JSON, executes \texttt{Read}, and feeds the file content back as the next message; the agent reads it and decides the next action.
+
+\begin{itemize}
+    \item \textbf{Loop.} Model output (JSON) $\rightarrow$ harness execution $\rightarrow$ tool result $\rightarrow$ next model turn. Continues until the model emits a ``done'' signal or hits a stop condition.
+    \item \textbf{Schema is the contract.} Each tool advertises an argument schema; outputs that fail the schema are rejected.
+    \item \textbf{Same brain.} There is no separate ``planner'' --- the same transformer that writes code also decides to call tools.
+    \item \textbf{Key implication.} Every action the agent takes is a \emph{next-token prediction} constrained by the available tool schema.
+\end{itemize}
+\end{frame}
+
+% ---- T2b-F02 · MERGE-PENDING(T2-F03+T2b-F02) · TIER: CORE · from T2b:66
+\begin{frame}{From One JSON Line to a Running Loop}
+\textbf{When an agent wants to read a file, it does not read the file. It \emph{writes a request} --- one line of JSON --- and something else does the reading.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.78,
+    b/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+              minimum width=2.6cm, minimum height=0.95cm, text width=2.45cm, align=center},
+    m/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+              minimum width=2.6cm, minimum height=0.95cm, text width=2.45cm, align=center},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}]
+    \node[m] (llm)  at (0,0)    {\textbf{The model}\\ (on Anthropic's servers)};
+    \node[b] (harn) at (4.6,0)  {\textbf{The harness}\\ Claude Code, on your laptop};
+    \node[b] (disk) at (9.2,0)  {\textbf{Your disk}\\ \texttt{fellows\_seed.csv}};
+    \draw[arr] (llm) -- node[above, font=\tiny, align=center] {\textbf{writes} this JSON} (harn);
+    \draw[arr] (harn) -- node[above, font=\tiny] {\textbf{runs} it} (disk);
+    \draw[arr] (disk) to[bend left=28] node[below, font=\tiny] {file contents go back to the model} (llm);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{What the model emits} (the line above):
+
+\vspace{0.08cm}
+{\ttfamily\scriptsize \{"tool": "Read",\\ \phantom{x}"args": \{"file\_path": "\ldots"\}\}}
+
+\vspace{0.1cm}
+{\scriptsize It is \emph{text the model generated}, in a shape you told it to use. The model cannot touch your disk; the harness can.}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{conceptbox}
+\footnotesize
+\textbf{The naive mental model.} ``I open a session, the model remembers me, and somewhere a dispatcher assigns work to specialists.''
+
+\vspace{0.12cm}
+Every clause is wrong. This deck replaces it --- and the cost model, the context limits, and the sub-agent behaviour of T3b and T5b--T5c all follow.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Answered next:} if nothing is stored, what is a ``session'' --- and where is ``the agent''?}
+\end{frame}
+
+% ---- T2-F04 · KEEP · TIER: READ · from T2:111
+\begin{frame}{Privacy Boundary: Local Execution Is Not the Same as Local Processing}
+\begin{itemize}
+    \item code may execute locally on your machine
+    \item many project files may stay on disk locally
+    \item if file contents, prompts, or tool outputs are sent back in the conversation, those contents may still traverse the network
+    \item only a fully local or institutionally private deployment changes that boundary
+\end{itemize}
+
+\vspace{0.25cm}
+\textbf{Practical rule:} running code locally does not make it safe to put restricted data into the conversation --- treat everything you type or attach as leaving your machine.
+\end{frame}
+
+
+%=============================================================================
+\section{The Session Is a List}
+%===========================================================
+
+\sectiondivider{The Session Is a List}{What a session is, and the loop that drives it}
+
+% ---- T2b-F03 · KEEP · TIER: READ · from T2b:114
+\begin{frame}{First, the Vocabulary: Who Is Speaking?}
+\textbf{Every message carries a \texttt{role} label saying who produced it. There are three things you will see, and one is misleadingly named.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{2.4cm}|p{3.4cm}|p{4.8cm}|}
+\hline
+\textbf{Label} & \textbf{Who actually wrote it} & \textbf{Example} \\ \hline
+\texttt{"user"} & \textbf{you} & ``Solve the model and report $r$.'' \\ \hline
+\texttt{"assistant"} & \textbf{the LLM} --- Claude itself & the JSON tool request on the last slide \\ \hline
+\texttt{"user"}, containing a \texttt{tool\_result} & \textbf{your harness}, reporting what a tool returned & the contents of \texttt{fellows\_seed.csv} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{The naming trap.} ``Assistant'' is simply the API's word for \emph{the model's own turn} --- it is not a separate helper program. And tool results are labelled \texttt{"user"} even though you did not type them: the API has only two speakers, so anything sent \emph{to} the model is labelled \texttt{"user"}, whoever produced it. Read \texttt{"user"} as ``input to the model'', not as ``the human''.
+\end{cautionbox}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Why it matters:} \texttt{assistant} means \emph{the model}; tool output re-enters as \texttt{user}. That is all the vocabulary this deck needs.}
+\end{frame}
+
+% ---- T2b-F04 · KEEP · TIER: CORE · from T2b:141
+\begin{frame}{The Session Is a List, Not a Connection}
+\textbf{The API is stateless. Each turn is a \emph{separate} request that carries the entire conversation so far --- the model remembers nothing between calls.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    msg/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+                minimum width=2.5cm, minimum height=0.42cm, font=\tiny, align=center},
+    new/.style={rectangle, draw=RedTitle!75, fill=blue!10, rounded corners,
+                minimum width=2.5cm, minimum height=0.42cm, font=\tiny, align=center},
+    hd/.style={font=\scriptsize\bfseries},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!65}
+]
+    \node[hd] at (0,1.15) {Turn 1};
+    \node[new] (a1) at (0,0.6) {user: ``solve it''};
+    \node[draw=gray!45, dashed, fit=(a1), inner sep=2pt] {};
+
+    \node[hd] at (3.6,1.15) {Turn 2};
+    \node[msg] (b1) at (3.6,0.6) {user: ``solve it''};
+    \node[msg] (b2) at (3.6,0.12) {assistant: tool\_use};
+    \node[new] (b3) at (3.6,-0.36) {user: tool\_result};
+    \node[draw=gray!45, dashed, fit=(b1)(b3), inner sep=2pt] {};
+
+    \node[hd] at (7.2,1.15) {Turn 3};
+    \node[msg] (c1) at (7.2,0.6) {user: ``solve it''};
+    \node[msg] (c2) at (7.2,0.12) {assistant: tool\_use};
+    \node[msg] (c3) at (7.2,-0.36) {user: tool\_result};
+    \node[msg] (c4) at (7.2,-0.84) {assistant: tool\_use};
+    \node[new] (c5) at (7.2,-1.32) {user: tool\_result};
+    \node[draw=gray!45, dashed, fit=(c1)(c5), inner sep=2pt] {};
+
+    \draw[arr] (1.35,0.1) -- (2.25,0.1);
+    \draw[arr] (4.95,-0.1) -- (5.85,-0.1);
+
+    \node[font=\tiny, gray!75, align=center] at (1.8,-0.35) {new request,\\\emph{whole list again}};
+    \node[font=\tiny, gray!75, align=center] at (5.4,-0.55) {new request,\\\emph{whole list again}};
+
+    \node[font=\scriptsize, align=center] at (10.2,0.0)
+        {\textbf{Blue $=$ the only}\\\textbf{new bytes}\\[3pt]
+         Grey $=$ re-sent\\verbatim, and\\re-charged};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{itemize}\footnotesize
+    \item \textbf{``Re-send everything'' is literal:} turn 3 is a fresh request carrying turns 1--3 in full
+    \item No open connection, no server-side memory of you
+    \item ``Context window full'' means \emph{this list} outgrew the limit
+    \item You are billed for the whole list each turn
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{Where the list starts and stops.} \texttt{/clear} does exactly one thing: it throws the list away and starts an empty one. Compaction replaces the list with a summary of itself. Both are list operations --- there is no ``connection'' to reset.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- T2b-F05 · EDIT · TIER: READ · from T2b:204
+\begin{frame}{Four Moving Parts, One Function Call}
+\textbf{An agent is not a service you connect to. It is four arguments you assemble and send.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{1.9cm}|p{3.4cm}|p{5.4cm}|}
+\hline
+\textbf{Argument} & \textbf{What it is} & \textbf{Concretely} \\ \hline
+\texttt{model} & \textbf{which LLM} to send to & the string \texttt{"claude-opus-5"} --- just a name; you are picking a brain \\ \hline
+\texttt{system} & the \textbf{standing instructions}: role, rules, style, read \emph{before} the conversation & ``You are a computational macroeconomist. Never invent data.'' This is what \texttt{CLAUDE.md} becomes (T2b, T5b) \\ \hline
+\texttt{tools} & the \textbf{menu of actions} --- name, description, argument schema. \emph{Descriptions only; no code is sent} & ``\texttt{Read}: read a file. Arguments: \texttt{file\_path} (string).'' The model picks from this menu \\ \hline
+\texttt{messages} & the \textbf{conversation so far} & every \texttt{user} / \texttt{assistant} / \texttt{tool\_result} turn, in order \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{What comes back:} ordinary text, or \texttt{tool\_use} blocks --- the model asking you to run something from the menu. Change \texttt{system} and \texttt{tools} and you have a \emph{different agent}; there is no ``agent object'' to create or shut down.}
+\end{frame}
+
+% ---- T2b-F06 · KEEP · TIER: LAB · from T2b:226
+\begin{frame}[fragile]{The Loop in Twenty Lines --- Written by You, Once}
+\textbf{You write this loop once. The model never writes or runs it --- it only supplies the replies the loop reads.}
+
+\vspace{0.04cm}
+
+\begin{lstlisting}[style=pythonstyle,basicstyle=\ttfamily\fontsize{5.4}{6.2}\selectfont]
+messages = [{"role": "user", "content": "Solve the model and report r."}]
+
+while True:
+    resp = client.messages.create(
+        model="claude-opus-5",
+        max_tokens=16000,
+        system="You are a computational macroeconomist.",
+        tools=TOOLS,                      # schemas, not functions
+        messages=messages,                # the whole list, every time
+    )
+    if resp.stop_reason != "tool_use":    # model is done talking
+        break
+    messages.append({"role": "assistant", "content": resp.content})
+
+    results = []
+    for b in resp.content:                # may be SEVERAL tool calls
+        if b.type == "tool_use":
+            results.append({"type": "tool_result",
+                            "tool_use_id": b.id,      # must match
+                            "content": run_tool(b.name, b.input)})
+    messages.append({"role": "user", "content": results})
+\end{lstlisting}
+
+\vspace{0.02cm}
+{\scriptsize\textbf{Not automatic:} this file --- a person wrote it. \textbf{Automatic:} \emph{which} tool, \emph{which} arguments, when to stop --- chosen by the model inside \texttt{create()}, line 4. \textbf{Line 9 with line 21:} the list only grows and is re-sent whole every pass.}
+\end{frame}
+
+% ---- T2b-F07 · KEEP · TIER: READ · from T2b:259
+\begin{frame}{ReAct, Named --- and Where the Textbook Diagram Is Now Dated}
+\textbf{The loop you just read has a name in the literature: ReAct --- reason, act, observe, repeat \textnormal{(Yao et al., 2022)}.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    st/.style={rectangle, draw=RedTitle!65, fill=blue!6, rounded corners,
+               minimum width=2.3cm, minimum height=0.62cm, font=\scriptsize, align=center},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}
+]
+    \node[st] (r) at (0,1.5)    {\textbf{Reason}};
+    \node[st] (a) at (2.1,0.0)  {\textbf{Act}};
+    \node[st] (o) at (0,-1.5)   {\textbf{Observe}};
+    \node[st] (d) at (-2.1,0.0) {\textbf{Done?}};
+
+    \draw[arr] (r) to[bend left=22] node[font=\tiny, above right=-1pt] {line 4} (a);
+    \draw[arr] (a) to[bend left=22] node[font=\tiny, below right=-1pt] {line 20} (o);
+    \draw[arr] (o) to[bend left=22] node[font=\tiny, below left=-1pt] {line 21} (d);
+    \draw[arr] (d) to[bend left=22] node[font=\tiny, above left=-1pt] {line 11} (r);
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}\footnotesize
+    \item \textbf{Reason} $=$ the model's turn (line 4)
+    \item \textbf{Act} $=$ your harness runs the tool (line 20)
+    \item \textbf{Observe} $=$ the \texttt{tool\_result} goes back (line 21)
+    \item \textbf{Done?} $=$ the \texttt{stop\_reason} test (line 11)
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Where the 2022 picture is dated.} The original ReAct prompted the model to emit literal \texttt{Thought:} / \texttt{Action:} text that a parser scraped. Current models emit \emph{structured} \texttt{tool\_use} blocks and interleave reasoning with tool calls rather than strictly alternating. \textbf{Treat ReAct as the ancestor of the loop, not as its wire format} --- if you implement the 2022 string-parsing version today you are rebuilding something the API already gives you typed.
+\end{cautionbox}
+\end{frame}
+
+% ---- T2b-F08 · EDIT · TIER: READ · from T2b:301
+\begin{frame}{So Where Does the Agent Live?}
+\textbf{The JSON frame said: \emph{``the agent reads it and decides the next action.''} That is convenient shorthand. Taken literally it is misleading --- no single place contains the agent.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.92,
+    loc/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=3.5cm, minimum height=1.75cm, text width=3.35cm, align=center},
+    hd/.style={font=\scriptsize\bfseries}]
+    \node[hd] at (0,1.15)   {Your laptop};
+    \node[loc] at (0,0)     {the \textbf{harness}: the loop\\ the \textbf{tool code}\\ \textbf{the list}, in memory};
+    \node[hd] at (4.5,1.15) {The wire};
+    \node[loc, draw=RedTitle!60, fill=blue!5] at (4.5,0)
+        {one \textbf{HTTPS request}\\ per turn, carrying\\ the \emph{whole} list};
+    \node[hd] at (9.0,1.15) {Anthropic's servers};
+    \node[loc, draw=green!45!black, fill=green!5] at (9.0,0)
+        {the \textbf{model weights}\\ \emph{stateless} --- keeps\\ nothing between calls};
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!70] (1.85,0.3) -- (2.7,0.3);
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!70] (6.3,-0.3) -- (7.2,-0.3);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The agent is the loop, not a location.} ``The agent'' names a \emph{behaviour} that appears when a stateless model is driven by a stateful loop. Delete the loop and there is no agent --- only a model that answers one question. Read T2's sentence as: \emph{the harness appended the tool result to the list, and the next request carried that list to the model.}
+\end{takeawaybox}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Why this is the practical frame:} it tells you where each cost and limit lives --- tokens and the context window on the \emph{wire and the server}, tool permissions and your data on \emph{your laptop} (T2's privacy boundary), and the memory in a list \emph{you} own and can clear.}
+\end{frame}
+
+
+%=============================================================================
+\section{Worked Example --- GDP Growth by Party}
+%===========================================================
+
+\sectiondivider{Worked Example --- GDP Growth by Party}{One real research question, traced message by message}
+
+% ---- T2b-F33 · KEEP · TIER: CORE · from T2b:1371
+% TODO(Phase B): Review A4: footnote the recorded transcript (date, harness + version, model) once it exists in labs/Lec09_Agent_Lab/transcripts/.
+\begin{frame}{The Task --- and the Trap Inside It}
+\textbf{One prompt, typed once:}
+
+\vspace{0.12cm}
+\begin{conceptbox}
+\footnotesize\textit{``Get US real GDP growth since 2000. Get which party held the White House over the same period. Then plot and \textbf{rationalize how party affiliation affects GDP growth}.''}
+\end{conceptbox}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{Three jobs, not one}
+\begin{enumerate}\footnotesize
+    \item fetch a macro series (a \emph{fact})
+    \item build a party timeline (a \emph{fact})
+    \item plot it (\emph{mechanical})
+    \item explain the relationship (\emph{a causal claim})
+\end{enumerate}
+
+\vspace{0.1cm}
+{\scriptsize Steps 1--3 an agent can do. Step 4 is where the research is --- and where the prompt is booby-trapped.}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{``Rationalize'' is a leading verb.} It presupposes an effect and asks for a justification. A compliant model will supply one. Watch, in the trace that follows, the exact turn where a defensible data task turns into an indefensible causal claim --- and notice that nothing in the machinery stops it.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\footnotesize\textbf{A chat model with no tools fails this instantly and invisibly}: it will recite GDP numbers from memory. They will look right. Some will be wrong, and none will be checkable.
+\end{frame}
+
+% ---- T2b-F34 · EDIT · TIER: CORE · from T2b:1405
+% TODO(Phase B): Review A4: sync the five requests with the recorded run; if the real run differs, the slide changes. Review A2: label the server "LLM (vendor)" rather than one company.
+\begin{frame}{One Agent: Every Message That Crosses the Wire}
+\textbf{Five requests. Each carries the \emph{entire} list built so far.}
+
+\vspace{0.02cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.80,
+    ln/.style={draw=black!35, dashed},
+    hd/.style={font=\scriptsize\bfseries, align=center},
+    a/.style={-{Stealth[length=1.6mm]}, thick},
+    loc/.style={a, gray!75},
+    wire/.style={a, RedTitle!75}]
+    \node[hd] (u) at (0,0.55)   {You};
+    \node[hd] (h) at (4.3,0.55) {Harness\\ \textnormal{\tiny(your laptop)}};
+    \node[hd] (l) at (9.6,0.55) {LLM\\ \textnormal{\tiny(Anthropic)}};
+    \draw[ln] (0,0.1) -- (0,-6.5);
+    \draw[ln] (4.3,0.1) -- (4.3,-6.5);
+    \draw[ln] (9.6,0.1) -- (9.6,-6.5);
+
+    \draw[loc] (0,-0.25) -- node[above]{the prompt} (4.3,-0.25);
+    \draw[wire] (4.3,-0.7) -- node[above]{\textbf{req 1} = system + tools + [prompt]} (9.6,-0.7);
+    \draw[wire] (9.6,-1.15) -- node[above]{\texttt{tool\_use}: Bash \emph{fetch GDP series}} (4.3,-1.15);
+    \draw[loc] (4.3,-1.6) -- node[above, xshift=2mm]{runs it locally} (3.0,-1.6);
+    \draw[wire] (4.3,-2.05) -- node[above]{\textbf{req 2} = list + \texttt{tool\_result}(100 rows)} (9.6,-2.05);
+    \draw[wire, orange!80!black] (9.6,-2.5) -- node[above, orange!70!black]{\texttt{tool\_use}: Write \emph{party\_by\_year.csv}} (4.3,-2.5);
+    \node[font=\tiny, orange!70!black, anchor=west] at (9.75,-2.5) {\textbf{no fetch}};
+    \node[font=\tiny, orange!70!black, anchor=west, align=left] at (9.75,-2.9) {from the model's\\ own memory};
+    \draw[wire] (4.3,-2.95) -- node[above]{\textbf{req 3} = list + \texttt{tool\_result}(ok)} (9.6,-2.95);
+    \draw[wire] (9.6,-3.4) -- node[above]{\texttt{tool\_use}: Bash \emph{python plot.py}} (4.3,-3.4);
+    \draw[loc, red!60!black] (4.3,-3.85) -- node[above, red!55!black, xshift=1mm]{\textbf{error}: no display backend} (2.4,-3.85);
+    \draw[wire, red!60!black] (4.3,-4.3) -- node[above]{\textbf{req 4} = list + \texttt{tool\_result}(\emph{is\_error})} (9.6,-4.3);
+    \draw[wire] (9.6,-4.75) -- node[above]{\texttt{tool\_use}: Bash \emph{retry with Agg}} (4.3,-4.75);
+    \draw[wire] (4.3,-5.2) -- node[above]{\textbf{req 5} = list + \texttt{tool\_result}(figure written)} (9.6,-5.2);
+    \draw[wire] (9.6,-5.65) -- node[above]{text + \texttt{stop\_reason}: \texttt{end\_turn}} (4.3,-5.65);
+    \draw[loc] (4.3,-6.1) -- node[above]{the answer, and a \texttt{.png}} (0,-6.1);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.02cm}
+{\scriptsize\textbf{Blue crosses the network and is billed; grey stays on your laptop, free.} The list grew to eleven messages --- \textbf{req 5} re-sent all of them.}
+\end{frame}
+
+% ---- T2b-F35 · EDIT · TIER: READ · from T2b:1447
+\begin{frame}{What Went Into \textnormal{\texttt{req 1}} --- and Never Changed}
+\textbf{This is T2b's \emph{initialization}, seen from the wire: those five steps exist to build exactly two arguments --- then re-sent byte-identical on every later request.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.5cm}|p{4.6cm}|p{5.0cm}|}
+\hline
+& \textbf{Assembled from} & \textbf{In this example} \\ \hline
+\texttt{system} & T2b's init steps 1--4: global settings, \texttt{CLAUDE.md}, \texttt{.claude/rules/*.md} & ``You are Claude Code. You have these tools\ldots'' $+$ whatever house rules T5b has you write \\ \hline
+\texttt{tools} & the schema of every tool the harness is willing to run & \texttt{Bash}, \texttt{Read}, \texttt{Write}, \texttt{Grep}\ldots\ names, descriptions, argument types --- \emph{no code} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Yes --- the model writes the code and asks your machine to run it.} A \texttt{Bash} call is the model generating the \emph{text} of a shell command as an argument. It executes nothing; your harness runs that string on your laptop, with your files and permissions.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+{\footnotesize\textbf{The safety boundary is not the model's judgement} --- it is T2b's permission dial, between the generated string and your shell.}
+\end{column}
+\begin{column}{0.51\textwidth}
+{\footnotesize\textbf{\texttt{system} is the only text still guaranteed to be there on turn 200} --- everything else drifts or compacts away. That is the mechanical reason \texttt{CLAUDE.md} earns its keep.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- T2b-F36 · EDIT · TIER: READ · from T2b:1481
+\begin{frame}{Reading the Trace: Four Things Just Happened}
+\textbf{Every claim from the session section shows up in that one picture.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.28}
+\begin{tabular}{|p{2.6cm}|p{4.1cm}|p{4.5cm}|}
+\hline
+\textbf{Moment} & \textbf{What it looked like} & \textbf{What it proves} \\ \hline
+\textbf{The loop ran itself} & five \texttt{tool\_use} $\rightarrow$ \texttt{tool\_result} round trips, no human input & nobody scheduled these steps; the model chose each one (above) \\ \hline
+\textbf{The error was recovered} & backend error came back as a \texttt{tool\_result} with \texttt{is\_error}, and the next turn retried & this is ``Observe'' in ReAct, and why a failed tool must still \emph{return} (above) \\ \hline
+\textbf{Cost grew quadratically} & req 5 re-sent everything from req 1 & the list is the cost driver, not the number of questions (above) \\ \hline
+\textbf{One step had no tool} & the party timeline was \emph{written from memory} (orange, previous slide) & the weakest link: in the transcript it looks identical to a fetched fact \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Where a referee would stop you.} The GDP series has provenance --- a URL, a vintage, a retrieval date. The party timeline has none; it is model recall typed into a CSV. \textbf{Ask of every number an agent hands you: which tool produced this, and can I re-run it?}
+\end{cautionbox}
+\end{frame}
+
+% ---- T2b-F37 · KEEP · TIER: READ · from T2b:1506
+\begin{frame}{The Same Task with Three Agents}
+\textbf{The useful question is not ``is this faster'' but \emph{which steps are independent, and which one needs an adversary}.}
+
+\vspace{0.05cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.80,
+    o/.style={rectangle, draw=RedTitle!70, fill=blue!7, rounded corners,
+              minimum width=3.0cm, minimum height=0.7cm, align=center},
+    w/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+              minimum width=2.9cm, minimum height=1.0cm, text width=2.75cm, align=center},
+    r/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+              minimum width=2.9cm, minimum height=1.0cm, text width=2.75cm, align=center},
+    a/.style={-{Stealth[length=1.7mm]}, thick, gray!70}]
+    \node[o] (orc) at (5.2,1.5) {\textbf{Orchestrator} --- owns the plot and the write-up};
+    \node[w] (A) at (0.6,-0.3) {\textbf{data-fetcher}\\ GDP series $+$ URL,\\ vintage, date};
+    \node[w] (B) at (5.2,-0.3) {\textbf{timeline-builder}\\ party by year,\\ \emph{with a citation}};
+    \node[r] (C) at (9.8,-0.3) {\textbf{domain-reviewer}\\ attack the causal\\ claim};
+    \draw[a] (orc) -- (A);  \draw[a] (orc) -- (B);  \draw[a] (orc) -- (C);
+    \node[font=\tiny, gray!70] at (2.9,-1.35) {parallel: independent facts};
+    \node[font=\tiny, red!55!black] at (9.8,-1.35) {sequential: needs the draft first};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{What fan-out actually buys}
+\begin{itemize}\footnotesize
+    \item the two \emph{facts} are independent $\rightarrow$ genuinely parallel
+    \item 100 rows land in \texttt{data-fetcher}'s context, \textbf{not} the orchestrator's
+    \item one job each, so ``cite your source'' is enforceable
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{What it does \emph{not} buy}
+\begin{itemize}\footnotesize
+    \item the plot is one small step --- splitting it adds turns, not speed
+    \item three agents cost more tokens for the \emph{same} numbers
+    \item nothing here makes the causal claim more true
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Only \texttt{domain-reviewer} changes the answer} --- and it cannot run in parallel: it needs something to attack.}
+\end{frame}
+
+% ---- T2b-F38 · EDIT · TIER: CORE · from T2b:1555
+\begin{frame}{What the Reviewer Says --- and What No Agent Can Fix}
+\textbf{Given the draft, a competent \texttt{domain-reviewer} returns roughly this:}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize
+``The correlation is real but you cannot read it as an effect. Since 2000 you have about \textbf{six administrations} --- your effective $n$ is single digits, not the 100 quarters you plotted. Presidents inherit economies, business cycles are not assigned at random, and Congress is unmodelled. \textbf{Blinder and Watson (2016)} find a large gap over 1949--2012 (about \textbf{1.79pp} more annual real GDP growth under Democratic presidents, 16 terms) and attribute most of it to \emph{oil shocks, productivity shocks, and foreign demand} --- not to policy. Report the correlation, state the identification problem, and drop the word `affects'.'' \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.13cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{This is the case for multi-agent, stated honestly.} Not speed. A second agent whose job is to \emph{disagree} caught a claim the first agent was happy to make --- because you told it to.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{And the limit.} Every agent here inherited your word \emph{``rationalize''}. A more agreeable reviewer would have obliged. \textbf{No number of agents fixes a leading prompt} --- that is T5c's Context Dilemma, in one word of your own typing.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+{\footnotesize\textbf{The fix is upstream and costs nothing:} ask ``\emph{is} there a relationship, and what would identify it?'' --- then the same machinery works for you instead of against you.}
+\end{frame}
+
+% ---- NEW · TIER: READ
+% TODO(Phase B): Add the 9.2 economic twin (what am I paying for?) in Phase B.
+\begin{frame}{Bridge: Put the Loop on Your Own Machine}
+\textbf{You have watched the loop on the wire, once with one agent and once with three.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item A session is a list the harness re-sends; the agent is the loop, not a place
+    \item Every number an agent hands you should name the tool that produced it
+    \item \textbf{Next (T2b):} put that loop on your own machine --- install it, learn its files and commands, run your first session
+\end{itemize}
+\end{frame}
+
+%===========================================================
+\end{document}

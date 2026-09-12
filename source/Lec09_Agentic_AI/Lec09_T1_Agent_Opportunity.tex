@@ -1,0 +1,483 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.1
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: the example ladder (capability rungs); the principal-agent lens (Lec10 T9 owns the evidence)
+%% Owns: chat vs agent (where the loop runs), the agentic loop, four features, the spectrum
+%% Owns: orchestration-pattern names, multi-agent cost-benefit, measured task horizons (concept only)
+%% Owns: the four research patterns (Lec10 T1 cites the names)
+%% Defers: JSON tool call, session-as-list -> T2a; Git -> T2b; seven tests -> T5d
+%% Defers: MCP is named once in the timeline and explained only in TA; model-specific numbers -> TA
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms}
+
+\begin{document}
+
+\makebeamertitle
+
+% ---- NEW · TIER: CORE
+% TODO(Phase B): Cold open before the map (archive_pre_split/Lec09_Agentic_AI.tex:2022-2121, "Case Study: Empty Folder -> Figure").
+% TODO(Phase B): Figure figures/homeownership_by_age.jpg; the three prompts; two obstacles solved unprompted (FRED lacked the series -> Census HVS; HTTP 403 -> User-Agent); 6 min 21 s.
+% TODO(Phase B): What the economist did: asked the question, checked the figure. Attribution: Paul Goldsmith-Pinkham, "From an Empty Folder to a Figure" + URL (Capstone_Projects_2026.md:526-528) + date.
+\begin{frame}{Six Minutes, One Figure}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- T1-F01 · EDIT · TIER: CORE · from T1:30
+% TODO(Phase B): Name the economic twin of each part in the italic line (review A3).
+\begin{frame}{Lecture 9 in One Map}
+\textbf{One lecture, five parts, eleven decks, three questions: how agentic AI works, how to use it well, and what your role is.}
+
+\LecNineMap{1}{}
+
+\vspace{0.1cm}
+\footnotesize\textit{Two research threads run through all five parts: \textbf{HA-Ramsey} (a published research program, full case in Lec10 T8) and the \textbf{ES Fellows dataset} (a project you could build this week, full case in Lec10 T4). Here we study the workflows; the cases themselves come later this morning.}
+\end{frame}
+
+
+%=============================================================================
+\section{The Agent Opportunity}
+%===========================================================
+
+\sectiondivider{The Agent Opportunity}{What changed, and why an economist should care}
+
+% ---- T1-F02 · EDIT · TIER: READ · from T1:45
+\begin{frame}{Why Economists Should Care: Execution Is the Bottleneck}
+\textbf{The bottleneck in applied research is often not ideas. It is execution.}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Turning a good question into clean code, diagnostics, tables, and figures is slow
+    \item Many research tasks are repetitive: reshape data, rerun specifications, trace sources, refactor scripts, update plots
+    \item Agentic tools compress the time from \textit{idea} to \textit{first defensible result}
+    \item That raises the return to the skills economists uniquely provide: question design, institutional knowledge, validation, and judgment
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{The promise is not ``AI does research for you.''} It is faster implementation and iteration around a question you still define and defend. The rest of the lecture supplies what that takes: how an agent runs (9.2), how to build and call one (9.3), how to design and validate one (9.4), and how to run, check, and govern a whole project (9.5).
+\end{frame}
+
+% ---- NEW · TIER: CORE
+% TODO(Phase B): Review A4: one TikZ strip, six capability rungs, one course-owned example each, "what stayed human" underneath, and where each returns:
+% TODO(Phase B): chat window (T1-F06 Fellows test) | one agent, one sitting (six minutes -> figure) | one agent, files, many sittings (882 Fellows) | agent + human gates, weeks (HA-Ramsey) | team of sub-agents (T3b ledger) | scripted fan-out + verifier (Lec10 T6b, 11,171 labels).
+% TODO(Phase B): Counter-rung under "agent + gates": Lec10 T9, passed every gate, still wrong. Across all rungs: the GDP-by-party leading verb (T2a). Navier-Stokes is NOT on the ladder (dated sidebar in T3b and TA).
+\begin{frame}{The Ladder: From a Chat Window to a Verified Swarm}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: CORE
+% TODO(Phase B): Review A3 lens frame. Researcher = principal, agent = agent: hidden action (Holmstrom 1979: you see the output, not the process) and a misspecified objective (Goodhart: the agent optimizes the contracted proxy).
+% TODO(Phase B): "Generation is cheap; verification is scarce" (Tao, cited in Lec10 T9:693). One terminology line: three meanings of "agent" in this course (LLM in a loop; household in Aiyagari/HA-Ramsey; principal-agent theory).
+% TODO(Phase B): Ownership: this frame owns the lens; Lec10 T9 ("This Is a Principal--Agent Problem", T9:607) owns the evidence -- point to it, do not retell it.
+\begin{frame}{Delegating to an Agent Is a Principal--Agent Problem}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: READ
+% TODO(Phase B): Timeline TikZ (v1 T1 item 5): 2022 chat; 2023 structured tool calls + IDE assistants; 2024 terminal agents, MCP named once (T1b:71); 2025 sub-agents, frameworks at 1.0 (T1b:135-145), OpenAI adopts MCP (T1b:72), AAIF (T1b:73); 2026 scheduled runtimes (T1b:253-260).
+% TODO(Phase B): Every fact [solid]/[hype]-tagged and dated; re-verify at the freshness gate. Closing line from T1b-F16.
+\begin{frame}{From Chatbox to Agent Swarm, 2022--2026}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- T1-F03 · KEEP · TIER: READ · from T1:62
+\begin{frame}{Story 1 --- HA-Ramsey: Weeks, Not Years}
+\textbf{Proper use of an agentic workflow turned one published solver into a new research program.}
+
+\vspace{0.15cm}
+
+\begin{examplebox}
+\small
+\textbf{Seed:} a working, validated representative-agent (RA) ``deep Ramsey'' neural solver --- the complete code behind Feng--Han--Zhu (2026).\\
+\textbf{Target:} the heterogeneous-agent (HA) Ramsey model of Chien--Feng--Wen (2027) --- the entire paper: idiosyncratic risk, borrowing constraints, a 4--5D state.\\
+\textbf{Outcome:} a full HA research codebase \emph{plus} three methodological discoveries that surfaced from the AI iteration itself --- $\alpha$-shapes for non-convex feasible sets, the admissible set as a viability kernel, and a Lyapunov-type penalty for saddle-path selection.
+\end{examplebox}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item The AI supplied \textbf{throughput} --- LaTeX drafting, PyTorch translation, diagnostics, 32+ sweeps; ``time from seed to working solver: \textbf{weeks, not years}; the binding constraint was economist judgment at the milestones, not implementation labor''
+\end{itemize}
+
+\textbf{Why show this first:} this is what ``using it properly'' buys. Not autocomplete --- research.
+
+{\scriptsize \textit{Full case with the economics and the figures: Lec10 T8, later this morning. Source: HA-Ramsey case-study package.}}
+\end{frame}
+
+% ---- T1-F04 · EDIT · TIER: READ · from T1:85
+\begin{frame}{Story 2 --- 882 Fellows: A Dataset You Could Build This Week}
+\textbf{The second thread is deliberately ordinary: build a credible dataset about the economics profession from the public web.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{Task:} career metadata for all 882 current Econometric Society Fellows --- election year, PhD year, research fields, career stage
+    \item \textbf{Seed:} the official Society roster, split into 18 batches of 50; every filled field must carry a source URL from an official or institutional page
+    \item \textbf{What makes it hard:} roster control, source discipline, state across sessions, auditable provenance --- \emph{bookkeeping, not intelligence}
+    \item \textbf{What happened:} the agentic workflow scaled the search massively; the honest headline was about what still could \emph{not} be measured (T5c tells that part)
+\end{itemize}
+
+\vspace{0.25cm}
+
+\textbf{Why two stories:} HA-Ramsey shows the ceiling of the method. The fellows dataset is the floor you can stand on immediately --- in Exercise B, you build one batch of 50 yourself.
+
+\vspace{0.1cm}
+{\scriptsize \textit{Full case with the coverage results: Lec10 T4, later this morning.}}
+\end{frame}
+
+
+%=============================================================================
+\section{Chat, Copilot, Agent}
+%===========================================================
+
+\sectiondivider{Chat, Copilot, Agent}{Where the loop runs, and what it can touch}
+
+% ---- T1-F05 · KEEP · TIER: READ · from T1:111
+\begin{frame}{What Modern Web Chat Already Does Well}
+\textbf{As of mid-2026, a strong web-chat product is already useful for economists.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Brainstorming model setups, empirical strategies, review rubrics, and robustness checks
+    \item Summarizing papers, referee reports, and lecture notes
+    \item Inspecting uploaded files and explaining code snippets
+    \item Sometimes browsing the web or running limited sandboxed tools
+    \item Helping you draft a specification before you open your editor
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{So the weak baseline is not ``a browser cannot do anything.''} The weak baseline is a \textit{single chat session without a durable harness}.
+\end{frame}
+
+% ---- T1-F06 · KEEP · TIER: READ · from T1:129
+\begin{frame}{What Breaks Without a Harness: The Fellows Test}
+\textbf{Try the fellows task in a plain chat window. It is a job of many sittings --- and four things break within the first hour.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Durable context is weak.} The task spans days of separate sessions. The coding rules you settle today --- which sources count, how to record a missing PhD year --- are not reliably remembered by tomorrow's fresh chat
+    \item \textbf{Reusable workflow is weak.} Your checklist lives in prompts you retype (slightly differently) each time, not in a file the tool reads automatically
+    \item \textbf{Controlled execution is weak.} The chat cannot open the roster file, write the CSV, or rerun a check --- \emph{you} become the copy-paste machine between the model and your folder
+    \item \textbf{Audit trail is weak.} Six weeks later: which source URL backed the PhD year of fellow \#312? A scrolled-away transcript cannot answer field-level questions
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\textbf{That is the real contrast.} Agents are not magic because they are ``smarter.'' They are useful because they operate inside a structured project with files, tools, and repeatable workflows.
+\end{frame}
+
+% ---- T1-F07 · MERGE-PENDING(T1-F07+T1-F10) · TIER: CORE · from T1:146
+% TODO(Phase B): Review A5: merge into ONE frame keyed on where the loop runs, what it can touch, what persists, and who presses run (vendor sandbox vs IDE vs your machine/data/cluster).
+% TODO(Phase B): Fix T1-F07's table: web chat runs code in a vendor sandbox (contradicted T1-F05); drop "why is Copilot not an agent?" -- IDE assistants ship agent modes; one product can sit on several rungs.
+% TODO(Phase B): Delete T1-F07's JSON paragraph (T2a owns it). Name Claude Code, Codex CLI, Gemini CLI as terminal agents (review A2).
+\begin{frame}{Chat vs.\ Agent: Same Brain, Different Arms}
+\textbf{One key technical change made agents possible: modern LLMs (post-2023) support structured tool calls.}
+
+\vspace{0.2cm}
+
+Instead of writing ``you should run \texttt{python solve.py},'' the model emits a machine-readable request --- something like \texttt{\{"tool": "Bash", "command": "python solve.py"\}} --- and a \textbf{harness}, software installed on your machine, executes it and returns the real output. (T2a opens this loop in machine language.)
+
+\vspace{0.25cm}
+
+\begin{center}
+\small
+\begin{tabular}{|l|c|c|}
+\hline
+& \textbf{claude.ai (browser)} & \textbf{Claude Code (terminal)} \\ \hline
+LLM model & \multicolumn{2}{c|}{the same frontier model} \\ \hline
+Harness & none (sandboxed) & local CLI on your machine \\ \hline
+Can run Python? & no & yes---\textit{your} Python, \textit{your} machine \\ \hline
+Sees real errors? & no & yes---loops back automatically \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Same brain, different arms.} The terminal agent is not a magically smarter model. The harness is what flips the switch from text-only output to text\,+\,actions inside a project.
+\end{frame}
+
+% ---- T1-F10 · MERGE-PENDING(T1-F07+T1-F10) · TIER: CORE · from T1:228
+\begin{frame}{The Spectrum, and Our Featured Tool}
+\begin{center}
+\small
+\begin{tabular}{|p{2.5cm}|p{3.0cm}|p{3.2cm}|p{3.6cm}|}
+\hline
+& \textbf{Web chat} & \textbf{IDE assistant} & \textbf{Terminal agent} \\ \hline
+\textbf{Best at} & thinking, drafting & editing local code & end-to-end execution \\ \hline
+\textbf{Context} & conversation + uploads & open files & full project tree \\ \hline
+\textbf{Typical role} & architect's whiteboard & coding copilot & workflow operator \\ \hline
+\textbf{Economic example} & design the specification & clean one regression file & run the full pipeline \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Concrete example throughout this lecture:} Claude Code, a terminal agent. \textbf{General lesson:} the same workflow logic appears in Codex CLI, Gemini CLI, Aider, and similar tools.
+
+\vspace{0.15cm}
+\footnotesize\textit{The only tool-comparison table in Lecture 9 --- the workflow matters more than the tool. T5a returns to tool choice per pipeline step.}
+\end{frame}
+
+% ---- T1-F08 · KEEP · TIER: CORE · from T1:172
+\begin{frame}{The Agentic Loop: Plan, Act, Observe, Verify, Repeat}
+\textbf{An agentic workflow is not one long generation. It is a control loop wrapped around tools, files, and checks.}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners, draw=RedTitle!70, fill=blue!5,
+        minimum width=2.0cm, minimum height=0.75cm, text width=1.9cm,
+        align=center, font=\scriptsize, text=DarkText},
+    mem/.style={rectangle, rounded corners, draw=black!55, fill=VeryLightGray,
+        minimum width=2.4cm, minimum height=0.8cm, text width=2.3cm,
+        align=center, font=\scriptsize, text=DarkText},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60},
+    lab/.style={font=\tiny\itshape, text=black!60}
+]
+    \node[box] (goal) at (-3.6,0.75) {User goal\\+ success criteria};
+    \node[box] (plan) at (0,1.5)   {Plan\\next step};
+    \node[box] (act)  at (3.1,0.75)  {Act\\shell, Python, files, web};
+    \node[box] (obs)  at (3.1,-0.75) {Observe\\real outputs, real errors};
+    \node[box] (ver)  at (0,-1.5)  {Verify\\tests, benchmarks, review};
+    \node[mem] (memo) at (0,0)    {Project files\\+ memory on disk};
+    \node[box] (art)  at (-3.6,-0.75) {Artifact\\+ report};
+    \draw[arr] (goal) -- (plan);
+    \draw[arr] (plan) to[bend left=18] (act);
+    \draw[arr] (act) -- (obs);
+    \draw[arr] (obs) to[bend left=18] (ver);
+    \draw[arr] (ver) to[bend left=18] node[lab, below left] {not done yet: loop} (plan);
+    \draw[arr] (ver) -- node[lab, below] {checks pass} (art);
+    \draw[arr, dashed] (memo) -- (plan);
+    \draw[arr, dashed] (act) -- (memo);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item \textbf{Orchestrator:} the loop deciding what to do next --- plan, act, observe, verify
+    \item \textbf{Memory:} saved project state on disk, not just chat history (dashed arrows: the loop reads it and writes it)
+    \item \textbf{Verifier:} tests, benchmarks, or review checks deciding whether output survives
+\end{itemize}
+\end{frame}
+
+% ---- T1-F09 · KEEP · TIER: READ · from T1:212
+% MiniCourse refinement: cleaner autonomy spectrum framing from M4_T3
+\begin{frame}{What Makes Something ``Agentic''? Four Features}
+\begin{itemize}
+    \item \textbf{Tool use} --- invokes \texttt{pandas}, \texttt{curl}, \texttt{R}, \texttt{statsmodels}, the shell, whatever the task requires
+    \medskip
+    \item \textbf{Autonomy} --- plans a multi-step empirical workflow without re-prompting.\\
+    \textit{e.g.,} ``download FRED $\to$ clean $\to$ regress $\to$ plot $\to$ save table'' as one command
+    \medskip
+    \item \textbf{Iteration} --- observes that a regression failed, identifies the bad column, fixes the formula, reruns
+    \medskip
+    \item \textbf{Persistence} --- remembers your project conventions across sessions (variable names, preferred packages, validated benchmarks)
+\end{itemize}
+
+\bigskip
+\textbf{All four are cumulative.} Tool use without autonomy = a glorified interactive console (a REPL --- \emph{read--eval--print loop}, like the Python \texttt{>>>} prompt). Autonomy without iteration = a script that dies on the first error. You need all four for ``agentic.''
+\end{frame}
+
+
+%=============================================================================
+\section{The Landscape in Three Frames}
+%===========================================================
+
+\sectiondivider{The Landscape in Three Frames}{Patterns, costs, and how long agents really work}
+
+% ---- T1b-F04 · EDIT · TIER: READ · from T1b:102
+\begin{frame}{Four Orchestration Patterns}
+\textbf{Production agent systems are built from a small set of recurring control structures.}
+
+\vspace{0.18cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.0cm}|p{7.4cm}|}
+\hline
+\textbf{Pattern} & \textbf{Shape} \\ \hline
+Orchestrator--worker & a lead agent decomposes a task and dispatches workers; \emph{dominant in production} \\ \hline
+Planner--executor & one component plans, another executes step by step \\ \hline
+Reflection & the agent critiques and revises its own output before returning \\ \hline
+Handoff & control passes between specialized agents (e.g.\ triage $\to$ specialist) \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.16cm}
+
+\footnotesize\textbf{The agent team you will build in Part 9.3 and run as an RA team in T5b is an orchestrator--worker system}: the main agent orchestrates; \texttt{code-reviewer}, \texttt{domain-reviewer}, and \texttt{verifier} sub-agents are the workers. The landscape just adds vocabulary and tooling around the same loop.
+\end{frame}
+
+% ---- T1b-F06 · EDIT · TIER: READ · from T1b:152
+% TODO(Phase B): Tag +90.2% / 15x as [hype] (vendor-internal eval) in the bullets themselves.
+\begin{frame}{The Multi-Agent Cost--Benefit Decision}
+\textbf{More agents is not free. Treat it as marginal value vs.\ marginal cost.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}
+    \item Anthropic reports its multi-agent research system beat a single-agent baseline by \textbf{+90.2\%} on its internal research-eval\ldots
+    \item \ldots at roughly \textbf{15$\times$ the token cost}
+    \item So multi-agent pays off when the task is broad, parallelizable, and the answer's value is high relative to tokens
+    \item It is wasteful for narrow, sequential, or cheap tasks
+\end{itemize}
+
+\vspace{0.12cm}
+{\scriptsize \textbf{[solid, label: Anthropic-internal-eval]} --- a vendor benchmark on a self-defined research task, not an external suite. Read the $+90.2\%$ as directional, not portable.}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{Economist framing.} You are choosing a point where marginal research value $=$ marginal token (and latency, and debugging) cost. The Aiyagari sub-agent review in T5b is justified on \emph{wall-clock}, not because ``more agents are better.''
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- T1b-F09 · EDIT · TIER: READ · from T1b:217
+% TODO(Phase B): Review A5: keep the concept (50%-reliability horizon, doubling time, fragility); move the model-specific numbers (Opus 4.5, GPT-5) to TA's dated comparisons and refresh them at the freshness gate.
+% TODO(Phase B): Footer: "the rest of the landscape, dated: Appendix TA".
+\begin{frame}{How Long Can an Agent Actually Work? Measure, Don't Trust Marketing}
+\textbf{Vendors say ``works for hours'' or ``runs for days.'' METR gives a \emph{measured} alternative.}
+
+\vspace{0.18cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}\footnotesize
+    \item METR's \emph{task-length-doubling} result: the task length an agent completes at \textbf{50\% reliability} has doubled roughly every \textbf{7 months}, accelerating to $\sim$\textbf{4 months} in 2024--25. \textbf{[solid]}
+    \item Time Horizon 1.1 (Jan 2026) pegs \textbf{Opus 4.5 $\approx$ 320 min} and \textbf{GPT-5 $\approx$ 214 min} (50\%-reliability horizon).
+    \item Use these measured minutes instead of vendor ``multi-hour/multi-day autonomy.''
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Metric fragility.} The number is tied to a \textbf{50\% reliability} threshold and a specific task suite; the horizon at 80\% reliability is much shorter, and it shifts across suites. A measured-but-fragile number still beats a vendor claim. \\[2pt]
+\textbf{[hype counterpoint]} product pages advertising ``multi-hour'' or ``multi-day'' autonomy --- no reliability threshold stated.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Research translation:} the right question is not ``can it run for hours?'' but ``at what reliability, on what task distribution, validated how?''
+\end{frame}
+
+
+%=============================================================================
+\section{What This Means for Research}
+%===========================================================
+
+\sectiondivider{What This Means for Research}{Four patterns, and what stays human}
+
+% ---- T1-F11 · EDIT · TIER: READ · from T1:249
+% TODO(Phase B): Review A3/A5: "Lec10's six cases" / "Cases 4--6" -> seven cases; add Case 7 (MPE shortcut, Lec10 T9) to the collaborator row as the cautionary instance.
+\begin{frame}{Four Research Patterns Across the Lec10 Cases}
+\small
+\begin{tabular}{p{2.55cm}p{3.5cm}p{5.2cm}}
+\toprule
+\textbf{Pattern} & \textbf{Lec10 case(s)} & \textbf{Main risk if you use the wrong workflow} \\
+\midrule
+Reusable skill & Case 1: referee-style paper review & Generic comments, hallucinated quotes, missing quality gate \\
+Empirical pipeline & Case 2: MEPS harmonization and figures & Wrong crosswalk, dropped survey weights, silent validation failure \\
+Public-web dataset & Case 3: fellows metadata with field-level provenance & Weak sources, hidden missingness, no audit trail \\
+Full-lifecycle collaborator & Cases 4--6: collaborator, 4-day sprint, HA-Ramsey & Polished output built on weak framing or claims discipline \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.05cm}
+\textbf{Four patterns organize Lec10's six cases} --- and our two threads are instances: the fellows dataset (Case 3) and HA-Ramsey (Case 6, the full-lifecycle pattern at research scale).
+
+\vspace{0.1cm}
+\scriptsize\textbf{Where RAG fits.} Agentic RAG (Lec08 T5) differs from single-shot RAG: the agent decides \emph{dynamically}, via the same tool-call mechanism, whether and when to retrieve. RAG is one tool among many that the agent can compose.
+\end{frame}
+
+% ---- T1-F12 · MERGE-PENDING(T1-F12+T2-F24) · TIER: READ · from T1:269
+% TODO(Phase B): Two rows of T2-F24 into T1-F12's columns; footer = one-line teaser of the seven tests (T5d owns the table); T5b's contract frame formally owns division of labor.
+\begin{frame}{What Remains Human Across the Four Patterns}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{You still own}
+\begin{itemize}
+    \item the research question
+    \item the success criteria
+    \item the coding and source rules
+    \item the validation target
+    \item the final interpretation
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{The agent accelerates}
+\begin{itemize}
+    \item repetitive execution
+    \item file handling and refactoring
+    \item promptable decomposition
+    \item reruns after fixes
+    \item draft diagnostics and reports
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Why this matters for economists:} the gain is not that judgment disappears. The gain is that disciplined execution becomes cheaper.
+
+\vspace{0.15cm}
+\textbf{Hold on to the left column.} In 9.5 it becomes a job description: the researcher as project manager.
+\end{frame}
+
+% ---- T2-F24 · MERGE-PENDING(T1-F12+T2-F24) · TIER: READ · from T2:783
+\begin{frame}{Division of Labor: You Provide, the Agent Provides}
+\begin{center}
+\small
+\begin{tabular}{|p{5.5cm}|p{5.9cm}|}
+\hline
+\textbf{You provide} & \textbf{Agent provides} \\ \hline
+Question, identification logic, and source rules & Fast code generation and refactoring \\ \hline
+Workflow choice and benchmark design & Boilerplate implementation and debugging \\ \hline
+Knowledge of the data, model, and institutions & File edits, script writing, and test runs \\ \hline
+Economic interpretation and seminar defense & Iteration on visible errors and outputs \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+\textbf{Research version of the slogan:} the agent can be a strong RA, but you still have to be the principal investigator.
+
+\end{frame}
+
+% ---- T1-F17 · EDIT · TIER: READ · from T1:436
+% TODO(Phase B): Bridge sentence (v1): "You have seen what agents do and what proper use produced. The question changes from 'what is this?' to 'how does it actually run, and how do I start?'" + the 9.2 economic twin.
+\begin{frame}{Bridge: Open the Hood}
+\textbf{Part 9.1 framed the terminal-agent workflow: chat alone is not enough; a harness wraps tools, files, and verifiers around the model so the loop can do real work.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item You have seen \emph{what} agents do, \emph{why} the harness exists, and what proper use produced in two real projects
+    \item \textbf{Dated detail (Appendix TA):} the wider landscape --- interoperability standards, frameworks, and product churn --- read on demand
+    \item \textbf{Next (9.2, T2a and T2b):} the question changes from ``what is this?'' to ``\emph{how does it actually work, and how do I start?}'' --- components, install, initialization, the CLI, and your first session
+\end{itemize}
+
+\vspace{0.3cm}
+\footnotesize\textit{Arc: \textbf{9.1 See} $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ 9.5 Run \& Govern.}
+\end{frame}
+
+%===========================================================
+\end{document}

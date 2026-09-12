@@ -1,0 +1,152 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.4
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: the Design Lab protocol, scenarios S1-S4, the rubric, the links
+%% Owns: reliability under repetition (pass^k, moved from T1b per review A6.1) as the Validate method
+%% Owns: the harness-neutral acceptance test at rung 3 (review A2.3)
+%% Defers: benchmark validity (SWE-bench) -> T5d; the eight steps and the canvas -> T3a; the rungs -> T3b
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.4: Design Lab --- Your Agent for an Economics Task}
+
+\begin{document}
+
+\makebeamertitle
+
+% ---- NEW · TIER: CORE
+% TODO(Phase B): Add the 9.4 economic twin (write the contract, audit the work) in Phase B.
+\begin{frame}{Lecture 9 in One Map: Design Lab}
+\textbf{This part answers: can you design an agent for a question of your own --- and prove it works?}
+
+\LecNineMap{4}{}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: pick a scenario $\to$ fill the canvas $\to$ write the brief and compile it for your harness $\to$ run the detection matrix, three times $\to$ pitch what you measured.}
+\end{frame}
+
+% ---- NEW · TIER: CORE
+% TODO(Phase B): Workflow TikZ (plan v1 section 7.1, amended): pick S1-S3 -> fill the eight-cell canvas (cell 7 plants a bug) -> write briefs/<name>.md -> compile to your harness (sub-agent / skill / headless prompt) -> run scripts/detection_matrix.py k=3 -> narrow the description if rates are wrong -> pitch and validate.
+% TODO(Phase B): About 50 minutes; teams of 2-4 with at least one working harness (Step 0 setup check). Deliverables: canvas, brief, one matrix row with rates, one "surprising cell" sentence.
+\begin{frame}{The Design Lab in One Slide}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): S1 Aiyagari solver audit (guaranteed on both tested harnesses) | S2 a leading question in a new costume (review A6.2: FRED FEDFUNDS + CPI since 2000, "explain how the 2022-23 hikes brought inflation down"; unambiguous planted defects only) | S3 Fellows provenance batch (hook where the harness has hooks, runner gate otherwise) | S4 referee: skill or agent? (brief only).
+% TODO(Phase B): Columns: goal, agents to design, planted defect, data, time. A scenario joins the menu only after it passes on both tested harnesses (review A6.4).
+\begin{frame}{Scenario Menu}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): labs/Lec09_Agent_Lab/scenarios/S1_aiyagari_audit/ (points to review_target/ and TERMINAL_WALKTHROUGH Steps 1-8); design a fourth agent (replication-checker) from the canvas.
+\begin{frame}{S1 Brief --- Aiyagari Solver Audit}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): Same anatomy as the T2a GDP trace (fact, fact, plot, leading causal verb) on new data; students must recognise the verb without having seen this answer. Instructor debrief lives in instructor/, not in the scenario folder.
+\begin{frame}{S2 Brief --- A Leading Question in a New Costume}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): provenance-checker (Read/Grep; per-row verdict; never infers gender or birth year -- rule text from T4-F15); 2 of 10 rows lack source_url, 1 row has a gender inferred from a name. Gate: PreToolUse hook on Write in Claude Code; require_source_url.py inside the runner elsewhere (review A2.4, A5).
+\begin{frame}{S3 Brief --- Fellows Provenance Batch}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): Left: T2b-F20's canvas TikZ with the grey answers removed (\href to AGENT_DESIGN_CANVAS.md). Right: the briefs/<name>.md front matter and its three compilations (review A2.2).
+\begin{frame}{The Blank Canvas, and the Brief It Compiles To}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): One prompt the agent should handle, one adjacent prompt it should not; narrow the description until both behave -- measured as a rate over k=3 fresh runs, not one run.
+\begin{frame}{Debug the English}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- T1b-F13 · MOVE · TIER: CORE · from T1b:313
+% TODO(Phase B): Review A6.1: this is the Validate method. Reframe for the lab: every "should fire / should stay silent" cell is run k=3 times by the rung-3 runner; report the rate, not the best run.
+% TODO(Phase B): Keep the tau-bench numbers tagged and verified; the "economist translation" stays.
+\begin{frame}{Single-Try Score vs.\ Reliability Under Repetition}
+\textbf{For an agent that runs unattended, the relevant statistic is not its \emph{best} run --- it is whether it succeeds \emph{every} time.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Best-of-$n$ thinking (wrong for autonomy)}
+\begin{itemize}\footnotesize
+    \item report the best of several attempts
+    \item flatters the model
+    \item fine for a human-in-the-loop draft you will check
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{pass-hat-$k$ / reliability (right for autonomy)}
+\begin{itemize}\footnotesize
+    \item probability \emph{all} $k$ independent runs succeed
+    \item $\tau$-bench: $\sim$90\% at $k{=}1$ $\to$ $\sim$57\% at $k{=}8$
+    \item this is what matters when no human checks each run
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.22cm}
+
+\textbf{Economist translation:} an unattended agent on a recurring data pull is a repeated trial. A 90\% single-try success compounds into frequent failure across a quarter of nightly runs. Design for the reliability curve, not the demo.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): Matrix template as a figure: diagonal shaded, off-diagonal, control row. One fresh headless process per cell (fresh session by construction), k=3; name the surprising cell. Works on every tested harness (review A2.3).
+\begin{frame}{Pitch and Validate: The Detection Matrix at Rung 3}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: READ
+% TODO(Phase B): Arrows from each canvas cell to its line in the brief and in the compiled file: 1 -> description failure clause; 2 -> role prose; 3 -> tools; 4 -> "you will be given"; 5 -> return format; 6 -> model + stop rule; 7 -> the test; 8 -> path.
+\begin{frame}{From Canvas Cell to File Line}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): Review A6.1 rows x three levels: canvas complete; tool allowlist equals blast radius; planted defect caught with file:line; control row silent; rates reported honestly (k=3). No row grades whether auto-dispatch happened to fire once.
+\begin{frame}{Rubric}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: LAB
+% TODO(Phase B): Review A9: one hub URL (the site's labs page) plus a QR code (qrcode.sty); deep links live in the lab README; file:line references pinned to tag lec09-2026f. Links 404 until the lab is pushed.
+\begin{frame}{Links}
+\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\end{frame}
+
+% ---- NEW · TIER: READ
+\begin{frame}{Bridge: From One Agent to a Whole Project}
+\textbf{You designed one agent for one task and measured whether it catches what it should.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{Next (Part 9.5):} run a whole project with a team of them (T5a--T5b), catch your own mistakes (T5c), and stay inside the red lines (T5d)
+\end{itemize}
+\end{frame}
+
+%===========================================================
+\end{document}
