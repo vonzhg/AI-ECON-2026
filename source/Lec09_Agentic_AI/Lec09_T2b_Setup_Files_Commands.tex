@@ -16,6 +16,7 @@
 \graphicspath{{./pic/}{./figures/}{../}}
 
 \usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
 
 \input{lec09_map.tex}
 
@@ -100,7 +101,7 @@ Lecture 9.2b: Your Setup --- Files, Commands, First Session}
 \end{itemize}
 \end{frame}
 
-% ---- T2-F07 · EDIT · TIER: LAB · from T2:185
+% ==== Phase B · T2-F07 · TIER: LAB (harness-neutral footnote)
 % TODO(Phase B): Review A2: the three durable steps shown for each tested harness (Claude Code, Gemini CLI, Codex CLI), commands from CLI_FACTS_2026-09.md.
 \begin{frame}[fragile]{Install Once: Three Durable Steps}
 \textbf{Setup has exactly three steps, and only the first command ever changes.}
@@ -128,72 +129,56 @@ claude
 \end{takeawaybox}
 
 \vspace{0.1cm}
-\footnotesize\textit{Durable vs.\ dated: this 3-step shape survives every product update; exact commands, subscription tiers, and the Windows/OneDrive caveats are dated detail $\to$ Appendix TA and the official docs.}
+\footnotesize\textit{Durable vs.\ dated: the same three steps hold for Codex CLI and Gemini CLI. Exact commands, subscription tiers, and the Windows/OneDrive caveats are dated detail $\to$ Appendix TA and the official docs.}
 \end{frame}
 
-% ---- T1-F14 · MERGE-PENDING(T1-F14+T1-F15) · TIER: CORE · from T1:325
-% TODO(Phase B): One frame: the time-machine TikZ from T1-F14 above T1-F15's risk/benefit columns.
-\begin{frame}{What Git Is: A Time Machine for Your Project}
-\textbf{Git is a version-control system: it keeps snapshots of a project folder so you can always see what changed and go back.}
+% ==== Phase B · T1-F14..T1-F15 · TIER: CORE
+\begin{frame}{Git Is the Safety Net: A Time Machine for Agent Work}
+\textbf{Git keeps snapshots of a project folder. An agent edits fast and wide; a snapshot before each session is your undo, your diff, and your audit trail.}
 
-\vspace{0.15cm}
+\vspace{0.12cm}
 
 \begin{center}
 \begin{tikzpicture}[
     gb/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
-        minimum width=2.75cm, minimum height=1.15cm, text width=2.65cm,
+        minimum width=2.75cm, minimum height=1.0cm, text width=2.65cm,
         align=center, font=\scriptsize},
     cmd/.style={font=\tiny\ttfamily, text=RedTitle},
     arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
 ]
-    \node[gb] (wd) at (0,0) {\textbf{Working directory}\\ your files, edited freely (by you or the agent)};
-    \node[gb] (st) at (3.9,0) {\textbf{Staging area}\\ what the next snapshot will include};
-    \node[gb] (hist) at (7.8,0) {\textbf{History}\\ snapshot 1 $\leftarrow$ 2 $\leftarrow$ 3 $\cdots$\\ \tiny lives in a hidden \texttt{.git} folder};
-    \node[gb, dashed, fill=white] (rem) at (11.7,0) {\textbf{Remote (GitHub)}\\ optional copy: backup, sharing};
+    \node[gb] (wd) at (0,0) {\textbf{Working directory}\\ your files, edited by you or the agent};
+    \node[gb] (st) at (3.9,0) {\textbf{Staging area}\\ what the next snapshot will hold};
+    \node[gb] (hist) at (7.8,0) {\textbf{History}\\ snapshot 1 $\leftarrow$ 2 $\leftarrow$ 3 $\cdots$\\ \tiny in a hidden \texttt{.git} folder};
+    \node[gb, dashed, fill=white] (rem) at (11.7,0) {\textbf{Remote (GitHub)}\\ optional: backup, sharing};
     \draw[arr] (wd) -- node[above, cmd] {git add} (st);
     \draw[arr] (st) -- node[above, cmd] {git commit} (hist);
     \draw[arr, dashed] (hist) -- node[above, cmd] {git push} (rem);
 \end{tikzpicture}
 \end{center}
 
-\vspace{0.2cm}
-
-\begin{itemize}
-    \item A \textbf{commit} is a snapshot of the whole project at a moment you chose; the history is a chain of snapshots you can list (\texttt{git log}), compare (\texttt{git diff}), and return to
-    \item Everything is local, plain files, no server required --- the \textbf{remote} is optional
-    \item \textbf{Why it fits agent work:} the agent edits fast and wide; snapshots give you a clean before/after boundary around every session
-\end{itemize}
-\end{frame}
-
-% ---- T1-F15 · MERGE-PENDING(T1-F14+T1-F15) · TIER: CORE · from T1:357
-\begin{frame}{Git Is the Safety Net}
+\vspace{0.1cm}
 
 \begin{columns}[T]
 \begin{column}{0.48\textwidth}
-\textbf{The risk without Git:}
-\vspace{0.15cm}
-\begin{itemize}
-    \item Claude Code can edit dozens of files autonomously in one session
-    \item OneDrive and Dropbox sync by \textit{copying}---two simultaneous writes create corrupt merge files
-    \item No undo: if the agent makes bad changes, there is no ``revert'' without Git
-    \item No audit trail: you cannot see what changed or when
+\footnotesize\textbf{Without it}
+\begin{itemize}\scriptsize
+    \item a terminal agent edits dozens of files in one session
+    \item OneDrive and Dropbox sync by copying --- they race the agent's rapid writes
+    \item no undo, and no record of what changed or when
 \end{itemize}
 \end{column}
 \begin{column}{0.48\textwidth}
-\textbf{What Git gives you:}
-\vspace{0.15cm}
-\begin{itemize}
-    \item \texttt{git diff} shows exactly what the agent changed before you accept it
-    \item \texttt{git checkout -{-} .} reverts all uncommitted changes instantly---your emergency brake
-    \item \texttt{git log} shows every change with a timestamp and message
-    \item Works offline; cloud sync races with the agent's rapid file writes
+\footnotesize\textbf{With it}
+\begin{itemize}\scriptsize
+    \item \texttt{git diff}: exactly what the agent changed, before you accept it
+    \item \texttt{git restore .}: discard every uncommitted change --- the emergency brake
+    \item \texttt{git log}: every snapshot, with a time and a message; all of it offline
 \end{itemize}
 \end{column}
 \end{columns}
 
-\vspace{0.25cm}
-
-\textbf{Practical rule:} keep large data files on OneDrive; keep code and scripts in Git. Mixing them is workable if you are careful --- but do not let OneDrive sync a \emph{live repository} (the hidden \texttt{.git} folder): the two sync models collide and can corrupt the history. Keep the repo outside the synced folder, or exclude \texttt{.git} from sync.
+\vspace{0.12cm}
+\footnotesize\textbf{Practical rule:} code in Git, large data wherever you like --- but never let a sync service mirror a live \texttt{.git} folder; the two sync models collide and can corrupt the history.
 \end{frame}
 
 % ---- T1-F16 · KEEP · TIER: LAB · from T1:387
@@ -287,11 +272,34 @@ Two layers of configuration. \textbf{Local overrides global.}
 \textbf{Rule:} global dotfolder $=$ your personal defaults (apply everywhere). Local dotfolder $=$ the project's rules (apply only here). T5b fills the local layer with research content.
 \end{frame}
 
-% ---- NEW · TIER: CORE
-% TODO(Phase B): Review A2.5 (replaces v1's .claude-only tree and TA's mapping table): a verified table from CLI_FACTS_2026-09.md -- instructions file (CLAUDE.md / GEMINI.md / AGENTS.md), skills, custom sub-agents (or "not native -- use rung 3"), settings/policy, memory -- per tested harness, with version and date.
-% TODO(Phase B): Live examples: ROOT/.claude/agents/, labs/Lec09_Agent_Lab/.claude/agents/, demos/M4_olg_5step_demo/.claude/skills/olg-5step/SKILL.md. Draw only paths that exist.
+% ==== Phase B · NEW:Project Files Across Harnesses · TIER: CORE
 \begin{frame}{Project Files Across Harnesses}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{Every terminal agent reads the same kinds of files from your project. The names differ; the jobs do not.}
+
+\vspace{0.06cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.35cm}|>{\raggedright\arraybackslash}p{3.1cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+\textbf{Job} & \textbf{Claude Code} & \textbf{Gemini CLI} & \textbf{Codex CLI} \\ \hline
+Standing instructions & \texttt{CLAUDE.md} & \texttt{GEMINI.md} (name configurable)$^\dagger$ & \texttt{AGENTS.md}$^\dagger$ \\ \hline
+Skills (\texttt{SKILL.md}) & \texttt{.claude/skills/<name>/} & \texttt{.gemini/skills/<name>/}$^\dagger$ & \texttt{\textasciitilde/.codex/skills/<name>/}$^\dagger$ \\ \hline
+Custom sub-agents & \texttt{.claude/agents/<name>.md} & \texttt{.gemini/agents/<name>.md}$^\dagger$ & a \texttt{spawn\_agent} tool; custom types: not yet verified \\ \hline
+Settings, permissions & \texttt{.claude/settings.json} & \texttt{.gemini/settings.json}; policy engine & \texttt{\textasciitilde/.codex/config.toml}; sandbox modes \\ \hline
+Headless run (rung 3) & \texttt{claude -p} & \texttt{gemini -p} & \texttt{codex exec} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Trust is a setting, too.} Gemini CLI ignores a project's agents, hooks, and skills until you trust the folder; Claude Code asks on first start; Codex wants a git repository. The lab's setup check tells you which case you are in.
+\end{cautionbox}
+
+\vspace{0.04cm}
+{\scriptsize \textit{Checked on 12 Sep 2026 (Claude Code 2.1.270, Gemini CLI 0.47.0, Codex CLI 0.154.0). $^\dagger$\,read from the installed package, not yet run. Live examples: the repository's \texttt{.claude/agents/}, the lab's \texttt{.claude/agents/}, and the OLG demo's \texttt{.claude/skills/}.}}
 \end{frame}
 
 % ---- T2-F09 · KEEP · TIER: READ · from T2:247
@@ -352,7 +360,7 @@ Optional course log & you / course & explicit progress notes such as \texttt{pro
 \textbf{Course recommendation:} rely on \texttt{CLAUDE.md} for shared rules, treat auto memory as helpful but not authoritative, and keep explicit logs when you want students to inspect the evolution of a project.
 \end{frame}
 
-% ---- T2c-F12 · EDIT · TIER: READ · from T2c:425
+% ==== Phase B · T2c-F12 · TIER: READ (trust rule for other harnesses)
 % TODO(Phase B): Review A2: the table rows are Claude Code objects; add one line on how the other tested harnesses scope the same thing (from CLI_FACTS).
 \begin{frame}{Where Those Four Agents Lived}
 \textbf{Three different things get called ``the agent'', and they have three different lifetimes. Only one of them is yours.}
@@ -375,7 +383,7 @@ the \emph{report} & the sub-agent & the message list, plus session scratch & no 
 \vspace{0.1cm}
 
 \begin{cautionbox}
-\footnotesize\textbf{Where you put the folder decides whether the specialist exists.} \texttt{.claude/agents/} resolves relative to the directory the session starts \emph{in} --- the global-vs-local rule above, applied to agents.
+\footnotesize\textbf{Where you put the folder decides whether the specialist exists.} \texttt{.claude/agents/} resolves relative to the directory the session starts \emph{in} --- the global-vs-local rule above, applied to agents. Gemini CLI's \texttt{.gemini/agents/} works the same way, but only in a trusted folder.
 \end{cautionbox}
 \end{frame}
 
@@ -460,7 +468,7 @@ the \emph{report} & the sub-agent & the message list, plus session scratch & no 
 \footnotesize\textbf{Spend effort on \textit{decisions}, save it on \textit{execution}:} max effort on a long context can cost an order of magnitude more than the default.
 \end{frame}
 
-% ---- T2-F12 · EDIT · TIER: READ · from T2:354
+% ==== Phase B · T2-F12 · TIER: READ (/agents pointer)
 % TODO(Phase B): Add one pointer row: "/agents -- inspect which specialists are in scope (T3b)". T2b owns the twelve commands; T3b owns the rung surfaces.
 \begin{frame}{Commands That Earn Their Keep (2): Context, Cost, and Undo}
 \textbf{The other six manage your two budgets --- the window and the meter --- and undo mistakes.}
@@ -488,7 +496,7 @@ the \emph{report} & the sub-agent & the message list, plus session scratch & no 
 
 \begin{takeawaybox}
 \scriptsize
-\textbf{Four dials, not twelve commands.} What it reads (\texttt{/context}, \texttt{/compact}, \texttt{/clear}) $\cdot$ how hard it thinks (\texttt{/model}, \texttt{/effort}, \texttt{/fast}) $\cdot$ how much it may do unasked (modes, \texttt{/permissions}) $\cdot$ what it costs (\texttt{/usage}).
+\textbf{Four dials, not twelve commands.} What it reads (\texttt{/context}, \texttt{/compact}, \texttt{/clear}) $\cdot$ how hard it thinks (\texttt{/model}, \texttt{/effort}, \texttt{/fast}) $\cdot$ how much it may do unasked (modes, \texttt{/permissions}) $\cdot$ what it costs (\texttt{/usage}). Not in the twelve: \texttt{/agents} (T3b).
 \end{takeawaybox}
 \end{frame}
 
@@ -606,10 +614,31 @@ Default & Asks before each action \\ \hline
 \end{conceptbox}
 \end{frame}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): Optional (v1 T2b item 17): the commands, modes, keys and permission settings on one page, one column per tested harness, linked to the official docs; every entry from CLI_FACTS_2026-09.md.
-\begin{frame}{One-Page Cheat Sheet}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+% ==== Phase B · NEW:One-Page Cheat Sheet · TIER: READ
+\begin{frame}{One-Page Cheat Sheet: What You Type, Per Harness}
+\textbf{The handful of commands the lab needs, in the three harnesses the course supports. Everything else is in each tool's \texttt{-{}-help}.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.1cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
+\hline
+\textbf{To\ldots} & \textbf{Claude Code} & \textbf{Gemini CLI} & \textbf{Codex CLI} \\ \hline
+start a session here & \texttt{claude} & \texttt{gemini} & \texttt{codex} \\ \hline
+log in & \texttt{/login} & sign in on first start & \texttt{codex login} \\ \hline
+run once, headless & \texttt{claude -p "\ldots"} & \texttt{gemini -p "\ldots"} & \texttt{codex exec "\ldots"} \\ \hline
+get machine-readable output & \texttt{-{}-output-format json} & \texttt{-o json} & \texttt{-{}-json} \\ \hline
+stay read-only & \texttt{-{}-permission-mode plan} & \texttt{-{}-approval-mode plan} & \texttt{-s read-only} \\ \hline
+see the context budget & \texttt{/context} & \multicolumn{2}{l|}{in the interactive UI; see each tool's docs} \\ \hline
+run in the background & \texttt{claude -{}-bg}; \texttt{claude agents} & --- & \texttt{codex agents} (browse sessions) \\ \hline
+check your setup & \multicolumn{3}{l|}{\texttt{python3 scripts/setup\_check.py -{}-live} \quad (from the lab folder)} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+{\scriptsize \textit{From each CLI's own help on 12 Sep 2026 (Claude Code 2.1.270, Gemini CLI 0.47.0, Codex CLI 0.154.0); flags drift between releases --- re-check with \texttt{-{}-help}. \textbf{[dated]}}}
 \end{frame}
 
 
@@ -847,14 +876,14 @@ claude> [Read sources/fellows_page.html]
 \end{itemize}
 \end{frame}
 
-% ---- T2-F22 · EDIT · TIER: READ · from T2:724
+% ==== Phase B · T2-F22 · TIER: READ (dated /compact practice)
 % TODO(Phase B): Footnote the /compact <focus> syntax and the ~20-turn heuristic from archive v1 (Context Window Mechanics), tagged dated.
 \begin{frame}{Compaction: What \texttt{/compact} Keeps and What It Drops}
 \textbf{When the window fills, the harness summarizes: that is compaction. It is a lossy operation, and you should treat it as one.}
 
 \vspace{0.1cm}
 
-\begin{itemize}
+\begin{itemize}\footnotesize
     \item \texttt{/compact} = \textbf{summarize and clear}: older tool outputs are dropped first, the dialogue is condensed into a summary, and \texttt{CLAUDE.md} + rules are re-read from disk
     \item \textbf{What survives:} the decisions, the current task, key snippets. \textbf{What often does not:} the \emph{reasoning} behind decisions, rejected alternatives, small corrections you made in passing
     \item \textbf{Auto-compaction:} by default the harness compacts on its own as the window fills --- convenient, but the same information loss applies whether you triggered it or not
@@ -869,11 +898,10 @@ claude> [Read sources/fellows_page.html]
 \end{takeawaybox}
 
 \vspace{0.05cm}
-\footnotesize\textit{That is the mechanics. T5c returns to what this trade-off costs research integrity --- and why more context is not always better.}
+{\scriptsize\textit{T5c returns to what this trade-off costs research integrity. Dated (Claude Code, Sept.\ 2026): \texttt{/compact} takes focus instructions (``\texttt{/compact keep the asset-grid decision}''); \texttt{-{}-autocompact} sets when it fires; ``compact every 20 turns'' is folklore --- compact between phases.}}
 \end{frame}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): Add the 9.3 economic twin (dividing the labour) in Phase B.
+% ==== Phase B · NEW:Bridge: From Using an Agent to Building One · TIER: READ
 \begin{frame}{Bridge: From Using an Agent to Building One}
 \textbf{You can install, launch, steer, budget, and read the screen. In the lab folder sit six agent files you have not yet written.}
 
@@ -881,6 +909,7 @@ claude> [Read sources/fellows_page.html]
 
 \begin{itemize}
     \item \textbf{Next (Part 9.3):} build one from scratch (T3a), then learn the three ways to call it (T3b)
+    \item \textbf{The economist's version of Part 9.3:} how should the labour be divided --- and what does each specialist need to know, and not know?
 \end{itemize}
 \end{frame}
 
