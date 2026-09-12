@@ -12,6 +12,7 @@ the decks it describes.
   python3 tools/lec09_assemble.py check     [--strict]    # manifest integrity
   python3 tools/lec09_assemble.py assemble  [--deck T1] [--force]
   python3 tools/lec09_assemble.py summary                 # tiers per deck
+  python3 tools/lec09_assemble.py runsheet                # the CORE path, in order
 
 `check` verifies that every source frame is used exactly once (as a frame, a
 merge source, or a cut) and that every listed edit applies exactly as written.
@@ -283,7 +284,7 @@ def cmd_check(args) -> int:
         if uses[fid] != 1:
             errors.append(f"{fid} ({frames[fid].title}) is used {uses[fid]} times")
     errors += [f"manifest names unknown frame {fid}" for fid in uses if fid not in frames]
-    drift = []
+    drift, rewritten = [], 0
     for deck in manifest["decks"]:
         path = os.path.join(L9, deck["file"])
         if not os.path.exists(path):
@@ -295,7 +296,11 @@ def cmd_check(args) -> int:
                     continue
                 expected, _ = apply_edits(fid, frames[fid].text, item_edits(item, fid))
                 if fid not in current:
-                    drift.append(f"{deck['file']}: marker for {fid} missing")
+                    # Phase B deletes a frame's marker once its rewrite is done.
+                    if args.strict:
+                        drift.append(f"{deck['file']}: marker for {fid} missing")
+                    else:
+                        rewritten += 1
                 elif current[fid] != expected:
                     drift.append(f"{deck['file']}: {fid} differs from source + edits")
     for e in errors:
@@ -303,8 +308,8 @@ def cmd_check(args) -> int:
     for d in drift:
         print("DRIFT" if not args.strict else "ERROR", d)
     status = 1 if errors or (args.strict and drift) else 0
-    print(f"check: {len(frames)} source frames, {len(errors)} errors, {len(drift)} drifted"
-          f"{' (strict)' if args.strict else ''}")
+    print(f"check: {len(frames)} source frames, {len(errors)} errors, {len(drift)} drifted, "
+          f"{rewritten} rewritten (marker removed){' (strict)' if args.strict else ''}")
     return status
 
 
@@ -350,6 +355,26 @@ def cmd_summary(args):
     print(f"cut: {len(manifest.get('cut') or {})}")
 
 
+def cmd_runsheet(args):
+    """CORE path in teaching order, as a Markdown table body."""
+    frames = all_frames()
+    for deck in load_manifest()["decks"]:
+        core = [i for i in deck["items"] if i.get("tier") == "CORE"]
+        if not core:
+            continue
+        print(f"\n**{deck['key']}** · {deck['subtitle'].split(': ', 1)[1]}\n")
+        print("| # | Frame | Source |\n|---|---|---|")
+        for n, item in enumerate(core, 1):
+            if "new" in item:
+                title, src = item["new"], "NEW"
+            else:
+                ids = [item["frame"]] if "frame" in item else item["merge"]
+                text, _ = apply_edits(ids[0], frames[ids[0]].text, item_edits(item, ids[0]))
+                title = frame_title(text.splitlines()[0])
+                src = " + ".join(ids)
+            print(f"| {n} | {title} | {src} |")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -359,9 +384,11 @@ def main() -> int:
     sub.choices["assemble"].add_argument("--force", action="store_true")
     sub.add_parser("check").add_argument("--strict", action="store_true")
     sub.add_parser("summary")
+    sub.add_parser("runsheet")
     args = ap.parse_args()
     return {"inventory": cmd_inventory, "refs": cmd_refs, "check": cmd_check,
-            "assemble": cmd_assemble, "summary": cmd_summary}[args.cmd](args) or 0
+            "assemble": cmd_assemble, "summary": cmd_summary,
+            "runsheet": cmd_runsheet}[args.cmd](args) or 0
 
 
 if __name__ == "__main__":
