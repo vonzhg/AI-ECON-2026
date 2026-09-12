@@ -33,7 +33,7 @@ Lecture 9.3a: Build an Agent From Scratch --- Eight Steps, One Canvas}
 \LecNineMap{3}{a}
 
 \vspace{0.1cm}
-\footnotesize\textit{Route: why three agents, not one $\to$ the eight steps and the canvas $\to$ tool, skill, sub-agent: where the reasoning lives.}
+\footnotesize\textit{Route: why three agents, not one $\to$ the eight steps and the canvas $\to$ tool, skill, sub-agent: where the reasoning lives. The economist's question for this part: how should the labour be divided --- and what goes in each contract?}
 \end{frame}
 
 
@@ -200,7 +200,7 @@ Still entirely yours & the question, the validation, the defence & the question,
 
 \sectiondivider{The Eight Steps}{From a job description to a file you can dispatch}
 
-% ---- T2b-F13 · EDIT · TIER: CORE · from T2b:486
+% ==== Phase B · T2b-F13 · TIER: CORE
 \begin{frame}{Eight Steps, Eight Artifacts --- You Are Building an Agent, Not a Model}
 \textbf{T5a's six-step ladder builds a model. This ladder builds the thing that reviews it. Same discipline: every step ends in an artifact.}
 
@@ -230,7 +230,7 @@ Still entirely yours & the question, the validation, the defence & the question,
 
     \node[rectangle, draw=RedTitle!70, fill=blue!5, rounded corners, font=\scriptsize,
           text width=2.6cm, align=center, minimum height=1.5cm] at (11.3,0.0)
-        {\textbf{Steps 2--4} are the \textbf{three dials} the next section names.\\[3pt]
+        {\textbf{Steps 2--4} are the \textbf{three dials} T3b names.\\[3pt]
          {\tiny\itshape Step 7 sends you back to step 2.}};
 \end{tikzpicture}
 \end{center}
@@ -238,12 +238,11 @@ Still entirely yours & the question, the validation, the defence & the question,
 \vspace{0.08cm}
 
 \begin{takeawaybox}
-\footnotesize\textbf{Eight artifacts, in order.} A sentence of the form \emph{``it produces X; I will know it failed when Y''}; a \texttt{system} prompt; a \texttt{tools:} line; a task string; a return format; a token ceiling and a stop rule; a $3 \times 3$ detection matrix; a committed file. \textbf{Seven of the eight produce English, not code --- and a step that produced no artifact was skipped.}
+\footnotesize\textbf{Eight artifacts, in order.} A sentence of the form \emph{``it produces X; I will know it failed when Y''}; a \texttt{system} prompt; a \texttt{tools:} line; a task string; a return format; a token ceiling and a stop rule; a $3 \times 3$ detection matrix; a committed file. \textbf{Seven of the eight produce English, not code --- and a step that produced no artifact was skipped.} The design canvas is these eight steps on one page.
 \end{takeawaybox}
 \end{frame}
 
-% ---- T2b-F14 · EDIT · TIER: READ · from T2b:527
-% TODO(Phase B): Sync the listing with labs/Lec09_Agent_Lab/.claude/agents/code-reviewer.md verbatim.
+% ==== Phase B · T2b-F14 · TIER: READ
 \begin{frame}[fragile]{Steps 1--2 --- Name the Failure, Then Write the Job Description}
 \textbf{Step 1 is one sentence: \emph{it produces X, and I will know it failed when Y}. Step 2 is that sentence expanded --- the only part of an agent that is not a setting.}
 
@@ -251,34 +250,34 @@ Still entirely yours & the question, the validation, the defence & the question,
 
 \begin{columns}[T]
 \begin{column}{0.53\textwidth}
-\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.7}{5.4}\selectfont,numbers=none]
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.5}{5.1}\selectfont,numbers=none]
 ---
 name: code-reviewer
-description: Reviews Python numerical code for
-  bugs, convergence problems, and silent failure
-  modes. Use when the user asks for a code review
-  or reports that results look wrong. Does NOT
-  judge economics -- domain-reviewer's job.
+description: Reviews Python numerical code for bugs,
+  convergence problems, and silent failure modes. Use
+  when the user asks for a code review, asks whether a
+  solver is correct, or reports that results look
+  wrong. Does NOT judge economics -- that is
+  domain-reviewer's job.
 tools: Read, Grep, Glob
 model: sonnet
 ---
-You are a careful reviewer of scientific Python.
-This is research code, not production software:
-correctness and silent failure matter far more than
-style. Report, in this order:
+You are a careful reviewer of scientific Python. [...]
+Report, in this order:
 
-1. Outright bugs -- wrong index, wrong sign,
-   wrong order of operations.
-2. Silent failures -- a loop that exits on
-   iteration count rather than a convergence
-   criterion; a tolerance never checked.
-3. Numerical fragility -- division without a
-   guard; a grid too coarse for the claim.
+1. Outright bugs -- wrong index, wrong sign, wrong
+   order of operations.
+2. Silent failures -- a loop that exits on iteration
+   count rather than on a convergence criterion, a
+   tolerance never checked, an exception swallowed.
+3. Numerical fragility -- division without a guard,
+   a grid too coarse to support the claim, [...]
 
 For each finding give the line number, quote the
 line, and say what goes wrong at run time. If you
-find nothing in a category, say so explicitly
-rather than inventing an issue.
+find nothing in a category, say so explicitly rather
+than inventing an issue. Do not comment on the
+economics.
 \end{lstlisting}
 \end{column}
 \begin{column}{0.45\textwidth}
@@ -289,7 +288,7 @@ rather than inventing an issue.
 \end{enumerate}
 
 \vspace{0.1cm}
-{\scriptsize \textit{Verbatim from this course's own lab, \texttt{labs/Lec09\_Agent\_Lab/.claude/agents/}. Every slide so far has \emph{talked} about these files; this is the first one you have seen. \textbf{[solid]}}}
+{\tiny \textit{The lab's \texttt{code-reviewer.md}: line breaks added, bold dropped, [\ldots] marks a cut. The first agent file you have seen. \textbf{[solid]}}}
 \end{column}
 \end{columns}
 \end{frame}
@@ -500,9 +499,7 @@ total wall clock & 2\,m\,59\,s \\ \hline
 {\footnotesize\textbf{Why this is not busywork.} A term that drifts is a variable that drifts --- and the glossary is what lets \texttt{math-agent} and \texttt{econ-agent} disagree about \emph{economics} rather than about what you meant.}
 \end{frame}
 
-% ---- T2b-F20 · EDIT · TIER: CORE · from T2b:778
-% TODO(Phase B): \href to labs/Lec09_Agent_Lab/AGENT_DESIGN_CANVAS.md (URL repeated in a footnote); sync math-agent listing with the real file.
-% TODO(Phase B): Review A2.2: the canvas compiles to a harness-neutral brief (briefs/<name>.md) -> a Claude Code sub-agent, a skill, or a headless prompt.
+% ==== Phase B · T2b-F20 · TIER: CORE
 \begin{frame}[fragile]{The Agent Design Canvas: Eight Cells, One Worked Answer}
 \textbf{Eight steps, one page, filled in before you write a line. Bold is the question; grey is one worked answer; the file beside it is what that answer compiles to.}
 
@@ -553,7 +550,7 @@ Never assert a result you cannot derive in the reply.
 \end{columns}
 
 \vspace{0.05cm}
-{\footnotesize\textbf{Then debug the English:} ask it one thing it \emph{should} handle and one it should \emph{not}, and narrow the \texttt{description} until both behave (T3b). \textbf{T4 hands you the blank one.}}
+{\scriptsize\textbf{Then debug the English} (T3b). \textbf{T4 hands you the blank canvas} and compiles the same eight answers for any of the three harnesses. \textit{Listing condensed from the lab's \texttt{math-agent.md}; canvas on the \href{https://vonzhg.github.io/AI-ECON-2026/labs/}{course labs page}.}}
 \end{frame}
 
 % ---- T2b-F21 · EDIT · TIER: READ · from T2b:831
@@ -635,80 +632,57 @@ There is no compiled artefact and no fixed input schema. The reasoning is still 
 \textbf{Why the confusion matters:} if you believe a skill is code, you will try to write it like code --- rigid parameters, defensive branching. Skills that work read like a good methods appendix written for a capable RA.
 \end{frame}
 
-% ---- T2b-F30 · MERGE-PENDING(T2b-F30+T4-F13) · TIER: READ · from T2b:1245
-% TODO(Phase B): One frame: T4-F13's folder tree above T2b-F30's SKILL.md listing. Review A2: note that the skill format is shared by the tested harnesses (verify in the spike).
-\begin{frame}[fragile]{What a Skill Actually Is: Progressive Disclosure}
-\textbf{The mechanism is a two-stage load, and it is the reason skills are cheap to keep around.}
+% ==== Phase B · T2b-F30..T4-F13 · TIER: READ
+\begin{frame}[fragile]{What a Skill Actually Is: A Folder the Model Opens Only When Needed}
+\textbf{A skill is a folder of prose and helpers. The model sees one line of it until that line matches the task --- which is why skills are cheap to keep.}
 
-\vspace{0.1cm}
+\vspace{0.02cm}
 
 \begin{columns}[T]
-\begin{column}{0.52\textwidth}
-\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+\begin{column}{0.53\textwidth}
+{\scriptsize A skill folder, e.g.\ Lec10's: \texttt{review-paper-skill/} $\to$ \texttt{SKILL.md} (the protocol) $+$ \texttt{references/} (loaded on demand)}
+
+\vspace{0.04cm}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.0}{5.8}\selectfont,numbers=none]
 ---
 name: olg-5step
-description: Manually run the local
-  five-step OLG dynamic-macro demo.
-  Use when explicitly invoked to
-  demonstrate Model -> Equilibrium ->
-  Algorithm -> Pseudo-code -> Implement.
+description: Manually run the local five-step
+  OLG dynamic-macro demo. Use when explicitly
+  invoked to demonstrate Model -> Equilibrium
+  -> Algorithm -> Pseudo-code -> Implement.
+argument-hint: "stage number or command"
 disable-model-invocation: true
 ---
-
 # OLG Five-Step Skill
-Use this skill to demonstrate the five-
-stage agentic dynamic-macro workflow.
+Use this skill to demonstrate the five-stage
+agentic dynamic-macro workflow.
 ## Workflow
-1. Work from the demo root, the folder
-   containing run.py, stages/, src/.
-...
+1. Work from the demo root [...]
 \end{lstlisting}
-{\scriptsize \textit{This repository's own skill: \texttt{demos/M4\_olg\_5step\_demo/.claude/skills/olg-5step/SKILL.md}}}
+{\tiny \textit{This repository's OLG demo skill (\texttt{.claude/skills/olg-5step/SKILL.md}); line breaks added.}}
 \end{column}
-\begin{column}{0.46\textwidth}
+\begin{column}{0.45\textwidth}
 \begin{center}
 \begin{tikzpicture}[font=\tiny,
     st/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
-               minimum width=3.5cm, minimum height=0.72cm, text width=3.35cm, align=center},
+               minimum width=3.5cm, minimum height=0.7cm, text width=3.35cm, align=center},
     on/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
-               minimum width=3.5cm, minimum height=0.72cm, text width=3.35cm, align=center},
+               minimum width=3.5cm, minimum height=0.7cm, text width=3.35cm, align=center},
     arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70}]
-    \node[on] (a) at (0,2.1) {\textbf{always in context}\\ the \texttt{description} line only};
-    \node[st] (b) at (0,0.85) {\textbf{on trigger}\\ the model reads the body};
-    \node[st] (c) at (0,-0.4) {\textbf{on demand}\\ scripts run, files load};
+    \node[on] (a) at (0,1.8) {\textbf{always in context}\\ the \texttt{description} line only};
+    \node[st] (b) at (0,0.75) {\textbf{on trigger}\\ the model reads \texttt{SKILL.md}};
+    \node[st] (c) at (0,-0.3) {\textbf{on demand}\\ references load, scripts run};
     \draw[arr] (a) -- (b);
     \draw[arr] (b) -- (c);
-    \node[align=center, black!65] at (0,-1.25) {cheap to have twenty;\\ you pay for the one you use};
+    \node[align=center, black!65] at (0,-1.0) {cheap to have twenty; you pay for the one you use};
 \end{tikzpicture}
 \end{center}
+
 \end{column}
 \end{columns}
 
-\vspace{0.1cm}
-\footnotesize\textbf{The \texttt{description} is load-bearing.} It is the only part the model always sees, so it is what selection runs on --- the same prose-driven choice as sub-agent dispatch in T3b. T5b returns to \emph{when} skills load; this is \emph{how} they are chosen.
-\end{frame}
-
-% ---- T4-F13 · MERGE-PENDING(T2b-F30+T4-F13) · TIER: READ · from T4:367
-\begin{frame}[fragile]{Skill File Structure}
-\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
-.claude/skills/paper-review/
-  SKILL.md
-  references/
-    referee-template.md
-\end{lstlisting}
-
-\vspace{0.2cm}
-
-\textbf{\texttt{SKILL.md}} stores the repeatable protocol:
-\begin{itemize}
-    \item what the command is called
-    \item what steps it should follow
-    \item what checks must pass before it reports success
-\end{itemize}
-
-\vspace{0.2cm}
-
-\textbf{Reference files} store task-specific detail that would clutter the main instruction file.
+\vspace{0.08cm}
+\footnotesize\textbf{The \texttt{description} is load-bearing:} selection runs on the only part the model always sees --- as with sub-agent dispatch in T3b. Gemini CLI and Codex CLI read the same \texttt{SKILL.md} format (T2b); T5b returns to \emph{when} skills load.
 \end{frame}
 
 % ---- T2b-F31 · EDIT · TIER: CORE · from T2b:1296
@@ -844,10 +818,26 @@ disable-model-invocation: true
 \textbf{Portable idea:} Claude may call them \texttt{skills}; Codex may package them differently. The durable object is a saved playbook with triggers, allowed tools, steps, and acceptance tests.
 \end{frame}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): From archive v1:1561 (repo URLs at v1:1591, re-verify each): Sant'Anna review-paper / data-analysis, Blattman proposal-write, plus the course's own Lec10 T2 review-paper skill as example 4.
+% ==== Phase B · NEW:Economist-Authored Skills in the Wild · TIER: READ
 \begin{frame}{Economist-Authored Skills in the Wild}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{Working economists already publish their skills. Read them as patterns to adapt, not scripts to install blindly.}
+
+\vspace{0.1cm}
+
+\begin{itemize}\small
+    \item \textbf{Pedro Sant'Anna, \texttt{claude-code-my-workflow}} --- ``a ready-to-fork foundation for AI-assisted academic work'' in LaTeX and R, with dozens of skills, among them \texttt{/review-paper}, \texttt{/data-analysis}, \texttt{/replication-package}, \texttt{/stata-replication}, \texttt{/power-analysis}, and \texttt{/submission-disclosures}
+    \item \textbf{Chris Blattman, \texttt{claudeblattman}} --- ``a free, open-source resource for non-developers who want to build real AI workflows,'' with downloadable skill files
+    \item \textbf{This course, \texttt{review-paper}} (Lec10 T2) --- a multi-stage referee pipeline with a references folder and quote verification; the capstone's track D2 asks you to build one like it
+\end{itemize}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{What to copy is the discipline, not the file.} Each published skill encodes someone else's research habits --- their checks, their gates, their idea of done. Adopt a skill only after you can say what it checks and what it would miss.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+{\scriptsize \textit{\texttt{github.com/pedrohcgs/claude-code-my-workflow} and \texttt{github.com/chrisblattman/claudeblattman}, both MIT-licensed; checked 12 Sep 2026. \textbf{[solid]}}}
 \end{frame}
 
 % ---- NEW · TIER: READ
