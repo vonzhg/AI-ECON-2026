@@ -13,6 +13,7 @@ the decks it describes.
   python3 tools/lec09_assemble.py assemble  [--deck T1] [--force]
   python3 tools/lec09_assemble.py summary                 # tiers per deck
   python3 tools/lec09_assemble.py runsheet                # the CORE path, in order
+  python3 tools/lec09_assemble.py rewrite T1 --target T1-F07 --through T1-F10 --with new.tex
 
 `check` verifies that every source frame is used exactly once (as a frame, a
 merge source, or a cut) and that every listed edit applies exactly as written.
@@ -62,6 +63,7 @@ PREAMBLE = r"""\input{../shared_preamble.tex}
 \graphicspath{{./pic/}{./figures/}{../}}
 
 \usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
 @@MAP_INPUT@@
 \title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
 @@SUBTITLE@@}
@@ -355,6 +357,56 @@ def cmd_summary(args):
     print(f"cut: {len(manifest.get('cut') or {})}")
 
 
+def cmd_rewrite(args) -> int:
+    """Phase B: replace a marked block (one frame, or a run of frames) with new text.
+
+    --target is a source frame ID (T1-F07) or NEW:<frame title>; --through extends
+    the block to the end of a later marked frame (a pending merge).  The block runs
+    from the target's marker line to the \\end{frame} that closes the last frame,
+    and is replaced by a provenance line plus the new frames.
+    """
+    deck = next((d for d in load_manifest()["decks"] if d["key"] == args.deck), None)
+    if deck is None:
+        sys.exit(f"no deck {args.deck} in the manifest")
+    path = os.path.join(L9, deck["file"])
+    lines = open(path, encoding="utf-8").read().splitlines(keepends=True)
+
+    def marker_index(target: str) -> int:
+        if target.startswith("NEW:"):
+            title = "\\begin{frame}{" + target[4:] + "}"
+            for i, line in enumerate(lines):
+                if line.startswith(title):
+                    j = i - 1
+                    while j >= 0 and not lines[j].startswith("% ---- NEW"):
+                        j -= 1
+                    return j
+            sys.exit(f"no placeholder frame titled {target[4:]!r} in {deck['file']}")
+        for i, line in enumerate(lines):
+            if line.startswith(f"% ---- {target} · "):
+                return i
+        sys.exit(f"no marker for {target} in {deck['file']} (already rewritten?)")
+
+    start = marker_index(args.target)
+    last = marker_index(args.through) if args.through else start
+    if last < start:
+        sys.exit("--through must name a later frame")
+    tier = re.search(r"TIER: (\w+)", lines[start])
+    end = last
+    while not BEGIN.match(lines[end]):
+        end += 1
+    while not END.match(lines[end]):
+        end += 1
+    new = open(args.with_file, encoding="utf-8").read().strip("\n") + "\n"
+    if len(re.findall(r"^\\begin\{frame\}", new, re.M)) != len(re.findall(r"^\\end\{frame\}", new, re.M)):
+        sys.exit("replacement text has unbalanced \\begin{frame}/\\end{frame}")
+    ids = args.target if not args.through else f"{args.target}..{args.through}"
+    head = f"% ==== Phase B · {ids} · TIER: {tier.group(1) if tier else '?'}\n"
+    lines[start:end + 1] = [head, new]
+    open(path, "w", encoding="utf-8").write("".join(lines))
+    print(f"{deck['file']}: replaced lines {start + 1}-{end + 1} ({ids})")
+    return 0
+
+
 def cmd_runsheet(args):
     """CORE path in teaching order, as a Markdown table body."""
     frames = all_frames()
@@ -385,10 +437,15 @@ def main() -> int:
     sub.add_parser("check").add_argument("--strict", action="store_true")
     sub.add_parser("summary")
     sub.add_parser("runsheet")
+    rw = sub.add_parser("rewrite")
+    rw.add_argument("deck")
+    rw.add_argument("--target", required=True)
+    rw.add_argument("--through")
+    rw.add_argument("--with", dest="with_file", required=True)
     args = ap.parse_args()
     return {"inventory": cmd_inventory, "refs": cmd_refs, "check": cmd_check,
             "assemble": cmd_assemble, "summary": cmd_summary,
-            "runsheet": cmd_runsheet}[args.cmd](args) or 0
+            "runsheet": cmd_runsheet, "rewrite": cmd_rewrite}[args.cmd](args) or 0
 
 
 if __name__ == "__main__":
