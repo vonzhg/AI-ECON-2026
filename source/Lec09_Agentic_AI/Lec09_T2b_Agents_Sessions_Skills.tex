@@ -1,0 +1,1653 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.2b: Anatomy of an Agent
+%% Satellite interlude after T2, mirroring how T1b sits after T1.
+%% Written 2026-09-04 to answer notes/09-04-2026.txt: how an agent works, how a
+%% set of agents is created through an API, how many can run at once, how
+%% "automatic dispatch" actually works, and how an agent differs from a skill.
+%%
+%% Boundary discipline (audited against all seven Lec09 decks before writing):
+%%   T1b owns orchestration-pattern names, the framework table, and the
+%%        multi-agent cost-benefit numbers  -> cross-reference, never restate.
+%%   T2   owns harness/LLM/files and "same brain, no separate planner"
+%%        -> this deck extends that claim from one agent to many.
+%%   T4   owns Skills/Agents/Rules sorted by WHEN THEY LOAD, and the RA team
+%%        -> this deck sorts Tool/Skill/Sub-agent by WHO SUPPLIES THE REASONING.
+%%   T5   owns the epistemic caveat on sub-agents -> defer to it, do not soften.
+%% Hard constraint from Lec09_Rewrite_Plan_2026-07-06.md: MCP appears ONLY in T1b.
+%% Deliberately does NOT \input{lec09_map.tex}: \LecNineMap models the five acts,
+%% and adding a satellite node would force a rebuild of T1-T5.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.2b: Anatomy of an Agent --- Sessions, Sub-Agents, and Skills}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 9.2b Agenda}
+\textbf{T2 opened the hood on one agent. This interlude answers the six questions students actually ask once they have run a session --- and corrects three beliefs that are widespread and wrong.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+  \item \textbf{One agent, written out} --- what a ``session'' physically is, and the loop in twenty lines of Python
+  \item \textbf{Three backgrounds, three agents} --- the eight steps that turn a job description into a file you can dispatch
+  \item \textbf{Many agents} --- how you create a \emph{set} of them, and what actually limits the number
+  \item \textbf{Who decides to dispatch?} --- the router myth, and what really happens
+  \item \textbf{Agent vs.\ skill} --- a distinction most write-ups get backwards
+  \item \textbf{Synthesis} --- and a lab where you design and dispatch your own agents
+\end{enumerate}
+
+\vspace{0.18cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Why a separate deck.} T1b surveyed the \emph{landscape} of multi-agent systems; T4 taught you to \emph{use} sub-agents. Neither showed the machinery, and neither had you \emph{build} one. Everything here is checkable on your own machine --- and the lab makes you check it.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Reading convention, as in T1b: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report.}}
+\end{frame}
+
+%=============================================================================
+\section{One Agent, Written Out}
+%===========================================================
+
+\sectiondivider{One Agent, Written Out}{What a session is, and the loop that drives it}
+
+\begin{frame}{From One JSON Line to a Running Loop}
+\textbf{When an agent wants to read a file, it does not read the file. It \emph{writes a request} --- one line of JSON --- and something else does the reading.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.78,
+    b/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+              minimum width=2.6cm, minimum height=0.95cm, text width=2.45cm, align=center},
+    m/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+              minimum width=2.6cm, minimum height=0.95cm, text width=2.45cm, align=center},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}]
+    \node[m] (llm)  at (0,0)    {\textbf{The model}\\ (on Anthropic's servers)};
+    \node[b] (harn) at (4.6,0)  {\textbf{The harness}\\ Claude Code, on your laptop};
+    \node[b] (disk) at (9.2,0)  {\textbf{Your disk}\\ \texttt{fellows\_seed.csv}};
+    \draw[arr] (llm) -- node[above, font=\tiny, align=center] {\textbf{writes} this JSON} (harn);
+    \draw[arr] (harn) -- node[above, font=\tiny] {\textbf{runs} it} (disk);
+    \draw[arr] (disk) to[bend left=28] node[below, font=\tiny] {file contents go back to the model} (llm);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{What the model emits} (T2's line):
+
+\vspace{0.08cm}
+{\ttfamily\scriptsize \{"tool": "Read",\\ \phantom{x}"args": \{"file\_path": "\ldots"\}\}}
+
+\vspace{0.1cm}
+{\scriptsize It is \emph{text the model generated}, in a shape you told it to use. The model cannot touch your disk; the harness can.}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{conceptbox}
+\footnotesize
+\textbf{The naive mental model.} ``I open a session, the model remembers me, and somewhere a dispatcher assigns work to specialists.''
+
+\vspace{0.12cm}
+Every clause is wrong. This deck replaces it --- and the cost model, the context limits, and the sub-agent behaviour of T4--T5 all follow.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Answered next:} if nothing is stored, what is a ``session'' --- and where is ``the agent''?}
+\end{frame}
+
+\begin{frame}{First, the Vocabulary: Who Is Speaking?}
+\textbf{Every message carries a \texttt{role} label saying who produced it. There are three things you will see, and one is misleadingly named.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{2.4cm}|p{3.4cm}|p{4.8cm}|}
+\hline
+\textbf{Label} & \textbf{Who actually wrote it} & \textbf{Example} \\ \hline
+\texttt{"user"} & \textbf{you} & ``Solve the model and report $r$.'' \\ \hline
+\texttt{"assistant"} & \textbf{the LLM} --- Claude itself & the JSON tool request on the last slide \\ \hline
+\texttt{"user"}, containing a \texttt{tool\_result} & \textbf{your harness}, reporting what a tool returned & the contents of \texttt{fellows\_seed.csv} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{The naming trap.} ``Assistant'' is simply the API's word for \emph{the model's own turn} --- it is not a separate helper program. And tool results are labelled \texttt{"user"} even though you did not type them: the API has only two speakers, so anything sent \emph{to} the model is labelled \texttt{"user"}, whoever produced it. Read \texttt{"user"} as ``input to the model'', not as ``the human''.
+\end{cautionbox}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Why it matters:} \texttt{assistant} means \emph{the model}; tool output re-enters as \texttt{user}. That is all the vocabulary this deck needs.}
+\end{frame}
+
+\begin{frame}{The Session Is a List, Not a Connection}
+\textbf{The API is stateless. Each turn is a \emph{separate} request that carries the entire conversation so far --- the model remembers nothing between calls.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    msg/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+                minimum width=2.5cm, minimum height=0.42cm, font=\tiny, align=center},
+    new/.style={rectangle, draw=RedTitle!75, fill=blue!10, rounded corners,
+                minimum width=2.5cm, minimum height=0.42cm, font=\tiny, align=center},
+    hd/.style={font=\scriptsize\bfseries},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!65}
+]
+    \node[hd] at (0,1.15) {Turn 1};
+    \node[new] (a1) at (0,0.6) {user: ``solve it''};
+    \node[draw=gray!45, dashed, fit=(a1), inner sep=2pt] {};
+
+    \node[hd] at (3.6,1.15) {Turn 2};
+    \node[msg] (b1) at (3.6,0.6) {user: ``solve it''};
+    \node[msg] (b2) at (3.6,0.12) {assistant: tool\_use};
+    \node[new] (b3) at (3.6,-0.36) {user: tool\_result};
+    \node[draw=gray!45, dashed, fit=(b1)(b3), inner sep=2pt] {};
+
+    \node[hd] at (7.2,1.15) {Turn 3};
+    \node[msg] (c1) at (7.2,0.6) {user: ``solve it''};
+    \node[msg] (c2) at (7.2,0.12) {assistant: tool\_use};
+    \node[msg] (c3) at (7.2,-0.36) {user: tool\_result};
+    \node[msg] (c4) at (7.2,-0.84) {assistant: tool\_use};
+    \node[new] (c5) at (7.2,-1.32) {user: tool\_result};
+    \node[draw=gray!45, dashed, fit=(c1)(c5), inner sep=2pt] {};
+
+    \draw[arr] (1.35,0.1) -- (2.25,0.1);
+    \draw[arr] (4.95,-0.1) -- (5.85,-0.1);
+
+    \node[font=\tiny, gray!75, align=center] at (1.8,-0.35) {new request,\\\emph{whole list again}};
+    \node[font=\tiny, gray!75, align=center] at (5.4,-0.55) {new request,\\\emph{whole list again}};
+
+    \node[font=\scriptsize, align=center] at (10.2,0.0)
+        {\textbf{Blue $=$ the only}\\\textbf{new bytes}\\[3pt]
+         Grey $=$ re-sent\\verbatim, and\\re-charged};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{itemize}\footnotesize
+    \item \textbf{``Re-send everything'' is literal:} turn 3 is a fresh request carrying turns 1--3 in full
+    \item No open connection, no server-side memory of you
+    \item ``Context window full'' means \emph{this list} outgrew the limit
+    \item You are billed for the whole list each turn
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{Where the list starts and stops.} \texttt{/clear} does exactly one thing: it throws the list away and starts an empty one. Compaction replaces the list with a summary of itself. Both are list operations --- there is no ``connection'' to reset.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Four Moving Parts, One Function Call}
+\textbf{An agent is not a service you connect to. It is four arguments you assemble and send.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|p{1.9cm}|p{3.4cm}|p{5.4cm}|}
+\hline
+\textbf{Argument} & \textbf{What it is} & \textbf{Concretely} \\ \hline
+\texttt{model} & \textbf{which LLM} to send to & the string \texttt{"claude-opus-5"} --- just a name; you are picking a brain \\ \hline
+\texttt{system} & the \textbf{standing instructions}: role, rules, style, read \emph{before} the conversation & ``You are a computational macroeconomist. Never invent data.'' This is what \texttt{CLAUDE.md} becomes (T4) \\ \hline
+\texttt{tools} & the \textbf{menu of actions} --- name, description, argument schema. \emph{Descriptions only; no code is sent} & ``\texttt{Read}: read a file. Arguments: \texttt{file\_path} (string).'' The model picks from this menu \\ \hline
+\texttt{messages} & the \textbf{conversation so far} & every \texttt{user} / \texttt{assistant} / \texttt{tool\_result} turn, in order \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{What comes back:} ordinary text, or \texttt{tool\_use} blocks --- the model asking you to run something from the menu. Change \texttt{system} and \texttt{tools} and you have a \emph{different agent}; there is no ``agent object'' to create or shut down.}
+\end{frame}
+
+\begin{frame}[fragile]{The Loop in Twenty Lines --- Written by You, Once}
+\textbf{You write this loop once. The model never writes or runs it --- it only supplies the replies the loop reads.}
+
+\vspace{0.04cm}
+
+\begin{lstlisting}[style=pythonstyle,basicstyle=\ttfamily\fontsize{5.4}{6.2}\selectfont]
+messages = [{"role": "user", "content": "Solve the model and report r."}]
+
+while True:
+    resp = client.messages.create(
+        model="claude-opus-5",
+        max_tokens=16000,
+        system="You are a computational macroeconomist.",
+        tools=TOOLS,                      # schemas, not functions
+        messages=messages,                # the whole list, every time
+    )
+    if resp.stop_reason != "tool_use":    # model is done talking
+        break
+    messages.append({"role": "assistant", "content": resp.content})
+
+    results = []
+    for b in resp.content:                # may be SEVERAL tool calls
+        if b.type == "tool_use":
+            results.append({"type": "tool_result",
+                            "tool_use_id": b.id,      # must match
+                            "content": run_tool(b.name, b.input)})
+    messages.append({"role": "user", "content": results})
+\end{lstlisting}
+
+\vspace{0.02cm}
+{\scriptsize\textbf{Not automatic:} this file --- a person wrote it. \textbf{Automatic:} \emph{which} tool, \emph{which} arguments, when to stop --- chosen by the model inside \texttt{create()}, line 4. \textbf{Line 9 with line 21:} the list only grows and is re-sent whole every pass.}
+\end{frame}
+
+\begin{frame}{ReAct, Named --- and Where the Textbook Diagram Is Now Dated}
+\textbf{The loop you just read has a name in the literature: ReAct --- reason, act, observe, repeat \textnormal{(Yao et al., 2022)}.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{center}
+\begin{tikzpicture}[
+    st/.style={rectangle, draw=RedTitle!65, fill=blue!6, rounded corners,
+               minimum width=2.3cm, minimum height=0.62cm, font=\scriptsize, align=center},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}
+]
+    \node[st] (r) at (0,1.5)    {\textbf{Reason}};
+    \node[st] (a) at (2.1,0.0)  {\textbf{Act}};
+    \node[st] (o) at (0,-1.5)   {\textbf{Observe}};
+    \node[st] (d) at (-2.1,0.0) {\textbf{Done?}};
+
+    \draw[arr] (r) to[bend left=22] node[font=\tiny, above right=-1pt] {line 4} (a);
+    \draw[arr] (a) to[bend left=22] node[font=\tiny, below right=-1pt] {line 20} (o);
+    \draw[arr] (o) to[bend left=22] node[font=\tiny, below left=-1pt] {line 21} (d);
+    \draw[arr] (d) to[bend left=22] node[font=\tiny, above left=-1pt] {line 11} (r);
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}\footnotesize
+    \item \textbf{Reason} $=$ the model's turn (line 4)
+    \item \textbf{Act} $=$ your harness runs the tool (line 20)
+    \item \textbf{Observe} $=$ the \texttt{tool\_result} goes back (line 21)
+    \item \textbf{Done?} $=$ the \texttt{stop\_reason} test (line 11)
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Where the 2022 picture is dated.} The original ReAct prompted the model to emit literal \texttt{Thought:} / \texttt{Action:} text that a parser scraped. Current models emit \emph{structured} \texttt{tool\_use} blocks and interleave reasoning with tool calls rather than strictly alternating. \textbf{Treat ReAct as the ancestor of the loop, not as its wire format} --- if you implement the 2022 string-parsing version today you are rebuilding something the API already gives you typed.
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{So Where Does the Agent Live?}
+\textbf{T2 wrote: \emph{``the agent reads it and decides the next action.''} That is convenient shorthand. Taken literally it is misleading --- no single place contains the agent.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.92,
+    loc/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=3.5cm, minimum height=1.75cm, text width=3.35cm, align=center},
+    hd/.style={font=\scriptsize\bfseries}]
+    \node[hd] at (0,1.15)   {Your laptop};
+    \node[loc] at (0,0)     {the \textbf{harness}: the loop\\ the \textbf{tool code}\\ \textbf{the list}, in memory};
+    \node[hd] at (4.5,1.15) {The wire};
+    \node[loc, draw=RedTitle!60, fill=blue!5] at (4.5,0)
+        {one \textbf{HTTPS request}\\ per turn, carrying\\ the \emph{whole} list};
+    \node[hd] at (9.0,1.15) {Anthropic's servers};
+    \node[loc, draw=green!45!black, fill=green!5] at (9.0,0)
+        {the \textbf{model weights}\\ \emph{stateless} --- keeps\\ nothing between calls};
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!70] (1.85,0.3) -- (2.7,0.3);
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!70] (6.3,-0.3) -- (7.2,-0.3);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The agent is the loop, not a location.} ``The agent'' names a \emph{behaviour} that appears when a stateless model is driven by a stateful loop. Delete the loop and there is no agent --- only a model that answers one question. Read T2's sentence as: \emph{the harness appended the tool result to the list, and the next request carried that list to the model.}
+\end{takeawaybox}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Why this is the practical frame:} it tells you where each cost and limit lives --- tokens and the context window on the \emph{wire and the server}, tool permissions and your data on \emph{your laptop} (T2's privacy boundary), and the memory in a list \emph{you} own and can clear.}
+\end{frame}
+
+%=============================================================================
+\section{Three Backgrounds, Three Agents}
+%===========================================================
+
+\sectiondivider{Three Backgrounds, Three Agents}{Why the capstone needs all three --- and the eight steps that build one}
+
+\begin{frame}{The Capstone Needs Three Backgrounds. The Syllabus Requires One.}
+\textbf{The course assumes you are an economist. The capstone assumes you are also a programmer and a mathematician --- and those two are exactly what it never asks for.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.0cm}|p{4.6cm}|p{4.0cm}|}
+\hline
+\textbf{Background} & \textbf{What M3 ``replication verified'' needs} & \textbf{What the course assumes} \\ \hline
+Economics & an estimand or equilibrium concept, and a calibration you can defend & \textbf{required} --- ``intermediate micro and macro'' \\ \hline
+Mathematics & the domain of $u(\cdot)$, the optimality condition, the contraction, a fine enough grid & \textbf{not required} --- recursive methods are ``a plus'' \\ \hline
+Programming $+$ AI & readable sources, a solver that runs, pinned environment, one-command reproduction & \textbf{not required} --- ``Python experience helps but is not required'' \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{The gap is the assignment.} The syllabus is not at fault --- the course builds up what it needs. The problem is \emph{sequencing}: on the day the capstone starts you are short two of the three, and the deliverables do not wait.
+\end{cautionbox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Answered next:} what goes wrong when a background is missing --- and why the output looks fine either way.}
+\end{frame}
+
+\begin{frame}{Three Error Channels --- and All Three Render a Figure}
+\textbf{A missing background does not announce itself. Each of the three produces a different error, in a different place --- and all three produce a program that exits 0 and draws a clean figure.}
+
+\vspace{0.06cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.66,
+    hd/.style={font=\scriptsize\bfseries, align=center},
+    r/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+              minimum width=3.7cm, minimum height=0.8cm, text width=3.5cm, align=center},
+    m/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+              minimum width=3.7cm, minimum height=0.8cm, text width=3.5cm, align=center},
+    fig/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=3.7cm, minimum height=0.42cm, font=\scriptsize, align=center},
+    arr/.style={-{Stealth[length=1.6mm]}, thick, gray!70},
+    cpt/.style={font=\tiny, align=center, gray!75}]
+
+    \node[hd] at (0,2.5)   {Programming $+$ AI};
+    \node[hd] at (4.1,2.5) {Mathematics};
+    \node[hd] at (8.2,2.5) {Economics};
+
+    \node[r] (r1) at (0,1.6)   {source never parsed --- a Chinese-language PDF read as garbled prose, tables lost};
+    \node[r] (r2) at (4.1,1.6) {$\sigma = 2$, so $u(c) = -1/c$ --- which is \emph{positive} for $c < 0$};
+    \node[r] (r3) at (8.2,1.6) {$r$ held fixed; aggregate assets computed, then discarded};
+
+    \node[m] (m1) at (0,0.3)   {code written against an equation the model \emph{paraphrased}};
+    \node[m] (m2) at (4.1,0.3) {iteration converges to a policy that \textbf{rewards bankruptcy}};
+    \node[m] (m3) at (8.2,0.3) {a partial-equilibrium number reported as Aiyagari's};
+
+    \node[fig] (f1) at (0,-0.7)   {\textbf{a figure}};
+    \node[fig] (f2) at (4.1,-0.7) {\textbf{a figure}};
+    \node[fig] (f3) at (8.2,-0.7) {\textbf{a figure}};
+
+    \foreach \i in {1,2,3} {\draw[arr] (r\i) -- (m\i); \draw[arr] (m\i) -- (f\i);}
+
+    \node[cpt] at (0,-1.4)   {\emph{wrong source.}};
+    \node[cpt] at (4.1,-1.4) {\emph{wrong domain.}};
+    \node[cpt] at (8.2,-1.4) {\emph{wrong object.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.04cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Why three, and not one careful generalist.} The three errors live in different places and are caught by different \emph{reading}: a parse failure by counting words, a domain error by asking where a function is defined, a missing market-clearing condition by knowing what the paper's contribution was. \textbf{No single pass finds all three.}
+\end{takeawaybox}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Answered next:} three people, or three job descriptions?}
+\end{frame}
+
+\begin{frame}{Hire Three Students, or Write Three Job Descriptions}
+\textbf{The capstone allows a team of two to four with mixed skill sets, and says solo is entirely feasible. What a team supplies in people, a solo student supplies in files.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{|p{2.5cm}|p{3.8cm}|p{4.1cm}|}
+\hline
+ & \textbf{Three students} & \textbf{Three agents, solo} \\ \hline
+Written at M1 & a division of labour & three files in \texttt{.claude/agents/} \\ \hline
+Fixed cost & recruiting, scheduling, trust & one afternoon of careful English \\ \hline
+Marginal cost & their time, and yours & tokens, and \emph{your} coordination cost (\S3) \\ \hline
+Independent judgement & three priors, three literatures read & executional only --- all three inherit your framing (T5) \\ \hline
+Still entirely yours & the question, the validation, the defence & the question, the validation, the defence \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{A complement, not a substitute.} A mathematician's job description does not give you a mathematician's judgement --- it gives you a second reading by something instructed, in writing, to look only for mathematics. T5 makes the argument; the rule is: if you have a co-author who knows the math, use the co-author \textbf{and} the agent.
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{The Trio, Sorted by Which Background Supplies the Expertise}
+\textbf{T4 sorted your RA team by \emph{review function}. Sort the same folder by \emph{which human background supplies the expertise} and a different --- emptier --- picture appears.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    h1/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    h2/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    h3/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    bd/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=3.6cm, minimum height=1.7cm, text width=3.4cm,
+               align=center, anchor=north}]
+    \node[h1] (ha) at (-4.0,0) {\texttt{tooling-agent}};
+    \node[h2] (hb) at (0,0)    {\texttt{math-agent}};
+    \node[h3] (hc) at (4.0,0)  {\texttt{econ-agent}};
+
+    \node[bd] at (ha.south) {\textbf{Programming $+$ AI.}\\[3pt]
+        Sources into context, models into runnable code: PDF to Markdown to \LaTeX{}, pinned environment, one-command reproduction.\\[3pt]
+        \emph{\texttt{Read, Bash, Glob, Write}}};
+    \node[bd] at (hb.south) {\textbf{Mathematics.}\\[3pt]
+        The derivation and the method: domain of $u(\cdot)$, the optimality conditions, the contraction, the grid and the tolerance.\\[3pt]
+        \emph{\texttt{Read, Grep, Glob}}};
+    \node[bd] at (hc.south) {\textbf{Economics.}\\[3pt]
+        The \emph{object}: estimand or equilibrium concept, market clearing, calibration frequency, what the literature knows.\\[3pt]
+        \emph{\texttt{Read, Grep, Glob}}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Now read the lab's own team again, and find the hole.} \texttt{code-reviewer} checks the Python; \texttt{domain-reviewer} checks the code against the \emph{stated} model; \texttt{verifier} runs it. \textbf{Nobody checks the stated model against the correct one.} The instructor key proves it: ``\texttt{utility()} divides by $1-\sigma$, zero in the log case'' is filed under \texttt{domain-reviewer} --- an \emph{economist} auditing a limiting case, because no file owns that job. \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.04cm}
+{\scriptsize \textit{T4 sorts these files by \emph{when they load}; this section sorts them by \emph{which background wrote them}. Only the second question tells you what is missing --- and it is the mathematics agent you are going to write.}}
+\end{frame}
+
+\begin{frame}{Eight Steps, Eight Artifacts --- You Are Building an Agent, Not a Model}
+\textbf{T3's six-step ladder builds a model. This ladder builds the thing that reviews it. Same discipline: every step ends in an artifact.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.74,
+    box/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=2.25cm, minimum height=0.9cm, text width=2.1cm,
+                align=center, font=\scriptsize},
+    dial/.style={box, draw=RedTitle!70, fill=blue!6},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}]
+
+    \node[box]  (s1) at (0,1.05)    {\textbf{1.}\\ name the deliverable};
+    \node[dial] (s2) at (2.6,1.05)  {\textbf{2.}\\ write the job description};
+    \node[dial] (s3) at (5.2,1.05)  {\textbf{3.}\\ set the tool allowlist};
+    \node[dial] (s4) at (7.8,1.05)  {\textbf{4.}\\ pack the brief};
+
+    \node[box]  (s5) at (0,-1.05)   {\textbf{5.}\\ fix the return contract};
+    \node[box]  (s6) at (2.6,-1.05) {\textbf{6.}\\ set budget and stop rule};
+    \node[box]  (s7) at (5.2,-1.05) {\textbf{7.}\\ test on a planted bug};
+    \node[box]  (s8) at (7.8,-1.05) {\textbf{8.}\\ promote, commit, share};
+
+    \draw[arr] (s1) -- (s2);  \draw[arr] (s2) -- (s3);  \draw[arr] (s3) -- (s4);
+    \draw[arr] (s5) -- (s6);  \draw[arr] (s6) -- (s7);  \draw[arr] (s7) -- (s8);
+    \draw[arr] (8.95,1.05) -- (9.35,1.05) -- (9.35,0) -- (-1.35,0) -- (-1.35,-1.05) -- (-1.2,-1.05);
+
+    \node[rectangle, draw=RedTitle!70, fill=blue!5, rounded corners, font=\scriptsize,
+          text width=2.6cm, align=center, minimum height=1.5cm] at (11.3,0.0)
+        {\textbf{Steps 2--4} are the \textbf{three dials} the next section names.\\[3pt]
+         {\tiny\itshape Step 7 sends you back to step 2.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.08cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Eight artifacts, in order.} A sentence of the form \emph{``it produces X; I will know it failed when Y''}; a \texttt{system} prompt; a \texttt{tools:} line; a task string; a return format; a token ceiling and a stop rule; a $3 \times 3$ detection matrix; a committed file. \textbf{Seven of the eight produce English, not code --- and a step that produced no artifact was skipped.}
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}[fragile]{Steps 1--2 --- Name the Failure, Then Write the Job Description}
+\textbf{Step 1 is one sentence: \emph{it produces X, and I will know it failed when Y}. Step 2 is that sentence expanded --- the only part of an agent that is not a setting.}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.7}{5.4}\selectfont,numbers=none]
+---
+name: code-reviewer
+description: Reviews Python numerical code for
+  bugs, convergence problems, and silent failure
+  modes. Use when the user asks for a code review
+  or reports that results look wrong. Does NOT
+  judge economics -- domain-reviewer's job.
+tools: Read, Grep, Glob
+model: sonnet
+---
+You are a careful reviewer of scientific Python.
+This is research code, not production software:
+correctness and silent failure matter far more than
+style. Report, in this order:
+
+1. Outright bugs -- wrong index, wrong sign,
+   wrong order of operations.
+2. Silent failures -- a loop that exits on
+   iteration count rather than a convergence
+   criterion; a tolerance never checked.
+3. Numerical fragility -- division without a
+   guard; a grid too coarse for the claim.
+
+For each finding give the line number, quote the
+line, and say what goes wrong at run time. If you
+find nothing in a category, say so explicitly
+rather than inventing an issue.
+\end{lstlisting}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{enumerate}\footnotesize
+  \item \textbf{Step 1 is the last clause of \texttt{description}:} ``Does NOT judge economics.'' The failure mode is named \emph{before} the agent exists.
+  \item \textbf{Step 2 is everything below the second rule.} That prose becomes the \texttt{system} argument of every request this agent makes --- \S1's second moving part, written by you.
+  \item \textbf{``say so explicitly rather than inventing an issue''} is the most valuable sentence in the file. An agent asked to review \emph{will} find something.
+\end{enumerate}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Verbatim from this course's own lab, \texttt{labs/Lec09\_Agent\_Lab/.claude/agents/}. Every slide so far has \emph{talked} about these files; this is the first one you have seen. \textbf{[solid]}}}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Steps 3--4 --- Capability Is Blast Radius; the Brief Is the Context}
+\textbf{The \texttt{tools:} line is not a convenience setting. Read forwards it is everything this agent can do to your project; read backwards it is everything it is able to \emph{learn}.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.85,
+    ok/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+               minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center},
+    mid/.style={rectangle, draw=orange!75!black, fill=orange!5, rounded corners,
+                minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center},
+    bad/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+                minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center}]
+    \node[ok]  at (0,1.4)  {\texttt{Read, Grep, Glob} --- changes nothing; can only be wrong \emph{in prose}};
+    \node[mid] at (0,0.6)  {$+$ \texttt{Bash} --- can run your code, and can delete it};
+    \node[bad] at (0,-0.2) {$+$ \texttt{Write, Edit} --- can change what it is reviewing};
+    \node[bad] at (0,-1.0) {$+$ web access --- can read text you did not write (T1b)};
+    \draw[-{Stealth[length=2mm]}, thick, gray!65] (-2.6,1.6) -- (-2.6,-1.2);
+    \node[font=\tiny, gray!70, rotate=90, anchor=south] at (-2.72,0.2) {blast radius};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{conceptbox}
+\footnotesize\textbf{Step 4 --- the brief.} This is what enters \texttt{messages}, and nothing else does:
+
+\vspace{0.08cm}
+\textit{``Review \texttt{src/aiyagari.py} against \texttt{docs/model.md}. The calibration is annual. Report only findings you can tie to a line number.''}
+
+\vspace{0.1cm}
+\textbf{What stays out:} your hypothesis, your hunch about where the bug is, and the dead ends you already tried. A clean list is the entire point --- \S3 draws it.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.14cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The asymmetry that makes the three non-interchangeable.} \texttt{math-agent} needs \emph{no} shell and \emph{no} write access --- a derivation is checked by reading, and an agent that cannot execute can never confuse ``it ran'' with ``it is right.'' \texttt{tooling-agent} is useless without \texttt{Bash}. Three dials, set three ways, are three different amounts of trust.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Steps 5--6 --- One Message Back, and a Ceiling You Set}
+\textbf{A sub-agent returns exactly one thing: its final message. Everything it read, ran, and reasoned about is discarded --- so what you did not ask for, you will never see.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.8,
+    big/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+                minimum width=3.9cm, minimum height=1.7cm, text width=3.7cm, align=center},
+    fin/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+                minimum width=2.0cm, minimum height=0.58cm, align=center},
+    gone/.style={rectangle, draw=gray!45, dashed, rounded corners,
+                 minimum width=3.9cm, minimum height=0.8cm, text width=3.7cm, align=center}]
+    \node[big] (w) at (0,0) {\textbf{the worker's own list}\\[2pt] 14 messages, 3 files read,\\ 1 command run, 2 wrong guesses};
+    \draw[gray!60, thick] (2.0,0.8) -- (3.9,0.2);
+    \draw[gray!60, thick] (2.0,-0.8) -- (3.9,-0.2);
+    \node[font=\tiny, gray!70] at (3.0,1.05) {only this crosses back};
+    \node[fin] (o) at (5.2,0) {\textbf{one final message}};
+    \node[gone] at (0,-1.75) {everything else --- gone when the sub-agent ends. Not in your context, not in your transcript.};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.43\textwidth}
+{\footnotesize\textbf{Step 5 --- the return contract}}
+\begin{itemize}\footnotesize
+  \item Fix the \emph{shape}: one line per finding, giving \texttt{file:line}, the quoted text, and what breaks at run time
+  \item Demand an explicit ``nothing found in this category'' --- the sentence that stops an agreeable reviewer inventing one
+\end{itemize}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Step 6 --- budget and stop rule}}
+\begin{itemize}\footnotesize
+  \item The \texttt{model:} line is a \emph{budget} decision --- a read-only reviewer on a 400-line file does not need the frontier model
+  \item Stop rule: \emph{report, do not fix}. A reviewer with \texttt{Edit} becomes an author, and you have lost your control group
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Rate limits and context growth are \S3's subject. Here: \emph{you} set the ceiling, per agent, in one header line.}}
+\end{frame}
+
+\begin{frame}{Steps 7--8 --- Test It on a Bug You Planted, Then Commit It}
+\textbf{An untested reviewer is one you trust for no reason. Plant one defect per background, dispatch all three, and read the matrix.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{5.2cm}|p{1.7cm}|p{1.8cm}|p{1.4cm}|}
+\hline
+\textbf{Defect (or control) in the solver} & \texttt{tooling-agent} & \texttt{math-agent} & \texttt{econ-agent} \\ \hline
+\texttt{TOL} defined, never read --- loop exits on \texttt{MAX\_ITER} & \checkmark\ \emph{it finished, it did not converge} & \checkmark\ \textbf{its job} --- no stopping rule & --- \\ \hline
+$\sigma = 2$, so $u(c) = -1/c$, \emph{positive} for $c < 0$ & \checkmark\ \emph{seen in a run} & \checkmark\ \textbf{its job} & --- \\ \hline
+$r$ fixed; aggregate assets computed, then \emph{discarded} & --- & --- & \checkmark\ \textbf{its job} \\ \hline
+\emph{control:} \texttt{EV = P @ V.T}, which is \textbf{correct} & silent & silent & silent \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{examplebox}
+\footnotesize\textbf{Why the planted bug is a \emph{mathematics} bug.} With $\sigma = 2$, \texttt{utility(c)} $= c^{-1}/(-1) = -1/c$: negative for feasible $c > 0$, \textbf{positive} for infeasible $c < 0$. Infeasible therefore scores \emph{higher} --- $+9.49$ at $c = -0.13$ against $-2.00$ at $c = 0.50$ --- and the program prints \texttt{V[0,0] = 9.490446}, then exits 0. \textbf{[solid]}
+\end{examplebox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Read the matrix, not the reports.} An empty column means the \texttt{description} is too narrow; a full column, too broad. \textbf{Step 8:} commit the file --- a teammate then gets your mathematician by \texttt{git pull}.}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{tooling-agent} at Work: A PDF Becomes Readable Context}
+\textbf{An agent cannot read a PDF --- it reads text. Turning one into the other has a cost structure an economist should recognise.}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.0}{5.9}\selectfont,numbers=none]
+export LC_ALL=en_US.UTF-8   # CJK paths, spaces
+
+# stage every not-yet-converted PDF, then call
+# the converter ONCE over the whole directory
+STAGE="$(mktemp -d)"
+for pdf in "$INPUT_DIR"/*.pdf; do
+    name="$(basename "$pdf" .pdf)"
+    [ -d "$OUTPUT_DIR/$name" ] && continue
+    ln -s "$(readlink -f "$pdf")" "$STAGE/"
+done
+
+mineru -p "$STAGE" -o "$OUTPUT_DIR" \
+       -b vlm-auto-engine
+
+ls "$OUTPUT_DIR" | wc -l        # files kept?
+wc -w "$OUTPUT_DIR"/*/vlm/*.md  # words kept?
+\end{lstlisting}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{3.6cm}|p{1.7cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{54-page econ paper, one A100-40GB}} \\ \hline
+engine startup $+$ model load & \textbf{1\,m\,50\,s} \emph{fixed} \\ \hline
+inference, all 54 pages & \textbf{44\,s} \emph{marginal} \\ \hline
+total wall clock & 2\,m\,59\,s \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Fixed cost 110\,s; marginal cost 0.8\,s a page.} Calling the converter once \emph{per file} re-pays the fixed cost every time: thirty PDFs become fifty-five minutes of model loading around twenty minutes of work. \textbf{One line of \texttt{bash}, and a returns-to-scale argument.}
+\end{takeawaybox}
+\end{column}
+\end{columns}
+
+\vspace{0.06cm}
+{\scriptsize \textit{Production code, NCSA Delta, via the scheduler --- T4's login-versus-compute boundary. \textbf{The silent failure in the same logs:} one converter's concurrency default deadlocks the engine, which stalls while the server stays bound. Nothing errors. \textbf{[solid]}}}
+\end{frame}
+
+\begin{frame}{From Markdown to a Language You Read --- and a Stable Glossary}
+\textbf{Extraction gets you text. It does not get you a source you can cite, or a term you can use twice the same way. Those are two more artifacts.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.85,
+    n/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+              minimum width=2.15cm, minimum height=1.0cm, text width=2.0cm, align=center},
+    f/.style={n, draw=RedTitle!70, fill=blue!7},
+    g/.style={n, draw=green!45!black, fill=green!6},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70},
+    cpt/.style={font=\tiny, align=center, gray!75}]
+    \node[n] (a) at (0,0)    {a PDF you were \emph{given}\\ \emph{a chapter draft, in Chinese}};
+    \node[f] (b) at (2.7,0)  {\textbf{extraction}\\ Markdown $+$ images $+$ layout proof};
+    \node[n] (c) at (5.4,0)  {\textbf{\LaTeX{}}\\ equations, tables, figure refs restored};
+    \node[n] (d) at (8.1,0)  {\textbf{translation}\\ into a language you are \emph{fluent} in};
+    \node[g] (e) at (10.8,0) {\textbf{glossary}\\ one row per concept, one column authoritative};
+    \draw[arr] (a) -- (b);  \draw[arr] (b) -- (c);  \draw[arr] (c) -- (d);  \draw[arr] (d) -- (e);
+    \node[cpt] at (2.7,-1.0) {step 7, on your own agent:\\ \texttt{ls} the images, \texttt{wc -w} the text};
+    \node[cpt] at (8.1,-1.0) {keep the original beside it ---\\ the translation is \emph{derived data}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{conceptbox}
+\footnotesize\textbf{One glossary, extended --- not a new one.} This lecture's Chinese script already carries a 28-row bilingual key-terms table: \emph{harness, orchestrator, sub-agent, context window, provenance}, \texttt{CLAUDE.md}, \emph{skill, hook, compaction}, and twenty more. Add the rows your project needs and keep one column authoritative, so the same object is not called three things in three chapters. \textbf{Style is shared; vocabulary is local.}
+\end{conceptbox}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Why this is not busywork.} A term that drifts is a variable that drifts --- and the glossary is what lets \texttt{math-agent} and \texttt{econ-agent} disagree about \emph{economics} rather than about what you meant.}
+\end{frame}
+
+\begin{frame}[fragile]{The Agent Design Canvas: Eight Cells, One Worked Answer}
+\textbf{Eight steps, one page, filled in before you write a line. Bold is the question; grey is one worked answer; the file beside it is what that answer compiles to.}
+
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    cell/.style={rectangle, draw=black!55, fill=white, minimum width=3.05cm,
+                 minimum height=0.82cm, text width=2.85cm, align=left,
+                 anchor=north west, inner sep=1.6pt, font=\tiny}]
+    \node[cell] (c1) at (0,0)      {\textbf{1. Produces / fails when}\\ {\color{gray!85}\itshape a math audit; fails by passing a wrong derivation}};
+    \node[cell] (c2) at (3.25,0)    {\textbf{2. Job description}\\ {\color{gray!85}\itshape mathematics --- not code, not economics}};
+    \node[cell] (c3) at (0,-0.92)  {\textbf{3. Tools}\\ {\color{gray!85}\itshape \texttt{Read, Grep, Glob} --- no shell, no write}};
+    \node[cell] (c4) at (3.25,-0.92){\textbf{4. Brief in}\\ {\color{gray!85}\itshape the solver, the model note, the frequency}};
+    \node[cell] (c5) at (0,-1.84)  {\textbf{5. Returns}\\ {\color{gray!85}\itshape \texttt{file:line}, the algebra, ``correct'' if correct}};
+    \node[cell] (c6) at (3.25,-1.84){\textbf{6. Budget / stop}\\ {\color{gray!85}\itshape one pass; report, do not fix}};
+    \node[cell] (c7) at (0,-2.76)  {\textbf{7. Planted bug to catch}\\ {\color{gray!85}\itshape $u(c) = -1/c$ is positive for $c<0$}};
+    \node[cell] (c8) at (3.25,-2.76){\textbf{8. Path in the repo}\\ {\color{gray!85}\itshape \texttt{.claude/agents/math-agent.md}}};
+    \node[draw=black!45, rounded corners, fit=(c1)(c8), inner sep=2pt] {};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.54\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.6}{5.3}\selectfont,numbers=none]
+---
+name: math-agent
+description: Checks the mathematics of a numerical economics model -- the
+  domain of every function evaluated, the derivation of the optimality
+  conditions, and the convergence argument. Use when results are plausible
+  but the model may be misstated. Does NOT review Python style and does NOT
+  judge calibration -- econ-agent's job.
+tools: Read, Grep, Glob
+model: sonnet
+---
+You check mathematics. Assume the code runs and assume the economics is
+someone else's job.
+
+For every function the model evaluates, state its domain, check that the
+code can only evaluate it inside that domain, and name the parameter value
+that breaks it. Then: does the optimality condition follow from the stated
+problem; is the operator a contraction, and is the stopping rule the one
+that argument requires; is the grid fine enough for the claim being made?
+
+Quote the line, give the algebra, and say plainly when a step is correct.
+Never assert a result you cannot derive in the reply.
+\end{lstlisting}
+\end{column}
+\end{columns}
+
+\vspace{0.05cm}
+{\footnotesize\textbf{Then debug the English:} ask it one thing it \emph{should} handle and one it should \emph{not}, and narrow the \texttt{description} until both behave (\S4). \textbf{Blank canvas: in the lab folder.}}
+\end{frame}
+
+\begin{frame}{Bridge: Steps 2--4 Are the Three Dials}
+\textbf{You have just written three job descriptions. The next section tells you what you actually did --- you turned three dials on one function call, three times.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.9,
+    st/.style={rectangle, draw=RedTitle!70, fill=blue!6, rounded corners,
+               minimum width=3.7cm, minimum height=0.62cm, align=center},
+    dl/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=2.4cm, minimum height=0.62cm, align=center},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!70}]
+    \node[st] (a1) at (0,1.0)  {\textbf{Step 2} --- job description};
+    \node[st] (a2) at (0,0.0)  {\textbf{Step 3} --- tool allowlist};
+    \node[st] (a3) at (0,-1.0) {\textbf{Step 4} --- the brief};
+    \node[dl] (b1) at (5.6,1.0)  {\texttt{system}};
+    \node[dl] (b2) at (5.6,0.0)  {\texttt{tools}};
+    \node[dl] (b3) at (5.6,-1.0) {\texttt{messages}};
+    \draw[arr] (a1) -- node[above, font=\tiny] {\emph{is}} (b1);
+    \draw[arr] (a2) -- node[above, font=\tiny] {\emph{is}} (b2);
+    \draw[arr] (a3) -- node[above, font=\tiny] {\emph{seeds}} (b3);
+    \node[font=\scriptsize, align=left, text width=3.6cm, gray!80] at (9.3,0.0)
+        {\S1's four arguments. The fourth, \texttt{model}, is step 6 --- your budget dial.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{What carries forward.} \S3 names these dials and asks how many agents you can run at once, and what binds. \S4 asks who decides to call them. \S5 asks how a skill differs from an agent. \textbf{T2c asks what you actually type} --- and what a run with ten thousand of them consists of. Every one is now a question about a Markdown file \emph{you} wrote.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{And the milestone, plainly:} M1 asks for a division of labour. Working solo, \texttt{.claude/agents/} \emph{is} your division of labour. \textbf{Answered next:} how many can run at once, and what actually stops you.}
+\end{frame}
+
+%=============================================================================
+\section{Many Agents}
+%===========================================================
+
+\sectiondivider{Many Agents}{Creating a set of them --- and what actually limits the number}
+
+\begin{frame}{Three Dials Make an Agent}
+\textbf{To create a \emph{set} of agents you do not create anything. You vary three dials and keep three separate lists.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    dial/.style={rectangle, draw=RedTitle!60, fill=blue!5, rounded corners,
+                 minimum width=2.5cm, minimum height=0.62cm, font=\scriptsize, align=center},
+    ag/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+               minimum width=2.75cm, minimum height=1.35cm, text width=2.6cm,
+               align=center, font=\tiny},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!65}
+]
+    \node[dial] (d1) at (0,1.15) {\textbf{system} --- identity};
+    \node[dial] (d2) at (0,0.35) {\textbf{tools} --- capability};
+    \node[dial] (d3) at (0,-0.45) {\textbf{messages} --- memory};
+
+    \node[ag] (A) at (4.3, 1.05) {\textbf{Analyst}\\ stats tools\\ own list};
+    \node[ag] (B) at (4.3,-0.55) {\textbf{Reviewer}\\ read-only tools\\ own list};
+    \node[ag] (C) at (7.6, 0.25) {\textbf{Verifier}\\ test-runner tool\\ own list};
+
+    \draw[arr] (1.35,0.35) -- (2.9,0.9);
+    \draw[arr] (1.35,0.35) -- (2.9,-0.4);
+    \draw[arr] (5.7,0.5) -- (6.2,0.35);
+
+    \node[font=\scriptsize, align=left, text width=3.1cm] at (10.6,0.25)
+        {Three agents $=$\\ three \emph{configurations}\\ and three \emph{lists}.\\[4pt]
+         No processes, no\\ registry, no server\\ objects.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The economist's reading.} You are not hiring staff; you are writing three job descriptions and keeping three notebooks. The ``firm'' exists only in your code. What is scarce is not agents --- it is tokens, context, and your attention.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{How Many at Once? Three Constraints, Not Infinity}
+\textbf{``You can instantiate an unlimited number of agents'' is true in the same sense that you can write an unlimited number of cheques.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize]
+    \fill[green!8] (0,0) rectangle (3.4,1.55);
+    \draw[-{Stealth[length=2mm]}, thick, black!70] (0,0) -- (11.2,0)
+        node[right, font=\tiny] {agents in flight};
+    \foreach \x/\l in {0/0, 1.7/2, 3.4/4, 5.1/6, 6.8/8, 8.5/10, 10.2/12}
+        \draw[black!45] (\x,0.06) -- (\x,-0.06) node[below, font=\tiny] {\l};
+
+    \draw[dashed, thick, red!65!black] (3.4,-0.2) -- (3.4,1.9);
+    \node[align=center, font=\tiny, red!55!black, anchor=south] at (3.4,1.92)
+        {\textbf{tokens/min}\\ rate limit};
+
+    \draw[dashed, thick, orange!75!black] (6.0,-0.2) -- (6.0,1.45);
+    \node[align=center, font=\tiny, orange!65!black, anchor=south] at (6.2,1.47)
+        {\textbf{context}\\ each agent's list grows};
+
+    \draw[dashed, thick, RedTitle!75] (8.7,-0.2) -- (8.7,1.0);
+    \node[align=center, font=\tiny, RedTitle, anchor=south] at (8.9,1.02)
+        {\textbf{coordination}\\ merge + verify cost};
+
+    \node[font=\tiny, align=center, green!35!black] at (1.7,0.72)
+        {feasible\\ and useful};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{Rate limits} are the hard ceiling: quota is tokens-per-minute, not agents. Ten agents each re-sending a long list exhaust it faster than two.
+    \item \textbf{Context} binds per agent: every worker carries its own growing list (previous section).
+    \item \textbf{Coordination} is the one economists should expect: \emph{you} must read, reconcile, and verify $n$ outputs. That cost rises with $n$ while the value of the marginal agent falls.
+\end{itemize}
+
+\vspace{0.1cm}
+\footnotesize\textbf{The binding constraint is usually the third one.} T1b priced this out: multi-agent bought a large accuracy gain at roughly $15\times$ the token cost. Reach for more agents when the task is genuinely wide, not to feel parallel.
+\end{frame}
+
+\begin{frame}{Isolated Context Is the Point}
+\textbf{The reason to spawn a sub-agent is not extra brains --- the model is the same. It is a second, clean list.}
+
+\vspace{0.02cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.80]
+    \draw[draw=black!60, fill=VeryLightGray, rounded corners] (0,0) rectangle (3.3,2.6);
+    \fill[RedTitle!22] (0.06,0.06) rectangle (3.24,2.05);
+    \node[font=\scriptsize\bfseries, align=center] at (1.65,2.88) {Orchestrator};
+    \node[font=\tiny, align=center] at (1.65,1.05)
+        {plan, six file reads,\\ three tool results,\\ two dead ends,\\ your last nine prompts};
+    \node[font=\tiny, align=center] at (1.65,2.32) {\emph{78\% full}};
+
+    \draw[draw=black!60, fill=VeryLightGray, rounded corners] (5.2,0) rectangle (7.7,2.6);
+    \fill[green!45!black!30] (5.26,0.06) rectangle (7.64,0.55);
+    \node[font=\scriptsize\bfseries, align=center] at (6.45,2.88) {Worker A};
+    \node[font=\tiny, align=center] at (6.45,0.3) {one task, one file};
+    \node[font=\tiny, align=center, gray!70] at (6.45,1.5) {\emph{clean}};
+
+    \draw[draw=black!60, fill=VeryLightGray, rounded corners] (9.0,0) rectangle (11.5,2.6);
+    \fill[green!45!black!30] (9.06,0.06) rectangle (11.44,0.5);
+    \node[font=\scriptsize\bfseries, align=center] at (10.25,2.88) {Worker B};
+    \node[font=\tiny, align=center] at (10.25,0.28) {one task, one file};
+    \node[font=\tiny, align=center, gray!70] at (10.25,1.5) {\emph{clean}};
+
+    \draw[-{Stealth[length=2mm]}, thick, gray!70] (3.4,1.9) -- (5.1,1.9)
+        node[midway, above, font=\tiny] {task only};
+    \draw[-{Stealth[length=2mm]}, thick, gray!70] (3.4,1.9) to[bend left=8] (8.9,2.0);
+
+    \draw[-{Stealth[length=2mm]}, thick, green!45!black] (6.45,-0.35) -- (1.65,-0.35)
+        node[midway, below, font=\tiny] {\emph{findings only} --- a short summary, not the transcript};
+    \draw[green!45!black, thick] (6.45,0) -- (6.45,-0.35);
+    \draw[green!45!black, thick] (10.25,0) -- (10.25,-0.35) -- (6.45,-0.35);
+    \draw[green!45!black, thick] (1.65,-0.35) -- (1.65,0);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.22cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{itemize}\footnotesize
+    \item The worker never sees your dead ends, so cannot be misled by them
+    \item The orchestrator's list grows by a summary, not by all the worker read
+    \item That asymmetry is the economic case for sub-agents
+\end{itemize}
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Do not over-read this.} A clean window is not an independent mind. T5 shows workers inherit your framing --- fresh context buys \emph{focus}, not \emph{independence}.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Three Wirings, Drawn as Data Flow}
+\textbf{Strip the vocabulary away and multi-agent designs differ in exactly one respect: who writes into whose list.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    n/.style={circle, draw=black!65, fill=VeryLightGray, minimum size=0.66cm, font=\tiny},
+    bb/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=2.2cm, minimum height=0.5cm, font=\tiny},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70},
+    hd/.style={font=\scriptsize\bfseries}
+]
+    % Sequential
+    \node[hd] at (1.5,1.5) {Sequential};
+    \node[n] (s1) at (0.3,0.4) {A};
+    \node[n] (s2) at (1.5,0.4) {B};
+    \node[n] (s3) at (2.7,0.4) {C};
+    \draw[arr] (s1) -- (s2);
+    \draw[arr] (s2) -- (s3);
+    \node[font=\tiny, align=center, gray!75] at (1.5,-0.45) {each list seeded\\ by the last output};
+
+    % Hierarchical
+    \node[hd] at (5.9,1.5) {Hierarchical};
+    \node[n] (h0) at (5.9,0.85) {O};
+    \node[n] (h1) at (4.9,-0.1) {A};
+    \node[n] (h2) at (5.9,-0.1) {B};
+    \node[n] (h3) at (6.9,-0.1) {C};
+    \draw[arr] (h0) -- (h1);
+    \draw[arr] (h0) -- (h2);
+    \draw[arr] (h0) -- (h3);
+    \node[font=\tiny, align=center, gray!75] at (5.9,-0.8) {workers report up;\\ only O sees all};
+
+    % Blackboard
+    \node[hd] at (10.0,1.5) {Blackboard};
+    \node[bb] (bbn) at (10.0,0.85) {shared state};
+    \node[n] (b1) at (9.0,-0.15) {A};
+    \node[n] (b2) at (10.0,-0.15) {B};
+    \node[n] (b3) at (11.0,-0.15) {C};
+    \draw[arr, <->] (bbn) -- (b1);
+    \draw[arr, <->] (bbn) -- (b2);
+    \draw[arr, <->] (bbn) -- (b3);
+    \node[font=\tiny, align=center, gray!75] at (10.0,-0.85) {all read and write\\ one store};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.35cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{Sequential} is a relay: cheap, easy to debug, no parallel gain, and an early error propagates
+    \item \textbf{Hierarchical} is T1b's orchestrator--worker and what T4's RA team already is --- the pattern that dominates in practice
+    \item \textbf{Blackboard} decouples agents from each other but needs write discipline; in a research project the ``blackboard'' is usually just \emph{files on disk} --- exactly the file-driven workflow of T4
+\end{itemize}
+\end{frame}
+
+%=============================================================================
+\section{Who Decides to Dispatch?}
+%===========================================================
+
+\sectiondivider{Who Decides to Dispatch?}{The router myth, and what the transcript actually shows}
+
+\begin{frame}{The Router Myth}
+\textbf{The usual explanation: a fast ``router'' model classifies your prompt, looks up specialists in an agent registry, and wakes them. That is not what happens.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    bx/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+               minimum width=2.0cm, minimum height=0.6cm, font=\tiny, align=center},
+    gh/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+               minimum width=2.0cm, minimum height=0.6cm, font=\tiny, align=center},
+    ok/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+               minimum width=2.0cm, minimum height=0.6cm, font=\tiny, align=center},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70},
+    hd/.style={font=\scriptsize\bfseries}
+]
+    % LEFT: the myth
+    \node[hd, red!55!black] at (2.4,2.35) {What people describe};
+    \node[bx] (u1) at (0.0,1.5) {your prompt};
+    \node[gh] (rt) at (2.4,1.5) {\textbf{router LLM}};
+    \node[gh] (rg) at (2.4,0.5) {agent registry};
+    \node[bx] (w1) at (4.8,1.9) {specialist 1};
+    \node[bx] (w2) at (4.8,1.05) {specialist 2};
+    \draw[arr] (u1) -- (rt);
+    \draw[arr] (rt) -- (rg);
+    \draw[arr] (rt) -- (w1);
+    \draw[arr] (rt) -- (w2);
+    \draw[red!60!black, very thick, opacity=0.55] (-1.0,-0.15) -- (5.9,2.6);
+    \draw[red!60!black, very thick, opacity=0.55] (-1.0,2.6) -- (5.9,-0.15);
+
+    % RIGHT: reality
+    \node[hd, green!35!black] at (9.6,2.35) {What actually happens};
+    \node[bx] (u2) at (7.3,1.5) {your prompt};
+    \node[ok] (md) at (9.7,1.5) {\textbf{same model,}\\ \textbf{same context}};
+    \node[ok] (tc) at (9.7,0.5) {emits a tool call\\ named \texttt{Agent}};
+    \node[bx] (sw) at (12.1,0.5) {sub-agent\\ runs};
+    \draw[arr] (u2) -- (md);
+    \draw[arr] (md) -- (tc);
+    \draw[arr] (tc) -- (sw);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{No second model, no classification step.} Dispatch is one more \texttt{tool\_use} block from the \S1 loop --- the tool just happens to start another loop
+    \item The ``registry'' is a folder of Markdown files \emph{you wrote}; the model picks from it by reading their \texttt{description} fields, exactly as it picks any tool
+    \item T2 said this for one agent: \emph{``the same transformer that writes code decides to call tools.''} This is that fact one level up
+\end{itemize}
+
+{\scriptsize \textit{Guard: T1b's ``think-budget routers'' route one query between fast and deep \emph{modes of one model}, not between agents.}}
+\end{frame}
+
+\begin{frame}{Dispatch Is a Tool Call --- Evidence You Can See}
+\textbf{You do not have to take this on faith. Four checks, all runnable in the lab that follows.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|p{0.4cm}|p{4.3cm}|p{5.9cm}|}
+\hline
+& \textbf{Do this} & \textbf{What it proves} \\ \hline
+1 & Run \texttt{/agents} in a session & The list is \emph{your} \texttt{.claude/agents/} folder. Nothing is registered with a service. \\ \hline
+2 & Ask something a specialist fits; watch the transcript & The dispatch appears as a named tool call in the same stream as \texttt{Read} and \texttt{Bash}. \\ \hline
+3 & Compare context before and after & It grows by a short \emph{summary}, not by the worker's transcript. \\ \hline
+4 & \textbf{Narrow one agent's \texttt{description}, re-ask} & Dispatch stops. Selection is driven by prose the model reads. \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Check 4 is the decisive one.} If a separate router with a registry were making the decision, editing one English sentence in a Markdown file could not switch the behaviour off. It can --- because that sentence \emph{is} the mechanism.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+{\scriptsize \textit{Real trace, check 2 (Claude Code 2.1.261): \texttt{Read} $\to$ \texttt{Agent code-reviewer} $\to$ \texttt{Agent domain-reviewer} --- the dispatch sits in the same list as \texttt{Read}. \textbf{[solid]}}}
+\end{frame}
+
+\begin{frame}{Auto-Dispatch vs.\ Hand-Wired: Spontaneous Order or Central Planning}
+\textbf{Once you know dispatch is a model decision, the design choice becomes familiar: leave allocation to the agent, or plan it yourself.}
+
+\vspace{0.05cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.86]
+    \draw[-{Stealth[length=2mm]}, thick, black!65] (0,0) -- (11.4,0);
+    \node[font=\tiny, anchor=north] at (0.9,-0.1) {you specify everything};
+    \node[font=\tiny, anchor=north] at (10.3,-0.1) {the model decides};
+
+    \node[rectangle, draw=RedTitle!65, fill=blue!6, rounded corners, minimum width=3.2cm,
+          minimum height=1.2cm, text width=3.0cm, align=center, font=\tiny] (L) at (1.9,1.1)
+        {\textbf{Hand-wired}\\ fixed pipeline you author\\ \emph{low variance, high fixed cost}};
+    \node[rectangle, draw=black!55, fill=VeryLightGray, rounded corners, minimum width=3.2cm,
+          minimum height=1.2cm, text width=3.0cm, align=center, font=\tiny] (M) at (5.7,1.1)
+        {\textbf{Where research sits}\\ you author the specialists,\\ the model chooses when};
+    \node[rectangle, draw=green!45!black, fill=green!5, rounded corners, minimum width=3.2cm,
+          minimum height=1.2cm, text width=3.0cm, align=center, font=\tiny] (R) at (9.5,1.1)
+        {\textbf{Auto-dispatch}\\ agent picks its own helpers\\ \emph{adapts, variable cost}};
+    \draw[gray!60, dashed] (1.9,0.48) -- (1.9,0.04);
+    \draw[gray!60, dashed] (5.7,0.48) -- (5.7,0.04);
+    \draw[gray!60, dashed] (9.5,0.48) -- (9.5,0.04);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{Central planning (hand-wired)}
+\begin{itemize}\footnotesize
+    \item Reproducible: same path every run
+    \item No planner tokens spent
+    \item Brittle off the anticipated path
+    \item High authoring cost; it decays
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{Spontaneous order (auto-dispatch)}
+\begin{itemize}\footnotesize
+    \item Handles tasks you did not foresee
+    \item Zero setup at the point of use
+    \item \textbf{Principal--agent problem:} it may delegate the wrong thing, and you pay
+    \item Variable, harder-to-forecast cost
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+\footnotesize\textbf{The practical middle.} Author the specialists once, let the model choose \emph{when} to call them, and keep a validation gate so a bad delegation is caught rather than trusted --- T4's quality gates, doing an economist's job.
+\end{frame}
+
+%=============================================================================
+\section{Agent vs.\ Skill}
+%===========================================================
+
+\sectiondivider{Agent vs.\ Skill}{A distinction most write-ups get backwards}
+
+\begin{frame}{The Usual Definition Describes a Tool, Not a Skill}
+\textbf{You will read that ``a skill is a deterministic, hard-coded piece of software with no brain of its own.'' That is an accurate definition --- of something else.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{The common claim}
+
+\vspace{0.1cm}
+``A skill does exactly one thing. It requires exact inputs to produce exact outputs. It cannot decide when it should be used, nor fix itself on error. It just runs the code it was given.''
+\end{cautionbox}
+
+\vspace{0.15cm}
+\footnotesize That paragraph is a correct description of a \textbf{tool} (a function with a schema). It is not what a skill is.
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{conceptbox}
+\footnotesize\textbf{What a skill actually is}
+
+\vspace{0.1cm}
+A folder with a Markdown file in it. The file is \textbf{prose written for the model to read} --- a procedure, conventions, worked steps --- plus optional scripts.
+
+\vspace{0.12cm}
+There is no compiled artefact and no fixed input schema. The reasoning is still the model's; the skill supplies \emph{instructions}, not \emph{execution}.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\textbf{Why the confusion matters:} if you believe a skill is code, you will try to write it like code --- rigid parameters, defensive branching. Skills that work read like a good methods appendix written for a capable RA.
+\end{frame}
+
+\begin{frame}[fragile]{What a Skill Actually Is: Progressive Disclosure}
+\textbf{The mechanism is a two-stage load, and it is the reason skills are cheap to keep around.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+---
+name: olg-5step
+description: Manually run the local
+  five-step OLG dynamic-macro demo.
+  Use when explicitly invoked to
+  demonstrate Model -> Equilibrium ->
+  Algorithm -> Pseudo-code -> Implement.
+disable-model-invocation: true
+---
+
+# OLG Five-Step Skill
+Use this skill to demonstrate the five-
+stage agentic dynamic-macro workflow.
+## Workflow
+1. Work from the demo root, the folder
+   containing run.py, stages/, src/.
+...
+\end{lstlisting}
+{\scriptsize \textit{This repository's own skill: \texttt{demos/M4\_olg\_5step\_demo/.claude/skills/olg-5step/SKILL.md}}}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    st/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+               minimum width=3.5cm, minimum height=0.72cm, text width=3.35cm, align=center},
+    on/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.5cm, minimum height=0.72cm, text width=3.35cm, align=center},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70}]
+    \node[on] (a) at (0,2.1) {\textbf{always in context}\\ the \texttt{description} line only};
+    \node[st] (b) at (0,0.85) {\textbf{on trigger}\\ the model reads the body};
+    \node[st] (c) at (0,-0.4) {\textbf{on demand}\\ scripts run, files load};
+    \draw[arr] (a) -- (b);
+    \draw[arr] (b) -- (c);
+    \node[align=center, black!65] at (0,-1.25) {cheap to have twenty;\\ you pay for the one you use};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+\footnotesize\textbf{The \texttt{description} is load-bearing.} It is the only part the model always sees, so it is what selection runs on --- the same prose-driven choice as sub-agent dispatch in \S4. T4 taught you \emph{when} skills load; this is \emph{how} they are chosen.
+\end{frame}
+
+\begin{frame}{Tool, Skill, Sub-Agent: Sorted by Where the Reasoning Lives}
+\textbf{T4 sorted Skills, Agents and Rules by \emph{when they load}. Sort the same objects by \emph{who does the thinking} and the confusion disappears.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    hd/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.4cm, minimum height=0.6cm, font=\scriptsize\bfseries, align=center},
+    bd/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=3.4cm, minimum height=1.9cm, text width=3.25cm,
+               align=center, anchor=north}]
+    \node[hd] (h1) at (-3.85,0) {Tool};
+    \node[hd] (h2) at (0,0)     {Skill};
+    \node[hd] (h3) at (3.85,0)  {Sub-agent};
+
+    \node[bd] (b1) at (h1.south) {\textbf{Code you wrote.}\\[3pt]
+        Deterministic. Model chooses \emph{arguments}; the function does the rest.\\[3pt]
+        \emph{No reasoning inside.}};
+    \node[bd] (b2) at (h2.south) {\textbf{Prose you wrote.}\\[3pt]
+        Model chooses \emph{to read it}, then follows it.\\[3pt]
+        \emph{Reasoning stays in the main loop.}};
+    \node[bd] (b3) at (h3.south) {\textbf{A second loop.}\\[3pt]
+        Own context, own tools, own turns.\\[3pt]
+        \emph{Reasoning happens somewhere else.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{2.1cm}|p{2.6cm}|p{2.6cm}|p{2.8cm}|}
+\hline
+& \textbf{Tool} & \textbf{Skill} & \textbf{Sub-agent} \\ \hline
+Made of & code & Markdown & a task description \\ \hline
+Costs you & a tool schema & one \texttt{description} line & a whole second context \\ \hline
+Fails by & raising an error & being ignored & drifting off-task \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.08cm}
+{\scriptsize \textit{T4's third category, Rules, is orthogonal to all three: it is always-on context, not a thing the model chooses.}}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{disable-model-invocation: true} --- the One-Line Proof}
+\textbf{One line in this repository's own skill settles the router question.}
+
+\vspace{0.15cm}
+
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\small,numbers=none]
+disable-model-invocation: true
+\end{lstlisting}
+
+\vspace{0.15cm}
+
+\begin{itemize}\footnotesize
+    \item The flag means: \emph{do not let the model decide to invoke this on its own} --- it becomes callable by name only
+    \item That flag is only meaningful because, by default, \textbf{the model itself} was making the call, by reading the \texttt{description}
+    \item If a separate router service with a registry were dispatching, there would be nothing for a line of YAML inside one skill file to disable
+\end{itemize}
+
+\vspace{0.2cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The whole of \S4 and \S5 in one sentence.} Selection --- of a tool, of a skill, of a sub-agent --- is the model reading short English descriptions and choosing. That is why editing prose changes behaviour, and why writing good descriptions is the highest-leverage thing you do when you set up a project.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{A Worked Example, End to End}
+%===========================================================
+
+\sectiondivider{A Worked Example, End to End}{One real research question, traced message by message}
+
+\begin{frame}{The Task --- and the Trap Inside It}
+\textbf{One prompt, typed once:}
+
+\vspace{0.12cm}
+\begin{conceptbox}
+\footnotesize\textit{``Get US real GDP growth since 2000. Get which party held the White House over the same period. Then plot and \textbf{rationalize how party affiliation affects GDP growth}.''}
+\end{conceptbox}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{Three jobs, not one}
+\begin{enumerate}\footnotesize
+    \item fetch a macro series (a \emph{fact})
+    \item build a party timeline (a \emph{fact})
+    \item plot it (\emph{mechanical})
+    \item explain the relationship (\emph{a causal claim})
+\end{enumerate}
+
+\vspace{0.1cm}
+{\scriptsize Steps 1--3 an agent can do. Step 4 is where the research is --- and where the prompt is booby-trapped.}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{``Rationalize'' is a leading verb.} It presupposes an effect and asks for a justification. A compliant model will supply one. Watch, in the trace that follows, the exact turn where a defensible data task turns into an indefensible causal claim --- and notice that nothing in the machinery stops it.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\footnotesize\textbf{A chat model with no tools fails this instantly and invisibly}: it will recite GDP numbers from memory. They will look right. Some will be wrong, and none will be checkable.
+\end{frame}
+
+\begin{frame}{One Agent: Every Message That Crosses the Wire}
+\textbf{Five requests. Each carries the \emph{entire} list built so far.}
+
+\vspace{0.02cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.80,
+    ln/.style={draw=black!35, dashed},
+    hd/.style={font=\scriptsize\bfseries, align=center},
+    a/.style={-{Stealth[length=1.6mm]}, thick},
+    loc/.style={a, gray!75},
+    wire/.style={a, RedTitle!75}]
+    \node[hd] (u) at (0,0.55)   {You};
+    \node[hd] (h) at (4.3,0.55) {Harness\\ \textnormal{\tiny(your laptop)}};
+    \node[hd] (l) at (9.6,0.55) {LLM\\ \textnormal{\tiny(Anthropic)}};
+    \draw[ln] (0,0.1) -- (0,-6.5);
+    \draw[ln] (4.3,0.1) -- (4.3,-6.5);
+    \draw[ln] (9.6,0.1) -- (9.6,-6.5);
+
+    \draw[loc] (0,-0.25) -- node[above]{the prompt} (4.3,-0.25);
+    \draw[wire] (4.3,-0.7) -- node[above]{\textbf{req 1} = system + tools + [prompt]} (9.6,-0.7);
+    \draw[wire] (9.6,-1.15) -- node[above]{\texttt{tool\_use}: Bash \emph{fetch GDP series}} (4.3,-1.15);
+    \draw[loc] (4.3,-1.6) -- node[above, xshift=2mm]{runs it locally} (3.0,-1.6);
+    \draw[wire] (4.3,-2.05) -- node[above]{\textbf{req 2} = list + \texttt{tool\_result}(100 rows)} (9.6,-2.05);
+    \draw[wire, orange!80!black] (9.6,-2.5) -- node[above, orange!70!black]{\texttt{tool\_use}: Write \emph{party\_by\_year.csv}} (4.3,-2.5);
+    \node[font=\tiny, orange!70!black, anchor=west] at (9.75,-2.5) {\textbf{no fetch}};
+    \node[font=\tiny, orange!70!black, anchor=west, align=left] at (9.75,-2.9) {from the model's\\ own memory};
+    \draw[wire] (4.3,-2.95) -- node[above]{\textbf{req 3} = list + \texttt{tool\_result}(ok)} (9.6,-2.95);
+    \draw[wire] (9.6,-3.4) -- node[above]{\texttt{tool\_use}: Bash \emph{python plot.py}} (4.3,-3.4);
+    \draw[loc, red!60!black] (4.3,-3.85) -- node[above, red!55!black, xshift=1mm]{\textbf{error}: no display backend} (2.4,-3.85);
+    \draw[wire, red!60!black] (4.3,-4.3) -- node[above]{\textbf{req 4} = list + \texttt{tool\_result}(\emph{is\_error})} (9.6,-4.3);
+    \draw[wire] (9.6,-4.75) -- node[above]{\texttt{tool\_use}: Bash \emph{retry with Agg}} (4.3,-4.75);
+    \draw[wire] (4.3,-5.2) -- node[above]{\textbf{req 5} = list + \texttt{tool\_result}(figure written)} (9.6,-5.2);
+    \draw[wire] (9.6,-5.65) -- node[above]{text + \texttt{stop\_reason}: \texttt{end\_turn}} (4.3,-5.65);
+    \draw[loc] (4.3,-6.1) -- node[above]{the answer, and a \texttt{.png}} (0,-6.1);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.02cm}
+{\scriptsize\textbf{Blue crosses the network and is billed; grey stays on your laptop, free.} The list grew to eleven messages --- \textbf{req 5} re-sent all of them.}
+\end{frame}
+
+\begin{frame}{What Went Into \textnormal{\texttt{req 1}} --- and Never Changed}
+\textbf{This is T2's \emph{initialization}, seen from the wire: those five steps exist to build exactly two arguments --- then re-sent byte-identical on every later request.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.5cm}|p{4.6cm}|p{5.0cm}|}
+\hline
+& \textbf{Assembled from} & \textbf{In this example} \\ \hline
+\texttt{system} & T2's init steps 1--4: global settings, \texttt{CLAUDE.md}, \texttt{.claude/rules/*.md} & ``You are Claude Code. You have these tools\ldots'' $+$ whatever house rules T4 had you write \\ \hline
+\texttt{tools} & the schema of every tool the harness is willing to run & \texttt{Bash}, \texttt{Read}, \texttt{Write}, \texttt{Grep}\ldots\ names, descriptions, argument types --- \emph{no code} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Yes --- the model writes the code and asks your machine to run it.} A \texttt{Bash} call is the model generating the \emph{text} of a shell command as an argument. It executes nothing; your harness runs that string on your laptop, with your files and permissions.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+{\footnotesize\textbf{The safety boundary is not the model's judgement} --- it is T2's permission dial, between the generated string and your shell.}
+\end{column}
+\begin{column}{0.51\textwidth}
+{\footnotesize\textbf{\texttt{system} is the only text still guaranteed to be there on turn 200} --- everything else drifts or compacts away. That is the mechanical reason \texttt{CLAUDE.md} earns its keep.}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Reading the Trace: Four Things Just Happened}
+\textbf{Every claim from \S1, \S3--\S4 shows up in that one picture.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.28}
+\begin{tabular}{|p{2.6cm}|p{4.1cm}|p{4.5cm}|}
+\hline
+\textbf{Moment} & \textbf{What it looked like} & \textbf{What it proves} \\ \hline
+\textbf{The loop ran itself} & five \texttt{tool\_use} $\rightarrow$ \texttt{tool\_result} round trips, no human input & nobody scheduled these steps; the model chose each one (\S1) \\ \hline
+\textbf{The error was recovered} & backend error came back as a \texttt{tool\_result} with \texttt{is\_error}, and the next turn retried & this is ``Observe'' in ReAct, and why a failed tool must still \emph{return} (\S1) \\ \hline
+\textbf{Cost grew quadratically} & req 5 re-sent everything from req 1 & the list is the cost driver, not the number of questions (\S1) \\ \hline
+\textbf{One step had no tool} & the party timeline was \emph{written from memory} (orange, previous slide) & the weakest link: in the transcript it looks identical to a fetched fact \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Where a referee would stop you.} The GDP series has provenance --- a URL, a vintage, a retrieval date. The party timeline has none; it is model recall typed into a CSV. \textbf{Ask of every number an agent hands you: which tool produced this, and can I re-run it?}
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{The Same Task with Three Agents}
+\textbf{The useful question is not ``is this faster'' but \emph{which steps are independent, and which one needs an adversary}.}
+
+\vspace{0.05cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.80,
+    o/.style={rectangle, draw=RedTitle!70, fill=blue!7, rounded corners,
+              minimum width=3.0cm, minimum height=0.7cm, align=center},
+    w/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+              minimum width=2.9cm, minimum height=1.0cm, text width=2.75cm, align=center},
+    r/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+              minimum width=2.9cm, minimum height=1.0cm, text width=2.75cm, align=center},
+    a/.style={-{Stealth[length=1.7mm]}, thick, gray!70}]
+    \node[o] (orc) at (5.2,1.5) {\textbf{Orchestrator} --- owns the plot and the write-up};
+    \node[w] (A) at (0.6,-0.3) {\textbf{data-fetcher}\\ GDP series $+$ URL,\\ vintage, date};
+    \node[w] (B) at (5.2,-0.3) {\textbf{timeline-builder}\\ party by year,\\ \emph{with a citation}};
+    \node[r] (C) at (9.8,-0.3) {\textbf{domain-reviewer}\\ attack the causal\\ claim};
+    \draw[a] (orc) -- (A);  \draw[a] (orc) -- (B);  \draw[a] (orc) -- (C);
+    \node[font=\tiny, gray!70] at (2.9,-1.35) {parallel: independent facts};
+    \node[font=\tiny, red!55!black] at (9.8,-1.35) {sequential: needs the draft first};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{What fan-out actually buys}
+\begin{itemize}\footnotesize
+    \item the two \emph{facts} are independent $\rightarrow$ genuinely parallel
+    \item 100 rows land in \texttt{data-fetcher}'s context, \textbf{not} the orchestrator's
+    \item one job each, so ``cite your source'' is enforceable
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\footnotesize\textbf{What it does \emph{not} buy}
+\begin{itemize}\footnotesize
+    \item the plot is one small step --- splitting it adds turns, not speed
+    \item three agents cost more tokens for the \emph{same} numbers
+    \item nothing here makes the causal claim more true
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Only \texttt{domain-reviewer} changes the answer} --- and it cannot run in parallel: it needs something to attack.}
+\end{frame}
+
+\begin{frame}{What the Reviewer Says --- and What No Agent Can Fix}
+\textbf{Given the draft, a competent \texttt{domain-reviewer} returns roughly this:}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize
+``The correlation is real but you cannot read it as an effect. Since 2000 you have about \textbf{six administrations} --- your effective $n$ is single digits, not the 100 quarters you plotted. Presidents inherit economies, business cycles are not assigned at random, and Congress is unmodelled. \textbf{Blinder and Watson (2016)} find a large gap over 1949--2012 (about \textbf{1.79pp} more annual real GDP growth under Democratic presidents, 16 terms) and attribute most of it to \emph{oil shocks, productivity shocks, and foreign demand} --- not to policy. Report the correlation, state the identification problem, and drop the word `affects'.'' \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.13cm}
+
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{This is the case for multi-agent, stated honestly.} Not speed. A second agent whose job is to \emph{disagree} caught a claim the first agent was happy to make --- because you told it to.
+\end{takeawaybox}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{And the limit.} Every agent here inherited your word \emph{``rationalize''}. A more agreeable reviewer would have obliged. \textbf{No number of agents fixes a leading prompt} --- that is T5's Context Dilemma, in one word of your own typing.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+{\footnotesize\textbf{The fix is upstream and costs nothing:} ask ``\emph{is} there a relationship, and what would identify it?'' --- then the same machinery works for you instead of against you.}
+\end{frame}
+
+%=============================================================================
+\section{Synthesis}
+%===========================================================
+
+\begin{frame}{The Corrections, in One Table}
+\textbf{Everything here is checkable on your own machine --- the vocabulary is marketing, the mechanism is not.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{3.3cm}|p{7.2cm}|}
+\hline
+\textbf{Widely repeated} & \textbf{What the machine does} \\ \hline
+``The session remembers me.'' & The API is stateless. A session is a list you re-send in full every turn --- your cost curve and your context limit. \\ \hline
+``A router dispatches specialists from a registry.'' & The same model, in the same context, emits a tool call. The registry is your folder of Markdown files. \\ \hline
+``A skill is hard-coded software.'' & A skill is prose the model reads, disclosed progressively. Its \texttt{description} is what selection runs on. \\ \hline
+``You can run unlimited agents.'' & Tokens-per-minute, context growth, and \emph{your} coordination cost bind --- usually the third. \\ \hline
+``\texttt{CLAUDE.md} is just documentation.'' & It \emph{is} the \texttt{system} argument of every request --- built at initialization, and the only text still guaranteed to be there on turn 200. \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{center}
+\textbf{One model, one loop, many lists.}\\
+{\footnotesize\textit{Every lever you have --- \texttt{system}, tool, skill, sub-agent --- is prose you wrote.}}
+\end{center}
+\end{frame}
+
+\begin{frame}{Bridge: Now Design and Dispatch Your Own}
+\textbf{The lab makes every claim in this deck falsifiable in about forty minutes.}
+
+\vspace{0.18cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{Part A --- the mechanism, offline}
+\begin{itemize}\footnotesize
+    \item Build a \texttt{messages} list by hand and watch it grow
+    \item Run the \S1 loop against a scripted model --- no key, no network, no cost
+    \item Plot tokens per turn: see the cost curve
+    \item Wire the three patterns from \S3 and measure them
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\textbf{Part B --- dispatch, live in your terminal}
+\begin{itemize}\footnotesize
+    \item Write three agent files: \texttt{code-reviewer}, \texttt{domain-reviewer}, \texttt{verifier} --- T4's RA team, made real
+    \item Then write the fourth that team is missing: \texttt{math-agent}, from your filled canvas (\S2)
+    \item Dispatch them at a flawed Aiyagari solver
+    \item Run the four checks from \S4
+    \item Narrow a \texttt{description} and watch dispatch stop
+    \item See why \emph{what an agent is allowed to read} decides what its review is worth
+    \item Fill the $3 \times 3$ detection matrix and check the diagonal fires and the control row stays silent
+    \item Then T2c: dispatch the same task at all three rungs, and script one
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Then back to the spine.} T3 returns to method --- the homotopy workflow that decides \emph{what} you should be asking any of these agents to do. Knowing the machinery is worth little without it.
+\end{takeawaybox}
+\end{frame}
+
+%===========================================================
+\end{document}

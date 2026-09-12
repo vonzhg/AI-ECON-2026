@@ -1,0 +1,536 @@
+%% FullCourse_10Lecs -- Lecture 9, Topic 9.2c: Invoking Agents
+%% Satellite interlude after T2b. Written 2026-09-12 to answer the questions
+%% T2b's new section provoked: how do you actually invoke an agent, what does a
+%% run with ~10,000 of them consist of, and what did it cost to build T2b itself.
+%%
+%% Boundary discipline (audited against all Lec09 decks before writing):
+%%   T1b owns pass-hat-k, best-of-n-is-wrong-for-autonomy, reliability curves, the
+%%        +90.2%/15x pair, model prices, METR horizons, pattern names, the framework
+%%        table  -> cross-reference. Sec 2 must RECONCILE the best-of-n tension, not
+%%        sidestep it, or this deck contradicts T1b:320-339.
+%%   T2   owns the CLI command surface (/init /plan /model /effort /fast /voice
+%%        /context /compact /clear /usage /rewind /resume). This deck may own
+%%        /agents, which that list omits. /context is a T2 instrument: cite it.
+%%   T2b  owns the stateless list, the four arguments, the twenty-line loop, the
+%%        three dials, the three ceilings, the router myth, the four checks, and all
+%%        of its Sec 2 design material -> build on by name, restate none.
+%%   T4   owns "sub-agents run in parallel / review time is halved", the RA trio,
+%%        settings.json, hooks, permissions -> any speed claim cross-references it.
+%%   T5   owns the epistemic caveat and the self-critique ceiling -> defer, one line.
+%%   Lec10 T6b owns the 13k-call numbers -> this deck owns only the mapping.
+%%   Lec05 owns "no resets, no parallel worlds" -> name the disanalogy out loud.
+%% Hard constraint: MCP appears ONLY in T1b.
+%% Deliberately does NOT \input{lec09_map.tex}: \LecNineMap models the five acts, and
+%% adding a satellite node would force a rebuild of T1-T5.
+%% All CLI flags verified against the installed CLI (Claude Code 2.1.269), not docs.
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.2c: Invoking Agents --- One, Three, Ten Thousand}
+
+\begin{document}
+
+\makebeamertitle
+
+%=============================================================================
+\begin{frame}{Topic 9.2c Agenda}
+\textbf{T2b's \S2 ended with three job descriptions committed to a folder. It never said what you type to make one run. This interlude answers that --- and the question it leads to.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+  \item \textbf{Three rungs} --- the only three ways to invoke an agent, and what separates them
+  \item \textbf{Ten thousand} --- what a four-digit agent run actually consists of, and what made it bankable
+  \item \textbf{This deck's own ledger} --- the four agents that wrote T2b's \S2, the bill, and the mistakes
+  \item \textbf{Synthesis} --- one question decides the rung
+\end{enumerate}
+
+\vspace{0.18cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The claim this deck defends.} The number of agents you run is not a capability decision. It is a \emph{verification} decision --- you may only buy scale when a wrong answer is cheap to detect.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Reading convention, as in T1b: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report. CLI flags verified against Claude Code 2.1.269, not documentation.}}
+\end{frame}
+
+%=============================================================================
+\section{Three Rungs}
+%===========================================================
+
+\sectiondivider{Three Rungs}{The only three ways to invoke an agent --- and who chooses in each}
+
+\begin{frame}{The Question T2b Left Open}
+\textbf{Three job descriptions sit in a folder. Nothing yet runs them. There are exactly three ways to start one, and they differ in one thing: who chooses.}
+
+\vspace{0.14cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.9,
+    rung/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                 minimum width=3.5cm, minimum height=1.15cm, text width=3.3cm, align=center},
+    hi/.style={rung, draw=RedTitle!70, fill=blue!6},
+    cpt/.style={font=\tiny, align=center, gray!75, text width=3.4cm}]
+    \node[rung] (r1) at (0,0)      {\textbf{1. Implicit}\\ you describe the task};
+    \node[rung] (r2) at (4.0,0.95) {\textbf{2. Explicit}\\ you name the agent};
+    \node[hi]   (r3) at (8.0,1.9)  {\textbf{3. Scripted}\\ you loop over processes};
+    \node[cpt] at (0,-1.05)   {\emph{the model} chooses, by reading \texttt{description} fields\\ \textbf{reaches 1--3}};
+    \node[cpt] at (4.0,-0.10)  {\emph{you} choose\\ \textbf{reaches 1--5}};
+    \node[cpt] at (8.0,0.85)   {nobody chooses --- the loop runs all $N$\\ \textbf{reaches $10^4$}};
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!65] (1.8,0.3) -- (2.2,0.65);
+    \draw[-{Stealth[length=1.8mm]}, thick, gray!65] (5.8,1.25) -- (6.2,1.6);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Only the third rung scales, because only it removes you from the loop.} Rungs 1 and 2 cost a turn of your attention each --- T2b's \S3 third ceiling, the one that binds. Rung 3 trades that for a prior problem: what checks the output.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Answered next:} the exhibit T2b's \S4 argued for but never showed.}
+\end{frame}
+
+\begin{frame}[fragile]{Rung 1 --- You Describe It, the Model Chooses}
+\textbf{T2b's \S4 proved dispatch is an ordinary tool call, by argument and by experiment. It never showed you one. Here it is.}
+
+\vspace{0.08cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.2}{6.1}\selectfont,numbers=none]
+you  >  Check the derivation in src/aiyagari.py
+        against docs/model.md.
+
+# what the model emits -- one block in the same
+# list as Read and Bash, nothing special about it
+{ "type": "tool_use",
+  "name": "Agent",
+  "input": {
+    "subagent_type": "math-agent",
+    "description": "check the derivation",
+    "prompt": "Review src/aiyagari.py against
+               docs/model.md. The calibration is
+               annual. Report only findings you
+               can tie to a line number." } }
+
+# ... the sub-agent's whole session happens here ...
+
+{ "type": "tool_result",
+  "content": "line 34: utility() has no domain
+              guard. With SIGMA=2, u(c)=-1/c is
+              positive for c<0 ..." }
+\end{lstlisting}
+\end{column}
+\begin{column}{0.43\textwidth}
+\begin{itemize}\footnotesize
+  \item \textbf{You typed no agent name.} The model read the \texttt{description} fields in your folder and chose --- the same way it chooses \texttt{Read}
+  \item \textbf{\texttt{prompt} is the brief}, T2b's \S2 step 4, written by the model this time rather than by you
+  \item \textbf{One \texttt{tool\_result} comes back.} Everything the sub-agent read is gone --- T2b's \S2 step 5
+\end{itemize}
+
+\vspace{0.1cm}
+{\scriptsize \textit{The same thing in a real transcript, from the lab: \texttt{Bash} $\to$ \texttt{Agent code-reviewer} $\to$ \texttt{Read} --- \texttt{Agent} sits in the same list as the others. That is the whole claim. \textbf{[solid]}}}
+\end{column}
+\end{columns}
+
+\vspace{0.05cm}
+{\footnotesize\textbf{Answered next:} what changes when you name it yourself.}
+\end{frame}
+
+\begin{frame}[fragile]{Rung 2 --- You Name It}
+\textbf{Naming the agent moves the choice from the model to you. Three surfaces do it, and this course already uses two of them without saying so.}
+
+\vspace{0.08cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.2}{6.1}\selectfont,numbers=none]
+# (a) in prose -- the idiom the OLG demo already uses
+you >  Send the pseudo-code to the domain-reviewer
+       sub-agent; require it to trace one cohort's
+       residual end to end before I write code.
+
+# (b) inspect what is actually in scope
+/agents
+
+# (c) pin a whole session to one specialist
+claude --agent math-agent
+
+# (d) define one inline, with no file at all
+claude --agents '{"claim-checker":
+  {"description":"Find the source of every number.",
+   "prompt":"You verify figures against the repo."}}'
+\end{lstlisting}
+
+\vspace{0.04cm}
+{\scriptsize \textit{\texttt{/agents} is the one command T2's twelve do not list; T2 owns the rest of the surface.}}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Naming it skips the only test you had.} Rung 1 makes the model choose by reading your \texttt{description}. That choice \emph{is} the test that the description is right --- T2b's \S2 step 7 is built on it.
+
+\vspace{0.1cm}
+Name the agent every time and a badly worded \texttt{description} never fails, so you never find out. Use rung 2 when you know which specialist you want; use rung 1 when you are still debugging the English.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Answered next:} the rung that removes you, and reaches four digits.}
+\end{frame}
+
+\begin{frame}[fragile]{Rung 3 --- You Script It}
+\textbf{Rungs 1 and 2 spend a turn of your attention per dispatch. Rung 3 spends a process instead --- and it is the only rung that reaches four digits.}
+
+\vspace{0.08cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.2}{6.1}\selectfont,numbers=none]
+# one process per unit of work, fenced read-only
+for f in source/Lec09_Agentic_AI/Lec09_T*.tex; do
+    claude -p "$(cat briefs/claim_check.md) $f" \
+           --output-format json \
+           --allowedTools Read Grep Glob \
+           --permission-mode dontAsk \
+      > "out/$(basename "$f" .tex).json" &
+done
+wait
+# or hand them to the background control plane
+claude --bg "audit T2c for unsourced numbers"
+claude agents          # list them
+claude logs <id>       # read one
+claude stop <id>       # kill one
+\end{lstlisting}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.5cm}|p{1.5cm}|p{2.0cm}|}
+\hline
+\textbf{Rung} & \textbf{Costs you} & \textbf{Binds at} \\ \hline
+1 implicit & a turn, each time & your attention \\ \hline
+2 explicit & a turn, each time & your attention \\ \hline
+3 scripted & one brief, once & tokens per minute \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The brief becomes a file.} At rung 3 you cannot retype it, so it must live on disk --- T2b's \S2 step 8, arriving by necessity rather than discipline.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Verified against Claude Code 2.1.269. No \texttt{-\/-max-turns} at the CLI: the ceiling is the agent file's \texttt{model:} line.}}
+\end{frame}
+
+%=============================================================================
+\section{Ten Thousand}
+%===========================================================
+
+\sectiondivider{Ten Thousand}{What a four-digit agent run consists of --- and what made it bankable}
+
+\begin{frame}{What About Ten Thousand Agents?}
+\textbf{On 28 August 2026 OpenAI pointed roughly ten thousand agents at Navier--Stokes and had a Lean-checked proof 88 hours later. The number is the least interesting part.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|p{2.9cm}|p{8.0cm}|}
+\hline
+Warm-up (Euler) & $\sim$100 agents, $\sim$50 hours \\ \hline
+The run (Navier--Stokes) & $\sim$10{,}000 agents from 28 Aug 2026, done within \textbf{88 hours} \\ \hline
+Formalisation & a further \textbf{17 hours} to check the proof in \textbf{Lean} \\ \hline
+Traffic & $\sim$5 million messages \emph{between agents}; $\sim$300 billion output tokens \\ \hline
+Compute & ``several million dollars'' (Bubeck, OpenAI) \\ \hline
+What was shown & finite-time singularity from smooth data --- the \emph{negative} resolution \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Read the ledger, not the headline.} Every figure is the vendor's own account of an unreleased model, four days old here, and the result is disputed two frames on. \textbf{[hype]} What is worth your attention is the \emph{architecture} --- reported consistently, and the part that transfers.
+\end{cautionbox}
+
+\vspace{0.05cm}
+{\scriptsize \textit{As of 12 Sep 2026; announced 8 Sep, covered by Quanta, Semafor, CNN. \textbf{[solid]} that it was claimed and is contested.}}
+\end{frame}
+
+\begin{frame}{Not Ten Thousand Geniuses: Groups, Framings, and a Human}
+\textbf{Not ten thousand independent attempts. Agents sat in groups that talked internally, each group got a \emph{different framing of the same problem}, and a human moved fragments between groups.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.82,
+    grp/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=2.5cm, minimum height=0.92cm, text width=2.35cm, align=center},
+    par/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+                minimum width=2.2cm, minimum height=0.8cm, text width=2.05cm, align=center},
+    hum/.style={rectangle, draw=RedTitle!70, fill=blue!7, rounded corners,
+                minimum width=2.4cm, minimum height=0.9cm, text width=2.25cm, align=center},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70},
+    back/.style={-{Stealth[length=1.7mm]}, thick, RedTitle!65, dashed}]
+    \node[grp] (g1) at (0,1.35)  {\textbf{group A}\\ framing 1};
+    \node[grp] (g2) at (0,0.15)  {\textbf{group B}\\ framing 2};
+    \node[grp] (g3) at (0,-1.05) {\textbf{group C}\\ framing 3};
+    \node[par] (p)  at (4.0,0.15) {partial results};
+    \node[hum] (h)  at (7.7,0.15) {\textbf{a human} reads and picks};
+    \foreach \i in {1,2,3} {\draw[arr] (g\i) -- (p);}
+    \draw[arr] (p) -- (h);
+    \draw[back] (h.south) -- (7.7,-2.05) -- (-1.95,-2.05) -- (-1.95,0.15) -- (g2.west);
+    \node[font=\tiny, RedTitle!75] at (3.2,-2.3) {re-seeded as new prompts};
+    \node[font=\tiny, align=left, text width=2.6cm, gray!80] at (10.9,0.15)
+        {within a group: agents talk.\\[3pt] across groups: only what a human carries.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.08cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{What varied was dial one.} Different framings of one problem \emph{are} different \texttt{system} prompts --- T2b's \S2 step 2, run ten thousand times instead of three --- wired as T2b's \S3 blackboard with a person as the board. Sober reading: a thousand-agent run with better synthesis might land in the same place.
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{The Verifier Is the Whole Story}
+\textbf{You may only spend money on scale when a wrong answer is cheap to detect. Lean made a wrong proof cost nothing. That, and not the ten thousand, is the part that transfers.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{4.6cm}|p{6.3cm}|}
+\hline
+\textbf{Reporting} best-of-$n$ as your score & the sin T1b names: $\tau$-bench pass-hat-$k$ falls from $\sim$90\% at $k{=}1$ to $\sim$57\% at $k{=}8$, so a best-of-$n$ headline flatters the model and hides the reliability curve \\ \hline
+\textbf{Running} $n$ attempts behind a checker that can reject & legitimate --- because the \emph{checker} decides, not the score. The $9{,}999$ failures cost tokens and nothing else \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Two things Lean does not buy.} A human must still certify that the statement checked in Lean is the theorem anyone meant to prove --- the formal check is sound about the object it was given, not about your intent. And the result is contested: Buckmaster alleges OpenAI muscled in on work he and Alp\"oge were finishing, called one AI-written paper ``AI slop'' \emph{despite} its formal verification, and OpenAI denies the charge. \textbf{[solid]} on the dispute.
+\end{cautionbox}
+
+\vspace{0.05cm}
+{\footnotesize\textbf{Answered next:} you already own a run like this --- and it worked for exactly this reason.}
+\end{frame}
+
+\begin{frame}{Your Own Four-Digit Run, and Why It Worked}
+\textbf{Lec10's T6b labelled 11{,}171 of 13{,}225 tasks in a single five-hour window. Nobody called it a swarm, but it is the same machine --- and it had a verifier.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.1cm}|p{3.8cm}|p{3.8cm}|}
+\hline
+ & \textbf{Navier--Stokes} & \textbf{T6b, your labelling run} \\ \hline
+The checker & Lean: sound, mechanical & a rubric, cached per task \\ \hline
+The hard cases & re-framed and re-seeded by a human & a Sonnet \textbf{adjudication tier} for the 3{,}456 flagged \\ \hline
+Not repeating work & --- & one cache file per task; re-runs skip \\ \hline
+Human time & re-seeding between groups & $\sim$20 min to spec the rubric; $\sim$12 labels read by eye \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Rubric $+$ adjudication tier $+$ cache \emph{is} a verifier} --- weaker than Lean, cheap enough to run 13{,}000 times. \textbf{And note what neither buys:} you can re-run a proof attempt or a labelling task ten thousand times, but you cannot re-run 2008. A central bank gets one history, so fan-out never manufactures a counterfactual (Lec05).
+\end{takeawaybox}
+
+\vspace{0.05cm}
+{\scriptsize \textit{T6b owns these numbers and the bulking/caching design; this frame owns only the mapping. \textbf{[solid]}}}
+\end{frame}
+
+%=============================================================================
+\section{This Deck's Own Ledger}
+%===========================================================
+
+\sectiondivider{This Deck's Own Ledger}{The four agents that wrote T2b's \S2 --- the bill, and the mistakes}
+
+\begin{frame}{Who Wrote T2b's \S2, and What It Cost}
+\textbf{The thirteen frames you read in T2b's \S2 were not written by one session. Four agents did the reading. Here is the bill, from this project's own logs.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{1.3cm}|p{5.1cm}|p{1.7cm}|p{1.1cm}|p{1.1cm}|}
+\hline
+\textbf{Type} & \textbf{Brief} & \textbf{Tokens} & \textbf{Calls} & \textbf{Min} \\ \hline
+Explore & map the target deck and its house style & 57{,}474 & 15 & 3.0 \\ \hline
+Explore & build system, CJK support, TikZ idioms & 121{,}309 & 43 & 5.0 \\ \hline
+Explore & course context, capstone, PDF tooling & 145{,}432 & 34 & 5.6 \\ \hline
+Plan & draft the frame-by-frame outline & 124{,}361 & 30 & 10.3 \\ \hline
+\multicolumn{2}{|r|}{\textbf{total}} & \textbf{448{,}576} & \textbf{122} & \textbf{23.8} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{448{,}576 tokens were read; four summaries came back} --- roughly twenty- to thirty-fold compression, and the orchestrating session never held the 122 file reads that produced them. That is T2b's \S3 isolated-context argument with a price on it. The three explorers also ran \emph{concurrently}: \textbf{5.6 minutes of wall clock against 13.5 sequential} (T4 owns the general speed claim).
+\end{takeawaybox}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Own session logs, 12 September 2026, Claude Code 2.1.269. \textbf{[solid]}}}
+\end{frame}
+
+\begin{frame}{The Design Work Was the Four Briefs}
+\textbf{Dispatching cost one line each. What decided whether the deck was any good was what each brief asked for --- T2b's \S2 step 4, done four times.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.0cm}|p{3.9cm}|p{3.7cm}|}
+\hline
+\textbf{Asked for} & \textbf{Came back} & \textbf{Changed} \\ \hline
+sections, frames, verbatim style patterns & no deck shows an agent file & the section's premise, and the style contract \\ \hline
+engine, CJK support, best existing figures & a Chinese guard exists in Lec01; zero \texttt{includegraphics}; two TikZ idioms & staying on \texttt{pdflatex}; both card figures \\ \hline
+capstone, prerequisites, PDF tooling & prerequisites require neither Python nor ML; a converter pipeline exists on disk & claims 1 and 4; the pipeline frame \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{None of the three asked a question whose answer was already known.} Each asked for an \emph{inventory} --- what exists, where, quoted --- which is what a read-only agent with a clean window is good at. Ask an explorer for a \emph{judgement} and you get your own prior back with file paths attached (T5).
+\end{takeawaybox}
+\end{frame}
+
+\begin{frame}{Where Those Four Agents Lived}
+\textbf{Three different things get called ``the agent'', and they have three different lifetimes. Only one of them was yours, and it never ran.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.24}
+\begin{tabular}{|p{2.8cm}|p{2.3cm}|p{3.5cm}|p{1.8cm}|}
+\hline
+ & \textbf{Written by} & \textbf{Lives in} & \textbf{Survives?} \\ \hline
+the \emph{type} (\texttt{Explore}, \texttt{Plan}) & the vendor, built in & the harness, delivered as a list in the system prompt & yes, but not yours to edit \\ \hline
+the \emph{brief} & \textbf{the model}, in the tool call & nowhere --- four tool-call arguments & \textbf{no} \\ \hline
+the \emph{report} & the sub-agent & the message list, plus session scratch & no \\ \hline
+\texttt{code-reviewer}, \texttt{math-agent}, \ldots & \textbf{you} & \texttt{.claude/agents/} in the lab & yes, versioned \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Your six agent files have never run --- not once.} \texttt{.claude/agents/} resolves relative to the directory the session starts \emph{in}: the only such folder here is inside the lab, and that session started at the courses root. \textbf{Where you put the folder decides whether the specialist exists} --- T4's resolution rule for \texttt{CLAUDE.md}, applied to agents.
+\end{cautionbox}
+\end{frame}
+
+\begin{frame}{What Went Wrong --- Four Mistakes, in Order of Interest}
+\textbf{The ledger looks efficient. It was not. Three of these are avoidable and one is a real constraint worth knowing.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{4.5cm}|p{6.4cm}|}
+\hline
+\textbf{Paid twice for one answer} & while the first explorer mapped the deck, the orchestrator read the same file itself. \emph{Once you dispatch, stop doing the job} \\ \hline
+\textbf{Paid for a plan nobody waited for} & the Plan agent ran 10.3 min; the outline was written before it returned. \emph{Block on it, or do not spawn it} \\ \hline
+\textbf{Skipped step 8} & four briefs written, none saved --- three of them reusable across every deck here \\ \hline
+\textbf{Could not delegate what needed it} & thirteen overflowing frames are thirteen independent problems, ideal fan-out --- but thirteen edits target \emph{one file} \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The binding constraint was shared mutable state, not the model.} The lever is the tool allowlist from step 3: \textbf{read-only agents compose, writing agents serialise.} Fan out workers that \emph{return} replacement text; let one writer apply it.
+\end{takeawaybox}
+\end{frame}
+
+%=============================================================================
+\section{Synthesis}
+%===========================================================
+
+\begin{frame}{Choosing a Rung Is One Question}
+\textbf{Not ``how many agents can I run'' --- T2b's \S3 already answered that. The question is what checks the output, and how cheaply.}
+
+\vspace{0.14cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{4.3cm}|p{2.2cm}|p{4.2cm}|}
+\hline
+\textbf{What can check the output} & \textbf{Rung} & \textbf{Worked example} \\ \hline
+only you, by reading & 1--2, $N$ small & the three background specialists, judged by a $3 \times 3$ detection matrix (T2b \S2) \\ \hline
+a cheap partial check --- tests, a rubric, a schema --- plus a tier for the hard cases & 3, $N$ in the thousands & T6b: cached rubric, Sonnet adjudication, 11{,}171 labels \\ \hline
+a sound mechanical check & 3, $N$ until the quota binds & Lean, a compiler, a one-command replication script \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{center}
+\textbf{$N$ is a verification choice, not a capability choice.}\\
+{\footnotesize\textit{T2b's \S3 tells you where the ceiling is. The verifier tells you whether you want to go near it.}}
+\end{center}
+\end{frame}
+
+\begin{frame}{Bridge: Three Rungs, One Folder, and a Lab}
+\textbf{Everything in this deck is one of two artifacts: a folder of Markdown files, or a loop over processes. Neither is a framework, and both are yours.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{In the lab, added for this deck}
+\begin{itemize}\footnotesize
+  \item Dispatch the three background specialists --- the prompt strings T2b's \S2 asked for and never gave you
+  \item Run one task at all three rungs and compare the transcripts
+  \item Fan out read-only over every deck in the lecture and count unsourced numbers
+\end{itemize}
+\end{column}
+\begin{column}{0.49\textwidth}
+\textbf{Committed with this deck}
+\begin{itemize}\footnotesize
+  \item \texttt{deck-cartographer} --- map a deck's structure and style
+  \item \texttt{boundary-auditor} --- say which deck owns a topic, with quotes
+  \item \texttt{claim-checker} --- find the source of every number, or flag it
+\end{itemize}
+{\scriptsize \textit{The three briefs from \S3 that should have been files. At the repository root, so they are in scope where you actually work.}}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Then back to the spine.} T3 returns to method --- the homotopy workflow that decides \emph{what} you should be asking any of these agents to do. A rung is a delivery mechanism; it does not improve the question.
+\end{takeawaybox}
+\end{frame}
+
+%===========================================================
+\end{document}
