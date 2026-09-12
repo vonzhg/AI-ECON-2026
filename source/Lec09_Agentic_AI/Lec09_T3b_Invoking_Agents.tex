@@ -26,8 +26,7 @@ Lecture 9.3b: Invoking Agents --- One, Three, Ten Thousand}
 
 \makebeamertitle
 
-% ---- T2c-F01 · EDIT · TIER: READ · from T2c:44
-% TODO(Phase B): Keep the takeaway box ("the number of agents you run is a verification decision"); move the CLI version to the deck's single CLI_FACTS footnote.
+% ==== Phase B · T2c-F01 · TIER: READ (map frame done in Phase A)
 \begin{frame}{Lecture 9 in One Map: Invoking Agents}
 \textbf{T3a left three job descriptions in a folder. This deck answers what you type to make one run --- and where that leads.}
 
@@ -304,8 +303,7 @@ Lecture 9.3b: Invoking Agents --- One, Three, Ten Thousand}
 {\scriptsize \textit{Guard: TA's ``think-budget routers'' route one query between fast and deep \emph{modes of one model}, not between agents.}}
 \end{frame}
 
-% ---- T2b-F27 · EDIT · TIER: READ · from T2b:1124
-% TODO(Phase B): One CLI version string, footnoted from CLI_FACTS_2026-09.md.
+% ==== Phase B · T2b-F27 · TIER: READ (observation provenance kept)
 \begin{frame}{Dispatch Is a Tool Call --- Evidence You Can See}
 \textbf{You do not have to take this on faith. Four checks, all runnable in the lab that follows.}
 
@@ -428,8 +426,7 @@ Lecture 9.3b: Invoking Agents --- One, Three, Ten Thousand}
 {\footnotesize\textbf{Answered next:} the exhibit the router section argued for but never showed.}
 \end{frame}
 
-% ---- T2c-F03 · EDIT · TIER: LAB · from T2c:104
-% TODO(Phase B): Review A2.5: one verified line for the other tested harnesses (how dispatch or skill activation appears in their transcript, or "not native -- use rung 3").
+% ==== Phase B · T2c-F03 · TIER: LAB (harness line)
 \begin{frame}[fragile]{Rung 1 --- You Describe It, the Model Chooses}
 \textbf{The router section proved dispatch is an ordinary tool call, by argument and by experiment. It never showed you one. Here it is.}
 
@@ -474,11 +471,10 @@ you  >  Check the derivation in src/aiyagari.py
 \end{columns}
 
 \vspace{0.05cm}
-{\footnotesize\textbf{Answered next:} what changes when you name it yourself.}
+{\footnotesize\textbf{Answered next:} naming it yourself.} {\tiny\textit{Elsewhere: \texttt{.gemini/agents/} (trusted folders), Codex's \texttt{spawn\_agent}; transcripts not yet verified.}}
 \end{frame}
 
-% ---- T2c-F04 · EDIT · TIER: READ · from T2c:151
-% TODO(Phase B): Review A2.5: one verified line for the other tested harnesses.
+% ==== Phase B · T2c-F04 · TIER: READ (harness line)
 \begin{frame}[fragile]{Rung 2 --- You Name It}
 \textbf{Naming the agent moves the choice from the model to you. Three surfaces do it, and this course already uses two of them without saying so.}
 
@@ -518,11 +514,10 @@ Name the agent every time and a badly worded \texttt{description} never fails, s
 \end{columns}
 
 \vspace{0.06cm}
-{\footnotesize\textbf{Answered next:} the rung that removes you, and reaches four digits.}
+{\footnotesize\textbf{Answered next:} the rung that removes you, and reaches four digits.} {\tiny\textit{\texttt{/agents}, \texttt{-{}-agent} and \texttt{-{}-agents} are Claude Code's surfaces; elsewhere, name the agent in prose or use rung 3.}}
 \end{frame}
 
-% ---- T2c-F05 · EDIT · TIER: READ · from T2c:193
-% TODO(Phase B): Review A2.5: headless equivalents for the other tested harnesses (e.g. gemini -p ... -o json), verified.
+% ==== Phase B · T2c-F05 · TIER: READ (headless equivalents)
 \begin{frame}[fragile]{Rung 3 --- You Script It}
 \textbf{Rungs 1 and 2 spend a turn of your attention per dispatch. Rung 3 spends a process instead --- and it is the only rung that reaches four digits.}
 
@@ -569,7 +564,7 @@ claude stop <id>       # kill one
 \end{columns}
 
 \vspace{0.05cm}
-{\scriptsize \textit{Verified against Claude Code 2.1.269. No per-run turn-cap flag at the CLI: budget through the model, the tool allowlist, and the brief.}}
+{\tiny \textit{Checked on Claude Code 2.1.269; elsewhere \texttt{gemini -p "\ldots" -o json}, \texttt{codex exec "\ldots" -{}-json} (help, 12 Sep 2026). No turn-cap flag: budget via model, allowlist, brief.}}
 \end{frame}
 
 % ---- T2c-F14 · EDIT · TIER: CORE · from T2c:478
@@ -605,9 +600,8 @@ a sound mechanical check & 3, $N$ until the quota binds & Lean, a compiler, a on
 
 \sectiondivider{Four-Digit Runs}{What a four-digit agent run consists of --- and what made it bankable}
 
-% ---- T2c-F06 · EDIT · TIER: READ · from T2c:248
-% TODO(Phase B): Review A4: a dated sidebar, not a hook. Re-verify the claim and the dispute at the freshness gate (Oct 19-20); keep [hype].
-\begin{frame}{What About Ten Thousand Agents?}
+% ==== Phase B · T2c-F06 · TIER: READ (dated sidebar)
+\begin{frame}{A Dated Sidebar: What About Ten Thousand Agents?}
 \textbf{On 28 August 2026 OpenAI pointed roughly ten thousand agents at Navier--Stokes and had a Lean-checked proof 88 hours later. The number is the least interesting part.}
 
 \vspace{0.12cm}
@@ -633,7 +627,7 @@ What was shown & finite-time singularity from smooth data --- the \emph{negative
 \end{cautionbox}
 
 \vspace{0.05cm}
-{\scriptsize \textit{As of 12 Sep 2026; announced 8 Sep, covered by Quanta, Semafor, CNN. \textbf{[solid]} that it was claimed and is contested.}}
+{\scriptsize \textit{As of 12 Sep 2026 (announced 8 Sep; Quanta, Semafor, CNN) --- re-check before teaching. \textbf{[solid]} that it was claimed and is contested.}}
 \end{frame}
 
 % ---- T2c-F07 · EDIT · TIER: READ · from T2c:277
@@ -825,76 +819,36 @@ capstone, prerequisites, PDF tooling & prerequisites require neither Python nor 
 \end{center}
 \end{frame}
 
-% ---- T2b-F40 · MERGE-PENDING(T2b-F40+T2c-F15) · TIER: LAB · from T2b:1615
-% TODO(Phase B): One bridge (v1): "Everything in Parts 2-3 is one of two artifacts: a folder of Markdown files, or a loop over processes. Part 4 hands you the canvas and fifty minutes: design one for a question of your own, and prove it works."
-% TODO(Phase B): Lab list per review A2: Part B routes by harness (Step 0 setup check).
-\begin{frame}{Bridge: Now Design and Dispatch Your Own}
-\textbf{The lab makes every claim in this deck falsifiable in about forty minutes.}
+% ==== Phase B · T2b-F40..T2c-F15 · TIER: LAB
+\begin{frame}{Bridge: Two Artifacts, and Fifty Minutes to Design Your Own}
+\textbf{Everything in Parts 9.2--9.3 is one of two artifacts: a folder of Markdown files, or a loop over processes. Neither is a framework, and both are yours.}
 
-\vspace{0.18cm}
+\vspace{0.08cm}
 
 \begin{columns}[T]
-\begin{column}{0.49\textwidth}
-\textbf{Part A --- the mechanism, offline}
+\begin{column}{0.5\textwidth}
+\textbf{In the lab}
 \begin{itemize}\footnotesize
-    \item Build a \texttt{messages} list by hand and watch it grow
-    \item Run T2a's loop against a scripted model --- no key, no network, no cost
-    \item Plot tokens per turn: see the cost curve
-    \item Wire the three wirings from this deck and measure them
+  \item \textbf{Part A (offline):} build a \texttt{messages} list, run the loop against a scripted model, plot the cost curve, wire the three patterns
+  \item \textbf{Part B (your harness):} dispatch the specialists at the flawed Aiyagari solver, narrow a \texttt{description} and watch selection stop, fill the detection matrix, run one task at all three rungs
+  \item \textbf{Step 0} routes you: Claude Code follows the walkthrough; Gemini CLI and Codex CLI take the rung-3 route
 \end{itemize}
 \end{column}
-\begin{column}{0.49\textwidth}
-\textbf{Part B --- dispatch, live in your terminal}
-\begin{itemize}\footnotesize
-    \item Write three agent files: \texttt{code-reviewer}, \texttt{domain-reviewer}, \texttt{verifier} --- T5b's RA team, made real
-    \item Then write the fourth that team is missing: \texttt{math-agent}, from your filled canvas (T3a)
-    \item Dispatch them at a flawed Aiyagari solver
-    \item Run the four checks from the router section
-    \item Narrow a \texttt{description} and watch dispatch stop
-    \item See why \emph{what an agent is allowed to read} decides what its review is worth
-    \item Fill the $3 \times 3$ detection matrix and check the diagonal fires and the control row stays silent
-    \item Then dispatch the same task at all three rungs, and script one
-\end{itemize}
-\end{column}
-\end{columns}
-
-\vspace{0.2cm}
-
-\begin{takeawaybox}
-\footnotesize\textbf{Then back to the spine.} T4 comes next, then T5a returns to method --- the homotopy workflow that decides \emph{what} you should be asking any of these agents to do. Knowing the machinery is worth little without it.
-\end{takeawaybox}
-\end{frame}
-
-% ---- T2c-F15 · MERGE-PENDING(T2b-F40+T2c-F15) · TIER: LAB · from T2c:503
-\begin{frame}{Bridge: Three Rungs, One Folder, and a Lab}
-\textbf{Everything in this deck is one of two artifacts: a folder of Markdown files, or a loop over processes. Neither is a framework, and both are yours.}
-
-\vspace{0.15cm}
-
-\begin{columns}[T]
-\begin{column}{0.49\textwidth}
-\textbf{In the lab, added for this deck}
-\begin{itemize}\footnotesize
-  \item Dispatch the three background specialists --- the prompt strings T3a asked for and never gave you
-  \item Run one task at all three rungs and compare the transcripts
-  \item Fan out read-only over every deck in the lecture and count unsourced numbers
-\end{itemize}
-\end{column}
-\begin{column}{0.49\textwidth}
-\textbf{Committed with this deck}
+\begin{column}{0.48\textwidth}
+\textbf{Committed with the lecture}
 \begin{itemize}\footnotesize
   \item \texttt{deck-cartographer} --- map a deck's structure and style
   \item \texttt{boundary-auditor} --- say which deck owns a topic, with quotes
   \item \texttt{claim-checker} --- find the source of every number, or flag it
 \end{itemize}
-{\scriptsize \textit{The three briefs from the ledger that should have been files. At the repository root, so they are in scope where you actually work.}}
+{\scriptsize \textit{The three briefs from the ledger that should have been files --- at the repository root, where sessions start.}}
 \end{column}
 \end{columns}
 
 \vspace{0.15cm}
 
 \begin{takeawaybox}
-\footnotesize\textbf{Then back to the spine.} T4 comes next, then T5a returns to method --- the homotopy workflow that decides \emph{what} you should be asking any of these agents to do. A rung is a delivery mechanism; it does not improve the question.
+\footnotesize\textbf{Next, Part 9.4 (T4):} the canvas and fifty minutes --- design one agent for a question of your own and measure whether it works. \textbf{The economist's version:} write the contract, then audit it. A rung is a delivery mechanism; it does not improve the question.
 \end{takeawaybox}
 \end{frame}
 
