@@ -41,6 +41,11 @@ a solver that crashes teaches nothing about silent failure.
    `1 - sigma = 0`. The constant is currently 2, so it does not bite, but the
    function is presented as general.
 
+> **Run on 2026-09-12 (rung 3, Claude Code 2.1.270, `scripts/detection_matrix.py`).** Asked whether the printed
+> number is the quantity the docstring claims, `econ-agent` wrote: *"This is a stated scope limit, not a defect."*
+> That is why the walkthrough's matrix now scores partial equilibrium as a **scope row that must stay silent**,
+> not as a defect to catch.
+
 ## What `domain-reviewer` should explicitly clear
 
 7. **`EV = P @ V.T` is correct.** `EV[iz, ia']` is

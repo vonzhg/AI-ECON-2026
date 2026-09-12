@@ -10,10 +10,11 @@ Two tiers:
                              so run_agent() exercises the real control flow
                              deterministically.  No credentials, no cost.
 
-  Tier 2 (opt-in)            claude_code_*() shell out to the local `claude`
-                             CLI, mirroring the backend used in Lecture 8's
-                             RAG demo.  No Anthropic API key is needed -- it
-                             uses the student's own Claude Code login.
+  Tier 2 (opt-in)            harness_*() shell out to a local terminal agent
+                             -- Claude Code, Gemini CLI, or Codex CLI -- in
+                             headless mode, using the student's own login.
+                             No API key appears in this code.  The older
+                             claude_code_*() names remain as thin wrappers.
 
 Nothing here imports `anthropic`, `openai`, `crewai` or `langgraph`.  The lab
 runs on the course's standard CPU environment.
@@ -22,8 +23,10 @@ runs on the course's standard CPU environment.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -238,39 +241,105 @@ def resend_cost(n_turns: int, new_tokens_per_turn: int) -> list[int]:
 
 
 # --------------------------------------------------------------------------- #
-# Tier 2: the local Claude Code CLI (no API key required)
+# Tier 2: local terminal agents in headless mode (no API key in this code)
 # --------------------------------------------------------------------------- #
+#
+# One entry per harness.  The flags are dated facts: they were checked against
+# the installed CLIs and are recorded, with how each was established, in
+# source/Lec09_Agentic_AI/CLI_FACTS_2026-09.md.  Change the two together.
 
 
+@dataclass(frozen=True)
+class Harness:
+    name: str
+    binary: str
+    login_hint: str
+    status: str  # how the headless recipe below was established (CLI_FACTS)
+
+
+HARNESSES: dict[str, Harness] = {
+    "claude": Harness("claude", "claude", "run `claude` once in a terminal and complete /login",
+                      "RUN on Claude Code 2.1.269"),
+    "gemini": Harness("gemini", "gemini", "run `gemini` once and sign in (or set GEMINI_API_KEY)",
+                      "HELP on Gemini CLI 0.47.0 -- headless call not yet run"),
+    "codex": Harness("codex", "codex", "run `codex login`",
+                     "HELP on Codex CLI 0.154.0 -- headless call not yet run"),
+}
+
+
+def harness_available(name: str) -> bool:
+    """True if the harness's CLI is on PATH."""
+    return shutil.which(HARNESSES[name].binary) is not None
+
+
+def available_harnesses() -> list[str]:
+    return [name for name in HARNESSES if harness_available(name)]
+
+
+def _run_cli(cmd: list[str], cwd: str | None, timeout: int) -> subprocess.CompletedProcess:
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
+                              cwd=cwd, stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"`{cmd[0]}` timed out after {timeout}s") from exc
+    if proc.returncode != 0:
+        raise RuntimeError(f"`{cmd[0]}` exited {proc.returncode}: "
+                           f"{(proc.stderr or proc.stdout)[-400:]}")
+    return proc
+
+
+def harness_ask(name: str, prompt: str, *, cwd: str | None = None,
+                timeout: int = 300, read_only: bool = True, model: str | None = None) -> str:
+    """One headless call -- rung 3 -- returning the agent's final text.
+
+    read_only=True limits the agent to reading files: Read/Grep/Glob in Claude
+    Code, plan approval mode in Gemini CLI, the read-only sandbox in Codex CLI.
+    Every call is a fresh session, which is what makes it an honest test.
+    `model` is passed only to Claude Code, whose agent files name a model
+    alias (sonnet, opus, haiku); the other harnesses use their own default.
+    """
+    if name == "claude":
+        cmd = ["claude", "-p", prompt, "--output-format", "json"]
+        if model:
+            cmd += ["--model", model]
+        if read_only:
+            cmd += ["--allowedTools", "Read", "Grep", "Glob", "--permission-mode", "dontAsk"]
+        return json.loads(_run_cli(cmd, cwd, timeout).stdout).get("result", "")
+    if name == "gemini":
+        cmd = ["gemini", "-p", prompt, "-o", "json"]
+        if read_only:
+            cmd += ["--approval-mode", "plan"]
+        return json.loads(_run_cli(cmd, cwd, timeout).stdout).get("response", "")
+    if name == "codex":
+        with tempfile.TemporaryDirectory() as tmp:
+            last = os.path.join(tmp, "last_message.txt")
+            cmd = ["codex", "exec", prompt, "--skip-git-repo-check", "-o", last,
+                   "-s", "read-only" if read_only else "workspace-write"]
+            _run_cli(cmd, cwd, timeout)
+            with open(last, encoding="utf-8") as fh:
+                return fh.read()
+    raise ValueError(f"unknown harness {name!r}; choose from {sorted(HARNESSES)}")
+
+
+def harness_auth_check(name: str, timeout: int = 60) -> tuple[bool, str]:
+    """Probe a harness with a tiny headless prompt.  Returns (ok, message)."""
+    if not harness_available(name):
+        return False, f"`{HARNESSES[name].binary}` not found on PATH."
+    try:
+        reply = harness_ask(name, "Reply with the word OK.", timeout=timeout)
+    except RuntimeError as exc:
+        return False, f"{exc}\nFix: {HARNESSES[name].login_hint}."
+    return True, reply.strip()[:200]
+
+
+# Names used by earlier versions of the notebook.
 def claude_code_available() -> bool:
-    """True if the `claude` CLI is on PATH."""
-    return shutil.which("claude") is not None
+    return harness_available("claude")
 
 
 def claude_code_auth_check(timeout: int = 30) -> tuple[bool, str]:
-    """Probe `claude -p` with a tiny prompt. Returns (ok, message)."""
-    if not claude_code_available():
-        return False, ("`claude` CLI not found on PATH. Install Claude Code, or "
-                       "just skip this step -- every other cell runs offline.")
-    try:
-        proc = subprocess.run(
-            ["claude", "-p", "--output-format", "text", "Reply with the word OK."],
-            capture_output=True, text=True, timeout=timeout,
-        )
-    except subprocess.TimeoutExpired:
-        return False, f"`claude -p` timed out after {timeout}s."
-    if proc.returncode != 0:
-        return False, (f"`claude -p` exited {proc.returncode}. Run `claude` in a "
-                       f"terminal and complete /login first.\n{proc.stderr[:300]}")
-    return True, proc.stdout.strip()[:200]
+    return harness_auth_check("claude", timeout=timeout)
 
 
 def claude_code_ask(prompt: str, timeout: int = 120) -> str:
-    """One-shot `claude -p` call. Requires an interactive /login beforehand."""
-    proc = subprocess.run(
-        ["claude", "-p", "--output-format", "text", prompt],
-        capture_output=True, text=True, timeout=timeout,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(f"claude -p failed ({proc.returncode}): {proc.stderr[:300]}")
-    return proc.stdout.strip()
+    return harness_ask("claude", prompt, timeout=timeout, read_only=False)

@@ -303,8 +303,8 @@ rather than detection.
 |---|---|---|---|
 | the loop never tests a convergence criterion |  |  |  |
 | a utility function evaluated outside its domain |  |  |  |
-| an aggregate computed and then discarded |  |  |  |
 | *control:* `EV = P @ V.T`, which is **correct** | silent? | silent? | silent? |
+| *scope:* partial equilibrium, stated in the docstring --- a limitation to state, **not a bug** | silent? | silent? | silent? |
 
 What the matrix tells you, and what no single report can:
 
@@ -312,7 +312,7 @@ What the matrix tells you, and what no single report can:
   dispatched, or it was and found nothing it owns.
 - **A full column** — too broad. You do not have a specialist, you have a third
   copy of one generalist.
-- **Anything in the control row** — a false positive, and the most important
+- **Anything in the control or scope row** — a false positive, and the most important
   result in the lab. An agent that finds something in every category is not
   being careful; it is being agreeable. Topic 9.5 is about why.
 - **A cell where two agents agree** — weak evidence, not strong. They read the

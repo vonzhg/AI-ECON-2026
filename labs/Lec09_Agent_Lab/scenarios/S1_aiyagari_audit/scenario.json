@@ -1,0 +1,66 @@
+{
+  "name": "S1 -- Aiyagari solver audit",
+  "files": [
+    "../../review_target/aiyagari_solver.py"
+  ],
+  "precompute": {
+    "command": [
+      "python3",
+      "aiyagari_solver.py"
+    ],
+    "save_as": "run_log.txt",
+    "timeout": 600
+  },
+  "agents": {
+    "tooling-agent": {
+      "brief": "../../.claude/agents/tooling-agent.md",
+      "task": "run_log.txt records exactly what happened when aiyagari_solver.py was run: stdout, stderr and the exit code. Report what happened, including any warnings, and tie each finding to a line of aiyagari_solver.py."
+    },
+    "math-agent": {
+      "brief": "../../.claude/agents/math-agent.md",
+      "task": "Check the mathematics of aiyagari_solver.py against the model stated in its docstring. The calibration is annual."
+    },
+    "econ-agent": {
+      "brief": "../../.claude/agents/econ-agent.md",
+      "task": "Judge whether the number aiyagari_solver.py prints is the quantity its docstring claims."
+    }
+  },
+  "defects": [
+    {
+      "id": "convergence",
+      "label": "the loop never tests a convergence criterion",
+      "lines": [
+        31,
+        44,
+        64,
+        72
+      ],
+      "owner": "tooling-agent"
+    },
+    {
+      "id": "domain",
+      "label": "a utility function evaluated outside its domain",
+      "lines": [
+        34,
+        35,
+        51,
+        52
+      ],
+      "owner": "math-agent"
+    }
+  ],
+  "tolerance": 1,
+  "controls": [
+    {
+      "label": "EV = P @ V.T, which is correct",
+      "lines": [
+        46
+      ]
+    },
+    {
+      "label": "partial equilibrium, stated in the docstring (scope, not a bug)",
+      "pattern": "market[- ]clearing|general[- ]equilibrium|capital demand|equilibrium (interest )?rate|r is (held )?fixed|fixed interest rate|interest rate is (held )?fixed"
+    }
+  ],
+  "note": "The walkthrough's third matrix row used to score 'an aggregate computed and then discarded' as a defect. The answer key calls it a stated scope limitation, and on 2026-09-12 econ-agent said so in its reply, so it is scored as a control: reporting it as a bug is the false positive."
+}

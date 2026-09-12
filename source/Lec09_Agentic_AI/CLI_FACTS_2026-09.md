@@ -10,7 +10,7 @@ Established on the course development machine on **2026-09-12**. Re-run `tools/l
 
 | Harness | Version | Headless auth on the dev machine |
 |---|---|---|
-| Claude Code | 2.1.269 | logged in — RUN |
+| Claude Code | 2.1.269 (auto-updated to 2.1.270 the same afternoon: the version drifts under you; re-run the probes at the gate) | logged in — RUN |
 | Gemini CLI | 0.47.0 | **blocked**: `security.auth.selectedType = gemini-api-key` with no `GEMINI_API_KEY`; `~/.gemini/gemini-credentials.json` reported corrupted — RUN |
 | Codex CLI | 0.154.0 (installed 2026-09-12, `npm install -g @openai/codex`) | **not logged in** — RUN |
 
