@@ -44,6 +44,19 @@ Bold: the agent the scenario expects to catch that defect. `provenance-checker` 
 | *control:* gender left missing, no source (line 8) | 0/3 | 0/3 |
 | other findings | 0 | 2 |
 
-S2 at k = 3 did not run: all nine calls failed with a CLI error while other headless jobs were finishing, and a probe a few minutes later succeeded. The runner now reports the CLI's own error reason; S2 is re-run on its own.
+## S2 at k = 3 (Claude Code 2.1.270, 13 Sep 2026)
 
-**Still to do before Oct 22:** S2 at k = 3 on Claude Code, and S1–S3 on a second harness (Gemini CLI or Codex CLI) once it is logged in.
+A first attempt on 12 Sep failed on all nine calls with a CLI error while other headless jobs were finishing; this is the re-run on its own.
+
+| | code-reviewer | domain-reviewer | econ-agent |
+|---|---|---|---|
+| an 11-month change labelled year over year (line 21) | **3/3** | 3/3 | 0/3 |
+| a merge that shifts CPI a year forward (line 24) | **3/3** | 3/3 | 2/3 |
+| a correlation printed as an effect (lines 27–28) | 0/3 | **3/3** | 3/3 |
+| *control:* sorting CPI by date before differencing (line 18) | 0/3 | 0/3 | 0/3 |
+| *control:* calling the Mar 2022–Jul 2023 hiking window wrong (line 33) | 0/3 | 0/3 | 0/3 |
+| other findings | 4 | 0 | 3 |
+
+Every specialist caught its own defects in all three runs, and no control fired.
+
+**Still to do before Oct 22:** S1–S3 on a second harness (Gemini CLI or Codex CLI) once one is logged in.

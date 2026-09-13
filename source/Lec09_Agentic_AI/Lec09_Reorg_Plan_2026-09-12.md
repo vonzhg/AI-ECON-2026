@@ -63,7 +63,7 @@ v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1
 | 1 | Plan v2 in place (this section); manifest with tiers; framework registry | Sep 16 | **done** — manifest + registry; this section |
 | 2 | Portability spike + `CLI_FACTS_2026-09.md`; assembler dry run; map v2 compiled | Sep 19 | **done** — `8ef29c0`. Claude Code facts from runs; Gemini CLI 0.47.0 and Codex CLI 0.154.0 from help and source only (headless calls wait on a login) |
 | 3 | Phase A: eleven decks compile, `check --strict` passes | Sep 23 | **done** — `d1da743` (all eleven compile ×2; page totals consistent) |
-| 4 | Lab: brief format, rung-3 runner, setup check, S1–S3 on two harnesses (k=3), Ex.4 transcripts + replay | Oct 3 | **mostly done** — runner and setup check `527a6a0`; S1 k=3, S2/S3 k=1 on Claude Code `c50c337`, `4c56892`; S3 k=3 (all defects 3/3, controls silent) `cc3ac95`; GDP transcript `447f38f`; Part A Step 4b replay `b210d31`; cold-open session transcript `cc3ac95`. **Open:** S2 at k=3 (its k=3 run failed on a transient CLI error; re-run alone); S1–S3 on a second harness (needs `gemini` or `codex` login) |
+| 4 | Lab: brief format, rung-3 runner, setup check, S1–S3 on two harnesses (k=3), Ex.4 transcripts + replay | Oct 3 | **mostly done** — runner and setup check `527a6a0`; S1 k=3, S2/S3 k=1 on Claude Code `c50c337`, `4c56892`; S3 k=3 (all defects 3/3, controls silent) `cc3ac95`; GDP transcript `447f38f`; Part A Step 4b replay `b210d31`; cold-open session transcript `cc3ac95`. S2 k=3 (each specialist 3/3 on its own defects, controls silent), 13 Sep. **Open:** S1–S3 on a second harness (needs `gemini` or `codex` login) |
 | 5 | Phase B: CORE frames in all decks (A3–A6), T4 deck | Oct 5 | **done** — `05e2a0a` (T1) … `3e2087a` (TA); T4 `c50c337` |
 | 6 | Student setup announcement + harness survey (**instructor action**) | Oct 9 | open |
 | 7 | Phase B: LAB/READ frames, TA; content freeze | Oct 12 | **done** — sweep `fc6cf74`; freeze after the QA fixes below |
@@ -78,6 +78,36 @@ Phase B works deck by deck, CORE first, to the rewrite standard in the review (�
 - Must hit: Lec10 T9 / Case 7 in T1 and T5c/T5d; the economic twin on every map frame; the harness mapping table in T2b.
 - Course agents: `boundary-auditor` on the ownership lines; `claim-checker` on every NEW or EDIT frame with a number; external dated claims web-verified with a date.
 - Portability: Step 0 detects `claude`, `gemini`, `codex`; S1–S3 at k=3 on each tested harness; one dry run of the 50-minute Design Lab with two harnesses in the room.
+
+### 0.7 Close-out (2026-09-13)
+
+**State.** All work is committed on branch `lec09-reorg` (baseline `515f50d` on `main`). It is **not merged or pushed**: nothing is live on the public site until the instructor approves.
+
+**Before merging, re-run:**
+```bash
+python3 tools/lec09_assemble.py check        # 195 source frames, 0 errors, 0 drifted
+python3 tools/build_slides.py --check         # 0 stale, 0 unresolved
+python3 tools/check_site.py                   # all checks passed
+```
+
+**Merge and publish (instructor):** `git checkout main && git merge --no-ff lec09-reorg && git push`. Then check that the eleven `slides/Lec09_*.pdf` links, `labs/`, and the T4 QR code (the labs hub) resolve.
+
+**Open items**
+
+| Item | Who | By | How |
+|---|---|---|---|
+| Merge and publish | instructor | Oct 16 | above |
+| S1–S3 on a second harness, k=3 | instructor logs in; then re-run | Oct 16 | fix Gemini CLI auth or `codex login`; `python3 scripts/detection_matrix.py scenarios/S1_aiyagari_audit --harness codex --k 3` (and S2, S3) |
+| Student harness survey and setup announcement | instructor | Oct 9 | Step 0: `python3 scripts/setup_check.py --live` |
+| Minute budget for the 45 CORE frames | instructor | Oct 16 | `Lec09_RunSheet_2026-10-22.md` |
+| Dry run of the 50-minute Design Lab with two harnesses | instructor | Oct 20 | T4 |
+| Freshness gate | Oct 19–20 | Oct 20 | `tools/lec09_cli_probes.sh`; update `CLI_FACTS_2026-09.md`; re-check the rows marked re-check in `Lec09_External_Facts_2026-09.md` (Navier–Stokes, Codex Goal Mode, METR per-model minutes) |
+| 讲稿 rewrite (follow-up) | — | after Oct 22 | known drift: OpenAI's MCP date (still DevDay, Oct 2025), "four" broken benchmarks (eight), the old hooks table |
+
+**Found outside Lecture 9, not changed here**
+- `source/Lec07_LLM/Lec07_T5b_Applications_Validation.tex:665` and `source/Lec08_RAG/Lec08_T5_Research_Applications_Demo_Eval.tex:444` repeat the unsourced "AEA … October 2024" disclosure claim that T5d replaced with the quoted AER rule.
+- `Lec10_T4_Case3_ESFellows.tex:84` dates the roster April 14, 2026; `Lec10_T7_Synthesis_Appendix.tex:261` says April 13. T4's age-status counts (44 + 1 + 836) sum to 881, not the 882 on its roster slide.
+- `source/Docs/Capstone_Projects_2026.md:526-528` still lists the Goldsmith-Pinkham guides; `figures/homeownership_by_age.jpg` is no longer used by any live deck.
 
 ## 1. Context
 
