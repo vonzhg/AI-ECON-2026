@@ -15,6 +15,7 @@
 \graphicspath{{./pic/}{./figures/}{../}}
 
 \usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
 
 \input{lec09_map.tex}
 
@@ -25,15 +26,14 @@ Lecture 9.5c: Mindset --- Trace Mistakes, Manage Context}
 
 \makebeamertitle
 
-% ---- T5-F01 · EDIT · TIER: READ · from T5:30
-% TODO(Phase B): Route line without the paradigm-shift section (it moved to T5d).
+% ==== Phase B · T5-F01 · TIER: READ (route + economic twin)
 \begin{frame}{Lecture 9 in One Map: Tracing, Mistakes, Context}
 \textbf{This deck answers: what can go wrong, and how do I see it happening?}
 
 \LecNineMap{5}{c}
 
 \vspace{0.1cm}
-\footnotesize\textit{Route: audit what the agent actually did (tracing) $\to$ the failure modes the harness cannot prevent $\to$ managing context: the compaction trade-off and the Context Dilemma $\to$ the paradigm shift, completed --- what AI changed and what stays yours.}
+\footnotesize\textit{Route: audit what the agent actually did (tracing) $\to$ the failure modes the harness cannot prevent $\to$ managing context: the compaction trade-off and the Context Dilemma. The economist's question here: how do you monitor an action you cannot watch --- when your own prior is part of the problem?}
 \end{frame}
 
 
@@ -199,31 +199,59 @@ Checks:
 \textbf{The output may look polished even when the economics is wrong.} That is why validation stays central. The next three frames show concrete instances.
 \end{frame}
 
-% ---- NEW · TIER: CORE
-% TODO(Phase B): Review A3: two lines pointing to Lec10 T9 (Case 7): the assistant hit every acceptance gate by injecting the classical answer into the objective; "the loophole was in the contract". Do not retell the case.
-% TODO(Phase B): Plus the per-pillar "runs clean, economics wrong" anchors from archive v1:683/708/735/761 (grid VFI where EGM is far faster; too few grid points near the borrowing constraint; Smets-Wouters at the ZLB needs global methods).
+% ==== Phase B · NEW:Failure Case 0: Passed Every Gate, Still Wrong · TIER: CORE
 \begin{frame}{Failure Case 0: Passed Every Gate, Still Wrong}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{The dangerous failure is not the crash. It is the clean run that answers a slightly different question --- one per pillar, and one extreme case you will see in Lecture 10.}
+
+\vspace{0.1cm}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{1.45cm}|>{\raggedright\arraybackslash}p{4.9cm}|}
+\hline
+\textbf{Pillar} & \textbf{Runs clean, economics wrong} \\ \hline
+Theory & the household problem was never written down, so the code solves a nearby model \\ \hline
+Algorithm & grid VFI where the endogenous grid method suits a CRRA household with a borrowing limit --- slower, so the grid gets coarser \\ \hline
+Numerics & too few grid points near the borrowing limit: precautionary savings come out wrong, and the numbers still look fine \\ \hline
+Advanced methods & perturbation around a steady state in a model where the zero lower bound binds --- the kink disappears \\ \hline
+Code literacy & ``PASSED'' printed by a check nobody read \\ \hline
+\end{tabular}
+\end{center}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{The extreme case: Lec10 T9.} A neural solver ``passed'' every acceptance gate --- aggregate capital within 0.3\%, 98\% distribution overlap, Euler errors of 0.13\% --- because the assistant had fed the known answer into its own training objective.
+
+\vspace{0.08cm}
+It did not break the rules. \textbf{The loophole was in the contract.}
+\end{cautionbox}
+
+\vspace{0.05cm}
+{\scriptsize T9 tells the whole story, with the transcript. Here, the lesson is the pillar table: every row is a gate that can be passed for the wrong reason.}
+\end{column}
+\end{columns}
 \end{frame}
 
-% ---- T5-F09 · EDIT · TIER: CORE · from T5:194
-% TODO(Phase B): Review A5: minimum-wage treatment is mostly assigned by state, so "cluster at county" is itself doubtful. Rewrite: cluster at the level of treatment assignment (usually state here; Abadie, Athey, Imbens and Wooldridge 2023).
-% TODO(Phase B): Drop "SEs will be 2--4x too small" or source it.
+% ==== Phase B · T5-F09 · TIER: CORE
 \begin{frame}[fragile]{Failure Case 1: Clustering Standard Errors}
 \textbf{Prompt:} ``Estimate the effect of minimum-wage increases on teen employment using county--month panel data.''
 
-\vspace{0.12cm}
+\vspace{0.1cm}
 \begin{lstlisting}[basicstyle=\ttfamily\scriptsize,numbers=none]
 * Agent default:
 reg emp_teen mw_increase i.county i.month, robust
+* Clustered where the policy is set (mostly by state):
+reg emp_teen mw_increase i.county i.month, vce(cluster state)
 \end{lstlisting}
 
-\vspace{0.08cm}
-\begin{itemize}
-    \item \textbf{What's wrong.} Identification is at the county level, so standard errors must cluster at county. The default \texttt{,~robust} is technically valid syntax but econometrically wrong here; SEs will be 2--4$\times$ too small.
-    \item \textbf{Why the agent missed it.} The training corpus rewards code that \emph{runs}; clustering choice is a research-design decision, not a code-syntax decision.
-    \item \textbf{Detection.} Always specify the clustering level in the prompt; cross-check against the canonical reference (Abadie, Athey, Imbens, Wooldridge 2023, \emph{QJE}, ``When Should You Adjust Standard Errors for Clustering?'').
-    \item \textbf{Hook it.} A repository rule that requires every regression to declare a clustering level catches this category at the source.
+\vspace{0.06cm}
+\begin{itemize}\small
+    \item \textbf{What's wrong.} Minimum wages are set mostly by states, so treatment is assigned at the state level. Heteroskedasticity-robust errors ignore the correlation of outcomes within an assignment unit, and are typically too small. Cluster at the level where treatment is assigned.
+    \item \textbf{Why the agent missed it.} Code that runs is rewarded; the clustering level is a research-design decision, not a syntax decision.
+    \item \textbf{Detection.} State the assignment level in the prompt, and check it against Abadie, Athey, Imbens, and Wooldridge (2023, \emph{QJE}), ``When Should You Adjust Standard Errors for Clustering?''
+    \item \textbf{Hook it.} A repository rule that every regression declares its clustering level catches the category at the source.
 \end{itemize}
 \end{frame}
 
@@ -268,22 +296,22 @@ The instructor's full scan parsed \textbf{527 institutional profile pages} and r
 {\scriptsize \textit{Coverage tables and figures: Lec10 T4, later this morning.}}
 \end{frame}
 
-% ---- T2c-F13 · EDIT · TIER: READ · from T2c:450
-% TODO(Phase B): Generalize each row beyond the deck-building story (paid twice; paid for a plan nobody waited for; skipped step 8; writing agents serialise).
+% ==== Phase B · T2c-F13 · TIER: READ (generalized to research projects)
 \begin{frame}{Four Mistakes at Scale, in Order of Interest}
-\textbf{T3b's ledger looks efficient. It was not. Three of these are avoidable and one is a real constraint worth knowing.}
+\textbf{T3b's ledger looks efficient. It was not. The same four mistakes appear in any project with more than one agent --- three avoidable, one a real constraint.}
 
-\vspace{0.1cm}
+\vspace{0.04cm}
 
 \begin{center}
-\footnotesize
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{|p{4.5cm}|p{6.4cm}|}
+\scriptsize
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{4.4cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
 \hline
-\textbf{Paid twice for one answer} & while the first explorer mapped the deck, the orchestrator read the same file itself. \emph{Once you dispatch, stop doing the job} \\ \hline
-\textbf{Paid for a plan nobody waited for} & the Plan agent ran 10.3 min; the outline was written before it returned. \emph{Block on it, or do not spawn it} \\ \hline
-\textbf{Skipped step 8} & four briefs written, none saved --- three of them reusable across every deck here \\ \hline
-\textbf{Could not delegate what needed it} & thirteen overflowing frames are thirteen independent problems, ideal fan-out --- but thirteen edits target \emph{one file} \\ \hline
+\textbf{Mistake} & \textbf{In the ledger} & \textbf{In a research project} \\ \hline
+\textbf{Paid twice for one answer} & the orchestrator read the file an explorer was already mapping --- \emph{once you dispatch, stop doing the job} & you and an agent both clean the same dataset \\ \hline
+\textbf{Paid for a plan nobody waited for} & the plan arrived 10.3 minutes after the outline was written --- \emph{block on it, or do not spawn it} & a literature scan nobody reads before choosing the model \\ \hline
+\textbf{Skipped step 8} & four briefs written, none saved & next week's session re-invents the prompt that worked \\ \hline
+\textbf{Could not delegate what needed it} & thirteen independent fixes, all to \emph{one file} & several agents editing one paper \texttt{.tex} collide \\ \hline
 \end{tabular}
 \end{center}
 
@@ -473,17 +501,15 @@ Then compact (or start a new session); next time, read it first.
 {\scriptsize \textit{Korinek (2023), NBER WP 30957; Journal of Economic Literature.}}
 \end{frame}
 
-% ---- T5-F22 · EDIT · TIER: READ · from T5:501
-% TODO(Phase B): The two Lec10 hand-off bullets move to T5d's closing bridge; T5c's bridge keeps only the T5d pointer (v1 bridge sentence).
+% ==== Phase B · T5-F22 · TIER: READ
 \begin{frame}{Bridge: Rules, Tests, and What You Do on Monday}
-\textbf{T5c named the failure modes and showed how to see them. One deck remains before Lecture 10.}
+\textbf{You can see what the agent did, name what it cannot do, and hold your own prior at arm's length. One thing remains.}
 
 \vspace{0.25cm}
 
 \begin{itemize}
-    \item \textbf{T5d closes the lecture:} the red lines, the seven tests, when \emph{not} to use an agent, and your first thirty days
-    \item \textbf{Lec10 delivers the full cases:} the four patterns from T1, worked end-to-end
-    \item \textbf{Both threads hand off:} you saw the fellows \emph{workflow} --- Lec10 T4 shows the findings, and Exercise B gives you your own batch of 50; you saw HA-Ramsey's \emph{contract and milestones} --- Lec10 T8 shows the discoveries and the economics
+    \item \textbf{T5d closes the lecture:} the rules that keep this safe, the tests that make it research-grade, when \emph{not} to use an agent, and your first thirty days
+    \item \textbf{The economist's version:} the principal cannot watch every action --- so decide in advance what is never delegated, and what evidence you will accept
 \end{itemize}
 
 \vspace{0.3cm}
