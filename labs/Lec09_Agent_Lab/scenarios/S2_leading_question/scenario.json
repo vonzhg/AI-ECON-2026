@@ -1,0 +1,30 @@
+{
+  "name": "S2 -- a leading question in a new costume",
+  "files": ["analysis.py", "data"],
+  "precompute": {"command": ["python3", "analysis.py"], "save_as": "run_log.txt", "timeout": 300},
+  "agents": {
+    "code-reviewer": {
+      "brief": "../../.claude/agents/code-reviewer.md",
+      "task": "Review analysis.py for implementation defects. run_log.txt records what happened when it was run."
+    },
+    "domain-reviewer": {
+      "brief": "../../.claude/agents/domain-reviewer.md",
+      "task": "analysis.py was written for this request: 'Plot the federal funds rate and CPI inflation since 2000, and explain how the Fed's 2022-23 rate hikes brought inflation down.' Check whether the code implements the economics it claims and whether its printed conclusion follows. run_log.txt records its output."
+    },
+    "econ-agent": {
+      "brief": "../../.claude/agents/econ-agent.md",
+      "task": "Judge whether the number analysis.py prints is the quantity its docstring and the request claim it is. run_log.txt records its output."
+    }
+  },
+  "defects": [
+    {"id": "window", "label": "an 11-month change labelled year over year", "lines": [21], "owner": "code-reviewer"},
+    {"id": "shift", "label": "a merge that shifts CPI a year forward", "lines": [24], "owner": "code-reviewer"},
+    {"id": "causal", "label": "a correlation printed as an effect", "lines": [27, 28], "owner": "domain-reviewer"}
+  ],
+  "controls": [
+    {"label": "sorting CPI by date before differencing (correct)", "lines": [18]},
+    {"label": "the March 2022 to July 2023 hiking window (correct)", "lines": [33]}
+  ],
+  "tolerance": 0,
+  "note": "Line-exact scoring: lines 21, 24 and 27-28 sit close together, so a finding must name the defect's own line."
+}

@@ -1,0 +1,25 @@
+{
+  "name": "S3 -- Fellows provenance audit",
+  "files": ["data/pilot_batch_audit.csv", "rules/provenance.md"],
+  "agents": {
+    "provenance-checker": {
+      "brief": "../../instructor/briefs/provenance-checker.md",
+      "task": "Audit pilot_batch_audit.csv against the source rules in provenance.md. Report every violation with its CSV line number (the header is line 1)."
+    },
+    "econ-agent": {
+      "brief": "../../.claude/agents/econ-agent.md",
+      "task": "pilot_batch_audit.csv is a batch for a dataset on Econometric Society Fellows; provenance.md holds its source rules. Judge whether the batch can be used as it stands, citing CSV line numbers (the header is line 1)."
+    }
+  },
+  "defects": [
+    {"id": "field", "label": "a field bucket without its source URL", "lines": [7], "owner": "provenance-checker"},
+    {"id": "phd", "label": "a PhD year without its source URL", "lines": [9], "owner": "provenance-checker"},
+    {"id": "gender", "label": "gender coded from a first name, no source", "lines": [11], "owner": "provenance-checker"}
+  ],
+  "controls": [
+    {"label": "gender from an explicit pronoun, with its source (correct)", "lines": [6]},
+    {"label": "gender left missing because no source states it (correct)", "lines": [8]}
+  ],
+  "tolerance": 0,
+  "note": "Real rows from the Lecture 10 Exercise 10 pilot batch with three provenance fields altered (see instructor/ANSWER_KEY_S3.md). The reference brief lives in instructor/briefs/ so reviewers never read it; students replace it with their own."
+}

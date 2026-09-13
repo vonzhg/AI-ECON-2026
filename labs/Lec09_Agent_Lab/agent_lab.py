@@ -160,7 +160,7 @@ def tool_use_block(block_id: str, name: str, args: dict) -> dict:
 
 def run_agent(model, registry: ToolRegistry, system: str, user_prompt: str,
               max_turns: int = 12, trace: bool = True) -> dict:
-    """The agentic loop from Topic 9.2b, section 1.
+    """The agentic loop from T2a ("The Loop in Twenty Lines").
 
     Identical in structure to the Anthropic Messages API version shown on the
     slide; only `model.create` is stubbed.  Returns a trace dict so the

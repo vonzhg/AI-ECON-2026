@@ -1,6 +1,6 @@
 # Agent Design Canvas
 
-Companion to **Topic 9.2b §2, "Three Backgrounds, Three Agents."** One page,
+Companion to **T3a, "Build an Agent From Scratch,"** and the T4 Design Lab. One page,
 eight cells. Fill it in *before* you open an editor — if a cell is empty, the
 agent is not designed yet, it is a wish.
 

@@ -81,6 +81,49 @@ def control_fired(findings: list[dict], control: dict) -> bool:
     return bool(pattern) and any(re.search(pattern, f.get("claim", ""), re.I) for f in findings)
 
 
+def score_row(found: list[dict], spec: dict, tol: int, row: dict) -> None:
+    row["runs"] += 1
+    matched = set()
+    for d in spec["defects"]:
+        if hits(found, d["lines"], tol):
+            row["defects"][d["id"]] += 1
+            matched.update(f["line"] for f in found if any(abs(f["line"] - l) <= tol for l in d["lines"]))
+    for i, control in enumerate(spec["controls"]):
+        if control_fired(found, control):
+            row["controls"][i] += 1
+    row["other"] += len([f for f in found if f["line"] not in matched])
+
+
+def print_table(spec: dict, table: dict, title: str) -> None:
+    names = list(table)
+    width = max(len(d["label"]) + 9 for d in spec["defects"] + spec["controls"]) + 2
+    print(f"\n{title}")
+    print(f"{'':{width}}" + "".join(f"{n:>16}" for n in names))
+    for d in spec["defects"]:
+        cells = ""
+        for n in names:
+            r = table[n]
+            mark = "*" if d.get("owner") == n else " "
+            cells += f"{r['defects'][d['id']]:>11}/{r['runs']}{mark:<3}"
+        print(f"{d['label']:{width}}" + cells)
+    for i, control in enumerate(spec["controls"]):
+        print(f"{'control: ' + control['label']:{width}}"
+              + "".join(f"{table[n]['controls'][i]:>11}/{table[n]['runs']}   " for n in names))
+    print(f"{'other findings (read them)':{width}}" + "".join(f"{table[n]['other']:>15} " for n in names))
+
+
+def rescore(spec: dict, results_dir: str, tol: int) -> int:
+    import glob
+    table = {}
+    for path in sorted(glob.glob(os.path.join(results_dir, "*_run*.md"))):
+        name = os.path.basename(path).rsplit("_run", 1)[0]
+        row = table.setdefault(name, {"runs": 0, "failed": 0, "defects": {d["id"]: 0 for d in spec["defects"]},
+                                      "controls": [0] * len(spec["controls"]), "other": 0})
+        score_row(parse_findings(open(path, encoding="utf-8").read()), spec, tol, row)
+    print_table(spec, table, f"{spec['name']} -- rescored from {results_dir}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("scenario", help="scenario folder containing scenario.json")
@@ -88,19 +131,27 @@ def main() -> int:
     ap.add_argument("--k", type=int, default=3, help="fresh runs per agent (default 3)")
     ap.add_argument("--agents", nargs="+", help="subset of the scenario's agents")
     ap.add_argument("--timeout", type=int, default=600)
+    ap.add_argument("--rescore", metavar="RESULTS_DIR",
+                    help="recompute the matrix from saved replies (after changing scenario.json)")
     args = ap.parse_args()
 
     sdir = os.path.abspath(args.scenario)
     spec = json.load(open(os.path.join(sdir, "scenario.json"), encoding="utf-8"))
     agents = {n: a for n, a in spec["agents"].items() if not args.agents or n in args.agents}
     tol = spec.get("tolerance", 1)
+    if args.rescore:
+        return rescore(spec, args.rescore, tol)
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     outdir = os.path.join(LAB, "results", os.path.basename(sdir), f"{args.harness}-{stamp}")
     os.makedirs(outdir, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as stage:
         for rel in spec["files"]:
-            shutil.copy(os.path.join(sdir, rel), stage)
+            src = os.path.join(sdir, rel)
+            if os.path.isdir(src):
+                shutil.copytree(src, os.path.join(stage, os.path.basename(os.path.normpath(src))))
+            else:
+                shutil.copy(src, stage)
         pre = spec.get("precompute")
         if pre:  # run the code once, so every reviewer can stay read-only
             proc = subprocess.run(pre["command"], cwd=stage, capture_output=True, text=True,
@@ -118,51 +169,33 @@ def main() -> int:
             for run in range(1, args.k + 1):
                 with tempfile.TemporaryDirectory() as work:
                     for f in os.listdir(stage):
-                        shutil.copy(os.path.join(stage, f), work)
-                    try:
-                        reply = agent_lab.harness_ask(args.harness, prompt, cwd=work, timeout=args.timeout,
-                                                      read_only=True, model=model)
-                    except RuntimeError as exc:
+                        src = os.path.join(stage, f)
+                        if os.path.isdir(src):
+                            shutil.copytree(src, os.path.join(work, f))
+                        else:
+                            shutil.copy(src, work)
+                    reply = None
+                    for attempt in (1, 2):  # one retry: long runs hit transient rate limits
+                        try:
+                            reply = agent_lab.harness_ask(args.harness, prompt, cwd=work, timeout=args.timeout,
+                                                          read_only=True, model=model)
+                            break
+                        except RuntimeError as exc:
+                            print(f"  {name} run {run}: attempt {attempt} failed -- {str(exc)[:120]}", flush=True)
+                    if reply is None:
                         table[name]["failed"] += 1
-                        print(f"  {name} run {run}: FAILED -- {str(exc)[:160]}")
                         continue
                 with open(os.path.join(outdir, f"{name}_run{run}.md"), "w", encoding="utf-8") as fh:
                     fh.write(reply)
                 found = parse_findings(reply)
-                row = table[name]
-                row["runs"] += 1
-                matched = set()
-                for d in spec["defects"]:
-                    if hits(found, d["lines"], tol):
-                        row["defects"][d["id"]] += 1
-                        matched.update(f["line"] for f in found
-                                       if any(abs(f["line"] - l) <= tol for l in d["lines"]))
-                for i, control in enumerate(spec["controls"]):
-                    if control_fired(found, control):
-                        row["controls"][i] += 1
-                row["other"] += len([f for f in found if f["line"] not in matched])
+                score_row(found, spec, tol, table[name])
                 print(f"  {name} run {run}: {len(found)} findings", flush=True)
 
     summary = {"scenario": spec["name"], "harness": args.harness, "k": args.k,
                "harness_status": agent_lab.HARNESSES[args.harness].status, "when": stamp, "table": table}
     json.dump(summary, open(os.path.join(outdir, "summary.json"), "w"), indent=2)
 
-    names = list(agents)
-    width = max(len(d["label"]) + 9 for d in spec["defects"] + spec["controls"]) + 2
-    print(f"\n{spec['name']} -- harness {args.harness}, k = {args.k}")
-    print(f"{'':{width}}" + "".join(f"{n:>16}" for n in names))
-    for d in spec["defects"]:
-        cells = ""
-        for n in names:
-            r = table[n]
-            mark = "*" if d.get("owner") == n else " "
-            cells += f"{r['defects'][d['id']]:>11}/{r['runs']}{mark:<3}"
-        print(f"{d['label']:{width}}" + cells)
-    for i, control in enumerate(spec["controls"]):
-        print(f"{'control: ' + control['label']:{width}}"
-              + "".join(f"{table[n]['controls'][i]:>11}/{table[n]['runs']}   " for n in names))
-    print(f"{'other findings (read them)':{width}}"
-          + "".join(f"{table[n]['other']:>15} " for n in names))
+    print_table(spec, table, f"{spec['name']} -- harness {args.harness}, k = {args.k}")
     print("\n* = the agent the scenario expects to catch that defect.  Replies: " + os.path.relpath(outdir, LAB))
     return 0
 

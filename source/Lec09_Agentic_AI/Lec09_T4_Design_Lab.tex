@@ -16,6 +16,8 @@
 \graphicspath{{./pic/}{./figures/}{../}}
 
 \usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
+\usepackage{qrcode}
 
 \input{lec09_map.tex}
 
@@ -27,114 +29,440 @@ Lecture 9.4: Design Lab --- Your Agent for an Economics Task}
 \makebeamertitle
 
 % ---- NEW · TIER: CORE
-% TODO(Phase B): Add the 9.4 economic twin (write the contract, audit the work) in Phase B.
 \begin{frame}{Lecture 9 in One Map: Design Lab}
 \textbf{This part answers: can you design an agent for a question of your own --- and prove it works?}
 
 \LecNineMap{4}{}
 
 \vspace{0.1cm}
-\footnotesize\textit{Route: pick a scenario $\to$ fill the canvas $\to$ write the brief and compile it for your harness $\to$ run the detection matrix, three times $\to$ pitch what you measured.}
+\footnotesize\textit{Route: pick a scenario $\to$ fill the canvas $\to$ write the brief and compile it for your harness $\to$ run the detection matrix, three times $\to$ pitch what you measured. The economist's question for this part: how do you write the contract --- and audit it?}
 \end{frame}
 
-% ---- NEW · TIER: CORE
-% TODO(Phase B): Workflow TikZ (plan v1 section 7.1, amended): pick S1-S3 -> fill the eight-cell canvas (cell 7 plants a bug) -> write briefs/<name>.md -> compile to your harness (sub-agent / skill / headless prompt) -> run scripts/detection_matrix.py k=3 -> narrow the description if rates are wrong -> pitch and validate.
-% TODO(Phase B): About 50 minutes; teams of 2-4 with at least one working harness (Step 0 setup check). Deliverables: canvas, brief, one matrix row with rates, one "surprising cell" sentence.
+% ==== Phase B · NEW:The Design Lab in One Slide · TIER: CORE
 \begin{frame}{The Design Lab in One Slide}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
+\textbf{Fifty minutes, teams of two to four, at least one working harness per team: design one agent, then measure it --- three times --- before you believe it.}
 
-% ---- NEW · TIER: LAB
-% TODO(Phase B): S1 Aiyagari solver audit (guaranteed on both tested harnesses) | S2 a leading question in a new costume (review A6.2: FRED FEDFUNDS + CPI since 2000, "explain how the 2022-23 hikes brought inflation down"; unambiguous planted defects only) | S3 Fellows provenance batch (hook where the harness has hooks, runner gate otherwise) | S4 referee: skill or agent? (brief only).
-% TODO(Phase B): Columns: goal, agents to design, planted defect, data, time. A scenario joins the menu only after it passes on both tested harnesses (review A6.4).
-\begin{frame}{Scenario Menu}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
+\vspace{0.15cm}
+\begin{center}
+\begin{tikzpicture}[
+    st/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        text width=2.25cm, minimum height=1.55cm, align=center, font=\scriptsize},
+    hot/.style={st, draw=RedTitle!70, fill=blue!6},
+    mins/.style={font=\tiny\bfseries, text=RedTitle},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!65}
+]
+  \node[st]  (a) at (0,0)     {\textbf{Pick}\\ a scenario, read its \texttt{brief.md}; Step~0 done};
+  \node[hot] (b) at (2.75,0)  {\textbf{Design}\\ the eight canvas cells --- the contract};
+  \node[st]  (c) at (5.5,0)   {\textbf{Write}\\ the brief; compile it for your harness};
+  \node[hot] (d) at (8.25,0)  {\textbf{Measure}\\ the detection matrix, three fresh runs};
+  \node[st]  (e) at (11.0,0)  {\textbf{Pitch}\\ rates, silent controls, the surprise};
+  \foreach \i/\j in {a/b,b/c,c/d,d/e} {\draw[arr] (\i) -- (\j);}
+  \draw[arr, dashed, RedTitle!60] (d.south) -- ++(0,-0.45) -| node[pos=0.25, below, font=\tiny] {rates wrong? narrow the \texttt{description} and run again} (c.south);
+  \node[mins] at (0,1.05)    {5 min};
+  \node[mins] at (2.75,1.05) {15 min};
+  \node[mins] at (5.5,1.05)  {10 min};
+  \node[mins] at (8.25,1.05) {15 min};
+  \node[mins] at (11.0,1.05) {5 min};
+\end{tikzpicture}
+\end{center}
 
-% ---- NEW · TIER: LAB
-% TODO(Phase B): labs/Lec09_Agent_Lab/scenarios/S1_aiyagari_audit/ (points to review_target/ and TERMINAL_WALKTHROUGH Steps 1-8); design a fourth agent (replication-checker) from the canvas.
-\begin{frame}{S1 Brief --- Aiyagari Solver Audit}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
-
-% ---- NEW · TIER: LAB
-% TODO(Phase B): Same anatomy as the T2a GDP trace (fact, fact, plot, leading causal verb) on new data; students must recognise the verb without having seen this answer. Instructor debrief lives in instructor/, not in the scenario folder.
-\begin{frame}{S2 Brief --- A Leading Question in a New Costume}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
-
-% ---- NEW · TIER: LAB
-% TODO(Phase B): provenance-checker (Read/Grep; per-row verdict; never infers gender or birth year -- rule text from T4-F15); 2 of 10 rows lack source_url, 1 row has a gender inferred from a name. Gate: PreToolUse hook on Write in Claude Code; require_source_url.py inside the runner elsewhere (review A2.4, A5).
-\begin{frame}{S3 Brief --- Fellows Provenance Batch}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
-
-% ---- NEW · TIER: LAB
-% TODO(Phase B): Left: T2b-F20's canvas TikZ with the grey answers removed (\href to AGENT_DESIGN_CANVAS.md). Right: the briefs/<name>.md front matter and its three compilations (review A2.2).
-\begin{frame}{The Blank Canvas, and the Brief It Compiles To}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
-
-% ---- NEW · TIER: LAB
-% TODO(Phase B): One prompt the agent should handle, one adjacent prompt it should not; narrow the description until both behave -- measured as a rate over k=3 fresh runs, not one run.
-\begin{frame}{Debug the English}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
-\end{frame}
-
-% ---- T1b-F13 · MOVE · TIER: CORE · from T1b:313
-% TODO(Phase B): Review A6.1: this is the Validate method. Reframe for the lab: every "should fire / should stay silent" cell is run k=3 times by the rung-3 runner; report the rate, not the best run.
-% TODO(Phase B): Keep the tau-bench numbers tagged and verified; the "economist translation" stays.
-\begin{frame}{Single-Try Score vs.\ Reliability Under Repetition}
-\textbf{For an agent that runs unattended, the relevant statistic is not its \emph{best} run --- it is whether it succeeds \emph{every} time.}
-
-\vspace{0.2cm}
-
+\vspace{0.35cm}
 \begin{columns}[T]
-\begin{column}{0.5\textwidth}
-\textbf{Best-of-$n$ thinking (wrong for autonomy)}
-\begin{itemize}\footnotesize
-    \item report the best of several attempts
-    \item flatters the model
-    \item fine for a human-in-the-loop draft you will check
+\begin{column}{0.48\textwidth}
+\footnotesize\textbf{Deliverables}
+\begin{itemize}\scriptsize
+  \item the filled canvas and the brief it compiles to
+  \item one matrix row per agent, as rates over three runs
+  \item one sentence on the cell that surprised you
 \end{itemize}
 \end{column}
 \begin{column}{0.48\textwidth}
-\textbf{pass-hat-$k$ / reliability (right for autonomy)}
-\begin{itemize}\footnotesize
-    \item probability \emph{all} $k$ independent runs succeed
-    \item $\tau$-bench: $\sim$90\% at $k{=}1$ $\to$ $\sim$57\% at $k{=}8$
-    \item this is what matters when no human checks each run
+\begin{takeawaybox}
+\footnotesize\textbf{The economist's version:} the canvas is the contract, the matrix is the audit, and three runs are the sample. A reviewer you have not measured is one you are trusting for no reason.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · NEW:Scenario Menu · TIER: LAB
+\begin{frame}{Scenario Menu}
+\textbf{Three scenarios, each built so a careful agent can be caught being careless --- and a careless one caught being agreeable.}
+
+\vspace{0.15cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.35cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{2.6cm}|}
+\hline
+\textbf{Scenario} & \textbf{The task} & \textbf{What it tests} & \textbf{Materials} \\ \hline
+\textbf{S1} Aiyagari solver audit \textit{(guided start)} & review a solver that runs and prints plausible numbers & silent numerical failure; telling a stated scope from a bug & \texttt{review\_target/}, six lab agents \\ \hline
+\textbf{S2} A leading question & ``explain how the 2022--23 rate hikes brought inflation down'' & a leading verb on real data; what would identify the effect & FRED \texttt{FEDFUNDS}, \texttt{CPIAUCSL}; \texttt{analysis.py} \\ \hline
+\textbf{S3} Fellows provenance & audit ten rows of the Econometric Society Fellows dataset & sourcing, missingness, and a gate no agent can talk past & the Lecture 10 pilot batch and its rules \\ \hline
+\textbf{S4} Referee: skill or agent? \textit{(discussion)} & should a referee workflow be a skill or a sub-agent? & where the reasoning lives (T3a) & Lec10's \texttt{review-paper} skill \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\footnotesize Every scenario runs on Claude Code, Gemini CLI, or Codex CLI through \texttt{scripts/detection\_matrix.py}. Answer keys live in the lab's \texttt{instructor/} folder --- do not open it before you pitch.
+\end{frame}
+
+% ==== Phase B · NEW:S1 Brief --- Aiyagari Solver Audit · TIER: LAB
+\begin{frame}[fragile]{S1 Brief --- Audit the Aiyagari Solver}
+\textbf{The solver runs to completion and prints plausible numbers. Design the reviewer you would want on it before a result goes into a paper.}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{The situation}
+\begin{itemize}\scriptsize
+  \item \texttt{review\_target/aiyagari\_solver.py}: value-function iteration for the Aiyagari household problem, annual calibration
+  \item six lab agents already exist --- three by review function, three by background (T3a)
+  \item your team adds \textbf{one more}: a \texttt{replication-checker}, or the reviewer you think the team is missing
 \end{itemize}
+
+\vspace{0.1cm}
+\footnotesize\textbf{What to measure}
+\begin{itemize}\scriptsize
+  \item which defects your agent catches, with line numbers, as rates over three runs
+  \item whether it stays silent on code that is right --- and on a limitation the docstring already states
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+cd labs/Lec09_Agent_Lab
+python3 scripts/setup_check.py --live
+python3 scripts/detection_matrix.py \
+    scenarios/S1_aiyagari_audit \
+    --harness claude --k 3
+\end{lstlisting}
+\begin{takeawaybox}
+\scriptsize\textbf{Why start here.} On 12 September 2026 two of the lab's own agents caught both planted defects in three runs out of three and never flagged the correct lines. Your agent has a benchmark to beat.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · NEW:S2 Brief --- A Leading Question in a New Costume · TIER: LAB
+\begin{frame}{S2 Brief --- A Leading Question in a New Costume}
+\textbf{The request your research assistant received:}
+
+\vspace{0.1cm}
+\begin{conceptbox}
+\footnotesize\textit{``Plot the federal funds rate and CPI inflation since 2000, and explain how the Fed's 2022--23 rate hikes brought inflation down.''}
+\end{conceptbox}
+
+\vspace{0.12cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{What came back}
+\begin{itemize}\scriptsize
+  \item \texttt{analysis.py}: reads FRED \texttt{FEDFUNDS} and \texttt{CPIAUCSL} (retrieved 12 Sep 2026), draws the chart, prints one number
+  \item it runs cleanly and the chart looks like every chart you have seen
+\end{itemize}
+\footnotesize\textbf{House rules}
+\begin{itemize}\scriptsize
+  \item inflation means year-over-year growth in the CPI
+  \item the hiking cycle ran from March 2022 to July 2023
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Design one reviewer that would have stopped this.} Same anatomy as T2a's GDP trace --- two facts, a plot, a causal verb --- on new data, so last hour's answer does not transfer by pattern-matching. ``Explain how X brought Y down'' is not a research question until it says what would identify the effect.
+\end{cautionbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · NEW:S3 Brief --- Fellows Provenance Batch · TIER: LAB
+\begin{frame}[fragile]{S3 Brief --- Fellows Provenance Audit}
+\textbf{Ten rows came back for the Econometric Society Fellows dataset (Lec10 T4). Before they are merged, someone has to audit them --- and something has to enforce the rules even when nobody reads.}
+
+\vspace{0.12cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{The rules} (\texttt{rules/provenance.md})
+\begin{itemize}\scriptsize
+  \item every extracted field keeps its own source URL
+  \item gender only from an explicit statement on an official page
+  \item missing stays missing, with a note saying why
+\end{itemize}
+\footnotesize\textbf{Your agent}
+\begin{itemize}\scriptsize
+  \item a \texttt{provenance-checker}: row by row, line numbers, never fills or fixes a value
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{Then the gate that needs no agent}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+# any harness: a check the runner can call
+python3 checks/require_source_url.py \
+        data/pilot_batch_audit.csv
+
+# Claude Code: PreToolUse hook on Write
+# blocks a bad row before it is written
+\end{lstlisting}
+{\scriptsize A PostToolUse hook could only complain after the file was written --- we checked (Claude Code 2.1.269).}
 \end{column}
 \end{columns}
 
-\vspace{0.22cm}
-
-\textbf{Economist translation:} an unattended agent on a recurring data pull is a repeated trial. A 90\% single-try success compounds into frequent failure across a quarter of nightly runs. Design for the reliability curve, not the demo.
+\vspace{0.1cm}
+{\scriptsize\textit{Rows from the Lecture 10 exercise's pilot batch: official and institutional pages only. The scenario copy alters provenance, never a person's attributes.}}
 \end{frame}
 
-% ---- NEW · TIER: LAB
-% TODO(Phase B): Matrix template as a figure: diagonal shaded, off-diagonal, control row. One fresh headless process per cell (fresh session by construction), k=3; name the surprising cell. Works on every tested harness (review A2.3).
-\begin{frame}{Pitch and Validate: The Detection Matrix at Rung 3}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+% ==== Phase B · NEW:The Blank Canvas, and the Brief It Compiles To · TIER: LAB
+\begin{frame}[fragile]{The Blank Canvas, and the Brief It Compiles To}
+\textbf{Fill the eight cells before you open an editor. Then the answers compile into one brief --- and the brief runs on any of the three harnesses.}
+
+\vspace{0.06cm}
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    cell/.style={rectangle, draw=black!55, fill=white, minimum width=3.05cm,
+                 minimum height=0.82cm, text width=2.85cm, align=left,
+                 anchor=north west, inner sep=1.6pt, font=\tiny}]
+    \node[cell] (c1) at (0,0)       {\textbf{1. Produces / fails when}};
+    \node[cell] (c2) at (3.25,0)    {\textbf{2. Job description} --- and what it must refuse};
+    \node[cell] (c3) at (0,-0.92)   {\textbf{3. Tools} --- and why nothing more};
+    \node[cell] (c4) at (3.25,-0.92){\textbf{4. Brief in} --- and what you keep out};
+    \node[cell] (c5) at (0,-1.84)   {\textbf{5. Returns} --- including ``found nothing''};
+    \node[cell] (c6) at (3.25,-1.84){\textbf{6. Budget / stop rule}};
+    \node[cell] (c7) at (0,-2.76)   {\textbf{7. The defect it must catch; the one it must leave alone}};
+    \node[cell] (c8) at (3.25,-2.76){\textbf{8. Path in the repo}};
+    \node[draw=black!45, rounded corners, fit=(c1)(c8), inner sep=2pt] {};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.4}{6.3}\selectfont,numbers=none]
+---
+name: provenance-checker          # cell 8 names the file
+description: Audits a batch ... Use before
+  a batch is merged. Does NOT fill or fix
+  any value.                      # cells 1 and 2
+tools: Read, Grep, Glob           # cell 3
+model: sonnet                     # cell 6
+---
+You audit data provenance. ...    # cell 2
+Read the rules first, then ...    # cell 4
+One finding per violation, with
+the line number; say so if the
+batch passes.                     # cell 5
+\end{lstlisting}
+\vspace{-0.05cm}
+{\scriptsize
+\begin{itemize}\scriptsize
+  \item \textbf{Claude Code:} save as \texttt{.claude/agents/<name>.md} --- rungs 1--3
+  \item \textbf{Gemini CLI:} \texttt{.gemini/agents/<name>.md} in a trusted folder$^\dagger$
+  \item \textbf{Any harness:} the runner sends the prose as one headless call --- rung 3
+\end{itemize}}
+\end{column}
+\end{columns}
+
+\vspace{0.02cm}
+{\tiny\textit{$^\dagger$ format read from the installed Gemini CLI 0.47.0, not yet run; check on your machine. Cell 7 becomes the scenario's matrix. Blank canvas: \texttt{AGENT\_DESIGN\_CANVAS.md} in the lab.}}
 \end{frame}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): Arrows from each canvas cell to its line in the brief and in the compiled file: 1 -> description failure clause; 2 -> role prose; 3 -> tools; 4 -> "you will be given"; 5 -> return format; 6 -> model + stop rule; 7 -> the test; 8 -> path.
+% ==== Phase B · NEW:Debug the English · TIER: LAB
+\begin{frame}{Debug the English}
+\textbf{The \texttt{description} decides when your agent is used. Test it the way you would test any instrument: one case it should fire on, one adjacent case it should not --- three runs each.}
+
+\vspace{0.15cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{4.3cm}|>{\raggedright\arraybackslash}p{4.3cm}|}
+\hline
+ & \textbf{Should fire} & \textbf{Should stay out} \\ \hline
+\textbf{Example (S3)} & ``Audit this batch before we merge it.'' & ``Fill in the missing PhD years for this batch.'' \\ \hline
+\textbf{What you record} & fired in $x$ of 3 fresh sessions & fired in $y$ of 3 fresh sessions \\ \hline
+\textbf{Fix when wrong} & too narrow: say when to use it & too broad: say what it does \emph{not} do \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\footnotesize\textbf{Where to observe selection}
+\begin{itemize}\scriptsize
+  \item \textbf{Claude Code:} does the transcript show an \texttt{Agent} call naming yours? (rung 1)
+  \item \textbf{Other harnesses:} ship the brief as a skill and watch it activate, or compare task variants at rung 3
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{You are debugging English.} In the lab's Part B, replacing one sentence with a description about BibTeX made dispatch stop --- same model, same file, same prompt.
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · T1b-F13 · TIER: CORE
+\begin{frame}{Validate by Repetition: Rates, Not the Best Run}
+\textbf{An agent that runs unattended is a repeated trial. The statistic that matters is not its best run --- it is how often it is right.}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{Best-of-$n$ thinking --- wrong for autonomy}
+\begin{itemize}\scriptsize
+    \item report the best of several attempts
+    \item flatters the model
+    \item acceptable only for a draft a person checks line by line
+\end{itemize}
+\vspace{0.08cm}
+\footnotesize\textbf{Reliability --- right for autonomy}
+\begin{itemize}\scriptsize
+    \item pass$^k$: the probability that \emph{all} $k$ independent runs succeed; it falls quickly as $k$ grows ($\tau$-bench, Yao et al.\ 2024)
+    \item in the Design Lab: three fresh runs per cell, reported as rates
+\end{itemize}
+\vspace{0.08cm}
+\footnotesize\textbf{Economist translation:} 90\% on one try is a 73\% chance that three nightly runs all succeed. Design for the reliability curve, not the demo.
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{conceptbox}
+\footnotesize\textbf{A real matrix: S1 on Claude Code, 12 Sep 2026.}
+
+\vspace{0.05cm}
+\scriptsize
+\begin{tabular}{@{}l@{\hspace{4pt}}c@{\hspace{4pt}}c@{\hspace{4pt}}c@{}}
+ & \textbf{tooling} & \textbf{math} & \textbf{econ} \\
+convergence never tested & \textbf{3/3} & 3/3 & 2/3 \\
+utility outside its domain & 3/3 & \textbf{3/3} & 0/3 \\
+\textit{control: correct line} & 0/3 & 0/3 & 0/3 \\
+\textit{control: stated scope} & 0/3 & 0/3 & 0/3 \\
+\end{tabular}
+
+\vspace{0.06cm}
+\tiny Bold: the agent expected to catch it. Each run: a fresh headless session holding only the solver. econ-agent asked economics questions instead (a grid ceiling, a rate near $1/\beta - 1$) --- the job its brief gives it. Details: the lab's \texttt{transcripts/}.
+\end{conceptbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · NEW:Pitch and Validate: The Detection Matrix at Rung 3 · TIER: LAB
+\begin{frame}[fragile]{Pitch and Validate: The Detection Matrix at Rung 3}
+\textbf{Rows are what the scenario planted: defects to catch and controls to leave alone. Columns are agents. Each cell is a rate over three fresh runs.}
+
+\vspace{0.12cm}
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize,
+    hdr/.style={font=\scriptsize\bfseries, text width=1.9cm, align=center},
+    lab/.style={font=\scriptsize, text width=5.2cm, align=left, anchor=west},
+    cb/.style={rectangle, draw=black!40, minimum width=1.9cm, minimum height=0.5cm, font=\scriptsize},
+    dg/.style={cb, fill=green!14},
+    ct/.style={cb, fill=red!7}]
+  \node[hdr] at (6.3,0.55) {agent A}; \node[hdr] at (8.3,0.55) {agent B}; \node[hdr] at (10.3,0.55) {your agent};
+  \node[lab] at (0,0)     {defect 1 --- A's job};
+  \node[dg] at (6.3,0) {3/3};  \node[cb] at (8.3,0) {1/3};  \node[cb] at (10.3,0) {?};
+  \node[lab] at (0,-0.55) {defect 2 --- B's job};
+  \node[cb] at (6.3,-0.55) {2/3}; \node[dg] at (8.3,-0.55) {3/3}; \node[cb] at (10.3,-0.55) {?};
+  \node[lab] at (0,-1.1)  {defect 3 --- your agent's job};
+  \node[cb] at (6.3,-1.1) {0/3}; \node[cb] at (8.3,-1.1) {0/3}; \node[dg] at (10.3,-1.1) {?};
+  \node[lab] at (0,-1.65) {\textbf{control:} a correct line --- stays silent};
+  \node[ct] at (6.3,-1.65) {0/3}; \node[ct] at (8.3,-1.65) {0/3}; \node[ct] at (10.3,-1.65) {?};
+  \node[lab] at (0,-2.2)  {\textbf{control:} a stated scope --- stays silent};
+  \node[ct] at (6.3,-2.2) {0/3}; \node[ct] at (8.3,-2.2) {1/3}; \node[ct] at (10.3,-2.2) {?};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{Reading it} {\scriptsize(illustrative numbers)}
+\begin{itemize}\scriptsize
+  \item \textbf{an empty column:} the \texttt{description} is too narrow
+  \item \textbf{a full column:} not a specialist, a third generalist
+  \item \textbf{anything in a control row:} agreeable, not careful
+  \item \textbf{two agents agree:} weak evidence --- same file, same framing
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+python3 scripts/detection_matrix.py \
+    scenarios/S2_leading_question \
+    --harness gemini --k 3
+\end{lstlisting}
+{\scriptsize The pitch: your row, the control rows, and the one cell that surprised you.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · NEW:From Canvas Cell to File Line · TIER: READ
 \begin{frame}{From Canvas Cell to File Line}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{Every line of a working agent file traces back to one cell of the canvas. If you cannot point to the cell, the line is a guess.}
+
+\vspace{0.15cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{4.2cm}|>{\raggedright\arraybackslash}p{4.4cm}|}
+\hline
+\textbf{Canvas cell} & \textbf{Line in the brief} & \textbf{What it controls} \\ \hline
+1. Produces / fails when & the last clause of \texttt{description}: what it does \emph{not} do & when the model must not choose it \\ \hline
+2. Job description & the first sentence of the prose & the \texttt{system} argument of every request \\ \hline
+3. Tools & \texttt{tools:} & what it can do --- and what it can learn \\ \hline
+4. Brief in & ``you will be given\ldots'' & what enters \texttt{messages}; what you keep out \\ \hline
+5. Returns & the report format, including ``found nothing'' & whether its output can be checked \\ \hline
+6. Budget / stop rule & \texttt{model:} and when to stop and ask & cost, and runaway sessions \\ \hline
+7. Planted defect & the scenario's matrix rows & the acceptance test \\ \hline
+8. Path & where the file is saved & who gets it when they pull --- and in which harness \\ \hline
+\end{tabular}
+\end{center}
 \end{frame}
 
-% ---- NEW · TIER: LAB
-% TODO(Phase B): Review A6.1 rows x three levels: canvas complete; tool allowlist equals blast radius; planted defect caught with file:line; control row silent; rates reported honestly (k=3). No row grades whether auto-dispatch happened to fire once.
+% ==== Phase B · NEW:Rubric · TIER: LAB
 \begin{frame}{Rubric}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{Graded on the design and the honesty of the measurement --- never on whether automatic dispatch happened to fire once.}
+
+\vspace{0.15cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+\hline
+ & \textbf{Emerging} & \textbf{Solid} & \textbf{Strong} \\ \hline
+\textbf{The contract} & canvas cells blank or vague & all eight filled; \texttt{description} names a use & \texttt{description} also names what it must \emph{not} do, and the brief keeps your hypothesis out \\ \hline
+\textbf{Blast radius} & tools copied from an example & read-only unless the task needs more & every tool justified in one line \\ \hline
+\textbf{Catch} & a defect found once, no line number & defects caught with line numbers & rates over $k=3$, with the misses explained \\ \hline
+\textbf{Silence} & controls not checked & controls silent in most runs & controls silent in every run, including the stated scope \\ \hline
+\textbf{Honesty} & the best run reported & all runs reported & the surprising cell named, with a guess at why \\ \hline
+\end{tabular}
+\end{center}
 \end{frame}
 
-% ---- NEW · TIER: LAB
-% TODO(Phase B): Review A9: one hub URL (the site's labs page) plus a QR code (qrcode.sty); deep links live in the lab README; file:line references pinned to tag lec09-2026f. Links 404 until the lab is pushed.
+% ==== Phase B · NEW:Links · TIER: LAB
 \begin{frame}{Links}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{One link gets you everything: the course labs page. Scan it now.}
+
+\vspace{0.2cm}
+\begin{columns}[T]
+\begin{column}{0.3\textwidth}
+\begin{center}
+\qrcode[height=2.7cm, nolink]{https://vonzhg.github.io/AI-ECON-2026/labs/}
+
+\vspace{0.1cm}
+{\scriptsize\href{https://vonzhg.github.io/AI-ECON-2026/labs/}{vonzhg.github.io/AI-ECON-2026/labs}}
+\end{center}
+\end{column}
+\begin{column}{0.66\textwidth}
+\footnotesize\textbf{In the repository, under \texttt{labs/Lec09\_Agent\_Lab/}}
+\begin{itemize}\scriptsize
+  \item \texttt{scripts/setup\_check.py} --- Step 0: which harness works for you
+  \item \texttt{Lec09\_Lab\_Agents.ipynb} --- Part A, offline
+  \item \texttt{TERMINAL\_WALKTHROUGH.md} --- Part B
+  \item \texttt{AGENT\_DESIGN\_CANVAS.md} --- the canvas
+  \item \texttt{scenarios/S1\ldots S3} --- briefs and \texttt{scenario.json}
+  \item \texttt{scripts/detection\_matrix.py} --- the rung-3 runner
+\end{itemize}
+
+\vspace{0.1cm}
+\footnotesize\textbf{No local setup?} \href{https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1}{Open the repository in Codespaces} and install one harness there.
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+{\scriptsize\textit{Deep links are kept in the lab README rather than on slides, so a moved file breaks one page, not eleven decks.}}
 \end{frame}
 
 % ---- NEW · TIER: READ

@@ -102,11 +102,11 @@ derives finding #2 from first principles — no hint, no key:
 
 It also organised the report under this key's own headings ("## 1. Outright
 bugs") — those come from the `description` and body of `code-reviewer.md`, which
-is the §4 point about prose being the mechanism, visible in the output.
+is T3b's point about prose being the mechanism, visible in the output.
 
 ## Teaching use
 
 Findings 1–2 are `code-reviewer`'s and finding 5 is `domain-reviewer`'s, and
 neither agent can produce the other's. That is the argument for specialisation.
 Finding 7 is the trap that shows why agreement between agents is weak evidence
-(Topic 9.5's point, made concrete).
+(T5c's point, made concrete).

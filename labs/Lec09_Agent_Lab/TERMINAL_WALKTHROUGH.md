@@ -14,7 +14,7 @@ subscription. **You need:** `claude` on your PATH and a completed `/login`.
 
 ## What you are about to test
 
-Topic 9.2b made four claims. You are going to try to break each one:
+T3b made four claims. You are going to try to break each one:
 
 | # | Claim | The check |
 |---|---|---|
@@ -43,7 +43,7 @@ Three specialists ship with this lab, in `.claude/agents/`:
 | `domain-reviewer.md` | does the code implement the economics? | Read, Grep, Glob |
 | `verifier.md` | run it; report only what happened | Read, Bash, Glob |
 
-These are the same three names Topic 9.4 uses for the RA team. Now they are
+These are the same three names T5b uses for the RA team. Now they are
 real files.
 
 Each is **YAML frontmatter plus prose**. There is no code in them. Note in
@@ -157,7 +157,7 @@ produce the other's finding.
 
 > **⚠️ The trap.** All three workers received *your* framing through the task
 > string you wrote. If they agree, that is weak evidence — they inherited a
-> common prior. Topic 9.5 makes this argument in full. A clean context window
+> common prior. T5c makes this argument in full. A clean context window
 > buys focus, not independence, and no number of extra workers fixes it.
 
 **A worked example of that trap, from building this lab.** Two earlier drafts
@@ -229,7 +229,7 @@ model. Nobody checks the stated model against the *correct* one — look at
 `instructor/ANSWER_KEY.md` after class and you will find a limiting-case defect
 filed under `domain-reviewer`, because no file owns the mathematics.
 
-Three more agents ship in this lab, cut that second way (Topic 9.2b §2):
+Three more agents ship in this lab, cut that second way (T3a):
 
 | File | Background | Tools |
 |---|---|---|
@@ -246,7 +246,7 @@ against the model stated in its docstring. The calibration is annual.
 
 Compare what comes back with what `domain-reviewer` said in Step 3. They
 overlap less than you expect — and notice that you just used rung 2 (you named
-the agent), where Step 3 used rung 1 (the model chose). Topic 9.2c §1.
+the agent), where Step 3 used rung 1 (the model chose). T3b's three rungs.
 
 Now write a fourth of your own, from the eight cells of
 `AGENT_DESIGN_CANVAS.md`. The canvas is the assignment; this is the shape its
@@ -314,7 +314,7 @@ What the matrix tells you, and what no single report can:
   copy of one generalist.
 - **Anything in the control or scope row** — a false positive, and the most important
   result in the lab. An agent that finds something in every category is not
-  being careful; it is being agreeable. Topic 9.5 is about why.
+  being careful; it is being agreeable. T5c is about why.
 - **A cell where two agents agree** — weak evidence, not strong. They read the
   same file, with a framing you wrote.
 
@@ -326,7 +326,7 @@ the teaching material found the answers, not the defects.
 
 ## Step 8 — The same task at all three rungs
 
-Topic 9.2c claims there are exactly three ways to invoke an agent, and that they
+T3b claims there are exactly three ways to invoke an agent, and that they
 differ only in who chooses. Run one task three ways and see it.
 
 **Rung 1 — you describe, the model chooses.** No agent named:
@@ -362,7 +362,7 @@ wait
 **What to notice.** Rung 3 never asked your permission and never showed you a
 transcript. That is the trade: you stopped spending a turn per dispatch, and in
 exchange you now need something other than your own reading to decide whether
-each answer is any good. Topic 9.2c §4 is about choosing which.
+each answer is any good. T3b's last section is about choosing which.
 
 *Verified on Claude Code 2.1.269. There is no `--max-turns` at the CLI; the
 per-run ceiling is the `model:` line in the agent file.*
@@ -371,7 +371,7 @@ per-run ceiling is the `model:` line in the agent file.*
 
 ## Portability: the same thing elsewhere
 
-The pattern outlives any one product (Topic 9.1b's point).
+The pattern outlives any one product (Appendix TA's point).
 
 | | Claude Code | Codex CLI / others |
 |---|---|---|
@@ -407,4 +407,4 @@ under it and compare: the vocabulary differs, the loop does not.
 
 Part B calls a live model; it will **not** reproduce verbatim. Record the date,
 `claude --version`, and the model name next to anything you keep — the
-chain-of-custody discipline from Topic 9.1b.
+chain-of-custody discipline from T5d.
