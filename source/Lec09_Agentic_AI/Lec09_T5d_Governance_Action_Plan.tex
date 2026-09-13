@@ -220,13 +220,13 @@ Lecture 9.5d: Governance and Action Plan}
 \end{takeawaybox}
 \end{frame}
 
-% ==== Phase B · T6-F08 · TIER: READ (red-lines pointer)
+% ==== Phase B · T6-F08 · TIER: READ (red-lines pointer; seven tests; list tightened)
 \begin{frame}{When NOT to Use an Agent}
-\textbf{The six criteria can also serve as a boundary: there are research tasks where the agent overhead exceeds the benefit, or where the failure mode is too costly.}
+\textbf{The seven tests also mark a boundary: some research tasks cost more to delegate than they return, or fail too expensively.}
 
-\vspace{0.2cm}
+\vspace{0.1cm}
 
-\begin{itemize}
+\begin{itemize}\small
     \item \textbf{One-line scripts and isolated edits.} A two-line \texttt{sed} or one-shot plot has no validation surface for the harness to add value. Open the editor.
     \item \textbf{Deeply proprietary or undocumented pipelines.} If the conventions live in one person's head, the agent has nothing to read; the time you would spend documenting the pipeline well enough to brief the agent is the same time you would spend just fixing the thing.
     \item \textbf{Strict deterministic guarantees.} For numerical reproducibility audits, regulatory pipelines, or replication packages, model nondeterminism is a hazard the harness cannot fully suppress. Run it pinned; do not let the agent retry.
