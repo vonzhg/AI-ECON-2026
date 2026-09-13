@@ -13,7 +13,7 @@ jupyter notebook Lec09_Lab_Agents.ipynb
 
 Runs on the course's standard environment (numpy + matplotlib) with **no API key, no network, and no GPU**. The language model is replaced by a `ScriptedModel` that replays fixed responses, so the loop around it — which is the real thing — runs deterministically and for free.
 
-Nine steps: the session as a list, tool schemas, the agentic loop, the cost curve, sequential relay, orchestrator–worker isolation, blackboard, a capacity calculation, and an optional live call.
+Nine steps and two optional ones: the session as a list, tool schemas, the agentic loop, the cost curve, a recorded real run replayed through the same loop (Step 4b, optional), sequential relay, orchestrator–worker isolation, blackboard, a capacity calculation, and a live call (Step 9, optional).
 
 ## Part B — `TERMINAL_WALKTHROUGH.md`
 
@@ -51,7 +51,7 @@ Each run happens in a fresh folder that holds only the files under review, so no
 | `.claude/agents/{tooling-agent,math-agent,econ-agent}.md` | the trio sorted by **background** (T3a) |
 | `review_target/aiyagari_solver.py` | the flawed solver under review |
 | `scenarios/` | the Design Lab scenarios, each with a `brief.md` and a `scenario.json` |
-| `transcripts/` | recorded runs used on the slides, e.g. the GDP-by-party trace behind T2a |
+| `transcripts/` | recorded runs used on the slides, e.g. the GDP-by-party trace behind T2a (Part A Step 4b replays it offline), and the scenario validation records |
 | `instructor/` | **instructor copies** — answer keys and reference briefs |
 
 `.claude/agents/` is picked up only when you start `claude` from *this* folder, so it does not affect sessions elsewhere in the repository. That resolution rule is the point of T2b's "Where an Agent Lives": the course's own reusable specialists (`deck-cartographer`, `boundary-auditor`, `claim-checker`) therefore live at the **repository root**, in `AI-ECON-2026/.claude/agents/`, where sessions actually start. Gemini CLI reads `.gemini/agents/` the same way, but only in a folder you have trusted.

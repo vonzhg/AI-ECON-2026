@@ -9,6 +9,8 @@ Two tiers:
   Tier 1 (always available)  ScriptedModel replays a fixed list of responses,
                              so run_agent() exercises the real control flow
                              deterministically.  No credentials, no cost.
+                             load_transcript() rebuilds a recorded harness run
+                             (transcripts/) as such a script, with its results.
 
   Tier 2 (opt-in)            harness_*() shell out to a local terminal agent
                              -- Claude Code, Gemini CLI, or Codex CLI -- in
@@ -206,6 +208,83 @@ def run_agent(model, registry: ToolRegistry, system: str, user_prompt: str,
 
     return {"messages": messages, "history": history, "final_text": final_text,
             "turns": len(history)}
+
+
+# --------------------------------------------------------------------------- #
+# Replay: a recorded harness run, back through the same loop
+# --------------------------------------------------------------------------- #
+
+
+class RecordedTools(ToolRegistry):
+    """Answers each tool call with the result the recorded run got, in order.
+
+    Nothing is executed -- no web request, no file write, no shell.  A call
+    that does not match the recording comes back as an error result, so a
+    replay that drifts from the run says so instead of inventing an answer.
+    """
+
+    def __init__(self, calls: list[tuple[str, str, bool]]):
+        super().__init__()
+        self._calls = list(calls)          # (tool name, recorded result, is_error)
+        self._next = 0
+
+    def names(self) -> list[str]:
+        return sorted({name for name, _, _ in self._calls})
+
+    def to_api_list(self) -> list[dict]:
+        return [{"name": n, "description": "recorded", "input_schema": {"type": "object"}}
+                for n in self.names()]
+
+    def run(self, name: str, args: dict) -> tuple[str, bool]:
+        if self._next >= len(self._calls):
+            return ("Error: the recording has no more tool results.", True)
+        want, content, is_error = self._calls[self._next]
+        self._next += 1
+        if name != want:
+            return (f"Error: replay drifted -- recorded call {self._next} was {want!r}, "
+                    f"not {name!r}.", True)
+        return (content, is_error)
+
+
+def load_transcript(path: str) -> tuple[ScriptedModel, RecordedTools, dict]:
+    """Rebuild a recorded run (transcripts/*.jsonl) as a script plus its tool results.
+
+    The file holds one JSON row per block: text, tool_use, tool_result, and a
+    closing result row with the harness's own summary.  Consecutive text and
+    tool_use rows form one model response; the tool_result rows after them
+    answer its calls in order.  run_agent(model, tools, ...) then replays the
+    real run offline.  The file keeps blocks, not request boundaries, so the
+    replay's turn count need not match the harness's num_turns.
+    """
+    with open(path, encoding="utf-8") as fh:
+        rows = [json.loads(line) for line in fh if line.strip()]
+    script: list[Response] = []
+    calls: list[tuple[str, str, bool]] = []
+    blocks: list[dict] = []
+    pending: list[str] = []
+    meta: dict = {}
+
+    def close_response() -> None:
+        if blocks:
+            stop = "tool_use" if any(b["type"] == "tool_use" for b in blocks) else "end_turn"
+            script.append(Response(content=list(blocks), stop_reason=stop))
+            blocks.clear()
+
+    for row in rows:
+        kind = row.get("type")
+        if kind == "text":
+            blocks.append(text_block(row["text"]))
+        elif kind == "tool_use":
+            blocks.append(tool_use_block(f"call{row['n']}", row["name"], row["input"]))
+            pending.append(row["name"])
+        elif kind == "tool_result":
+            close_response()
+            name = pending.pop(0) if pending else "?"
+            calls.append((name, str(row.get("content", "")), bool(row.get("is_error"))))
+        elif kind == "result":
+            meta = {k: v for k, v in row.items() if k != "type"}
+    close_response()
+    return ScriptedModel(script=script, name="recorded"), RecordedTools(calls), meta
 
 
 # --------------------------------------------------------------------------- #
