@@ -21,8 +21,18 @@ Line 11 is the instructive one: the value happens to be right, and the process i
 | 6 | Alberto Abadie | gender coded from an explicit pronoun on the MIT profile, with `source_gender` |
 | 8 | Philip A. Haile | gender left missing because the source did not state pronouns --- missingness is a result |
 
-Birth year is missing on every row, each with a note: correct under the rules, and not a defect.
+The controls fire only on a claim about **gender** at those lines (`scenario.json` pairs each line with a pattern).
+
+Birth year is missing on every row. Only lines 2 and 4 say why in `notes`; the other rows' notes are about something else (line 11's birth-year note was replaced by the planted one). Under the last rule ("say why in `notes`") that is a small gap in the pilot batch itself, not a planted defect: a finding about it is sound, scores as "other", and does not fire a control.
 
 ## The mechanical gate
 
 `checks/require_source_url.py` reports exactly lines 7, 9 and 11 on this file and passes the unaltered pilot batch. As a Claude Code **PreToolUse** hook on `Write` it blocks the write; as a PostToolUse hook it could only complain afterwards (checked on Claude Code 2.1.269).
+
+## What the validation runs showed (Claude Code 2.1.270, k = 1, 2026-09-12)
+
+- `provenance-checker` (the reference brief) and `econ-agent` both cited lines 7, 9 and 11; neither fired a control.
+- **Both described line 7 wrongly**: they called it a 17-column row whose fields had shifted. Every line has 18 fields (Python's `csv` module; the gate script parses it the same way) --- the agents miscounted the run of empty fields `,,,`. Line-tied scoring counts the finding, so the matrix cannot see this; reading the claim still can. It is the S3 pitch in one example: the mechanical gate got the reason right where both agents did not.
+- `econ-agent`'s other findings: missing birth-year reasons on lines 5 and 10 (sound, see above, but it skipped the other rows with the same gap), and that `official_profile_url` is the same roster page on every row, so it cannot corroborate a row's `election_year` (a fair point about the pilot's design).
+
+Replies: `results/S3_fellows_provenance/claude-20260912-194931/` (local, gitignored); summary in `transcripts/S2_S3_validation_claude-code_2026-09-12.md`.

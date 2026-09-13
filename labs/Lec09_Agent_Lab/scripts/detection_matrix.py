@@ -74,10 +74,17 @@ def hits(findings: list[dict], lines: list[int], tol: int) -> bool:
 
 
 def control_fired(findings: list[dict], control: dict) -> bool:
-    """A control is a correct line, or a stated scope, that must not be reported as a defect."""
-    if control.get("lines") and hits(findings, control["lines"], 0):
-        return True
-    pattern = control.get("pattern")
+    """A control is a correct line, or a stated scope, that must not be reported as a defect.
+
+    `lines` alone: any finding on those lines fires it.  `pattern` alone: any claim
+    matching it fires it.  Both: only a claim on those lines that matches -- for a
+    correct line that a sound finding may still cite for another reason.
+    """
+    lines, pattern = control.get("lines"), control.get("pattern")
+    if lines and pattern:
+        return any(f["line"] in lines and re.search(pattern, f.get("claim", ""), re.I) for f in findings)
+    if lines:
+        return hits(findings, lines, 0)
     return bool(pattern) and any(re.search(pattern, f.get("claim", ""), re.I) for f in findings)
 
 
@@ -97,19 +104,20 @@ def score_row(found: list[dict], spec: dict, tol: int, row: dict) -> None:
 def print_table(spec: dict, table: dict, title: str) -> None:
     names = list(table)
     width = max(len(d["label"]) + 9 for d in spec["defects"] + spec["controls"]) + 2
+    col = max([16] + [len(n) + 2 for n in names])
     print(f"\n{title}")
-    print(f"{'':{width}}" + "".join(f"{n:>16}" for n in names))
+    print(f"{'':{width}}" + "".join(f"{n:>{col}}" for n in names))
     for d in spec["defects"]:
         cells = ""
         for n in names:
             r = table[n]
             mark = "*" if d.get("owner") == n else " "
-            cells += f"{r['defects'][d['id']]:>11}/{r['runs']}{mark:<3}"
+            cells += f"{r['defects'][d['id']]:>{col - 5}}/{r['runs']}{mark:<3}"
         print(f"{d['label']:{width}}" + cells)
     for i, control in enumerate(spec["controls"]):
         print(f"{'control: ' + control['label']:{width}}"
-              + "".join(f"{table[n]['controls'][i]:>11}/{table[n]['runs']}   " for n in names))
-    print(f"{'other findings (read them)':{width}}" + "".join(f"{table[n]['other']:>15} " for n in names))
+              + "".join(f"{table[n]['controls'][i]:>{col - 5}}/{table[n]['runs']}   " for n in names))
+    print(f"{'other findings (read them)':{width}}" + "".join(f"{table[n]['other']:>{col - 1}} " for n in names))
 
 
 def rescore(spec: dict, results_dir: str, tol: int) -> int:
@@ -192,6 +200,7 @@ def main() -> int:
                 print(f"  {name} run {run}: {len(found)} findings", flush=True)
 
     summary = {"scenario": spec["name"], "harness": args.harness, "k": args.k,
+               "harness_version": agent_lab.harness_version(args.harness),
                "harness_status": agent_lab.HARNESSES[args.harness].status, "when": stamp, "table": table}
     json.dump(summary, open(os.path.join(outdir, "summary.json"), "w"), indent=2)
 

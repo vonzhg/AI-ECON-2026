@@ -276,6 +276,18 @@ def available_harnesses() -> list[str]:
     return [name for name in HARNESSES if harness_available(name)]
 
 
+def harness_version(name: str) -> str:
+    """The CLI's own `--version` line, or '' if it cannot be read.  Record it with every run."""
+    if not harness_available(name):
+        return ""
+    try:
+        proc = subprocess.run([HARNESSES[name].binary, "--version"], capture_output=True,
+                              text=True, timeout=30, stdin=subprocess.DEVNULL)
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return (proc.stdout or proc.stderr).strip().splitlines()[-1] if (proc.stdout or proc.stderr).strip() else ""
+
+
 def _run_cli(cmd: list[str], cwd: str | None, timeout: int) -> subprocess.CompletedProcess:
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,

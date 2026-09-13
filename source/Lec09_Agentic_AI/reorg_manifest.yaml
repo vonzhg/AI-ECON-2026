@@ -1053,6 +1053,8 @@ decks:
       new: 'This deck answers the next question:'
     - old: '\LecNineMap{4}'
       new: '\LecNineMap{5}{b}'
+    - old: '(CLAUDE.md, skills, agents, rules, hooks) $\to$ your sub-agent RA team and cross-verification $\to$ remote/HPC execution.}'
+      new: '(instructions files, skills, agents, rules, hooks) $\to$ your sub-agent RA team and cross-verification $\to$ remote/HPC execution. The economist''s question here: how do you write the contract and gate the work?}'
 
   - section: 'The Paradigm Shift'
     divider: 'From solo coder to project manager'
@@ -1450,6 +1452,8 @@ decks:
       new: 'the terminal-agent workflow of T1--T5d'
     - old: 'Orchestration & T4''s sub-agent review'
       new: 'Orchestration & T5b''s sub-agent review'
+    - old: "\\footnotesize\n\\renewcommand{\\arraystretch}{1.18}"
+      new: "\\scriptsize\n\\renewcommand{\\arraystretch}{1.05}"
 
   - section: 'Setup Details'
     divider: 'Dated install notes, keys, and templates'

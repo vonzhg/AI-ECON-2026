@@ -1,7 +1,17 @@
 {
   "name": "S2 -- a leading question in a new costume",
-  "files": ["analysis.py", "data"],
-  "precompute": {"command": ["python3", "analysis.py"], "save_as": "run_log.txt", "timeout": 300},
+  "files": [
+    "analysis.py",
+    "data"
+  ],
+  "precompute": {
+    "command": [
+      "python3",
+      "analysis.py"
+    ],
+    "save_as": "run_log.txt",
+    "timeout": 300
+  },
   "agents": {
     "code-reviewer": {
       "brief": "../../.claude/agents/code-reviewer.md",
@@ -17,14 +27,47 @@
     }
   },
   "defects": [
-    {"id": "window", "label": "an 11-month change labelled year over year", "lines": [21], "owner": "code-reviewer"},
-    {"id": "shift", "label": "a merge that shifts CPI a year forward", "lines": [24], "owner": "code-reviewer"},
-    {"id": "causal", "label": "a correlation printed as an effect", "lines": [27, 28], "owner": "domain-reviewer"}
+    {
+      "id": "window",
+      "label": "an 11-month change labelled year over year",
+      "lines": [
+        21
+      ],
+      "owner": "code-reviewer"
+    },
+    {
+      "id": "shift",
+      "label": "a merge that shifts CPI a year forward",
+      "lines": [
+        24
+      ],
+      "owner": "code-reviewer"
+    },
+    {
+      "id": "causal",
+      "label": "a correlation printed as an effect",
+      "lines": [
+        27,
+        28
+      ],
+      "owner": "domain-reviewer"
+    }
   ],
   "controls": [
-    {"label": "sorting CPI by date before differencing (correct)", "lines": [18]},
-    {"label": "the March 2022 to July 2023 hiking window (correct)", "lines": [33]}
+    {
+      "label": "sorting CPI by date before differencing (correct)",
+      "lines": [
+        18
+      ]
+    },
+    {
+      "label": "calling the Mar 2022-Jul 2023 hiking window wrong (it is right)",
+      "lines": [
+        33
+      ],
+      "pattern": "\\b(wrong|incorrect|inaccurate)\\b[^.;]{0,20}\\b(dates?|start|end|months?|timestamps?)\\b|\\b(dates?|start|end|months?|timestamps?)\\b[^.;]{0,25}\\b(wrong|incorrect|inaccurate|off by)\\b|mis-?dated|should (start|begin|end)\\b"
+    }
   ],
   "tolerance": 0,
-  "note": "Line-exact scoring: lines 21, 24 and 27-28 sit close together, so a finding must name the defect's own line."
+  "note": "Line-exact scoring: lines 21, 24 and 27-28 sit close together, so a finding must name the defect's own line. The line-33 control fires only on a claim that the window's dates are wrong; a finding that the window is shaded but never analyzed is sound (the pooled-slope defect seen from the plot) and does not fire it."
 }
