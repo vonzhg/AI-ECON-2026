@@ -15,6 +15,7 @@
 \graphicspath{{./pic/}{./figures/}{../}}
 
 \usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
 
 
 \title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
@@ -24,27 +25,23 @@ Lecture 9 Appendix: The Landscape (Dated), Setup Details, References}
 
 \makebeamertitle
 
-% ---- T1b-F01 · EDIT · TIER: READ · from T1b:24
-% TODO(Phase B): Replace the agenda list with the appendix contents; keep the [solid]/[hype] reading convention.
+% ==== Phase B · T1b-F01 · TIER: READ
 \begin{frame}{What This Appendix Holds}
-\textbf{Everything in this appendix is dated: re-check it before teaching. The main decks point here instead of repeating product facts.}
+\textbf{Everything here is dated. The main decks point to this appendix instead of repeating product facts --- so this is the one deck to re-check before teaching.}
 
 \vspace{0.2cm}
 
 \begin{enumerate}
-  \item \textbf{The interoperability stack} --- MCP, A2A, AGNTCY/ACP, neutral governance
-  \item \textbf{Orchestration patterns} --- frameworks, context engineering, the multi-agent cost-benefit
-  \item \textbf{Reasoning models \& inference-time compute} --- think budgets, measured time horizons
-  \item \textbf{Autonomous coding \& computer-use agents} --- scheduled runtimes, sandboxing
-  \item \textbf{Benchmarks \& measurement validity} --- ties to the course's measurement theme
-  \item \textbf{Safety \& reproducibility} --- untrusted inputs, chain-of-custody
+  \item \textbf{The landscape, dated} --- the interoperability stack and neutral governance, frameworks, reasoning models, scheduled runtimes, computer-use agents
+  \item \textbf{Setup details} --- installing each supported harness, the lab's setup check, keys and a minimal instructions file, dated comparisons
+  \item \textbf{Resources} --- documentation, economists' public skill repositories, the security and reproducibility references, the Context Dilemma readings
 \end{enumerate}
 
 \vspace{0.15cm}
-\footnotesize\textit{Reading convention: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report (counter-source given).}
+\footnotesize\textit{Reading convention: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report. Harness facts come from \texttt{CLI\_FACTS\_2026-09.md} in the lecture's source folder, which records how each was checked.}
 
 \vspace{0.05cm}
-{\scriptsize \textit{Facts current as of June 2026. Model versions are stated with release dates; the field moves monthly --- recheck before teaching.}}
+{\scriptsize \textit{Checked on 12 September 2026. The field moves monthly: re-run the checks before teaching.}}
 \end{frame}
 
 
@@ -54,7 +51,7 @@ Lecture 9 Appendix: The Landscape (Dated), Setup Details, References}
 
 \sectiondivider{The Landscape (Dated)}{Compete on models, cooperate on plumbing --- as of September 2026}
 
-% ---- T1b-F02 · KEEP · TIER: READ · from T1b:51
+% ==== Phase B · T1b-F02 · TIER: READ (OpenAI MCP date corrected)
 \begin{frame}{Three Layers of Agent Interoperability}
 \textbf{The 2025--26 story is standard-setting: vendors compete on models but increasingly cooperate on the wiring between agents and tools.}
 
@@ -76,7 +73,7 @@ Discovery / identity & \textbf{AGNTCY / ACP} & agent directories, capability car
 
 \begin{itemize}\footnotesize
     \item MCP was introduced by Anthropic (Nov 2024); it is now \emph{multi-vendor}, not proprietary.
-    \item \textbf{OpenAI adopted MCP} at DevDay (Oct 6, 2025); Google and Microsoft tooling support it too. \textbf{[solid]}
+    \item \textbf{OpenAI announced MCP support in March 2025}, starting with its Agents SDK; Google and Microsoft tooling support it too. \textbf{[solid]}
     \item Governance moved to a neutral home: the \textbf{Linux Foundation Agentic AI Foundation (AAIF)}, formed Dec 9, 2025, now hosts MCP and related projects. \textbf{[solid]}
 \end{itemize}
 \end{frame}
@@ -198,8 +195,8 @@ Anthropic \textbf{Claude Agent SDK} & Sep 2025 & Anthropic \\ \hline
 \vspace{0.16cm}
 
 \begin{center}
-\footnotesize
-\renewcommand{\arraystretch}{1.18}
+\scriptsize
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{|p{3.2cm}|p{7.2cm}|}
 \hline
 \textbf{Landscape module} & \textbf{Connection to the spine} \\ \hline
@@ -226,42 +223,43 @@ Safety \& reproducibility & untrusted-input discipline $+$ logged chain-of-custo
 
 \sectiondivider{Setup Details}{Dated install notes, keys, and templates}
 
-% ---- T6-F13 · EDIT · TIER: READ · from T6:275
-% TODO(Phase B): Review A2: dated install notes for each tested harness (Claude Code, Gemini CLI, Codex CLI), from CLI_FACTS_2026-09.md.
-\begin{frame}[fragile]{Appendix A: Installing One Terminal Agent (Dated)}
-\textbf{Three operational steps, illustrated with Claude Code on macOS:}
+% ==== Phase B · T6-F13 · TIER: READ
+\begin{frame}[fragile]{Appendix A: Installing a Terminal Agent (Dated)}
+\textbf{Install one --- any of the three the course supports. The shape is the same: install, sign in once, start from the project folder.}
 
 \vspace{0.1cm}
-\begin{enumerate}
-    \item \textbf{Install the runtime} (Node.js for Claude Code; Python for Aider; analogous for others):
-\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
-brew install node  # or download from nodejs.org (v18+)
-\end{lstlisting}
-    \item \textbf{Install the agent CLI:}
-\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
-npm install -g @anthropic-ai/claude-code   # Claude Code
-# pip install codex-cli                    # OpenAI Codex CLI
-# pip install aider-chat                   # Aider
-\end{lstlisting}
-    \item \textbf{Verify:} \texttt{claude --version}, then \texttt{cd your-project-folder \&\& claude}.
-\end{enumerate}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+# Claude Code  (native installer; npm also works)
+curl -fsSL https://claude.ai/install.sh | bash
+claude            # then /login
 
-\vspace{0.1cm}
-\footnotesize\textbf{Mac + OneDrive note:} always \texttt{cd} into the project folder before launching the agent. Running from a \texttt{/Volumes/\ldots} path can trigger permission errors.
+# Codex CLI    (needs Node.js)
+npm install -g @openai/codex
+codex login
+
+# Gemini CLI   (needs Node.js)
+npm install -g @google/gemini-cli
+gemini            # sign in on first start; trust the project folder
+\end{lstlisting}
 
 \vspace{0.05cm}
-\textbf{Dated note:} subscription tiers, model IDs, and install commands change every few months. Recheck the official docs before teaching or running the lab.
+\begin{itemize}\footnotesize
+    \item \textbf{Verify:} \texttt{claude -{}-version}, \texttt{codex -{}-version}, or \texttt{gemini -{}-version} --- then \texttt{cd} into the project and start the agent there
+    \item \textbf{Mac + OneDrive:} launch from the project folder itself; a \texttt{/Volumes/\ldots} path can trigger permission errors
+\end{itemize}
+
+\vspace{0.05cm}
+{\scriptsize\textit{Versions on the course machine, 12 Sep 2026: Claude Code 2.1.270, Codex CLI 0.154.0, Gemini CLI 0.47.0. Plans, tiers, and commands change every few months --- check the official docs.}}
 \end{frame}
 
-% ---- T6-F14 · EDIT · TIER: READ · from T6:300
-% TODO(Phase B): Review A2.6: point to the lab's Step 0 setup check, which routes each student by harness.
+% ==== Phase B · T6-F14 · TIER: READ (setup check pointer)
 \begin{frame}{Appendix A2: Setup for the Lab}
 \textbf{Lightweight setup checklist for a terminal-agent workflow}
 
 \vspace{0.2cm}
 
 \begin{itemize}
-    \item Install one terminal agent and confirm it launches
+    \item Install one terminal agent, then run the lab's setup check: \texttt{python3 scripts/setup\_check.py -{}-live}
     \item Create a project folder with a project-specific system prompt (e.g., \texttt{CLAUDE.md}, \texttt{AGENTS.md}, \texttt{GEMINI.md}), \texttt{scripts/}, and \texttt{output/}
     \item Make sure Python or R runs from the terminal
     \item Keep the first session small: one file, one check, one output
@@ -301,34 +299,28 @@ Checks: ...
 \end{columns}
 \end{frame}
 
-% ---- T6-F16 · EDIT · TIER: READ · from T6:345
-% TODO(Phase B): carry over from T1 (removed there 2026-09-12): METR Time Horizon 1.1 (Jan 2026) pegs Opus 4.5 ~ 320 min and GPT-5 ~ 214 min
-%   at 50% reliability -- re-verify and replace with current models at the freshness gate.
-% TODO(Phase B): add a sources row for T1's timeline dates (ChatGPT Nov 2022; function calling Jun 2023; MCP Nov 2024; Claude Code,
-%   Codex CLI, Gemini CLI launches in 2025; AAIF Dec 2025; scheduled runtimes May 2026) and verify T1b-F02's "OpenAI adopted MCP at
-%   DevDay (Oct 6, 2025)" (an earlier MCP announcement for the Agents SDK may predate it).
-% TODO(Phase B): Re-verify every entry; add the model-specific task horizons moved out of T1 (review A5).
-\begin{frame}{Appendix C: Dated Comparisons and Resources}
-\textbf{As of September 2026, examples of terminal-agent workflows include:}
-\begin{itemize}
-    \item Claude Code
-    \item Codex CLI
-    \item Gemini CLI
-    \item Aider
-\end{itemize}
+% ==== Phase B · T6-F16 · TIER: READ
+\begin{frame}{Appendix C: Dated Comparisons}
+\textbf{The numbers the main decks deliberately leave out, with the date each was last checked. Replace them; do not quote them old.}
 
-\vspace{0.25cm}
+\vspace{0.12cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{6.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|}
+\hline
+\textbf{What} & \textbf{As last recorded} & \textbf{Status} \\ \hline
+Terminal agents in the course & Claude Code 2.1.270, Codex CLI 0.154.0, Gemini CLI 0.47.0 (Aider also exists) & checked 12 Sep 2026 \\ \hline
+METR 50\%-reliability time horizons (T1) & Time Horizon 1.1, Jan 2026: Opus 4.5 $\approx$ 320 min, GPT-5 $\approx$ 214 min & \textbf{stale}: predates current models --- refresh \\ \hline
+T1 timeline: tool calls & OpenAI function calling, June 2023 & [solid] \\ \hline
+T1 timeline: shared plumbing & MCP introduced by Anthropic, Nov 2024; OpenAI support from March 2025; neutral foundation (AAIF), Dec 2025 & checked 12 Sep 2026 \\ \hline
+T1 timeline: terminal agents & Claude Code, Codex CLI, Gemini CLI all released in 2025 & re-verify months \\ \hline
+T1 timeline: unattended runs & scheduled runtimes (May 2026; the runtimes frame above) & [hype] until confirmed \\ \hline
+\end{tabular}
+\end{center}
 
-\textbf{Good places to recheck before teaching:}
-\begin{itemize}
-    \item official Claude Code documentation
-    \item official OpenAI Codex CLI documentation
-    \item course notes and lab instructions
-\end{itemize}
-
-\vspace{0.2cm}
-
-\textbf{Teaching rule:} keep dated product comparisons in the appendix, not in the conceptual core of the lecture.
+\vspace{0.1cm}
+\footnotesize\textbf{Teaching rule:} dated comparisons live here, not in the conceptual core of the lecture.
 \end{frame}
 
 
@@ -338,10 +330,35 @@ Checks: ...
 
 \sectiondivider{Resources}{Docs, repositories, and references}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): Official docs for each tested harness; Sant'Anna and Blattman skill repositories; Goldsmith-Pinkham's guides; METR; OWASP agentic Top-10; CORE-Bench; the lab.
+% ==== Phase B · NEW:Resources · TIER: READ
 \begin{frame}{Resources}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+\textbf{Where to read further --- each chosen because it helps you check an agent's work, not just use one.}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{Using agents as an economist}
+\begin{itemize}\scriptsize
+  \item Official documentation for Claude Code, Codex CLI, and Gemini CLI
+  \item Paul Goldsmith-Pinkham, ``Getting Started with Claude Code'' and ``From an Empty Folder to a Figure'' (\texttt{paulgp.substack.com})
+  \item Pedro Sant'Anna, \texttt{github.com/pedrohcgs/claude-code-my-workflow}; Chris Blattman, \texttt{github.com/chrisblattman/claudeblattman}
+  \item Aniket Panjwani, ``AI Agents for Economics Research'' (CEPR/VoxDev webinar, 2026)
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{Checking agents}
+\begin{itemize}\scriptsize
+  \item METR, measured task horizons (\texttt{metr.org})
+  \item OWASP, \emph{Top 10 for Agentic Applications} (Dec 2025): the risks of agents that plan, remember, and act
+  \item Siegel et al.\ (2024), \emph{CORE-Bench}: agents reproducing published results from code and data, social science included
+  \item OpenAI (Feb 2026) on retiring SWE-bench Verified; Berkeley RDI (Apr 2026) on breaking agent benchmarks
+  \item The AEA's journal policies on AI use and on data and code
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+{\scriptsize\textit{And this course's own: the Lecture 9 lab (\texttt{labs/Lec09\_Agent\_Lab/}), its recorded transcripts, and \texttt{CLI\_FACTS\_2026-09.md}. Checked 12 Sep 2026.}}
 \end{frame}
 
 % ---- T6-F17 · KEEP · TIER: READ · from T6:368
