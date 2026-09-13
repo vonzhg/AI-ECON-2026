@@ -13,6 +13,7 @@ Google/Colab required, and setup uses **Tsinghua (TUNA) mirrors**. Every noteboo
 | `Lec07_LLM_Lab/Lab7A_Text_as_Data.ipynb` | 7 | Tokens & a toy **BPE**; TF-IDF; a mini **EPU** index; word embeddings (PPMI+SVD) and a hawk–dove score **validated against real rate cycles** — on 30 years of bundled FOMC statements |
 | `Lec07_LLM_Lab/Lab7B_Attention_MiniGPT.ipynb` | 7 | The 5-step **attention** formula by hand; causal masking; then train a **minimal GPT from scratch** (0.6M params, ~10 min CPU) and generate FOMC-ese with temperature/top-k |
 | `Lec08_RAG_Lab/Lec08_Lab_RAG.ipynb` | 8 | Build a **RAG** pipeline over 405 Ren Zhengfei speeches: chunk → TF-IDF index → retrieve → audit → **cited** grounded answer; **implement** a minimal retriever. Runs offline, stdlib-only |
+| `Lec09_Agent_Lab/` | 9 | **Part A** (offline notebook): a session as a list, tools, the agent loop, cost and multi-agent patterns, all against a scripted model. **Part B** and the **Design Lab** need one terminal agent (Claude Code, Codex CLI, or Gemini CLI) and network access — see the folder's README |
 
 **Start with the Getting Started lab** — it sets up the environment used by every later lab.
 
@@ -56,6 +57,7 @@ Verify with:
 jupyter nbconvert --to notebook --execute Lec01_02_Lab_Getting_Started.ipynb
 jupyter nbconvert --to notebook --execute Lec03_Lab_ML_Basics.ipynb
 jupyter nbconvert --to notebook --execute Lec08_RAG_Lab/Lec08_Lab_RAG.ipynb
+jupyter nbconvert --to notebook --execute Lec09_Agent_Lab/Lec09_Lab_Agents.ipynb
 ```
 
 The **Lecture 8 RAG lab** lives in its own subfolder (`Lec08_RAG_Lab/`) because it

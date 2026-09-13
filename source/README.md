@@ -16,7 +16,7 @@ One folder per lecture, each holding the `.tex` files for its topic decks plus t
 | `Lec06_HA_Models/` | 6 · Heterogeneous Agent Models via RL | *placeholder on the site* |
 | `Lec07_LLM/` | 7 · Large Language Models & Text as Economic Data | `Lec07_T1`–`T3b` |
 | `Lec08_RAG/` | 8 · Retrieval-Augmented Generation | `Lec08_T1`–`T3` |
-| `Lec09_Agentic_AI/` | 9 · Agentic AI for Research Workflows | `Lec09_T1`–`T5` |
+| `Lec09_Agentic_AI/` | 9 · Agentic AI for Research Workflows | `Lec09_T1`, `T2a`–`T2b`, `T3a`–`T3b`, `T4`, `T5a`–`T5d`, `TA` (five parts; the July five-act decks are in `_archive/five_acts_2026-07/`) |
 | `Lec10_Case_Studies/` | 10 · Case Studies | *placeholder on the site* |
 | `Lec01_Quant_Macro/` | — | Earlier drafts, superseded by `Lec01_Introduction/` |
 
