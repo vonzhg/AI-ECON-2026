@@ -131,17 +131,17 @@
   },
   "Lec09_T1_Agent_Opportunity.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T1_Agent_Opportunity.pdf",
-    "master_md5": "637df5053a5d29ce861d58782c17f34b",
+    "master_md5": "3ed0baeae260945a3ecb266834040e90",
     "pages": 24
   },
   "Lec09_T2a_How_an_Agent_Runs.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T2a_How_an_Agent_Runs.pdf",
-    "master_md5": "364d06185a749f5d4a70d802a2cfa3db",
+    "master_md5": "482f56599235326d23c391ac783baabb",
     "pages": 21
   },
   "Lec09_T2b_Setup_Files_Commands.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T2b_Setup_Files_Commands.pdf",
-    "master_md5": "8148b855479921701f38d0ea1534729e",
+    "master_md5": "2cd5b4f283747c25bd6e98b8f88f81a9",
     "pages": 32
   },
   "Lec09_T3a_Build_an_Agent.pdf": {
@@ -151,7 +151,7 @@
   },
   "Lec09_T3b_Invoking_Agents.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T3b_Invoking_Agents.pdf",
-    "master_md5": "ae11d1662597ae4b9eb822c290a166dd",
+    "master_md5": "77327d0195ce4314439d1642104310c4",
     "pages": 28
   },
   "Lec09_T4_Design_Lab.pdf": {
@@ -161,27 +161,27 @@
   },
   "Lec09_T5a_Homotopy_Method.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T5a_Homotopy_Method.pdf",
-    "master_md5": "79e0866fb6399fbcc489bbe06f0df1d3",
+    "master_md5": "f50d70d1d6bf034c1a9f3136f22ddd33",
     "pages": 28
   },
   "Lec09_T5b_Project_Management.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T5b_Project_Management.pdf",
-    "master_md5": "5e057c7851e9aed3e98f4cd81189874e",
+    "master_md5": "23b8c1d9e534eb4f1007f751c54c87c6",
     "pages": 25
   },
   "Lec09_T5c_Tracing_Mistakes_Context.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T5c_Tracing_Mistakes_Context.pdf",
-    "master_md5": "6625954a12c25589a5ad5f38d5b03469",
+    "master_md5": "d9635cdd800bbb2224d58a91b43b4541",
     "pages": 25
   },
   "Lec09_T5d_Governance_Action_Plan.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_T5d_Governance_Action_Plan.pdf",
-    "master_md5": "6e158e13a1ea1b0151a83ec305fba4ba",
+    "master_md5": "1b3a0d7556324ef608ee68bde3aa351e",
     "pages": 27
   },
   "Lec09_TA_Appendix_Landscape.pdf": {
     "master": "source/Lec09_Agentic_AI/Lec09_TA_Appendix_Landscape.pdf",
-    "master_md5": "aeedc8067f8f40b3834dbae59478f485",
+    "master_md5": "2ed6fd0ddc36f8418b07a117f08cb05d",
     "pages": 18
   }
 }

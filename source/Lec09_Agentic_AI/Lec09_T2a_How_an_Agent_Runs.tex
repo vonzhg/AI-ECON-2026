@@ -4,7 +4,7 @@
 %% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
 %% keep the markers until Phase B is done (lec09_assemble.py check reads them).
 %% Owns: harness/LLM/files, the JSON tool call, the privacy boundary, session-as-list, the twenty-line loop, ReAct
-%% Owns: {'the GDP-by-party worked trace (recorded transcript': 'labs/Lec09_Agent_Lab/transcripts/)'}
+%% Owns: the GDP-by-party worked trace (recorded transcript: labs/Lec09_Agent_Lab/transcripts/)
 %% Defers: install, files, commands, permissions, tokens/context mechanics -> T2b; dials, ceilings, dispatch -> T3b
 
 \input{../shared_preamble.tex}
@@ -453,7 +453,7 @@ while True:
 
     \draw[loc] (0,-0.25) -- node[above]{the prompt} (4.3,-0.25);
     \draw[wire] (4.3,-0.7) -- node[above]{\textbf{req 1} = system + tools + [prompt]} (9.6,-0.7);
-    \draw[wire] (9.6,-1.15) -- node[above]{2 web searches, 2 web tables: \emph{they disagree}} (4.3,-1.15);
+    \draw[wire] (9.6,-1.15) -- node[above]{2 searches; 1 fetch blocked; 1 table that \emph{looks wrong}} (4.3,-1.15);
     \draw[wire] (9.6,-1.6) -- node[above]{fetch FRED \texttt{A191RL1A225NBEA} (BEA real GDP, \%)} (4.3,-1.6);
     \node[font=\tiny, orange!70!black, anchor=west, align=left] at (9.75,-1.95) {\textbf{no tool call}\\ for the party timeline};
     \draw[wire] (9.6,-2.45) -- node[above]{load a data-viz \textbf{skill}; read 4 of its files} (4.3,-2.45);
@@ -519,7 +519,7 @@ while True:
 \hline
 \textbf{Moment} & \textbf{What it looked like} & \textbf{What it shows} \\ \hline
 \textbf{The loop ran itself} & 24 tool calls in 27 requests, no human input & nobody scheduled these steps; the model chose each one \\ \hline
-\textbf{It checked a source} & two web tables disagreed, so it went to FRED & verification happened because the model noticed --- not by default \\ \hline
+\textbf{It checked a source} & a fetched table looked wrong for 2020, so it went to FRED & verification happened because the model noticed --- not by default \\ \hline
 \textbf{Errors became inputs} & four blocked shell commands came back as \texttt{is\_error}; it read the file instead & ``Observe'' in ReAct --- and ``verified'' now means ``read carefully,'' not ``ran it'' \\ \hline
 \textbf{One step had no tool} & the party-by-year table came from memory & it happens to be right; nothing in the transcript lets you check \\ \hline
 \textbf{Context you did not write} & a bundled data-viz skill turned ``plot'' into an interactive web page & the harness's defaults are part of the prompt \\ \hline

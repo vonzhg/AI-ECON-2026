@@ -41,7 +41,7 @@ wait-for text=Real GDP growth`  — *error returned to the model:* Permission to
 ## What the run shows (and where it differs from the slide)
 
 - **The loop was long and self-directed:** 24 tool calls in 27 turns, none of them scheduled by a person.
-- **The GDP series has provenance.** Two web tables disagreed; the agent noticed ("2020 ... should be much larger than -0.92%") and switched to FRED series A191RL1A225NBEA (BEA real GDP, annual percent change).
+- **The GDP series has provenance.** The searches disagreed, one fetch was blocked (HTTP 403), and the one table it did get contradicted what the model knew; the agent noticed ("2020 ... should be much larger than -0.92%") and switched to FRED series A191RL1A225NBEA (BEA real GDP, annual percent change).
 - **The party timeline has none.** No tool call produced it: the table of presidents came from the model's memory. It happens to be right; nothing in the transcript lets you check that.
 - **The attribution convention was the model's choice:** each year went to "whoever was inaugurated that January" (2001 to Bush, 2009 to Obama). The write-up itself calls this "a labeling choice".
 - **Blocked commands came back as ordinary tool results** (`is_error`), and the loop routed around them -- so "verified" meant "read carefully", not "ran it".

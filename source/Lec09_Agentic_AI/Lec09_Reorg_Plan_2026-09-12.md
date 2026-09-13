@@ -1,6 +1,6 @@
 # Lecture 9 Reorganization Plan — "See → Under the Hood → Build → Design & Validate → Run & Govern"
 
-Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phase A assembled on branch `lec09-reorg` · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
+Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phases A and B complete on branch `lec09-reorg`, site updated on the branch; **not merged** · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
 Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = `/u/zfeng2/Github/Courses/AI-ECON-2026/`.
 
 ## 0. Plan v2 — status, amendments, and where the truth lives
@@ -30,9 +30,12 @@ v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1
 |---|---|
 | Which old frame goes where, in what order, at what tier, with which reference edits | `reorg_manifest.yaml` (§6 and Appendix A below are superseded as specs) |
 | Is every old frame accounted for; has an assembled frame drifted | `python3 tools/lec09_assemble.py check [--strict]` |
-| Frame and tier counts | `python3 tools/lec09_assemble.py summary` — currently 219 frames: 45 CORE, 20 LAB, 154 READ; 36 new, 8 merges pending, 4 cuts |
+| Frame and tier counts | `python3 tools/lec09_assemble.py summary` — 219 frames: 45 CORE, 20 LAB, 154 READ; 36 new, 8 merged, 4 cut |
 | What each deck owns and defers | the `owns` / `defers` lines in each deck header (generated from the manifest) |
-| Dated CLI and harness facts | `CLI_FACTS_2026-09.md` (to write, step 2) |
+| Dated CLI and harness facts | `CLI_FACTS_2026-09.md` (each fact labelled RUN / HELP / SRC / OPEN) |
+| Outside claims (papers, policies, vendor and press reports) | `Lec09_External_Facts_2026-09.md` (each labelled PAGE / SEARCH / PRESS / BIB; rows to re-check at the gate) |
+| Does a scenario work, on which harness, at what k | `labs/Lec09_Agent_Lab/transcripts/` (S1 k=3; S2 and S3 k=1; Claude Code only so far) and each run's `summary.json` |
+| What the Oct 22 session teaches | `Lec09_RunSheet_2026-10-22.md` (the 45 CORE frames; minute budget is the instructor's call) |
 
 ### 0.4 Framework registry (A7)
 | Framework | Owner | Cited by | Named at CORE? | Phase B action |
@@ -57,13 +60,13 @@ v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1
 |---|---|---|---|
 | 0 | Save review; baseline commit; branch | Sep 14 | **done** — review saved, `515f50d` on `main`, branch `lec09-reorg` |
 | 1 | Plan v2 in place (this section); manifest with tiers; framework registry | Sep 16 | **done** — manifest + registry; this section |
-| 2 | Portability spike + `CLI_FACTS_2026-09.md`; assembler dry run; map v2 compiled | Sep 19 | assembler and map v2 **done**; spike and facts sheet open |
+| 2 | Portability spike + `CLI_FACTS_2026-09.md`; assembler dry run; map v2 compiled | Sep 19 | **done** — `8ef29c0`. Claude Code facts from runs; Gemini CLI 0.47.0 and Codex CLI 0.154.0 from help and source only (headless calls wait on a login) |
 | 3 | Phase A: eleven decks compile, `check --strict` passes | Sep 23 | **done** — `d1da743` (all eleven compile ×2; page totals consistent) |
-| 4 | Lab: brief format, rung-3 runner, setup check, S1–S3 on two harnesses (k=3), Ex.4 transcripts + replay | Oct 3 | open |
-| 5 | Phase B: CORE frames in all decks (A3–A6), T4 deck | Oct 5 | open |
+| 4 | Lab: brief format, rung-3 runner, setup check, S1–S3 on two harnesses (k=3), Ex.4 transcripts + replay | Oct 3 | **mostly done** — runner and setup check `527a6a0`; S1 k=3, S2/S3 k=1 on Claude Code `c50c337`, `4c56892`; GDP transcript `447f38f`; Part A Step 4b replay `b210d31`. **Open:** S2/S3 at k=3; S1–S3 on a second harness (needs `gemini` or `codex` login) |
+| 5 | Phase B: CORE frames in all decks (A3–A6), T4 deck | Oct 5 | **done** — `05e2a0a` (T1) … `3e2087a` (TA); T4 `c50c337` |
 | 6 | Student setup announcement + harness survey (**instructor action**) | Oct 9 | open |
-| 7 | Phase B: LAB/READ frames, TA; content freeze | Oct 12 | open |
-| 8 | §10 A–K cross-references; QA gate; merge; publish; links live | Oct 16 | open |
+| 7 | Phase B: LAB/READ frames, TA; content freeze | Oct 12 | **done** — sweep `fc6cf74`; freeze after the QA fixes below |
+| 8 | §10 A–K cross-references; QA gate; merge; publish; links live | Oct 16 | **on the branch, merge pending** — cross-references, syllabus, site pages, published PDFs (`ccd7c66`, `a5558ea`). QA gate run on 12 Sep: `check` clean, 219 frames tiered (45/20/154), page totals, `build_slides --check` and `check_site` clean; `claim-checker` on all 95 Phase B frames and `boundary-auditor` on seven topics. About 20 errors fixed (see `Lec09_External_Facts_2026-09.md`, "Corrections"); outside claims checked on the web and recorded there. **Awaiting the instructor:** merge to `main`, push, and the live-link check. |
 | 9 | Freshness gate; run sheet; teams by harness | Oct 20 | open |
 
 Phase B works deck by deck, CORE first, to the rewrite standard in the review (§5 there): one claim per frame in the bold lead; economic twin on map frames and bridges; harness-neutral concepts with verified per-harness boxes; tagged and sourced numbers; no deck-history self-reference; at most five named frameworks at CORE. Delete a frame's `% ---- ID` marker only when its Phase B rewrite is done; `check` then stops tracking it.

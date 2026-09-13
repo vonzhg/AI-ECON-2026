@@ -329,7 +329,7 @@ Lecture 9.3b: Invoking Agents --- One, Three, Ten Thousand}
 \end{takeawaybox}
 
 \vspace{0.06cm}
-{\scriptsize \textit{Real trace, check 2 (Claude Code 2.1.261): \texttt{Read} $\to$ \texttt{Agent code-reviewer} $\to$ \texttt{Agent domain-reviewer} --- the dispatch sits in the same list as \texttt{Read}. \textbf{[solid]}}}
+{\scriptsize \textit{Real trace, check 3 (Claude Code 2.1.261): \texttt{Read} $\to$ \texttt{Agent code-reviewer} $\to$ \texttt{Agent domain-reviewer} --- both dispatches sit in the same list as \texttt{Read}. \textbf{[solid]}}}
 \end{frame}
 
 % ---- T2b-F28 · EDIT · TIER: READ · from T2b:1152
@@ -602,32 +602,32 @@ a sound mechanical check & 3, $N$ until the quota binds & Lean, a compiler, a on
 
 % ==== Phase B · T2c-F06 · TIER: READ (dated sidebar)
 \begin{frame}{A Dated Sidebar: What About Ten Thousand Agents?}
-\textbf{On 28 August 2026 OpenAI pointed roughly ten thousand agents at Navier--Stokes and had a Lean-checked proof 88 hours later. The number is the least interesting part.}
+\textbf{From 1 September 2026, about ten thousand OpenAI agents worked on Navier--Stokes: a proof in 88 hours, 17 more to check it in Lean. The number is the least interesting part.}
 
 \vspace{0.12cm}
 
 \begin{center}
 \footnotesize
-\renewcommand{\arraystretch}{1.22}
-\begin{tabular}{|p{2.9cm}|p{8.0cm}|}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabular}{|p{3.3cm}|p{8.3cm}|}
 \hline
 Warm-up (Euler) & $\sim$100 agents, $\sim$50 hours \\ \hline
-The run (Navier--Stokes) & $\sim$10{,}000 agents from 28 Aug 2026, done within \textbf{88 hours} \\ \hline
+The run (Navier--Stokes) & $\sim$10{,}000 concurrent agents from 1 Sep 2026, done within \textbf{88 hours} \\ \hline
 Formalisation & a further \textbf{17 hours} to check the proof in \textbf{Lean} \\ \hline
-Traffic & $\sim$5 million messages \emph{between agents}; $\sim$300 billion output tokens \\ \hline
+Traffic & $\sim$2.7 million messages \emph{between agents}, $\sim$130 billion output tokens (campaign: $\sim$4.9 million, $\sim$300 billion) \\ \hline
 Compute & ``several million dollars'' (Bubeck, OpenAI) \\ \hline
-What was shown & finite-time singularity from smooth data --- the \emph{negative} resolution \\ \hline
+What was shown & a \emph{forced} finite-time blow-up from smooth data, in $\mathbb{R}^3$ and on the torus --- the \emph{negative} direction \\ \hline
 \end{tabular}
 \end{center}
 
-\vspace{0.1cm}
+\vspace{0.04cm}
 
 \begin{cautionbox}
 \footnotesize\textbf{Read the ledger, not the headline.} Every figure is the vendor's own account of an unreleased model, and the result is disputed two frames on. \textbf{[hype]} What is worth your attention is the \emph{architecture} --- reported consistently, and the part that transfers.
 \end{cautionbox}
 
 \vspace{0.05cm}
-{\scriptsize \textit{As of 12 Sep 2026 (announced 8 Sep; Quanta, Semafor, CNN) --- re-check before teaching. \textbf{[solid]} that it was claimed and is contested.}}
+{\scriptsize \textit{As of 12 Sep 2026 (announced 8 Sep; figures as reported by VentureBeat and The Next Web); re-check before teaching. \textbf{[solid]}: claimed, and contested.}}
 \end{frame}
 
 % ---- T2c-F07 · EDIT · TIER: READ · from T2c:277
@@ -678,7 +678,7 @@ What was shown & finite-time singularity from smooth data --- the \emph{negative
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{|p{4.6cm}|p{6.3cm}|}
 \hline
-\textbf{Reporting} best-of-$n$ as your score & the sin T4 names: $\tau$-bench pass-hat-$k$ falls from $\sim$90\% at $k{=}1$ to $\sim$57\% at $k{=}8$, so a best-of-$n$ headline flatters the model and hides the reliability curve \\ \hline
+\textbf{Reporting} best-of-$n$ as your score & the sin T4 names: on $\tau$-bench gpt-4o solved under half the tasks, and under 25\% of retail tasks on all eight tries (Yao et al.\ 2024) \\ \hline
 \textbf{Running} $n$ attempts behind a checker that can reject & legitimate --- because the \emph{checker} decides, not the score. The $9{,}999$ failures cost tokens and nothing else \\ \hline
 \end{tabular}
 \end{center}
@@ -686,7 +686,7 @@ What was shown & finite-time singularity from smooth data --- the \emph{negative
 \vspace{0.1cm}
 
 \begin{cautionbox}
-\footnotesize\textbf{Two things Lean does not buy.} A human must still certify that the statement checked in Lean is the theorem anyone meant to prove --- the formal check is sound about the object it was given, not about your intent. And the result is contested: Buckmaster alleges OpenAI muscled in on work he and Alp\"oge were finishing, called one AI-written paper ``AI slop'' \emph{despite} its formal verification, and OpenAI denies the charge. \textbf{[solid]} on the dispute.
+\footnotesize\textbf{Two things Lean does not buy.} A human must still certify that the statement checked in Lean is the theorem anyone meant to prove --- the formal check is sound about the object it was given, not about your intent. And the credit is contested: Tristan Buckmaster (NYU), who worked on the forced approach with Levent Alp\"oge (Anthropic) in Codex, asked whether the model benefited from their data (``I am not accusing anyone of anything''); OpenAI says no one searched user data but ``cannot rule out'' that de-identified usage data helped its models. \textbf{[solid]} on the dispute (VentureBeat, 8 Sep 2026).
 \end{cautionbox}
 
 \vspace{0.05cm}

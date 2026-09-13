@@ -286,7 +286,7 @@ Two layers of configuration. \textbf{Local overrides global.}
 Standing instructions & \texttt{CLAUDE.md} & \texttt{GEMINI.md} (name configurable)$^\dagger$ & \texttt{AGENTS.md}$^\dagger$ \\ \hline
 Skills (\texttt{SKILL.md}) & \texttt{.claude/skills/<name>/} & \texttt{.gemini/skills/<name>/}$^\dagger$ & \texttt{\textasciitilde/.codex/skills/<name>/}$^\dagger$ \\ \hline
 Custom sub-agents & \texttt{.claude/agents/<name>.md} & \texttt{.gemini/agents/<name>.md}$^\dagger$ & a \texttt{spawn\_agent} tool; custom types: not yet verified \\ \hline
-Settings, permissions & \texttt{.claude/settings.json} & \texttt{.gemini/settings.json}; policy engine & \texttt{\textasciitilde/.codex/config.toml}; sandbox modes \\ \hline
+Settings, permissions & \texttt{.claude/settings.json} & \texttt{.gemini/settings.json}$^\dagger$; policy engine & \texttt{\textasciitilde/.codex/config.toml}$^\dagger$; sandbox modes \\ \hline
 Headless run (rung 3) & \texttt{claude -p} & \texttt{gemini -p} & \texttt{codex exec} \\ \hline
 \end{tabular}
 \end{center}
@@ -838,7 +838,7 @@ claude> [Read sources/fellows_page.html]
     \item \textbf{Input tokens.} Your prompt, conversation history, \texttt{CLAUDE.md}, rules, retrieved chunks. Every step that adds context adds cost.
     \item \textbf{Output tokens.} Generated code, JSON tool calls, prose explanations. Reasoning-heavy modes also produce many internal tokens.
     \item \textbf{Long sessions accumulate context.} Watch the status line; check \texttt{/cost} before long tasks.
-    \item \textbf{Pin for reproducibility.} Record the model version, prompt template, and seed when applicable; AEA disclosure (Oct 2024) extends to AI-assisted analysis.
+    \item \textbf{Pin for reproducibility.} Record the model version, prompt template, and seed when applicable; the AEA journals already ask you to describe AI use at submission (T5d quotes the rule).
 \end{itemize}
 
 \end{frame}
@@ -894,7 +894,7 @@ claude> [Read sources/fellows_page.html]
 \end{takeawaybox}
 
 \vspace{0.05cm}
-{\scriptsize\textit{T5c returns to what this trade-off costs research integrity. Dated (Claude Code, Sept.\ 2026): \texttt{/compact} takes focus instructions (``\texttt{/compact keep the asset-grid decision}''); \texttt{-{}-autocompact} sets when it fires; ``compact every 20 turns'' is folklore --- compact between phases.}}
+{\scriptsize\textit{T5c returns to what this trade-off costs research integrity. Dated (Claude Code, Sept.\ 2026): \texttt{/compact} takes focus instructions (``\texttt{/compact keep the asset-grid decision}''); \texttt{-{}-autocompact} sets the window it compacts at (auto, or 100k--1M tokens); ``compact every 20 turns'' is folklore --- compact between phases.}}
 \end{frame}
 
 % ==== Phase B · NEW:Bridge: From Using an Agent to Building One · TIER: READ

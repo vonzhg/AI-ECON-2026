@@ -176,7 +176,7 @@ decks:
   map: [2, a]
   owns:
     - harness/LLM/files, the JSON tool call, the privacy boundary, session-as-list, the twenty-line loop, ReAct
-    - the GDP-by-party worked trace (recorded transcript: labs/Lec09_Agent_Lab/transcripts/)
+    - 'the GDP-by-party worked trace (recorded transcript: labs/Lec09_Agent_Lab/transcripts/)'
   defers:
     - install, files, commands, permissions, tokens/context mechanics -> T2b; dials, ceilings, dispatch -> T3b
   items:
@@ -423,8 +423,11 @@ decks:
   - section: 'Budget'
     divider: 'Tokens, cost, and the context window'
   - frame: T2-F20
-    tag: KEEP
+    tag: EDIT
     tier: READ
+    edits:
+    - old: 'AEA disclosure (Oct 2024) extends to AI-assisted analysis.'
+      new: 'the AEA journals already ask you to describe AI use at submission (T5d quotes the rule).'
   - frame: T2-F21
     tag: KEEP
     tier: READ
@@ -764,6 +767,10 @@ decks:
     edits:
     - old: 'the sin T1b names'
       new: 'the sin T4 names'
+    - old: $\tau$-bench pass-hat-$k$ falls from $\sim$90\% at $k{=}1$ to $\sim$57\% at $k{=}8$, so a best-of-$n$ headline flatters the model and hides the reliability curve
+      new: on $\tau$-bench gpt-4o solved under half the tasks, and under 25\% of retail tasks on all eight tries (Yao et al.\ 2024)
+    - old: 'And the result is contested: Buckmaster alleges OpenAI muscled in on work he and Alp\"oge were finishing, called one AI-written paper ``AI slop'''' \emph{despite} its formal verification, and OpenAI denies the charge. \textbf{[solid]} on the dispute.'
+      new: 'And the credit is contested: Tristan Buckmaster (NYU), who worked on the forced approach with Levent Alp\"oge (Anthropic) in Codex, asked whether the model benefited from their data (``I am not accusing anyone of anything''''); OpenAI says no one searched user data but ``cannot rule out'''' that de-identified usage data helped its models. \textbf{[solid]} on the dispute (VentureBeat, 8 Sep 2026).'
   - frame: T2c-F09
     tag: KEEP
     tier: READ
@@ -1287,7 +1294,7 @@ decks:
     - benchmark validity, the seven tests, cannot-do (as non-delegable responsibility), when-not, trust-but-verify
     - what changes, the paradigm shift completed, the job description (map k=0 finale), the 30-day plan, the clean-up prompt, the Lec10 preview
   defers:
-    - reliability under repetition -> T4; the principal-agent lens -> T1 (evidence: Lec10 T9)
+    - 'reliability under repetition -> T4; the principal-agent lens -> T1 (evidence: Lec10 T9)'
   items:
   - new: 'Lecture 9 in One Map: Governance and Action Plan'
     tier: READ
@@ -1439,8 +1446,11 @@ decks:
     tag: KEEP
     tier: READ
   - frame: T1b-F10
-    tag: KEEP
+    tag: EDIT
     tier: READ
+    edits:
+    - old: '\item \textbf{Routines} triggered by cron or webhook'
+      new: '\item \textbf{Routines} (launched 14 Apr 2026): runs on a schedule, an API call, or a GitHub webhook'
   - frame: T1b-F11
     tag: KEEP
     tier: READ
