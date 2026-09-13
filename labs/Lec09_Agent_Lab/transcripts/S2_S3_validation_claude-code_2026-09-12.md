@@ -33,4 +33,17 @@ Bold: the agent the scenario expects to catch that defect. `provenance-checker` 
 - **The right line with the wrong reason.** On S3, both agents cited line 7 but called it a 17-column row; every line has 18 fields and the agents miscounted the run of empty fields. Line-tied scoring cannot see this. The gate script, which parses the CSV, got the reason right.
 - The sound "other" findings are listed in `instructor/ANSWER_KEY_S2.md` and `ANSWER_KEY_S3.md`.
 
-**Still to do before Oct 22:** k = 3 on Claude Code, and S1–S3 on a second harness (Gemini CLI or Codex CLI) once it is logged in.
+## S3 at k = 3 (Claude Code 2.1.270, 12 Sep 2026)
+
+| | provenance-checker | econ-agent |
+|---|---|---|
+| a field bucket without its source URL (line 7) | **3/3** | 3/3 |
+| a PhD year without its source URL (line 9) | **3/3** | 3/3 |
+| gender coded from a first name, no source (line 11) | **3/3** | 3/3 |
+| *control:* gender from an explicit pronoun (line 6) | 0/3 | 0/3 |
+| *control:* gender left missing, no source (line 8) | 0/3 | 0/3 |
+| other findings | 0 | 2 |
+
+S2 at k = 3 did not run: all nine calls failed with a CLI error while other headless jobs were finishing, and a probe a few minutes later succeeded. The runner now reports the CLI's own error reason; S2 is re-run on its own.
+
+**Still to do before Oct 22:** S2 at k = 3 on Claude Code, and S1–S3 on a second harness (Gemini CLI or Codex CLI) once it is logged in.

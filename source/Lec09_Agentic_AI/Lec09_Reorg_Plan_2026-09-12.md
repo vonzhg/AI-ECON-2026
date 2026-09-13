@@ -11,6 +11,7 @@ v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1
 - The notes to rewrite are **the eleven slide decks** (Phase B). `Lec09_讲稿.md` stays a follow-up (§14).
 - The hands-on parts run **live on Thu 2026-10-22 with mixed tools** (Claude Code, Codex CLI, Gemini CLI): the lab and the design exercise must pass on a second harness (A2).
 - Accepted recommendations: delegation-economics spine (A3), capability ladder with Navier–Stokes demoted (A4), S2 as a transfer case (A6.2), T4 renamed *Design Lab*, baseline commit before archiving (A8.1).
+- **2026-09-13:** the cold open uses an example from the instructor's own research — health insurance coverage by age — recorded as a real agent run from an empty folder (transcript in `labs/Lec09_Agent_Lab/transcripts/`). The borrowed homeownership example and its attribution are dropped. This supersedes the review's A9 line on the cold open.
 
 ### 0.2 Changelog v1 → v2
 | # | Amendment | Changes to v1 |

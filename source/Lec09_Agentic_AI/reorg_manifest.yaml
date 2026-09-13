@@ -35,12 +35,11 @@ decks:
     - JSON tool call, session-as-list -> T2a; Git -> T2b; seven tests -> T5d
     - MCP is named once in the timeline and explained only in TA; model-specific numbers -> TA
   items:
-  - new: 'Six Minutes, One Figure'
+  - new: 'From an Empty Folder to a Figure'
     tier: CORE
     todo: |-
-      Cold open before the map (archive_pre_split/Lec09_Agentic_AI.tex:2022-2121, "Case Study: Empty Folder -> Figure").
-      Figure figures/homeownership_by_age.jpg; the three prompts; two obstacles solved unprompted (FRED lacked the series -> Census HVS; HTTP 403 -> User-Agent); 6 min 21 s.
-      What the economist did: asked the question, checked the figure. Attribution: Paul Goldsmith-Pinkham, "From an Empty Folder to a Figure" + URL (Capstone_Projects_2026.md:526-528) + date.
+      Cold open before the map: a question from the instructor's research (who gained health coverage after 2013?), recorded 2026-09-13 as one agent session from an empty folder.
+      Figure figures/uninsured_by_age_agent.png; transcript labs/Lec09_Agent_Lab/transcripts/uninsured_by_age_claude-code-2.1.270_2026-09-13.md; numbers re-computed from Census HIC-4/5/6_ACS.
   - frame: T1-F01
     tag: EDIT
     tier: CORE
@@ -65,7 +64,7 @@ decks:
     tier: CORE
     todo: |-
       Review A4: one TikZ strip, six capability rungs, one course-owned example each, "what stayed human" underneath, and where each returns:
-      chat window (T1-F06 Fellows test) | one agent, one sitting (six minutes -> figure) | one agent, files, many sittings (882 Fellows) | agent + human gates, weeks (HA-Ramsey) | team of sub-agents (T3b ledger) | scripted fan-out + verifier (Lec10 T6b, 11,171 labels).
+      chat window (T1-F06 Fellows test) | one agent, one sitting (empty folder -> figure, one decision asked) | one agent, files, many sittings (882 Fellows) | agent + human gates, weeks (HA-Ramsey) | team of sub-agents (T3b ledger) | scripted fan-out + verifier (Lec10 T6b, 11,171 labels).
       Counter-rung under "agent + gates": Lec10 T9, passed every gate, still wrong. Across all rungs: the GDP-by-party leading verb (T2a). Navier-Stokes is NOT on the ladder (dated sidebar in T3b and TA).
   - new: 'Delegating to an Agent Is a Principal--Agent Problem'
     tier: CORE
@@ -1490,7 +1489,7 @@ decks:
     divider: 'Docs, repositories, and references'
   - new: 'Resources'
     tier: READ
-    todo: 'Official docs for each tested harness; Sant''Anna and Blattman skill repositories; Goldsmith-Pinkham''s guides; METR; OWASP agentic Top-10; CORE-Bench; the lab.'
+    todo: 'Official docs for each tested harness; Sant''Anna and Blattman skill repositories; METR; OWASP agentic Top-10; CORE-Bench; the lab.'
   - frame: T6-F17
     tag: KEEP
     tier: READ

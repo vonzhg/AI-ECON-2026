@@ -374,8 +374,14 @@ def _run_cli(cmd: list[str], cwd: str | None, timeout: int) -> subprocess.Comple
     except subprocess.TimeoutExpired as exc:
         raise RuntimeError(f"`{cmd[0]}` timed out after {timeout}s") from exc
     if proc.returncode != 0:
-        raise RuntimeError(f"`{cmd[0]}` exited {proc.returncode}: "
-                           f"{(proc.stderr or proc.stdout)[-400:]}")
+        detail = (proc.stderr or proc.stdout)[-400:]
+        try:  # a JSON reply names the failure better than its tail does
+            reply = json.loads(proc.stdout)
+            detail = " | ".join(f"{k}={reply[k]}" for k in ("subtype", "api_error_status", "result")
+                                if reply.get(k)) or detail
+        except (ValueError, TypeError, AttributeError):
+            pass
+        raise RuntimeError(f"`{cmd[0]}` exited {proc.returncode}: {detail}")
     return proc
 
 

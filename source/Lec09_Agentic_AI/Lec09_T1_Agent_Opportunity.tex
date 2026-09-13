@@ -29,40 +29,39 @@ Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms}
 
 \makebeamertitle
 
-% ==== Phase B · NEW:Six Minutes, One Figure · TIER: CORE
+% ==== Phase B · NEW:From an Empty Folder to a Figure · TIER: CORE
 \begin{frame}{From an Empty Folder to a Figure}
-\textbf{One economist, an empty folder, three prompts: six minutes to find, download, and clean the data --- then two more prompts to a figure.}
+\textbf{Who gained health coverage after 2013? An empty folder, four prompts, and 22 minutes of agent time --- including the one decision the agent stopped to ask for.}
 
-\vspace{0.06cm}
+\vspace{0.04cm}
 
 \begin{columns}[T]
-\begin{column}{0.44\textwidth}
+\begin{column}{0.47\textwidth}
 \centering
-\includegraphics[width=\linewidth]{homeownership_by_age.jpg}
+\includegraphics[width=\linewidth]{uninsured_by_age_agent.png}
 
-{\tiny\textit{The question: how has the age distribution of US homeowners changed over the last 50 years?}}
+{\tiny\textit{The agent's figure (ACS, 2008--2024). Lec10 T3 takes the question further.}}
 \end{column}
-\begin{column}{0.53\textwidth}
+\begin{column}{0.51\textwidth}
 \footnotesize
 \textbf{What the agent did}
 \begin{itemize}\scriptsize
-  \item On FRED it went in circles guessing series codes; the data came from Census HVS Tables 12 and 19
-  \item An HTTP 403 from the Census site: it retried with a user-agent header
-  \item It sent a sub-agent to read the documentation
-  \item It wrote the download script and 77 lines of R, and fixed a font error
+  \item Found the right Census table, then hit a wall: the data API now requires a key that is emailed to a person
+  \item Tried the no-key tables, patched a spreadsheet-parsing bug --- and stopped to ask: wait for a key, or accept gaps? (11 minutes, 59 tool calls)
+  \item Given a decision, built three consistent age groups with margins of error in under 4 minutes; then the figure and the labels
 \end{itemize}
 
 \vspace{0.04cm}
 \textbf{What stayed with the economist}
 \begin{itemize}\scriptsize
-  \item The question, and the axis flip that made the figure answer it
-  \item In his words: ``which age groups to highlight, what comparison matters, what story the figure should tell''
+  \item Choosing the data: it assumed one year's age groups hold in every year (they were redrawn in 2017), and its fallback crossed a survey redesign
+  \item The question, what to mark --- and one catch in the final figure: 2020 ACS data were collected; only the standard estimates were not released
 \end{itemize}
 \end{column}
 \end{columns}
 
 \vspace{0.04cm}
-{\scriptsize \textit{Paul Goldsmith-Pinkham, ``From an Empty Folder to a Figure'' (Substack, 29 March 2026); the figure is his. The six minutes cover the data, not the figure. \textbf{[solid]}}}
+{\scriptsize \textit{Recorded 13 Sep 2026 (Claude Code 2.1.270); transcript in the lab's \texttt{transcripts/}; numbers re-checked against Census tables. \textbf{[solid]}}}
 \end{frame}
 
 % ==== Phase B · T1-F01 · TIER: CORE
@@ -122,7 +121,7 @@ Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms}
   \node[rung] at (11.8,1.02)  {fan-out $+$\\ a verifier};
 
   \node[ex] (e1) at (0,0)     {\textbf{Fellows in a chat}\\ four things break\\ in the first hour};
-  \node[ex] (e2) at (2.36,0)  {\textbf{An empty folder}\\ data in six minutes,\\ figure in two prompts};
+  \node[ex] (e2) at (2.36,0)  {\textbf{An empty folder}\\ Census data to a figure;\\ one decision asked};
   \node[ex] (e3) at (4.72,0)  {\textbf{882 ES Fellows}\\ 18 batches of 50,\\ a URL per field};
   \node[ex] (e4) at (7.08,0)  {\textbf{HA-Ramsey}\\ weeks, not years;\\ three discoveries};
   \node[ex] (e5) at (9.44,0)  {\textbf{The ledger}\\ four sub-agents,\\ 448{,}576 tokens};
@@ -130,7 +129,7 @@ Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms}
   \foreach \i/\j in {1/2,2/3,3/4,4/5,5/6} {\draw[arr] (e\i) -- (e\j);}
 
   \node[hum] at (0,-0.95)     {notices what breaks};
-  \node[hum] at (2.36,-0.95)  {asks the question; flips the axis};
+  \node[hum] at (2.36,-0.95)  {asks the question; chooses the data};
   \node[hum] at (4.72,-0.95)  {redesigns the variable when birth year is unmeasurable};
   \node[hum] at (7.08,-0.95)  {catches the timing bug; signs each gate};
   \node[hum] at (9.44,-0.95)  {writes the four briefs; pays for its mistakes};

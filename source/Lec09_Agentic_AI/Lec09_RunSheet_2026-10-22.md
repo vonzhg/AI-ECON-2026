@@ -23,7 +23,7 @@ Pre-class (by Oct 9): students install one tested harness, log in, and run the l
 
 | # | Frame | Source |
 |---|---|---|
-| 1 | Six Minutes, One Figure | NEW |
+| 1 | From an Empty Folder to a Figure | NEW |
 | 2 | Lecture 9 in One Map | T1-F01 |
 | 3 | The Ladder: From a Chat Window to a Verified Swarm | NEW |
 | 4 | Delegating to an Agent Is a Principal--Agent Problem | NEW |

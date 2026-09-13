@@ -189,7 +189,7 @@ def main() -> int:
                                                           read_only=True, model=model)
                             break
                         except RuntimeError as exc:
-                            print(f"  {name} run {run}: attempt {attempt} failed -- {str(exc)[:120]}", flush=True)
+                            print(f"  {name} run {run}: attempt {attempt} failed -- {str(exc)[:300]}", flush=True)
                     if reply is None:
                         table[name]["failed"] += 1
                         continue
