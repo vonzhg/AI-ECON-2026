@@ -125,8 +125,7 @@ Lecture 9.5b: Management --- Organize the Project, Run the RA Team}
 {\scriptsize \textit{Economics and figures: Lec10 T8. Source: HA-Ramsey case-study package.}}
 \end{frame}
 
-% ---- T4-F04 · EDIT · TIER: CORE · from T4:128
-% TODO(Phase B): Review A3: this frame owns division of labor AND "collaborating with AI" (restate, audit, refine; who signs what); pointer to Lec10 T5 (the five-stage collaborator).
+% ==== Phase B · T4-F04 · TIER: CORE (collaborating with AI)
 \begin{frame}{Write the Contract First: Who Owns What}
 \textbf{Before any code, the HA-Ramsey project wrote down the division of labor --- T1's table, now with signatures.}
 
@@ -148,7 +147,7 @@ Running diagnostics and summarizing sweeps & Validation benchmarks and when a re
 
 \begin{takeawaybox}
 \footnotesize
-\textbf{``AI supplies throughput; the economist supplies judgment''} --- stated \emph{before} any code was written. The contract is an assignment rule: which goods the AI may produce alone, and which gates only you may sign.
+\textbf{``AI supplies throughput; the economist supplies judgment''} --- stated \emph{before} any code was written. Which goods the AI may produce alone; which gates only you sign. \textbf{Collaborating with AI} is working inside it: restate, audit, refine (Lec10 T5).
 \end{takeawaybox}
 \end{frame}
 
@@ -276,14 +275,45 @@ Checks: use survey weights; save the year map; report what passed
 \footnotesize\textit{The fellows project runs the same play with public-web material: the seed CSV, the batch file, and the schema rules are ``the public-web analog of \texttt{CLAUDE.md}'' (Lec10 T4) --- project files holding the rules and state across sessions.}
 \end{frame}
 
-% ---- NEW · TIER: READ
-% TODO(Phase B): From archive v1:1396 -- vendor-neutral [LEARN:tag] entries with three Aiyagari examples; pointer "mechanics -- T2b's three memories".
-\begin{frame}{A Corrections File: One Pattern, Any Harness}
-\textbf{Placeholder --- written in Phase B.} The specification is in the source comment above this frame.
+% ==== Phase B · NEW:A Corrections File: One Pattern, Any Harness · TIER: READ
+\begin{frame}[fragile]{A Corrections File: One Pattern, Any Harness}
+\textbf{Every time you correct the agent, write the correction down where the next session will read it. Tag it, date it, keep it short.}
+
+\vspace{0.12cm}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+# CORRECTIONS.md -- accumulated lessons
+
+[LEARN:aiyagari-grid] 2026-09-03
+  Too few asset-grid points near the
+  borrowing limit. Space them densely
+  there; a uniform grid needs 500+.
+
+[LEARN:vfi-stop] 2026-09-05
+  Never stop on an iteration count.
+  Stop on sup-norm < 1e-8 and report
+  the final distance.
+
+[LEARN:notation] 2026-09-05
+  V value, c_pol consumption policy,
+  a_pol savings policy, mu distribution.
+\end{lstlisting}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{itemize}\footnotesize
+  \item \textbf{Where it lives:} a file your instructions file points to --- \texttt{CLAUDE.md}, \texttt{GEMINI.md}, or \texttt{AGENTS.md}
+  \item \textbf{Who writes it:} you, or the agent at your request --- then \emph{you} read the diff
+  \item \textbf{Why it works:} the next session starts from the file, not from a conversation that was compacted away
+\end{itemize}
+
+\vspace{0.1cm}
+{\scriptsize The mechanics of what each memory loads and when: T2b's three memories.}
+\end{column}
+\end{columns}
 \end{frame}
 
-% ---- T4-F11 · EDIT · TIER: READ · from T4:292
-% TODO(Phase B): Add one line: "T3a sorted the same objects by who supplies the reasoning; this frame sorts them by when they load."
+% ==== Phase B · T4-F11 · TIER: READ (selection by description)
 \begin{frame}{Skills, Agents, and Rules: Three Different Jobs}
 \begin{center}
 \begin{tikzpicture}[
@@ -300,7 +330,7 @@ Checks: use survey weights; save the year map; report what passed
     \node[head] (hR) at ( 4.0, 0) {Rules};
 
     \node[body] (bS) at (hS.south) {Callable workflows.\\
-        Invoked by name, parameterized.\\
+        Chosen by their description, or called by name.\\
         \emph{Loaded on demand.}};
     \node[body] (bA) at (hA.south) {Specialist roles.\\
         Separate context, focused mandate.\\
@@ -316,59 +346,50 @@ Checks: use survey weights; save the year map; report what passed
 \end{center}
 
 \vspace{0.15cm}
-\footnotesize\textbf{Loading order matters.} Rules are read before the first user message; Skills load when invoked; Agents launch with the rules and any inherited context as their system prompt.
+\footnotesize\textbf{Loading order matters.} Rules are read before the first user message; a skill's body loads when its description matches; an agent starts in a fresh context with its own brief. T3a sorted the same objects by \emph{who supplies the reasoning}; this frame sorts them by \emph{when they load}.
 \end{frame}
 
-% ---- T4-F15 · EDIT · TIER: READ · from T4:409
-% TODO(Phase B): Review A5: a PostToolUse hook fires after the write and cannot reject it. Show PreToolUse on Write (blocks, inspects tool_input.content) and PostToolUse on Edit (validates the file, feeds the error back); wording "blocked / flagged back".
-% TODO(Phase B): Matcher: tool-name regex ("Write|Edit"); keep the slide schematic with a footnote; verify against the installed CLI (CLI_FACTS). One line on the runner gate for harnesses without hooks.
+% ==== Phase B · T4-F15 · TIER: READ
 \begin{frame}[fragile]{Rules and Hooks: Encoding the Fellows Provenance Discipline}
-\textbf{Guidance the agent should follow $\to$ a rule. A check that must fire mechanically $\to$ a hook. The fellows project needs both.}
+\textbf{Guidance the agent should follow $\to$ a rule. A check that must fire whatever the conversation says $\to$ a hook. The Fellows project needs both.}
 
-\vspace{0.15cm}
+\vspace{0.12cm}
 
 \begin{columns}[T]
-\begin{column}{0.52\textwidth}
+\begin{column}{0.5\textwidth}
 \textbf{The rule} (\texttt{.claude/rules/provenance.md}):
 \begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
-- Every filled field carries a source URL
-  from an official or institutional page.
-- Never infer gender, birth year, or living
-  status from names, photos, or country.
-- Record missing as missing; missingness
-  is a result, not a failure.
+- Every extracted field keeps its own source
+  URL: phd_year -> source_phd, and so on.
+- Code gender only when an official source
+  states it explicitly; otherwise leave it
+  missing.
+- Record missing as missing, with a note.
 \end{lstlisting}
-\footnotesize Always-on: loaded at session start, batch after batch.
+\footnotesize Always on: loaded at session start, batch after batch.
 \end{column}
-\begin{column}{0.45\textwidth}
-\textbf{The hook} (\texttt{settings.json}):
+\begin{column}{0.47\textwidth}
+\textbf{The hook} (\texttt{.claude/settings.json}):
 \begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
-"PostToolUse": [{
-  "matcher": "Write(data/*.csv)",
+"PreToolUse": [{
+  "matcher": "Write",
   "hooks": [{"type": "command",
-   "command":
-   "python checks/require_source_url.py"}]
+    "command":
+    "python3 checks/require_source_url.py"}]
 }]
 \end{lstlisting}
-\footnotesize Mechanical: any CSV row missing \texttt{source\_url} is rejected --- no matter what the conversation said.
+\footnotesize The script reads the pending write --- file path and content --- and exits 2: \textbf{the row is never written.}
 \end{column}
 \end{columns}
 
-\vspace{0.2cm}
+\vspace{0.12cm}
 
-\begin{center}
-\footnotesize
-\begin{tabular}{|p{1.6cm}|p{2.5cm}|p{6.0cm}|}
-\hline
-\textbf{Object} & \textbf{Fires} & \textbf{Use for} \\ \hline
-Rules & during work & natural-language conventions and guardrails \\ \hline
-Hooks & on tool events & mechanical enforcement: format, test, block, log \\ \hline
-Settings & at session start & permissions and project-level behavior \\ \hline
-\end{tabular}
-\end{center}
+\begin{cautionbox}
+\scriptsize\textbf{Two ways to get this wrong, both silent (checked on Claude Code 2.1.269).} A \texttt{PostToolUse} hook fires \emph{after} the write: it can complain, not prevent. And a matcher such as \texttt{"Write(data/*.csv)"} never fires: matchers name tools, so filter on the file path inside the script. Gemini CLI has comparable \texttt{BeforeTool} hooks (not yet tested here); on any harness, the lab's runner can call the same script.
+\end{cautionbox}
 \end{frame}
 
-% ---- T4-F16 · KEEP · TIER: READ · from T4:455
+% ==== Phase B · T4-F16 · TIER: READ (current tool names)
 \begin{frame}[fragile]{Permissions and Hooks in \texttt{settings.json}}
 \textbf{Two jobs:} \emph{permissions} define the blast radius; \emph{hooks} run mechanical checks at tool boundaries.
 
@@ -381,7 +402,7 @@ Settings & at session start & permissions and project-level behavior \\ \hline
               "Read(./.env)", "Read(./secrets/**)"]
   },
   "hooks": {
-    "PostToolUse": [{"matcher": "Write|Edit|MultiEdit",
+    "PostToolUse": [{"matcher": "Write|Edit",
                      "hooks": [{"type": "command",
                                 "command": ".claude/hooks/format-python.sh"}]}],
     "Stop":        [{"hooks": [{"type": "command",
@@ -426,10 +447,9 @@ Settings & at session start & permissions and project-level behavior \\ \hline
 
 \sectiondivider{Your RA Team}{Sub-agents, assignment, and cross-verification}
 
-% ---- T4-F18 · EDIT · TIER: READ · from T4:511
-% TODO(Phase B): Lead: "the three files you wrote in T3a; T3b showed why isolation works --- here is how to manage them".
+% ==== Phase B · T4-F18 · TIER: READ (measured speed claim)
 \begin{frame}{Sub-Agents: Your Parallel RA Team}
-\textbf{When the orchestrator spawns a sub-agent, the harness launches a separate agent instance with its own context window.}
+\textbf{The files you wrote in T3a, managed as a team: each sub-agent is a separate instance with its own context window (T3b).}
 
 \vspace{0.15cm}
 
@@ -449,7 +469,7 @@ Settings & at session start & permissions and project-level behavior \\ \hline
 \begin{center}
 \texttt{code-reviewer} \quad \textbf{$\Vert$} \quad \texttt{domain-reviewer}
 \end{center}
-in parallel; both finish in roughly one sequential run's wall-clock time. \textbf{Review time is halved.} \textit{Why separate roles? One prompt asking about everything does a mediocre job at each --- one RA checks style, another checks economics, another reruns the table.}
+in parallel: less wall-clock time (T3b's ledger: 5.6 minutes against 13.5), more tokens, and the same framing (T5c). \textit{Why separate roles? One prompt asking about everything does a mediocre job at each --- one RA checks style, another checks economics, another reruns the table.}
 \end{frame}
 
 % ---- T4-F19 · EDIT · TIER: READ · from T4:535
