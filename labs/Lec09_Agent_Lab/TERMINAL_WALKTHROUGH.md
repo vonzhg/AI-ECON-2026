@@ -3,12 +3,16 @@
 *Lecture 9 lab, part 2. Part A stubbed the model so you could see the loop.
 This part uses a real one.*
 
-**Time:** about 30 minutes. **Cost:** a few cents of your Claude Code
-subscription. **You need:** `claude` on your PATH and a completed `/login`.
+**Time:** about 30 minutes. **Cost:** a few cents of your subscription.
+**You need:** one terminal agent on your PATH and logged in. Run
+`python3 scripts/setup_check.py --live` first; it tells you which you have.
 
-> Everything here works the same way in other terminal agents (Codex CLI,
-> Gemini CLI, Aider). The file layout and slash-commands differ; the mechanism
-> does not. A portability note is at the end.
+> **Which route is yours.** Steps 1–8 are written for Claude Code, where custom
+> sub-agents were tested end to end. On Gemini CLI or Codex CLI, read Steps 1–6
+> for the ideas, do Step 7 at rung 3 with `scripts/detection_matrix.py`, and use
+> the table at the end for the equivalent files and commands. As of 12 Sep 2026
+> those two routes are built from each CLI's help and installed source, not yet
+> from a logged-in run; the table says which fact is which.
 
 ---
 
@@ -364,26 +368,42 @@ transcript. That is the trade: you stopped spending a turn per dispatch, and in
 exchange you now need something other than your own reading to decide whether
 each answer is any good. T3b's last section is about choosing which.
 
-*Verified on Claude Code 2.1.269. There is no `--max-turns` at the CLI; the
-per-run ceiling is the `model:` line in the agent file.*
+*Verified on Claude Code 2.1.269. There is no per-run turn-cap flag
+(`--max-turns` does not exist): budget a scripted run through the model, the
+tool allowlist, and the brief.*
 
 ---
 
 ## Portability: the same thing elsewhere
 
-The pattern outlives any one product (Appendix TA's point).
+The pattern outlives any one product (Appendix TA's point); the surfaces do
+not. Facts below are from `source/Lec09_Agentic_AI/CLI_FACTS_2026-09.md`,
+established 12 Sep 2026: **RUN** = observed by running it, **HELP** = read from
+the CLI's own help, **SRC** = read from the installed package but not yet run,
+**OPEN** = not yet established.
 
-| | Claude Code | Codex CLI / others |
-|---|---|---|
-| Specialist definitions | `.claude/agents/*.md` | equivalent config dir |
-| Inspect them | `/agents` | the tool's list command |
-| Dispatch appears as | an `Agent` tool call | a tool/function call |
-| Selection driven by | the `description` prose | the same |
+| | Claude Code 2.1.269 | Gemini CLI 0.47.0 | Codex CLI 0.154.0 |
+|---|---|---|---|
+| Specialist definitions | `.claude/agents/*.md` — RUN | `.gemini/agents/*.md`, same front-matter fields — SRC; ignored until you trust the folder — RUN | a `spawn_agent` tool with an `agent_type` — SRC; where custom types live — OPEN |
+| A dispatch appears as | an `Agent` tool call with `subagent_type` — RUN | OPEN | a `spawn_agent` tool call — SRC |
+| Instructions file | `CLAUDE.md` — RUN | `GEMINI.md` — SRC | `AGENTS.md` — SRC |
+| Rung 3, scripted | `claude -p "…" --output-format json` — RUN | `gemini -p "…" -o json` — HELP | `codex exec "…" --json` — HELP |
+| Read-only run | `--allowedTools Read Grep Glob --permission-mode dontAsk` — RUN | `--approval-mode plan` — HELP | `-s read-only` — HELP |
+| Per-run turn cap | no flag — HELP | OPEN | OPEN |
 
-`codex` was **not installed on the machine this lab was written on**, so the
-Claude Code path is the tested one and the right-hand column is stated from the
-shared mechanism rather than from a run. If you have Codex CLI, repeat Step 3
-under it and compare: the vocabulary differs, the loop does not.
+**What this means for you.** Rungs 1 and 2 (Steps 3–6) run on each harness's
+own sub-agent surface, and those surfaces differ. Rung 3 is the same idea
+everywhere: one fresh process per question, the answer parsed rather than read.
+That is why the acceptance test is scripted:
+
+```bash
+python3 scripts/detection_matrix.py scenarios/S1_aiyagari_audit --harness gemini --k 3   # or codex, claude
+```
+
+`agent_lab.harness_ask` holds the exact command it runs for each harness, and
+the runner records the CLI's `--version` in each run's `summary.json`. If a
+command in the table fails on your version, say so in your hand-in: that is a
+finding, not a failure.
 
 ---
 
