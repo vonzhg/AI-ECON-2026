@@ -1,7 +1,7 @@
 # Lecture 9 Reorganization Plan — "See → Under the Hood → Build → Design & Validate → Run & Govern"
 
 Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phases A and B complete on branch `lec09-reorg`, site updated on the branch; **not merged** · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
-Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = `/u/zfeng2/Github/Courses/AI-ECON-2026/`.
+Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = the repository root.
 
 ## 0. Plan v2 — status, amendments, and where the truth lives
 
