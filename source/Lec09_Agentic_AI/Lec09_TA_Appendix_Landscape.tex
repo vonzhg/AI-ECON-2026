@@ -1,0 +1,398 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9 Appendix
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: the interoperability stack (MCP and A2A explained only here), frameworks, reasoning models, scheduled runtimes, computer use
+%% Owns: dated install notes per harness, keybindings and templates, dated comparisons (incl. model-specific task horizons), resources, Context Dilemma references
+%% Defers: the harness file mapping -> T2b (review A2.5)
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
+
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9 Appendix: The Landscape (Dated), Setup Details, References}
+
+\begin{document}
+
+\makebeamertitle
+
+% ==== Phase B · T1b-F01 · TIER: READ
+\begin{frame}{What This Appendix Holds}
+\textbf{Everything here is dated. The main decks point to this appendix instead of repeating product facts --- so this is the one deck to re-check before teaching.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+  \item \textbf{The landscape, dated} --- the interoperability stack and neutral governance, frameworks, reasoning models, scheduled runtimes, computer-use agents
+  \item \textbf{Setup details} --- installing each supported harness, the lab's setup check, keys and a minimal instructions file, dated comparisons
+  \item \textbf{Resources} --- documentation, economists' public skill repositories, the security and reproducibility references, the Context Dilemma readings
+\end{enumerate}
+
+\vspace{0.15cm}
+\footnotesize\textit{Reading convention: \textbf{[solid]} $=$ primary or citable; \textbf{[hype]} $=$ vendor self-report. Harness facts come from \texttt{CLI\_FACTS\_2026-09.md} in the lecture's source folder, which records how each was checked.}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Checked on 12 September 2026. The field moves monthly: re-run the checks before teaching.}}
+\end{frame}
+
+
+%=============================================================================
+\section{The Landscape (Dated)}
+%===========================================================
+
+\sectiondivider{The Landscape (Dated)}{Compete on models, cooperate on plumbing --- as of September 2026}
+
+% ==== Phase B · T1b-F02 · TIER: READ (OpenAI MCP date corrected)
+\begin{frame}{Three Layers of Agent Interoperability}
+\textbf{The 2025--26 story is standard-setting: vendors compete on models but increasingly cooperate on the wiring between agents and tools.}
+
+\vspace{0.18cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.6cm}|p{3.0cm}|p{4.9cm}|}
+\hline
+\textbf{Layer} & \textbf{Protocol} & \textbf{What it standardizes} \\ \hline
+Agent $\leftrightarrow$ tool & \textbf{MCP} (Model Context Protocol) & how an agent discovers and calls external tools/data sources \\ \hline
+Agent $\leftrightarrow$ agent & \textbf{A2A} (Agent-to-Agent) & how independent agents delegate tasks to one another \\ \hline
+Discovery / identity & \textbf{AGNTCY / ACP} & agent directories, capability cards, identity and trust \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.18cm}
+
+\begin{itemize}\footnotesize
+    \item MCP was introduced by Anthropic (Nov 2024); it is now \emph{multi-vendor}, not proprietary.
+    \item \textbf{OpenAI announced MCP support in March 2025}, starting with its Agents SDK; Google and Microsoft tooling support it too. \textbf{[solid]}
+    \item Governance moved to a neutral home: the \textbf{Linux Foundation Agentic AI Foundation (AAIF)}, formed Dec 9, 2025, now hosts MCP and related projects. \textbf{[solid]}
+\end{itemize}
+\end{frame}
+
+% ---- T1b-F03 · KEEP · TIER: READ · from T1b:77
+\begin{frame}{Why Neutral Governance Is a Network-Effects Story}
+\textbf{For economists, the interoperability stack is a textbook standard-setting / network-effects case.}
+
+\vspace{0.22cm}
+
+\begin{itemize}
+    \item A shared protocol lowers switching costs: a tool wrapped once in MCP works across Claude, ChatGPT, Gemini, and open agents
+    \item Network effects make the standard more valuable as adoption grows --- which is why a single-vendor protocol faces adoption resistance
+    \item Moving MCP under the \textbf{Linux Foundation AAIF} (Dec 9, 2025) is the classic move: hand the ``plumbing'' to a neutral body so rivals will build on it
+    \item Competition then concentrates where rents remain: model quality, latency, and price --- not the connectors
+\end{itemize}
+
+\vspace{0.22cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Reproducibility note.} Protocols version. Pin the \emph{spec version} you used (e.g.\ MCP spec date, A2A version) alongside the model version and date --- a tool call that worked under one spec revision may behave differently under the next.
+\end{takeawaybox}
+\end{frame}
+
+% ---- T1b-F05 · KEEP · TIER: READ · from T1b:125
+\begin{frame}{Frameworks Reached 1.0 (2025--26)}
+\textbf{The orchestration layer matured from research demos to versioned, supported frameworks.}
+
+\vspace{0.16cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{4.6cm}|p{3.0cm}|p{2.6cm}|}
+\hline
+\textbf{Framework} & \textbf{Milestone} & \textbf{Vendor} \\ \hline
+LangGraph 1.0 & Oct 2025 & LangChain \\ \hline
+OpenAI Agents SDK ($+$ AgentKit) & SDK Mar 2025 & OpenAI \\ \hline
+Google Agent Dev. Kit (ADK) & v1.0 May 2025 & Google \\ \hline
+Microsoft Agent Framework & 1.0 Apr 2026 & Microsoft \\ \hline
+CrewAI & 1.0 & CrewAI \\ \hline
+Anthropic \textbf{Claude Agent SDK} & Sep 2025 & Anthropic \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Naming note.} What was the \emph{Claude Code SDK} was renamed the \textbf{Claude Agent SDK} on Sep 29, 2025, reflecting generalization beyond coding. \textbf{[solid]}
+
+\vspace{0.05cm}
+\textbf{Durable lesson:} the patterns outlive the framework. Learn orchestrator--worker once; map it onto whichever SDK your institution adopts.
+\end{frame}
+
+% ---- T1b-F08 · KEEP · TIER: READ · from T1b:199
+\begin{frame}{Reasoning Models and Think-Budget Control}
+\textbf{Frontier models now spend variable inference-time compute, and increasingly call tools \emph{inside} the reasoning loop.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{Tool use in the loop.} OpenAI o3 / o4-mini (Apr 2025) interleave tool calls with chain-of-thought rather than reasoning first and acting after.
+    \item \textbf{Think-budget routers.} GPT-5 (Aug 2025) $\to$ GPT-5.5 (Apr 2026) route between fast and deep modes per query.
+    \item \textbf{Toggleable extended thinking + configurable token budget.} \textbf{Claude Opus 4.5} (Nov 2025) lets you turn extended thinking on/off and cap the thinking-token budget; it was the first model past \textbf{80\% on SWE-bench Verified}, and Opus pricing was cut to \$5/\$25 per Mtok (input/output).
+    \item \textbf{Parallel deep reasoning.} Gemini ``Deep Think'' explores multiple reasoning paths in parallel.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Benchmark caveat (carry this everywhere).} The 80\% SWE-bench Verified figure is real but the metric is contaminated/saturating: OpenAI \emph{stopped reporting} SWE-bench Verified in Feb 2026. Pair any Verified headline with SWE-bench Pro ($\sim$55--59\% at the frontier, held-out). \textbf{[solid]}
+\end{cautionbox}
+\end{frame}
+
+% ---- T1b-F10 · KEEP · TIER: READ · from T1b:248
+\begin{frame}{Coding Agents Became Scheduled, Autonomous Runtimes}
+\textbf{In 2025--26, coding agents shifted from interactive assistants to background runtimes with persistent state.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{OpenAI Codex ``Goal Mode''} became the default (May 2026), with persistent cross-session state --- the agent resumes a goal rather than starting fresh each chat.
+    \item \textbf{Anthropic ``Code with Claude'' (May 6, 2026)} reframed Claude Code as an \emph{orchestrator}:
+    \begin{itemize}\scriptsize
+        \item \textbf{Auto Mode} with prompt-injection / destructive-action classifiers $+$ human approval gates
+        \item \textbf{Routines} (launched 14 Apr 2026): runs on a schedule, an API call, or a GitHub webhook
+        \item \textbf{Worktrees} for parallel branches
+        \item sandboxed \textbf{Managed Agents} with scoped credentials
+    \end{itemize}
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{takeawaybox}
+\footnotesize\textbf{Lesson for research infra.} Before an agent runs unattended on real data or repos, configure sandboxing, credential scoping, and approval gates first. ``Autonomous'' is a permissions decision, not a model capability.
+\end{takeawaybox}
+\end{frame}
+
+% ---- T1b-F11 · KEEP · TIER: READ · from T1b:270
+\begin{frame}{Computer-Use Agents: Strong Benchmarks, Volatile Products}
+\textbf{Browser/computer-use agents got good on paper but the standalone products churned.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item Computer-use / browser agents reached $\sim$\textbf{78--84\% on OSWorld-Verified} (human baseline $\sim$72\%).
+    \item \textbf{But standalone products are volatile:} Google \emph{killed} Project Mariner (May 2026); OpenAI folded Operator into ChatGPT Agent / Atlas.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Flag the benchmark numbers.} OSWorld scores are \textbf{scaffold-dependent and largely self-reported}: the same model scores very differently under different harnesses, and ``above human baseline'' does not mean reliable on \emph{your} unseen workflow. Treat as directional. \textbf{[solid claim that products churned; benchmark figures = vendor/scaffold-dependent]}
+\end{cautionbox}
+
+\vspace{0.12cm}
+\textbf{Lesson:} do not build durable research infrastructure on a single experimental product. Build on the protocol layer (MCP) and your own files; treat any one browser agent as replaceable.
+\end{frame}
+
+% ---- T1b-F16 · EDIT · TIER: READ · from T1b:388
+\begin{frame}{Synthesis: The Landscape Reinforces the Workflow Spine}
+\textbf{Every module above maps back onto the terminal-agent workflow of T1--T5d and onto the course's measurement / identification theme.}
+
+\vspace{0.16cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{|p{3.2cm}|p{7.2cm}|}
+\hline
+\textbf{Landscape module} & \textbf{Connection to the spine} \\ \hline
+Interoperability (MCP/A2A) & build on the neutral protocol layer, not one product; pin spec versions \\ \hline
+Orchestration & T5b's sub-agent review \emph{is} orchestrator--worker; pay for multi-agent only when value $>$ token cost \\ \hline
+Reasoning \& time horizons & ``runs for hours'' $\to$ a measured, reliability-thresholded number \\ \hline
+Coding / computer-use & autonomy is a sandboxing + approval-gate decision, set before the run \\ \hline
+Benchmarks & a headline score is not a measurement until you know its validity (Verified vs.\ Pro) \\ \hline
+Safety \& reproducibility & untrusted-input discipline $+$ logged chain-of-custody (dates, versions, seeds) \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+\begin{center}
+\textbf{The plumbing changes monthly; the research discipline does not.}\\
+\footnotesize\textit{Compete on questions and judgment; cooperate on standards; measure before you trust.}
+\end{center}
+\end{frame}
+
+
+%=============================================================================
+\section{Setup Details}
+%===========================================================
+
+\sectiondivider{Setup Details}{Dated install notes, keys, and templates}
+
+% ==== Phase B · T6-F13 · TIER: READ
+\begin{frame}[fragile]{Appendix A: Installing a Terminal Agent (Dated)}
+\textbf{Install one --- any of the three the course supports. The shape is the same: install, sign in once, start from the project folder.}
+
+\vspace{0.1cm}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\scriptsize,numbers=none]
+# Claude Code  (native installer; npm also works)
+curl -fsSL https://claude.ai/install.sh | bash
+claude            # then /login
+
+# Codex CLI    (needs Node.js)
+npm install -g @openai/codex
+codex login
+
+# Gemini CLI   (needs Node.js)
+npm install -g @google/gemini-cli
+gemini            # sign in on first start; trust the project folder
+\end{lstlisting}
+
+\vspace{0.05cm}
+\begin{itemize}\footnotesize
+    \item \textbf{Verify:} \texttt{claude -{}-version}, \texttt{codex -{}-version}, or \texttt{gemini -{}-version} --- then \texttt{cd} into the project and start the agent there
+    \item \textbf{Mac + OneDrive:} launch from the project folder itself; a \texttt{/Volumes/\ldots} path can trigger permission errors
+\end{itemize}
+
+\vspace{0.05cm}
+{\scriptsize\textit{Versions on the course machine, 12 Sep 2026: Claude Code 2.1.270, Codex CLI 0.154.0, Gemini CLI 0.47.0. Plans, tiers, and commands change every few months --- check the official docs.}}
+\end{frame}
+
+% ==== Phase B · T6-F14 · TIER: READ (setup check pointer)
+\begin{frame}{Appendix A2: Setup for the Lab}
+\textbf{Lightweight setup checklist for a terminal-agent workflow}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item Install one terminal agent, then run the lab's setup check: \texttt{python3 scripts/setup\_check.py -{}-live}
+    \item Create a project folder with a project-specific system prompt (e.g., \texttt{CLAUDE.md}, \texttt{AGENTS.md}, \texttt{GEMINI.md}), \texttt{scripts/}, and \texttt{output/}
+    \item Make sure Python or R runs from the terminal
+    \item Keep the first session small: one file, one check, one output
+\end{itemize}
+
+\vspace{0.25cm}
+
+\textbf{Dated note:} exact setup steps, plans, and rate limits change quickly. Recheck the official docs before the lab.
+\end{frame}
+
+% ---- T6-F15 · KEEP · TIER: READ · from T6:317
+\begin{frame}[fragile]{Appendix B: Keybindings and Minimal Templates}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Useful commands}
+
+\vspace{0.15cm}
+\footnotesize
+\begin{tabular}{|l|l|}
+\hline
+Compact session & \texttt{/compact} \\ \hline
+Clear session & \texttt{/clear} \\ \hline
+Interrupt & \texttt{Esc} \\ \hline
+Slash menu & \texttt{/} \\ \hline
+\end{tabular}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Minimal project-system-prompt}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+# CLAUDE.md / AGENTS.md / GEMINI.md
+Project: ...
+Goal: ...
+Language: ...
+Checks: ...
+\end{lstlisting}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · T6-F16 · TIER: READ
+\begin{frame}{Appendix C: Dated Comparisons}
+\textbf{The numbers the main decks deliberately leave out, with the date each was last checked. Replace them; do not quote them old.}
+
+\vspace{0.12cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{6.1cm}|>{\raggedright\arraybackslash}p{2.9cm}|}
+\hline
+\textbf{What} & \textbf{As last recorded} & \textbf{Status} \\ \hline
+Terminal agents in the course & Claude Code 2.1.270, Codex CLI 0.154.0, Gemini CLI 0.47.0 (Aider also exists) & checked 12 Sep 2026 \\ \hline
+METR 50\%-reliability time horizons (T1) & Time Horizon 1.1, Jan 2026: Opus 4.5 $\approx$ 320 min, GPT-5 $\approx$ 214 min & \textbf{stale}: predates current models --- refresh \\ \hline
+T1 timeline: tool calls & OpenAI function calling, June 2023 & [solid] \\ \hline
+T1 timeline: shared plumbing & MCP introduced by Anthropic, Nov 2024; OpenAI support from March 2025; neutral foundation (AAIF), Dec 2025 & checked 12 Sep 2026 \\ \hline
+T1 timeline: terminal agents & Claude Code, Codex CLI, Gemini CLI all released in 2025 & re-verify months \\ \hline
+T1 timeline: unattended runs & Claude Code routines, 14 Apr 2026; Codex Goal Mode generally available, May 2026 & checked 12 Sep 2026 (Codex: press reports) \\ \hline
+T3b sidebar: ten thousand agents & OpenAI, Navier--Stokes: $\sim$10{,}000 agents from 1 Sep 2026; a proof in 88 h, then 17 h in Lean (vendor report) & [hype]; re-verify at the gate \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+\footnotesize\textbf{Teaching rule:} dated comparisons live here, not in the conceptual core of the lecture.
+\end{frame}
+
+
+%=============================================================================
+\section{Resources}
+%===========================================================
+
+\sectiondivider{Resources}{Docs, repositories, and references}
+
+% ==== Phase B · NEW:Resources · TIER: READ
+\begin{frame}{Resources}
+\textbf{Where to read further --- each chosen because it helps you check an agent's work, not just use one.}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{Using agents as an economist}
+\begin{itemize}\scriptsize
+  \item Official documentation for Claude Code, Codex CLI, and Gemini CLI
+  \item Pedro Sant'Anna, \texttt{github.com/pedrohcgs/claude-code-my-workflow}; Chris Blattman, \texttt{github.com/chrisblattman/claudeblattman}
+  \item Aniket Panjwani, ``AI Agents for Economics Research'' (CEPR/VoxDev webinar, 2026)
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{Checking agents}
+\begin{itemize}\scriptsize
+  \item METR, measured task horizons (\texttt{metr.org})
+  \item OWASP, \emph{Top 10 for Agentic Applications} (Dec 2025): the risks of agents that plan, remember, and act
+  \item Siegel et al.\ (2024), \emph{CORE-Bench}: agents reproducing published results from code and data, social science included
+  \item OpenAI (Feb 2026) on retiring SWE-bench Verified; Berkeley RDI (Apr 2026) on breaking agent benchmarks
+  \item The AEA's journal policies on AI use and on data and code
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.15cm}
+{\scriptsize\textit{And this course's own: the Lecture 9 lab (\texttt{labs/Lec09\_Agent\_Lab/}), its recorded transcripts, and \texttt{CLI\_FACTS\_2026-09.md}. Checked 12 Sep 2026.}}
+\end{frame}
+
+% ---- T6-F17 · KEEP · TIER: READ · from T6:368
+\begin{frame}{Appendix D: Context Dilemma --- References}
+\scriptsize
+
+\textbf{Context as implicit prior}
+\begin{itemize}
+    \item Xie, Raghunathan, Liang, Ma (2022). An Explanation of In-context Learning as Implicit Bayesian Inference. ICLR. arXiv:2111.02080.
+\end{itemize}
+
+\textbf{Sycophancy and RLHF limits}
+\begin{itemize}
+    \item Sharma et al.\ (2023). Towards Understanding Sycophancy in Language Models. arXiv:2310.13548.
+    \item Perez et al.\ (2023). Discovering Language Model Behaviors with Model-Written Evaluations. ACL Findings. arXiv:2212.09251.
+    \item Casper et al.\ (2023). Open Problems and Fundamental Limitations of RLHF. TMLR. arXiv:2307.15217.
+    \item Wolf et al.\ (2023). Fundamental Limitations of Alignment in Large Language Models. arXiv:2304.11082.
+\end{itemize}
+
+\textbf{Self-correction and adversarial review}
+\begin{itemize}
+    \item Huang et al.\ (2024). Large Language Models Cannot Self-Correct Reasoning Yet. ICLR. arXiv:2310.01798.
+    \item Valmeekam et al.\ (2023). Can Large Language Models Really Improve by Self-critiquing Their Own Plans? NeurIPS. arXiv:2310.08118.
+    \item Du et al.\ (2023). Improving Factuality and Reasoning through Multiagent Debate. arXiv:2305.14325.
+    \item Irving, Christiano, Amodei (2018). AI Safety via Debate. arXiv:1805.00899.
+\end{itemize}
+
+\textbf{Monoculture and the economist workflow}
+\begin{itemize}
+    \item Kleinberg \& Raghavan (2021). Algorithmic Monoculture and Social Welfare. PNAS 118(22).
+    \item Bommasani et al.\ (2022). Picking on the Same Person: Does Algorithmic Monoculture Lead to Outcome Homogenization? NeurIPS. arXiv:2211.13972.
+    \item Korinek (2023). Language Models and Cognitive Automation for Economic Research. NBER WP 30957; JEL.
+\end{itemize}
+\end{frame}
+
+%===========================================================
+\end{document}

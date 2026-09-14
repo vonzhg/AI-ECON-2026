@@ -1,0 +1,854 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.3a
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: why three agents, the eight steps = the eight-cell canvas (one object), the harness-neutral brief (review A2.2)
+%% Owns: tool vs skill vs sub-agent by who reasons, what a skill is (with its folder), plain English vs encoded skill, playbooks
+%% Defers: dials, ceilings, isolation, dispatch, the three rungs -> T3b; when skills/agents/rules load -> T5b
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.3a: Build an Agent From Scratch --- Eight Steps, One Canvas}
+
+\begin{document}
+
+\makebeamertitle
+
+% ---- NEW · TIER: CORE
+\begin{frame}{Lecture 9 in One Map: Build an Agent}
+\textbf{This part answers: how do I build an agent, and how do I call it?}
+
+\LecNineMap{3}{a}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: why three agents, not one $\to$ the eight steps and the canvas $\to$ tool, skill, sub-agent: where the reasoning lives. The economist's question for this part: how should the labour be divided --- and what goes in each contract?}
+\end{frame}
+
+
+%=============================================================================
+\section{Why Three Agents}
+%===========================================================
+
+\sectiondivider{Why Three Agents}{Why the capstone needs three backgrounds --- and the eight steps that build one}
+
+% ---- T2b-F09 · KEEP · TIER: READ · from T2b:340
+\begin{frame}{The Capstone Needs Three Backgrounds. The Syllabus Requires One.}
+\textbf{The course assumes you are an economist. The capstone assumes you are also a programmer and a mathematician --- and those two are exactly what it never asks for.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.0cm}|p{4.6cm}|p{4.0cm}|}
+\hline
+\textbf{Background} & \textbf{What M3 ``replication verified'' needs} & \textbf{What the course assumes} \\ \hline
+Economics & an estimand or equilibrium concept, and a calibration you can defend & \textbf{required} --- ``intermediate micro and macro'' \\ \hline
+Mathematics & the domain of $u(\cdot)$, the optimality condition, the contraction, a fine enough grid & \textbf{not required} --- recursive methods are ``a plus'' \\ \hline
+Programming $+$ AI & readable sources, a solver that runs, pinned environment, one-command reproduction & \textbf{not required} --- ``Python experience helps but is not required'' \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{The gap is the assignment.} The syllabus is not at fault --- the course builds up what it needs. The problem is \emph{sequencing}: on the day the capstone starts you are short two of the three, and the deliverables do not wait.
+\end{cautionbox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Answered next:} what goes wrong when a background is missing --- and why the output looks fine either way.}
+\end{frame}
+
+% ---- T2b-F10 · KEEP · TIER: READ · from T2b:367
+\begin{frame}{Three Error Channels --- and All Three Render a Figure}
+\textbf{A missing background does not announce itself. Each of the three produces a different error, in a different place --- and all three produce a program that exits 0 and draws a clean figure.}
+
+\vspace{0.06cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.66,
+    hd/.style={font=\scriptsize\bfseries, align=center},
+    r/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+              minimum width=3.7cm, minimum height=0.8cm, text width=3.5cm, align=center},
+    m/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+              minimum width=3.7cm, minimum height=0.8cm, text width=3.5cm, align=center},
+    fig/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=3.7cm, minimum height=0.42cm, font=\scriptsize, align=center},
+    arr/.style={-{Stealth[length=1.6mm]}, thick, gray!70},
+    cpt/.style={font=\tiny, align=center, gray!75}]
+
+    \node[hd] at (0,2.5)   {Programming $+$ AI};
+    \node[hd] at (4.1,2.5) {Mathematics};
+    \node[hd] at (8.2,2.5) {Economics};
+
+    \node[r] (r1) at (0,1.6)   {source never parsed --- a Chinese-language PDF read as garbled prose, tables lost};
+    \node[r] (r2) at (4.1,1.6) {$\sigma = 2$, so $u(c) = -1/c$ --- which is \emph{positive} for $c < 0$};
+    \node[r] (r3) at (8.2,1.6) {$r$ held fixed; aggregate assets computed, then discarded};
+
+    \node[m] (m1) at (0,0.3)   {code written against an equation the model \emph{paraphrased}};
+    \node[m] (m2) at (4.1,0.3) {iteration converges to a policy that \textbf{rewards bankruptcy}};
+    \node[m] (m3) at (8.2,0.3) {a partial-equilibrium number reported as Aiyagari's};
+
+    \node[fig] (f1) at (0,-0.7)   {\textbf{a figure}};
+    \node[fig] (f2) at (4.1,-0.7) {\textbf{a figure}};
+    \node[fig] (f3) at (8.2,-0.7) {\textbf{a figure}};
+
+    \foreach \i in {1,2,3} {\draw[arr] (r\i) -- (m\i); \draw[arr] (m\i) -- (f\i);}
+
+    \node[cpt] at (0,-1.4)   {\emph{wrong source.}};
+    \node[cpt] at (4.1,-1.4) {\emph{wrong domain.}};
+    \node[cpt] at (8.2,-1.4) {\emph{wrong object.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.04cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Why three, and not one careful generalist.} The three errors live in different places and are caught by different \emph{reading}: a parse failure by counting words, a domain error by asking where a function is defined, a missing market-clearing condition by knowing what the paper's contribution was. \textbf{No single pass finds all three.}
+\end{takeawaybox}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Answered next:} three people, or three job descriptions?}
+\end{frame}
+
+% ---- T2b-F11 · EDIT · TIER: CORE · from T2b:418
+\begin{frame}{Hire Three Students, or Write Three Job Descriptions}
+\textbf{The capstone allows a team of two to four with mixed skill sets, and says solo is entirely feasible. What a team supplies in people, a solo student supplies in files.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{|p{2.5cm}|p{3.8cm}|p{4.1cm}|}
+\hline
+ & \textbf{Three students} & \textbf{Three agents, solo} \\ \hline
+Written at M1 & a division of labour & three files in \texttt{.claude/agents/} \\ \hline
+Fixed cost & recruiting, scheduling, trust & one afternoon of careful English \\ \hline
+Marginal cost & their time, and yours & tokens, and \emph{your} coordination cost (T3b) \\ \hline
+Independent judgement & three priors, three literatures read & executional only --- all three inherit your framing (T5c) \\ \hline
+Still entirely yours & the question, the validation, the defence & the question, the validation, the defence \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{A complement, not a substitute.} A mathematician's job description does not give you a mathematician's judgement --- it gives you a second reading by something instructed, in writing, to look only for mathematics. T5 makes the argument; the rule is: if you have a co-author who knows the math, use the co-author \textbf{and} the agent.
+\end{cautionbox}
+\end{frame}
+
+% ---- T2b-F12 · EDIT · TIER: READ · from T2b:444
+\begin{frame}{The Trio, Sorted by Which Background Supplies the Expertise}
+\textbf{T5b sorts your RA team by \emph{review function}. Sort the same folder by \emph{which human background supplies the expertise} and a different --- emptier --- picture appears.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    h1/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    h2/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    h3/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+               minimum width=3.6cm, minimum height=0.55cm, font=\scriptsize\bfseries, align=center},
+    bd/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=3.6cm, minimum height=1.7cm, text width=3.4cm,
+               align=center, anchor=north}]
+    \node[h1] (ha) at (-4.0,0) {\texttt{tooling-agent}};
+    \node[h2] (hb) at (0,0)    {\texttt{math-agent}};
+    \node[h3] (hc) at (4.0,0)  {\texttt{econ-agent}};
+
+    \node[bd] at (ha.south) {\textbf{Programming $+$ AI.}\\[3pt]
+        Sources into context, models into runnable code: PDF to Markdown to \LaTeX{}, pinned environment, one-command reproduction.\\[3pt]
+        \emph{\texttt{Read, Bash, Glob, Write}}};
+    \node[bd] at (hb.south) {\textbf{Mathematics.}\\[3pt]
+        The derivation and the method: domain of $u(\cdot)$, the optimality conditions, the contraction, the grid and the tolerance.\\[3pt]
+        \emph{\texttt{Read, Grep, Glob}}};
+    \node[bd] at (hc.south) {\textbf{Economics.}\\[3pt]
+        The \emph{object}: estimand or equilibrium concept, market clearing, calibration frequency, what the literature knows.\\[3pt]
+        \emph{\texttt{Read, Grep, Glob}}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{cautionbox}
+\footnotesize\textbf{Now read the lab's own team again, and find the hole.} \texttt{code-reviewer} checks the Python; \texttt{domain-reviewer} checks the code against the \emph{stated} model; \texttt{verifier} runs it. \textbf{Nobody checks the stated model against the correct one.} The instructor key proves it: ``\texttt{utility()} divides by $1-\sigma$, zero in the log case'' is filed under \texttt{domain-reviewer} --- an \emph{economist} auditing a limiting case, because no file owns that job. \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.04cm}
+{\scriptsize \textit{T5b sorts these files by \emph{when they load}; this section sorts them by \emph{which background wrote them}. Only the second question tells you what is missing --- and it is the mathematics agent you are going to write.}}
+\end{frame}
+
+
+%=============================================================================
+\section{The Eight Steps}
+%===========================================================
+
+\sectiondivider{The Eight Steps}{From a job description to a file you can dispatch}
+
+% ==== Phase B · T2b-F13 · TIER: CORE
+\begin{frame}{Eight Steps, Eight Artifacts --- You Are Building an Agent, Not a Model}
+\textbf{T5a's six-step ladder builds a model. This ladder builds the thing that reviews it. Same discipline: every step ends in an artifact.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.74,
+    box/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+                minimum width=2.25cm, minimum height=0.9cm, text width=2.1cm,
+                align=center, font=\scriptsize},
+    dial/.style={box, draw=RedTitle!70, fill=blue!6},
+    arr/.style={-{Stealth[length=1.9mm]}, thick, gray!70}]
+
+    \node[box]  (s1) at (0,1.05)    {\textbf{1.}\\ name the deliverable};
+    \node[dial] (s2) at (2.6,1.05)  {\textbf{2.}\\ write the job description};
+    \node[dial] (s3) at (5.2,1.05)  {\textbf{3.}\\ set the tool allowlist};
+    \node[dial] (s4) at (7.8,1.05)  {\textbf{4.}\\ pack the brief};
+
+    \node[box]  (s5) at (0,-1.05)   {\textbf{5.}\\ fix the return contract};
+    \node[box]  (s6) at (2.6,-1.05) {\textbf{6.}\\ set budget and stop rule};
+    \node[box]  (s7) at (5.2,-1.05) {\textbf{7.}\\ test on a planted bug};
+    \node[box]  (s8) at (7.8,-1.05) {\textbf{8.}\\ promote, commit, share};
+
+    \draw[arr] (s1) -- (s2);  \draw[arr] (s2) -- (s3);  \draw[arr] (s3) -- (s4);
+    \draw[arr] (s5) -- (s6);  \draw[arr] (s6) -- (s7);  \draw[arr] (s7) -- (s8);
+    \draw[arr] (8.95,1.05) -- (9.35,1.05) -- (9.35,0) -- (-1.35,0) -- (-1.35,-1.05) -- (-1.2,-1.05);
+
+    \node[rectangle, draw=RedTitle!70, fill=blue!5, rounded corners, font=\scriptsize,
+          text width=2.6cm, align=center, minimum height=1.5cm] at (11.3,0.0)
+        {\textbf{Steps 2--4} are the \textbf{three dials} T3b names.\\[3pt]
+         {\tiny\itshape Step 7 sends you back to step 2.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.08cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Eight artifacts, in order.} A sentence of the form \emph{``it produces X; I will know it failed when Y''}; a \texttt{system} prompt; a \texttt{tools:} line; a task string; a return format; a token ceiling and a stop rule; a $3 \times 3$ detection matrix; a committed file. \textbf{Seven of the eight produce English, not code --- and a step that produced no artifact was skipped.} The design canvas is these eight steps on one page.
+\end{takeawaybox}
+\end{frame}
+
+% ==== Phase B · T2b-F14 · TIER: READ
+\begin{frame}[fragile]{Steps 1--2 --- Name the Failure, Then Write the Job Description}
+\textbf{Step 1 is one sentence: \emph{it produces X, and I will know it failed when Y}. Step 2 is that sentence expanded --- the only part of an agent that is not a setting.}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.5}{5.1}\selectfont,numbers=none]
+---
+name: code-reviewer
+description: Reviews Python numerical code for bugs,
+  convergence problems, and silent failure modes. Use
+  when the user asks for a code review, asks whether a
+  solver is correct, or reports that results look
+  wrong. Does NOT judge economics -- that is
+  domain-reviewer's job.
+tools: Read, Grep, Glob
+model: sonnet
+---
+You are a careful reviewer of scientific Python. [...]
+Report, in this order:
+
+1. Outright bugs -- wrong index, wrong sign, wrong
+   order of operations.
+2. Silent failures -- a loop that exits on iteration
+   count rather than on a convergence criterion, a
+   tolerance never checked, an exception swallowed.
+3. Numerical fragility -- division without a guard,
+   a grid too coarse to support the claim, [...]
+
+For each finding give the line number, quote the
+line, and say what goes wrong at run time. If you
+find nothing in a category, say so explicitly rather
+than inventing an issue. Do not comment on the
+economics.
+\end{lstlisting}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{enumerate}\footnotesize
+  \item \textbf{Step 1 is the last clause of \texttt{description}:} ``Does NOT judge economics.'' The failure mode is named \emph{before} the agent exists.
+  \item \textbf{Step 2 is everything below the second rule.} That prose becomes the \texttt{system} argument of every request this agent makes --- T2a's second moving part, written by you.
+  \item \textbf{``say so explicitly rather than inventing an issue''} is the most valuable sentence in the file. An agent asked to review \emph{will} find something.
+\end{enumerate}
+
+\vspace{0.1cm}
+{\tiny \textit{The lab's \texttt{code-reviewer.md}: line breaks added, bold dropped, [\ldots] marks a cut. The first agent file you have seen. \textbf{[solid]}}}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---- T2b-F15 · EDIT · TIER: READ · from T2b:577
+\begin{frame}{Steps 3--4 --- Capability Is Blast Radius; the Brief Is the Context}
+\textbf{The \texttt{tools:} line is not a convenience setting. Read forwards it is everything this agent can do to your project; read backwards it is everything it is able to \emph{learn}.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.85,
+    ok/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+               minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center},
+    mid/.style={rectangle, draw=orange!75!black, fill=orange!5, rounded corners,
+                minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center},
+    bad/.style={rectangle, draw=red!55!black, fill=red!5, rounded corners,
+                minimum width=4.5cm, minimum height=0.58cm, text width=4.3cm, align=center}]
+    \node[ok]  at (0,1.4)  {\texttt{Read, Grep, Glob} --- changes nothing; can only be wrong \emph{in prose}};
+    \node[mid] at (0,0.6)  {$+$ \texttt{Bash} --- can run your code, and can delete it};
+    \node[bad] at (0,-0.2) {$+$ \texttt{Write, Edit} --- can change what it is reviewing};
+    \node[bad] at (0,-1.0) {$+$ web access --- can read text you did not write (T5d)};
+    \draw[-{Stealth[length=2mm]}, thick, gray!65] (-2.6,1.6) -- (-2.6,-1.2);
+    \node[font=\tiny, gray!70, rotate=90, anchor=south] at (-2.72,0.2) {blast radius};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{conceptbox}
+\footnotesize\textbf{Step 4 --- the brief.} This is what enters \texttt{messages}, and nothing else does:
+
+\vspace{0.08cm}
+\textit{``Review \texttt{src/aiyagari.py} against \texttt{docs/model.md}. The calibration is annual. Report only findings you can tie to a line number.''}
+
+\vspace{0.1cm}
+\textbf{What stays out:} your hypothesis, your hunch about where the bug is, and the dead ends you already tried. A clean list is the entire point --- T3b draws it.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.14cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{The asymmetry that makes the three non-interchangeable.} \texttt{math-agent} needs \emph{no} shell and \emph{no} write access --- a derivation is checked by reading, and an agent that cannot execute can never confuse ``it ran'' with ``it is right.'' \texttt{tooling-agent} is useless without \texttt{Bash}. Three dials, set three ways, are three different amounts of trust.
+\end{takeawaybox}
+\end{frame}
+
+% ---- T2b-F16 · EDIT · TIER: READ · from T2b:621
+\begin{frame}{Steps 5--6 --- One Message Back, and a Ceiling You Set}
+\textbf{A sub-agent returns exactly one thing: its final message. Everything it read, ran, and reasoned about is discarded --- so what you did not ask for, you will never see.}
+
+\vspace{0.1cm}
+
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.8,
+    big/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+                minimum width=3.9cm, minimum height=1.7cm, text width=3.7cm, align=center},
+    fin/.style={rectangle, draw=green!45!black, fill=green!6, rounded corners,
+                minimum width=2.0cm, minimum height=0.58cm, align=center},
+    gone/.style={rectangle, draw=gray!45, dashed, rounded corners,
+                 minimum width=3.9cm, minimum height=0.8cm, text width=3.7cm, align=center}]
+    \node[big] (w) at (0,0) {\textbf{the worker's own list}\\[2pt] 14 messages, 3 files read,\\ 1 command run, 2 wrong guesses};
+    \draw[gray!60, thick] (2.0,0.8) -- (3.9,0.2);
+    \draw[gray!60, thick] (2.0,-0.8) -- (3.9,-0.2);
+    \node[font=\tiny, gray!70] at (3.0,1.05) {only this crosses back};
+    \node[fin] (o) at (5.2,0) {\textbf{one final message}};
+    \node[gone] at (0,-1.75) {everything else --- gone when the sub-agent ends. Not in your context, not in your transcript.};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.43\textwidth}
+{\footnotesize\textbf{Step 5 --- the return contract}}
+\begin{itemize}\footnotesize
+  \item Fix the \emph{shape}: one line per finding, giving \texttt{file:line}, the quoted text, and what breaks at run time
+  \item Demand an explicit ``nothing found in this category'' --- the sentence that stops an agreeable reviewer inventing one
+\end{itemize}
+
+\vspace{0.08cm}
+{\footnotesize\textbf{Step 6 --- budget and stop rule}}
+\begin{itemize}\footnotesize
+  \item The \texttt{model:} line is a \emph{budget} decision --- a read-only reviewer on a 400-line file does not need the frontier model
+  \item Stop rule: \emph{report, do not fix}. A reviewer with \texttt{Edit} becomes an author, and you have lost your control group
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.1cm}
+{\scriptsize \textit{Rate limits and context growth are T3b's subject. Here: \emph{you} set the ceiling, per agent, in one header line.}}
+\end{frame}
+
+% ---- T2b-F17 · KEEP · TIER: READ · from T2b:665
+\begin{frame}{Steps 7--8 --- Test It on a Bug You Planted, Then Commit It}
+\textbf{An untested reviewer is one you trust for no reason. Plant one defect per background, dispatch all three, and read the matrix.}
+
+\vspace{0.1cm}
+
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{5.2cm}|p{1.7cm}|p{1.8cm}|p{1.4cm}|}
+\hline
+\textbf{Defect (or control) in the solver} & \texttt{tooling-agent} & \texttt{math-agent} & \texttt{econ-agent} \\ \hline
+\texttt{TOL} defined, never read --- loop exits on \texttt{MAX\_ITER} & \checkmark\ \emph{it finished, it did not converge} & \checkmark\ \textbf{its job} --- no stopping rule & --- \\ \hline
+$\sigma = 2$, so $u(c) = -1/c$, \emph{positive} for $c < 0$ & \checkmark\ \emph{seen in a run} & \checkmark\ \textbf{its job} & --- \\ \hline
+$r$ fixed; aggregate assets computed, then \emph{discarded} & --- & --- & \checkmark\ \textbf{its job} \\ \hline
+\emph{control:} \texttt{EV = P @ V.T}, which is \textbf{correct} & silent & silent & silent \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{examplebox}
+\footnotesize\textbf{Why the planted bug is a \emph{mathematics} bug.} With $\sigma = 2$, \texttt{utility(c)} $= c^{-1}/(-1) = -1/c$: negative for feasible $c > 0$, \textbf{positive} for infeasible $c < 0$. Infeasible therefore scores \emph{higher} --- $+9.49$ at $c = -0.13$ against $-2.00$ at $c = 0.50$ --- and the program prints \texttt{V[0,0] = 9.490446}, then exits 0. \textbf{[solid]}
+\end{examplebox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{Read the matrix, not the reports.} An empty column means the \texttt{description} is too narrow; a full column, too broad. \textbf{Step 8:} commit the file --- a teammate then gets your mathematician by \texttt{git pull}.}
+\end{frame}
+
+% ---- T2b-F18 · EDIT · TIER: READ · from T2b:693
+\begin{frame}[fragile]{\texttt{tooling-agent} at Work: A PDF Becomes Readable Context}
+\textbf{An agent cannot read a PDF --- it reads text. Turning one into the other has a cost structure an economist should recognise.}
+
+\vspace{0.06cm}
+
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.0}{5.9}\selectfont,numbers=none]
+export LC_ALL=en_US.UTF-8   # CJK paths, spaces
+
+# stage every not-yet-converted PDF, then call
+# the converter ONCE over the whole directory
+STAGE="$(mktemp -d)"
+for pdf in "$INPUT_DIR"/*.pdf; do
+    name="$(basename "$pdf" .pdf)"
+    [ -d "$OUTPUT_DIR/$name" ] && continue
+    ln -s "$(readlink -f "$pdf")" "$STAGE/"
+done
+
+mineru -p "$STAGE" -o "$OUTPUT_DIR" \
+       -b vlm-auto-engine
+
+ls "$OUTPUT_DIR" | wc -l        # files kept?
+wc -w "$OUTPUT_DIR"/*/vlm/*.md  # words kept?
+\end{lstlisting}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{3.6cm}|p{1.7cm}|}
+\hline
+\multicolumn{2}{|l|}{\textbf{54-page econ paper, one A100-40GB}} \\ \hline
+engine startup $+$ model load & \textbf{1\,m\,50\,s} \emph{fixed} \\ \hline
+inference, all 54 pages & \textbf{44\,s} \emph{marginal} \\ \hline
+total wall clock & 2\,m\,59\,s \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{Fixed cost 110\,s; marginal cost 0.8\,s a page.} Calling the converter once \emph{per file} re-pays the fixed cost every time: thirty PDFs become fifty-five minutes of model loading around twenty minutes of work. \textbf{One line of \texttt{bash}, and a returns-to-scale argument.}
+\end{takeawaybox}
+\end{column}
+\end{columns}
+
+\vspace{0.06cm}
+{\scriptsize \textit{Production code, NCSA Delta, via the scheduler --- T5b's login-versus-compute boundary. \textbf{The silent failure in the same logs:} one converter's concurrency default deadlocks the engine, which stalls while the server stays bound. Nothing errors. \textbf{[solid]}}}
+\end{frame}
+
+% ---- T2b-F19 · KEEP · TIER: READ · from T2b:744
+\begin{frame}{From Markdown to a Language You Read --- and a Stable Glossary}
+\textbf{Extraction gets you text. It does not get you a source you can cite, or a term you can use twice the same way. Those are two more artifacts.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny, yscale=0.85,
+    n/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+              minimum width=2.15cm, minimum height=1.0cm, text width=2.0cm, align=center},
+    f/.style={n, draw=RedTitle!70, fill=blue!7},
+    g/.style={n, draw=green!45!black, fill=green!6},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70},
+    cpt/.style={font=\tiny, align=center, gray!75}]
+    \node[n] (a) at (0,0)    {a PDF you were \emph{given}\\ \emph{a chapter draft, in Chinese}};
+    \node[f] (b) at (2.7,0)  {\textbf{extraction}\\ Markdown $+$ images $+$ layout proof};
+    \node[n] (c) at (5.4,0)  {\textbf{\LaTeX{}}\\ equations, tables, figure refs restored};
+    \node[n] (d) at (8.1,0)  {\textbf{translation}\\ into a language you are \emph{fluent} in};
+    \node[g] (e) at (10.8,0) {\textbf{glossary}\\ one row per concept, one column authoritative};
+    \draw[arr] (a) -- (b);  \draw[arr] (b) -- (c);  \draw[arr] (c) -- (d);  \draw[arr] (d) -- (e);
+    \node[cpt] at (2.7,-1.0) {step 7, on your own agent:\\ \texttt{ls} the images, \texttt{wc -w} the text};
+    \node[cpt] at (8.1,-1.0) {keep the original beside it ---\\ the translation is \emph{derived data}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{conceptbox}
+\footnotesize\textbf{One glossary, extended --- not a new one.} This lecture's Chinese script already carries a 28-row bilingual key-terms table: \emph{harness, orchestrator, sub-agent, context window, provenance}, \texttt{CLAUDE.md}, \emph{skill, hook, compaction}, and twenty more. Add the rows your project needs and keep one column authoritative, so the same object is not called three things in three chapters. \textbf{Style is shared; vocabulary is local.}
+\end{conceptbox}
+
+\vspace{0.04cm}
+{\footnotesize\textbf{Why this is not busywork.} A term that drifts is a variable that drifts --- and the glossary is what lets \texttt{math-agent} and \texttt{econ-agent} disagree about \emph{economics} rather than about what you meant.}
+\end{frame}
+
+% ==== Phase B · T2b-F20 · TIER: CORE
+\begin{frame}[fragile]{The Agent Design Canvas: Eight Cells, One Worked Answer}
+\textbf{Eight steps, one page, filled in before you write a line. Bold is the question; grey is one worked answer; the file beside it is what that answer compiles to.}
+
+\begin{columns}[T]
+\begin{column}{0.44\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    cell/.style={rectangle, draw=black!55, fill=white, minimum width=3.05cm,
+                 minimum height=0.82cm, text width=2.85cm, align=left,
+                 anchor=north west, inner sep=1.6pt, font=\tiny}]
+    \node[cell] (c1) at (0,0)      {\textbf{1. Produces / fails when}\\ {\color{gray!85}\itshape a math audit; fails by passing a wrong derivation}};
+    \node[cell] (c2) at (3.25,0)    {\textbf{2. Job description}\\ {\color{gray!85}\itshape mathematics --- not code, not economics}};
+    \node[cell] (c3) at (0,-0.92)  {\textbf{3. Tools}\\ {\color{gray!85}\itshape \texttt{Read, Grep, Glob} --- no shell, no write}};
+    \node[cell] (c4) at (3.25,-0.92){\textbf{4. Brief in}\\ {\color{gray!85}\itshape the solver, the model note, the frequency}};
+    \node[cell] (c5) at (0,-1.84)  {\textbf{5. Returns}\\ {\color{gray!85}\itshape \texttt{file:line}, the algebra, ``correct'' if correct}};
+    \node[cell] (c6) at (3.25,-1.84){\textbf{6. Budget / stop}\\ {\color{gray!85}\itshape one pass; report, do not fix}};
+    \node[cell] (c7) at (0,-2.76)  {\textbf{7. Planted bug to catch}\\ {\color{gray!85}\itshape $u(c) = -1/c$ is positive for $c<0$}};
+    \node[cell] (c8) at (3.25,-2.76){\textbf{8. Path in the repo}\\ {\color{gray!85}\itshape \texttt{.claude/agents/math-agent.md}}};
+    \node[draw=black!45, rounded corners, fit=(c1)(c8), inner sep=2pt] {};
+\end{tikzpicture}
+\end{center}
+\end{column}
+\begin{column}{0.54\textwidth}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{4.6}{5.3}\selectfont,numbers=none]
+---
+name: math-agent
+description: Checks the mathematics of a numerical economics model -- the
+  domain of every function evaluated, the derivation of the optimality
+  conditions, and the convergence argument. Use when results are plausible
+  but the model may be misstated. Does NOT review Python style and does NOT
+  judge calibration -- econ-agent's job.
+tools: Read, Grep, Glob
+model: sonnet
+---
+You check mathematics. Assume the code runs and assume the economics is
+someone else's job.
+
+For every function the model evaluates, state its domain, check that the
+code can only evaluate it inside that domain, and name the parameter value
+that breaks it. Then: does the optimality condition follow from the stated
+problem; is the operator a contraction, and is the stopping rule the one
+that argument requires; is the grid fine enough for the claim being made?
+
+Quote the line, give the algebra, and say plainly when a step is correct.
+Never assert a result you cannot derive in the reply.
+\end{lstlisting}
+\end{column}
+\end{columns}
+
+\vspace{0.05cm}
+{\scriptsize\textbf{Then debug the English} (T3b). \textbf{T4 hands you the blank canvas} and compiles the same eight answers for any of the three harnesses. \textit{Listing condensed from the lab's \texttt{math-agent.md}; canvas on the \href{https://vonzhg.github.io/AI-ECON-2026/labs/}{course labs page}.}}
+\end{frame}
+
+% ---- T2b-F21 · EDIT · TIER: READ · from T2b:831
+\begin{frame}{Bridge: Steps 2--4 Are the Three Dials}
+\textbf{You have just written three job descriptions. The next section tells you what you actually did --- you turned three dials on one function call, three times.}
+
+\vspace{0.15cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, yscale=0.9,
+    st/.style={rectangle, draw=RedTitle!70, fill=blue!6, rounded corners,
+               minimum width=3.7cm, minimum height=0.62cm, align=center},
+    dl/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=2.4cm, minimum height=0.62cm, align=center},
+    arr/.style={-{Stealth[length=1.8mm]}, thick, gray!70}]
+    \node[st] (a1) at (0,1.0)  {\textbf{Step 2} --- job description};
+    \node[st] (a2) at (0,0.0)  {\textbf{Step 3} --- tool allowlist};
+    \node[st] (a3) at (0,-1.0) {\textbf{Step 4} --- the brief};
+    \node[dl] (b1) at (5.6,1.0)  {\texttt{system}};
+    \node[dl] (b2) at (5.6,0.0)  {\texttt{tools}};
+    \node[dl] (b3) at (5.6,-1.0) {\texttt{messages}};
+    \draw[arr] (a1) -- node[above, font=\tiny] {\emph{is}} (b1);
+    \draw[arr] (a2) -- node[above, font=\tiny] {\emph{is}} (b2);
+    \draw[arr] (a3) -- node[above, font=\tiny] {\emph{seeds}} (b3);
+    \node[font=\scriptsize, align=left, text width=3.6cm, gray!80] at (9.3,0.0)
+        {T2a's four arguments. The fourth, \texttt{model}, is step 6 --- your budget dial.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.14cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{What carries forward.} T3b names these dials and asks how many agents you can run at once, what binds, and who decides to call them. The next section asks how a skill differs from an agent. \textbf{T3b then asks what you actually type} --- and what a run with ten thousand of them consists of. Every one is now a question about a Markdown file \emph{you} wrote.
+\end{takeawaybox}
+
+\vspace{0.06cm}
+{\footnotesize\textbf{And the milestone, plainly:} M1 asks for a division of labour. Working solo, \texttt{.claude/agents/} \emph{is} your division of labour. \textbf{Answered next:} how many can run at once, and what actually stops you.}
+\end{frame}
+
+
+%=============================================================================
+\section{Tool, Skill, Sub-Agent}
+%===========================================================
+
+\sectiondivider{Tool, Skill, Sub-Agent}{A distinction most write-ups get backwards}
+
+% ---- T2b-F29 · KEEP · TIER: READ · from T2b:1211
+\begin{frame}{The Usual Definition Describes a Tool, Not a Skill}
+\textbf{You will read that ``a skill is a deterministic, hard-coded piece of software with no brain of its own.'' That is an accurate definition --- of something else.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{The common claim}
+
+\vspace{0.1cm}
+``A skill does exactly one thing. It requires exact inputs to produce exact outputs. It cannot decide when it should be used, nor fix itself on error. It just runs the code it was given.''
+\end{cautionbox}
+
+\vspace{0.15cm}
+\footnotesize That paragraph is a correct description of a \textbf{tool} (a function with a schema). It is not what a skill is.
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{conceptbox}
+\footnotesize\textbf{What a skill actually is}
+
+\vspace{0.1cm}
+A folder with a Markdown file in it. The file is \textbf{prose written for the model to read} --- a procedure, conventions, worked steps --- plus optional scripts.
+
+\vspace{0.12cm}
+There is no compiled artefact and no fixed input schema. The reasoning is still the model's; the skill supplies \emph{instructions}, not \emph{execution}.
+\end{conceptbox}
+\end{column}
+\end{columns}
+
+\vspace{0.2cm}
+\textbf{Why the confusion matters:} if you believe a skill is code, you will try to write it like code --- rigid parameters, defensive branching. Skills that work read like a good methods appendix written for a capable RA.
+\end{frame}
+
+% ==== Phase B · T2b-F30..T4-F13 · TIER: READ
+\begin{frame}[fragile]{What a Skill Actually Is: A Folder the Model Opens Only When Needed}
+\textbf{A skill is a folder of prose and helpers. The model sees one line of it until that line matches the task --- which is why skills are cheap to keep.}
+
+\vspace{0.02cm}
+
+\begin{columns}[T]
+\begin{column}{0.53\textwidth}
+{\scriptsize A skill folder, e.g.\ Lec10's: \texttt{review-paper-skill/} $\to$ \texttt{SKILL.md} (the protocol) $+$ \texttt{references/} (loaded on demand)}
+
+\vspace{0.04cm}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\fontsize{5.0}{5.8}\selectfont,numbers=none]
+---
+name: olg-5step
+description: Manually run the local five-step
+  OLG dynamic-macro demo. Use when explicitly
+  invoked to demonstrate Model -> Equilibrium
+  -> Algorithm -> Pseudo-code -> Implement.
+argument-hint: "stage number or command"
+disable-model-invocation: true
+---
+# OLG Five-Step Skill
+Use this skill to demonstrate the five-stage
+agentic dynamic-macro workflow.
+## Workflow
+1. Work from the demo root [...]
+\end{lstlisting}
+{\tiny \textit{This repository's OLG demo skill (\texttt{.claude/skills/olg-5step/SKILL.md}); line breaks added.}}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    st/.style={rectangle, draw=black!60, fill=VeryLightGray, rounded corners,
+               minimum width=3.5cm, minimum height=0.7cm, text width=3.35cm, align=center},
+    on/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.5cm, minimum height=0.7cm, text width=3.35cm, align=center},
+    arr/.style={-{Stealth[length=1.7mm]}, thick, gray!70}]
+    \node[on] (a) at (0,1.8) {\textbf{always in context}\\ the \texttt{description} line only};
+    \node[st] (b) at (0,0.75) {\textbf{on trigger}\\ the model reads \texttt{SKILL.md}};
+    \node[st] (c) at (0,-0.3) {\textbf{on demand}\\ references load, scripts run};
+    \draw[arr] (a) -- (b);
+    \draw[arr] (b) -- (c);
+    \node[align=center, black!65] at (0,-1.0) {cheap to have twenty; you pay for the one you use};
+\end{tikzpicture}
+\end{center}
+
+\end{column}
+\end{columns}
+
+\vspace{0.08cm}
+\footnotesize\textbf{The \texttt{description} is load-bearing:} selection runs on the only part the model always sees --- as with sub-agent dispatch in T3b. Gemini CLI and Codex CLI read the same \texttt{SKILL.md} format (T2b); T5b returns to \emph{when} skills load.
+\end{frame}
+
+% ---- T2b-F31 · EDIT · TIER: CORE · from T2b:1296
+\begin{frame}{Tool, Skill, Sub-Agent: Sorted by Where the Reasoning Lives}
+\textbf{T5b sorts Skills, Agents and Rules by \emph{when they load}. Sort the same objects by \emph{who does the thinking} and the confusion disappears.}
+
+\vspace{0.12cm}
+
+\begin{center}
+\begin{tikzpicture}[font=\tiny,
+    hd/.style={rectangle, draw=RedTitle!70, fill=blue!8, rounded corners,
+               minimum width=3.4cm, minimum height=0.6cm, font=\scriptsize\bfseries, align=center},
+    bd/.style={rectangle, draw=black!55, fill=VeryLightGray, rounded corners,
+               minimum width=3.4cm, minimum height=1.9cm, text width=3.25cm,
+               align=center, anchor=north}]
+    \node[hd] (h1) at (-3.85,0) {Tool};
+    \node[hd] (h2) at (0,0)     {Skill};
+    \node[hd] (h3) at (3.85,0)  {Sub-agent};
+
+    \node[bd] (b1) at (h1.south) {\textbf{Code you wrote.}\\[3pt]
+        Deterministic. Model chooses \emph{arguments}; the function does the rest.\\[3pt]
+        \emph{No reasoning inside.}};
+    \node[bd] (b2) at (h2.south) {\textbf{Prose you wrote.}\\[3pt]
+        Model chooses \emph{to read it}, then follows it.\\[3pt]
+        \emph{Reasoning stays in the main loop.}};
+    \node[bd] (b3) at (h3.south) {\textbf{A second loop.}\\[3pt]
+        Own context, own tools, own turns.\\[3pt]
+        \emph{Reasoning happens somewhere else.}};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.12cm}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{2.1cm}|p{2.6cm}|p{2.6cm}|p{2.8cm}|}
+\hline
+& \textbf{Tool} & \textbf{Skill} & \textbf{Sub-agent} \\ \hline
+Made of & code & Markdown & a task description \\ \hline
+Costs you & a tool schema & one \texttt{description} line & a whole second context \\ \hline
+Fails by & raising an error & being ignored & drifting off-task \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.08cm}
+{\scriptsize \textit{T5b's third category, Rules, is orthogonal to all three: it is always-on context, not a thing the model chooses.}}
+\end{frame}
+
+% ---- T2b-F32 · EDIT · TIER: READ · from T2b:1341
+\begin{frame}[fragile]{\texttt{disable-model-invocation: true} --- the One-Line Proof}
+\textbf{One line in this repository's own skill settles the router question.}
+
+\vspace{0.15cm}
+
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\small,numbers=none]
+disable-model-invocation: true
+\end{lstlisting}
+
+\vspace{0.15cm}
+
+\begin{itemize}\footnotesize
+    \item The flag means: \emph{do not let the model decide to invoke this on its own} --- it becomes callable by name only
+    \item That flag is only meaningful because, by default, \textbf{the model itself} was making the call, by reading the \texttt{description}
+    \item If a separate router service with a registry were dispatching, there would be nothing for a line of YAML inside one skill file to disable
+\end{itemize}
+
+\vspace{0.2cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{T3b's dispatch argument and this section, in one sentence.} Selection --- of a tool, of a skill, of a sub-agent --- is the model reading short English descriptions and choosing. That is why editing prose changes behaviour, and why writing good descriptions is the highest-leverage thing you do when you set up a project.
+\end{takeawaybox}
+\end{frame}
+
+% ---- T4-F12 · MOVE · TIER: READ · from T4:327
+\begin{frame}{Plain English vs.\ Encoded Skill}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Plain English}
+
+\vspace{0.15cm}
+\textit{Review this paper and tell me the top problems with exact quotes.}
+
+\vspace{0.2cm}
+\textbf{Use when}
+\begin{itemize}
+    \item Exploring
+    \item Doing a one-off task
+    \item Still deciding the workflow
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Encoded skill}
+
+\vspace{0.15cm}
+\texttt{/paper-review draft\_A.pdf}
+
+\vspace{0.2cm}
+\textbf{Use when}
+\begin{itemize}
+    \item The workflow should repeat exactly
+    \item A student team needs one standard procedure
+    \item Validation must be consistent across versions
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+
+\textbf{Exploration starts in English. Reproducibility lives in skills.}
+
+\vspace{0.1cm}
+\footnotesize\textit{Capstone note: Track D2 asks you to deliver exactly this --- a validated skill for a recurring research task.}
+\end{frame}
+
+% ---- T4-F14 · MOVE · TIER: READ · from T4:389
+\begin{frame}{Skills Are Saved Research Playbooks}
+\textbf{A skill is the right home for long, repeated procedures.} Keep always-loaded project context short; put domain workflows in reusable skills.
+
+\vspace{0.1cm}
+\begin{center}
+\footnotesize
+\begin{tabular}{|p{2.8cm}|p{4.0cm}|p{4.8cm}|}
+\hline
+\textbf{Skill} & \textbf{Reusable workflow} & \textbf{Validation hook} \\ \hline
+\texttt{data-analysis} & Load, explore, regress, produce tables/figures & Output schema + script rerun \\ \hline
+\texttt{review-paper} & Read paper, audit argument, generate referee objections & Structured review report \\ \hline
+\texttt{weighted-survey} & Compute survey-weighted rates/means & Formula check against benchmark \\ \hline
+\texttt{hpc-job} & Write \texttt{sbatch} script, submit, parse logs & Scheduler status + parser \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.15cm}
+\textbf{Portable idea:} Claude may call them \texttt{skills}; Codex may package them differently. The durable object is a saved playbook with triggers, allowed tools, steps, and acceptance tests.
+\end{frame}
+
+% ==== Phase B · NEW:Economist-Authored Skills in the Wild · TIER: READ
+\begin{frame}{Economist-Authored Skills in the Wild}
+\textbf{Working economists already publish their skills. Read them as patterns to adapt, not scripts to install blindly.}
+
+\vspace{0.1cm}
+
+\begin{itemize}\small
+    \item \textbf{Pedro Sant'Anna, \texttt{claude-code-my-workflow}} --- ``a ready-to-fork foundation for AI-assisted academic work'' in LaTeX and R, with dozens of skills, among them \texttt{/review-paper}, \texttt{/data-analysis}, \texttt{/replication-package}, \texttt{/stata-replication}, \texttt{/power-analysis}, and \texttt{/submission-disclosures}
+    \item \textbf{Chris Blattman, \texttt{claudeblattman}} --- ``a free, open-source resource for non-developers who want to build real AI workflows,'' with downloadable skill files
+    \item \textbf{This course, \texttt{review-paper}} (Lec10 T2) --- a multi-stage referee pipeline with a references folder and quote verification; the capstone's track D2 asks you to build one like it
+\end{itemize}
+
+\vspace{0.1cm}
+
+\begin{takeawaybox}
+\footnotesize\textbf{What to copy is the discipline, not the file.} Each published skill encodes someone else's research habits --- their checks, their gates, their idea of done. Adopt a skill only after you can say what it checks and what it would miss.
+\end{takeawaybox}
+
+\vspace{0.1cm}
+{\scriptsize \textit{\texttt{github.com/pedrohcgs/claude-code-my-workflow} and \texttt{github.com/chrisblattman/claudeblattman}, both MIT-licensed; checked 12 Sep 2026. \textbf{[solid]}}}
+\end{frame}
+
+% ---- NEW · TIER: READ
+\begin{frame}{Bridge: From One File to Three Ways of Calling It}
+\textbf{One agent is one Markdown file with a description that does the work.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{Next (T3b):} how do you actually call it --- by description, by name, by script --- and what does a run of ten thousand consist of?
+\end{itemize}
+\end{frame}
+
+%===========================================================
+\end{document}

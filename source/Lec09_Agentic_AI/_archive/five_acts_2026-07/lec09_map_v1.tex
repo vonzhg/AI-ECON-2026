@@ -1,0 +1,92 @@
+%% Lec09 shared MAP slide: "one map, five acts" recurring diagram.
+%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray)
+%% and call \LecNineMap{k} inside a frame, where k in {1..5} highlights the
+%% current act ("you are here") and k = 0 renders the closing reprise with all
+%% five acts checked (used by T5's "Your Job Description" frame).
+%% Filename deliberately does not match the build glob Lec*_T*.tex, so the
+%% build script never tries to compile it standalone.
+
+\newcommand{\LecNineMap}[1]{%
+% Precompute per-box style selectors and the checkmark token; TikZ option
+% lists are comma-split before TeX conditionals run, so \ifnum must not sit
+% inside a [...] options list.
+\ifnum#1=0
+  \tikzset{lecmapa/.style={lecmapdone}, lecmapb/.style={lecmapdone},
+           lecmapc/.style={lecmapdone}, lecmapd/.style={lecmapdone},
+           lecmape/.style={lecmapdone}}%
+  % green fill + the "all five acts complete" banner mark completion; a per-box
+  % checkmark overflows the MANAGEMENT box, so keep the token empty here too.
+  \def\lecmapchk{}%
+\else
+  \tikzset{lecmapa/.style={}, lecmapb/.style={}, lecmapc/.style={},
+           lecmapd/.style={}, lecmape/.style={}}%
+  \def\lecmapchk{}%
+  \ifnum#1=1 \tikzset{lecmapa/.style={lecmapcur}}\fi
+  \ifnum#1=2 \tikzset{lecmapb/.style={lecmapcur}}\fi
+  \ifnum#1=3 \tikzset{lecmapc/.style={lecmapcur}}\fi
+  \ifnum#1=4 \tikzset{lecmapd/.style={lecmapcur}}\fi
+  \ifnum#1=5 \tikzset{lecmape/.style={lecmapcur}}\fi
+\fi
+\begin{center}
+\begin{tikzpicture}[
+    act/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=2.6cm, minimum height=0.92cm, text width=2.5cm,
+        align=center, font=\scriptsize, text=DarkText},
+    lecmapcur/.style={draw=RedTitle, very thick, fill=orange!20},
+    lecmapdone/.style={draw=green!45!black, thick, fill=green!10},
+    q/.style={font=\tiny\itshape, text width=2.7cm, align=center, text=black!70},
+    sat/.style={rectangle, rounded corners, draw=black!45, dashed, fill=white,
+        text width=5.0cm, align=center, font=\tiny, text=black!70,
+        minimum height=0.5cm},
+    barlab/.style={font=\tiny\bfseries, text=black!60},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+    % --- five act boxes ---
+    \node[act, lecmapa] (a1) at (0,0)
+        {\textbf{9.1 MAP}\lecmapchk\\ \tiny what \& why};
+    \node[act, lecmapb] (a2) at (2.85,0)
+        {\textbf{9.2 MACHINE}\lecmapchk\\ \tiny under the hood};
+    \node[act, lecmapc] (a3) at (5.7,0)
+        {\textbf{9.3 METHOD}\lecmapchk\\ \tiny homotopy workflow};
+    \node[act, lecmapd] (a4) at (8.55,0)
+        {\textbf{9.4 MANAGEMENT}\lecmapchk\\ \tiny run the project};
+    \node[act, lecmape] (a5) at (11.4,0)
+        {\textbf{9.5 MINDSET}\lecmapchk\\ \tiny your role};
+    \draw[arr] (a1) -- (a2);
+    \draw[arr] (a2) -- (a3);
+    \draw[arr] (a3) -- (a4);
+    \draw[arr] (a4) -- (a5);
+    % --- the student question each act answers ---
+    \node[q] at (0,-0.82)    {what is this,\\ and why care?};
+    \node[q] at (2.85,-0.82) {how does it work?\\ how do I start?};
+    \node[q] at (5.7,-0.82)  {how do I structure\\ real work?};
+    \node[q] at (8.55,-0.82) {how do I run a\\ whole project?};
+    \node[q] at (11.4,-0.82) {what goes wrong?\\ what is my job?};
+    % --- "you are here" marker above the current act ---
+    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (2.85,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (5.7,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=4 \node[font=\scriptsize\bfseries, text=RedTitle] at (8.55,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=5 \node[font=\scriptsize\bfseries, text=RedTitle] at (11.4,0.95)
+        {you are here\ $\blacktriangledown$};\fi
+    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (5.7,0.95)
+        {all five acts complete};\fi
+    % --- bottom band: the three questions of the lecture ---
+    \fill[blue!10]   (-1.3,-1.55) rectangle (4.15,-1.22);
+    \fill[green!10]  (4.4,-1.55)  rectangle (9.85,-1.22);
+    \fill[orange!15] (10.1,-1.55)  rectangle (12.7,-1.22);
+    \node[barlab] at (1.425,-1.385)  {HOW IT WORKS};
+    \node[barlab] at (7.125,-1.385)  {HOW TO USE IT WELL};
+    \node[barlab] at (11.4,-1.385)   {YOUR ROLE};
+    % --- dashed satellites: the two decks outside these five acts ---
+    \node[sat] at (2.0,-2.2)
+        {\textit{after 9.1:} optional interlude \textbf{9.1b} --- the agent landscape (MCP, A2A, benchmarks, safety)};
+    \node[sat] at (9.8,-2.2)
+        {\textit{after 9.5:} \textbf{9.6} wrap-up $\to$ \textbf{Lec10} full case studies (same morning)};
+\end{tikzpicture}
+\end{center}
+}

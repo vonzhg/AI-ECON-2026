@@ -1,0 +1,514 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.5d
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: security and red lines, prompt injection, disclosure and replication packages (review A8.5), chain of custody
+%% Owns: benchmark validity, the seven tests, cannot-do (as non-delegable responsibility), when-not, trust-but-verify
+%% Owns: what changes, the paradigm shift completed, the job description (map k=0 finale), the 30-day plan, the clean-up prompt, the Lec10 preview
+%% Defers: reliability under repetition -> T4; the principal-agent lens -> T1 (evidence: Lec10 T9)
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.5d: Governance and Action Plan}
+
+\begin{document}
+
+\makebeamertitle
+
+% ---- NEW · TIER: READ
+\begin{frame}{Lecture 9 in One Map: Governance and Action Plan}
+\textbf{This deck closes the lecture: the rules that keep this safe, the tests that make it research-grade, and what you do next.}
+
+\LecNineMap{5}{d}
+
+\vspace{0.1cm}
+\footnotesize\textit{Route: red lines and disclosure $\to$ measuring your own agent $\to$ limits and judgment $\to$ your first thirty days $\to$ Lecture 10. The economist's question here: what is never delegated, and what evidence will you accept?}
+\end{frame}
+
+
+%=============================================================================
+\section{Red Lines}
+%===========================================================
+
+\sectiondivider{Red Lines}{Untrusted inputs, restricted data, and disclosure}
+
+% ==== Phase B · T5-F12 · TIER: CORE (verified journal pointer)
+\begin{frame}{Security: Red Lines and Workarounds}
+\textbf{Do not put in front of an agent:} IRB-protected interviews, linked administrative microdata, personally identifiable information, HIPAA-regulated data, passwords / API keys / access tokens, embargoed or restricted-use datasets.
+
+\vspace{0.2cm}
+
+\textbf{Operational rule:} if you would not paste it into a public collaboration tool, do not paste it into an agent conversation.
+
+\vspace{0.25cm}
+
+\textbf{Sensitive data does not imply ``no agents ever.''} Three workarounds:
+\begin{enumerate}
+    \item Write the script with the agent, then run it yourself on the restricted data
+    \item Use synthetic or masked data with the same structure for debugging
+    \item Use institutionally approved local or private deployments when available
+\end{enumerate}
+
+\vspace{0.15cm}
+\textbf{Safe pattern:} expose structure and summary statistics, not raw records.
+
+\vspace{0.1cm}
+{\scriptsize \textit{IRB, HIPAA, and GDPR rules apply unchanged to agent-aided work; journal disclosure rules are two frames on.}}
+\end{frame}
+
+% ==== Phase B · T1b-F14 · TIER: READ (pointer edits)
+\begin{frame}{Treat Everything the Agent Reads as Untrusted}
+\textbf{The defining agentic-AI security failure is prompt injection: data the agent merely \emph{reads} can hijack what it \emph{does}.}
+
+\vspace{0.14cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{OWASP Top-10 for Agentic Applications} (Dec 2025) now codifies these risks.
+    \item Documented exploits: \textbf{EchoLeak} (CVE-2025-32711, zero-click M365 Copilot data exfiltration); \textbf{ShadowPrompt} in Claude's Chrome extension; Anthropic's \textbf{GTG-1002} --- the first largely-autonomous cyberattack (Nov 2025).
+    \item \textbf{NIST CAISI} red-teaming raised task-hijacking success from \textbf{11\% to 81\%} with adaptive attacks.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Operating rule.} Treat any content the agent reads --- emails, web pages, retrieved documents, even tool descriptions --- as an \emph{untrusted injection channel}. Use least-privilege sandboxing and revocable permissions, exactly as T5b's \texttt{settings.json} \texttt{deny} list and the previous frame prescribe. \textbf{[solid]}
+\end{cautionbox}
+\end{frame}
+
+% ==== Phase B · NEW:Disclosure, Replication Packages, and \texttt{AI\_LOG.md} · TIER: READ
+\begin{frame}{Disclosure, Replication Packages, and \texttt{AI\_LOG.md}}
+\textbf{Journals already have rules for this. An agent-assisted paper has to meet them --- and the evidence has to exist before submission, not be reconstructed after.}
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{What the AEA journals require}
+\begin{itemize}\scriptsize
+  \item ``Artificial intelligence (AI) software, such as chatbots or other large language models, may not be listed as an author.''
+  \item If AI software was used in preparing the manuscript, ``including drafting or editing text,'' it must be briefly described at submission; authors remain accountable for checking what it produced
+  \item Papers are published ``only if the data and code used in the analysis are clearly and precisely documented'' --- agent-written code included
+\end{itemize}
+{\tiny\textit{AER submission guidelines and AEA journal policies, aeaweb.org, checked 12 Sep 2026. Other journals differ: read the one you submit to.}}
+\end{column}
+\begin{column}{0.47\textwidth}
+\footnotesize\textbf{What that asks of your workflow}
+\begin{itemize}\scriptsize
+  \item \textbf{Replication package:} the code as run, the data or access instructions, the versions --- not the chat
+  \item \textbf{\texttt{AI\_LOG.md}} (the capstone asks for one): the prompts that mattered, the decisions you made, where the AI was wrong and how you caught it, and an honest split of the work
+  \item \textbf{Chain of custody:} date, harness and version, model --- next to every result you keep
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\begin{takeawaybox}
+\footnotesize\textbf{Disclosure is cheap if you logged as you went, and impossible to fake afterwards.} A referee may ask which numbers an agent produced; your log is the answer.
+\end{takeawaybox}
+\end{frame}
+
+% ==== Phase B · T1b-F15 · TIER: READ (ties to the seven tests)
+\begin{frame}{Reproducibility: Chain-of-Custody for Agentic Results}
+\textbf{Can an agent reproduce a published computational result? Often only partly --- which makes logging non-negotiable.}
+
+\vspace{0.16cm}
+
+\begin{itemize}\footnotesize
+    \item \textbf{CORE-Bench}: agents reproduce published computational results only $\sim$\textbf{60\% (easy)} / $\sim$\textbf{21\% (hard)}. \textbf{[solid]}
+    \item Therefore \textbf{log full trajectories}: prompts, tool calls, seeds, \emph{model versions}, \emph{spec versions}, and \emph{dates} --- the chain-of-custody for any agent-produced artifact.
+\end{itemize}
+
+\vspace{0.12cm}
+\begin{cautionbox}
+\footnotesize\textbf{Read vendor safety numbers skeptically.} Distinguish a vendor's ``$\sim$1\% attack success on a \emph{fixed} suite'' from academic findings that \emph{adaptive} attacks still exceed $\sim$85\%. A fixed-suite number measures the suite, not the threat model. \textbf{[solid]}
+\end{cautionbox}
+
+\vspace{0.1cm}
+\footnotesize\textbf{Ties to the seven tests below.} This is the same discipline (reproducibility, verifiability, auditability) --- now with the dates and spec versions the landscape forces you to pin.
+\end{frame}
+
+
+%=============================================================================
+\section{Measuring Your Own Agent}
+%===========================================================
+
+\sectiondivider{Measuring Your Own Agent}{A headline number is not a measurement until you know its validity}
+
+% ==== Phase B · T1b-F12 · TIER: READ
+\begin{frame}{Benchmarks Break: What SWE-bench Verified Taught}
+\textbf{The course's measurement theme, pointed at agents: a headline score is not a measurement until you know what it measures and who could have gamed it.}
+
+\vspace{0.14cm}
+\begin{itemize}\footnotesize
+    \item \textbf{Contamination.} On 23 February 2026 OpenAI stopped reporting SWE-bench Verified: auditing 138 hard tasks, it found 59\% had flawed tests, and frontier models could reproduce gold patches verbatim. It recommends SWE-bench Pro instead. \textbf{[solid]}
+    \item \textbf{Harness exploits.} In April 2026 Berkeley RDI scored near 100\% on eight agent benchmarks --- SWE-bench Verified and Pro, Terminal-Bench, WebArena among them --- \emph{without solving a single task}, mostly without calling a model. \textbf{[solid]}
+    \item \textbf{Never compare across suites.} A Verified score and a Pro score are different problems, difficulty, and exposure --- never one axis.
+\end{itemize}
+
+\vspace{0.1cm}
+\begin{cautionbox}
+\footnotesize\textbf{Your own evaluations are benchmarks too.} Berkeley's rule transfers directly to the Design Lab: run a do-nothing agent against your detection matrix. If it scores above zero, your test has a bug. (Reliability over repeated runs: T4.)
+\end{cautionbox}
+
+\vspace{0.04cm}
+{\scriptsize\textit{OpenAI, ``Why SWE-bench Verified no longer measures frontier coding capabilities'' (Feb 2026); Berkeley RDI, ``How We Broke Top AI Agent Benchmarks'' (Apr 2026). Both checked 12 Sep 2026.}}
+\end{frame}
+
+
+%=============================================================================
+\section{Limits and Judgment}
+%===========================================================
+
+\sectiondivider{Limits and Judgment}{What the workflow changes, and what remains human}
+
+% ==== Phase B · T1-F13..T6-F06 · TIER: CORE
+\begin{frame}{Seven Tests for Any AI-Assisted Research Output}
+\textbf{Before a script, figure, or table an agent produced goes into your paper, put it through seven questions. Any ``no'' or ``I don't know'' means it is not yet research-grade.}
+
+\vspace{0.12cm}
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.24}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{9.4cm}|}
+\hline
+\textbf{Test} & \textbf{The question} \\ \hline
+1. Correctness & Did it compute, extract, or summarize the right object --- and can you re-check the math, data flow, and magnitudes independently? \\ \hline
+2. Reproducibility & Can a co-author rerun it from a clean clone --- pinned model, prompt, seed, and data version? \\ \hline
+3. Auditability & Can a referee trace the commands, checks, and sources that produced it? \\ \hline
+4. Privacy boundary & Which files stayed local, and what content may still have crossed the network? \\ \hline
+5. Cost & What did it cost --- in tokens and dollars, including what a replicator will pay? \\ \hline
+6. Speed & Net of checking and fixing, did it actually save time? \\ \hline
+7. Skill investment & Is your team building durable skills --- or quietly losing them? \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.1cm}
+\footnotesize\textit{Distinct from T5a's five plan-grading criteria, which judge a plan before any code exists; these judge the output.}
+\end{frame}
+
+% ==== Phase B · T6-F07 · TIER: READ
+\begin{frame}{Three Decisions You Cannot Delegate}
+\textbf{Not because agents cannot talk about them --- they can, fluently. Because the researcher bears the consequences, and a delegated decision still has your name on it.}
+
+\vspace{0.12cm}
+\begin{itemize}
+  \item \textbf{Identification --- which variation answers the causal question.} \\
+  {\small An agent can describe instruments, event windows, and shocks, and sometimes spot a weak one. It cannot \emph{certify} that a shock is exogenous in your setting; that claim is yours to defend in a seminar.}
+
+  \vspace{0.08cm}
+  \item \textbf{Welfare --- which objective defines ``good.''} \\
+  {\small Pareto weights, discount rates, the equity--efficiency trade-off: normative choices, not technical ones.}
+
+  \vspace{0.08cm}
+  \item \textbf{Judgment --- which question is worth asking.} \\
+  {\small An agent optimizes the target it is given; deciding which target is interesting, novel, and policy-relevant is the job.}
+\end{itemize}
+
+\vspace{0.1cm}
+\begin{takeawaybox}
+\footnotesize\textbf{Capability is not the issue.} HA-Ramsey's AI iteration surfaced real methodological discoveries (Lec10 T8), and Lec10 T9's assistant passed every gate for the wrong reason. In both, the economist decided what counted. That is the residual claim a principal keeps.
+\end{takeawaybox}
+\end{frame}
+
+% ==== Phase B · T6-F08 · TIER: READ (red-lines pointer; seven tests; list tightened)
+\begin{frame}{When NOT to Use an Agent}
+\textbf{The seven tests also mark a boundary: some research tasks cost more to delegate than they return, or fail too expensively.}
+
+\vspace{0.1cm}
+
+\begin{itemize}\small
+    \item \textbf{One-line scripts and isolated edits.} A two-line \texttt{sed} or one-shot plot has no validation surface for the harness to add value. Open the editor.
+    \item \textbf{Deeply proprietary or undocumented pipelines.} If the conventions live in one person's head, the agent has nothing to read; the time you would spend documenting the pipeline well enough to brief the agent is the same time you would spend just fixing the thing.
+    \item \textbf{Strict deterministic guarantees.} For numerical reproducibility audits, regulatory pipelines, or replication packages, model nondeterminism is a hazard the harness cannot fully suppress. Run it pinned; do not let the agent retry.
+    \item \textbf{Restricted-data analyses where prompts may leak.} If pasting one column would violate IRB or HIPAA, the agent does not belong in the loop; the red-lines workarounds apply.
+    \item \textbf{Tasks where you do not yet have a benchmark.} Without a way to validate, faster output just means faster wrong. Define the V0 benchmark first; \emph{then} bring in the agent.
+\end{itemize}
+
+\vspace{0.1cm}
+\footnotesize\textbf{Practical rule:} the agent is most useful when the work is bounded, validated, and repeatable. None of those? Skip the agent.
+\end{frame}
+
+% ---- T6-F09 · KEEP · TIER: READ · from T6:197
+\begin{frame}{Trust but Verify}
+\begin{enumerate}
+    \item Reproduce one statistic by hand
+    \item Cross-check one result with another package or script
+    \item Test a limiting case or zero-variance benchmark
+    \item Read the code line by line where the economics enters
+    \item Ask whether the magnitude and sign make sense
+\end{enumerate}
+
+\vspace{0.3cm}
+
+\textbf{This is not optional ceremony.} It is what turns fast code into defensible research.
+\end{frame}
+
+% ---- T6-F10 · KEEP · TIER: READ · from T6:211
+\begin{frame}{What Changes for Economic Research}
+\begin{itemize}
+    \item The distance from question to first result shrinks
+    \item More specifications become cheap enough to try
+    \item Reproducibility can improve because workflow is written down
+    \item The premium shifts away from typing speed and toward design, judgment, and validation
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{What stays human:} asking the question, choosing the design, knowing the data, and interpreting the output.
+\end{frame}
+
+% ---- T5-F20 · MOVE · TIER: READ · from T5:453
+\begin{frame}{The Paradigm Shift, Completed: What Changed, What Did Not}
+\textbf{The HA-Ramsey record, read one last time --- now as a statement about your role.}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
+\begin{column}{0.49\textwidth}
+\textbf{What changed}
+\begin{itemize}
+    \item Theory--code--debug loop compressed from months to days
+    \item Documentation became executable: the TeX note, pseudocode, and code stay synchronized
+    \item Cross-literature imports got cheap (computational geometry, viability theory)
+    \item The unit of progress became the \emph{validated milestone}
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{cautionbox}
+\footnotesize
+\textbf{What did NOT change:}
+\begin{itemize}
+    \item AI never decided what was economically interesting
+    \item AI never caught the wrong timing on its own
+    \item AI never knew when a result was not credible
+\end{itemize}
+\end{cautionbox}
+\vspace{0.1cm}
+\footnotesize\textit{``Weeks, not years --- and the binding constraint was economist judgment at the milestones, not implementation labor.''}
+\end{column}
+\end{columns}
+
+\vspace{0.05cm}
+
+\textbf{Read the two columns together:} the machine moved every bound except the one that defines the researcher.
+
+{\scriptsize \textit{Source: HA-Ramsey case-study package (Lec10 T8).}}
+\end{frame}
+
+
+%=============================================================================
+\section{Action Plan}
+%===========================================================
+
+\sectiondivider{Action Plan}{Your first thirty days}
+
+% ==== Phase B · NEW:Your First 30 Days · TIER: CORE
+\begin{frame}{Your First 30 Days}
+\textbf{Four weeks, one habit each, on a project you already have. By the end you have the scaffold the capstone's first two milestones ask for.}
+
+\vspace{0.2cm}
+\begin{center}
+\begin{tikzpicture}[
+    wk/.style={rectangle, rounded corners, draw=black!55, fill=VeryLightGray,
+        text width=2.75cm, minimum height=2.5cm, align=left, font=\scriptsize, anchor=north},
+    hd/.style={font=\scriptsize\bfseries, text=RedTitle},
+    dk/.style={font=\tiny\itshape, text=black!55},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
+]
+  \node[hd] at (0,0.35)    {Week 1 --- a safe start};
+  \node[hd] at (3.2,0.35)  {Week 2 --- one ladder};
+  \node[hd] at (6.4,0.35)  {Week 3 --- one agent};
+  \node[hd] at (9.6,0.35)  {Week 4 --- one run you audit};
+  \node[wk] (a) at (0,0)   {Put an old project under Git; write its instructions file; run the clean-up exercise on a branch and rerun the results};
+  \node[wk] (b) at (3.2,0) {Write a spec; build a V0 that passes one analytical benchmark; extend one margin at a time};
+  \node[wk] (c) at (6.4,0) {Fill the canvas for one reviewer; measure it on a planted defect, three fresh runs; narrow the description};
+  \node[wk] (d) at (9.6,0) {Script one rung-3 run with a check that can reject; read its trace; start \texttt{AI\_LOG.md}};
+  \foreach \i/\j in {a/b,b/c,c/d} {\draw[arr] (\i.east) -- (\j.west);}
+  \node[dk] at (0,-2.75)   {T2b, T5d};
+  \node[dk] at (3.2,-2.75) {T5a};
+  \node[dk] at (6.4,-2.75) {T3a, T4};
+  \node[dk] at (9.6,-2.75) {T3b, T5c};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.15cm}
+\footnotesize\textbf{Capstone:} weeks 1--2 are M2's ``repo scaffolded, benchmark in hand''; the log you start in week 4 is the graded \texttt{AI\_LOG.md}. Works the same in Claude Code, Codex CLI, or Gemini CLI.
+\end{frame}
+
+% ==== Phase B · NEW:Your First Exercise: Clean Up Old Code · TIER: READ
+\begin{frame}[fragile]{Your First Exercise: Clean Up Old Code}
+\textbf{The best first exercise is not ``do research for me.'' It is: clean up one of your own old projects --- safely, on a branch, and prove nothing changed.}
+
+\vspace{0.1cm}
+\begin{lstlisting}[style=pythonstyle,language={},basicstyle=\ttfamily\tiny,numbers=none]
+I want your help cleaning up this project and setting up a git repo.
+First, copy it all over to a backup directory.
+Next, suggest an initial gitignore and create a first repo.
+Then, push the initial repo to a private repo on GitHub.
+Then, check out a new branch and suggest how to restructure the repo
+  to have best practices with data/code/docs/paper organization.
+Then just do it on the new branch.
+Finally, actually run any code you've modified/restructured to make
+  sure it lines up with the prior results.
+\end{lstlisting}
+
+\vspace{0.05cm}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\footnotesize\textbf{Why each line is there}
+\begin{itemize}\scriptsize
+    \item \textbf{backup directory:} you can always go back
+    \item \textbf{gitignore:} code apart from data and output
+    \item \textbf{private repository:} history off your machine
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+\begin{itemize}\scriptsize
+    \item \textbf{new branch:} the restructuring is reversible
+    \item \textbf{rerun and compare:} the check that the clean-up changed the layout, not the results
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.06cm}
+{\tiny\textit{Prompt adapted from Aniket Panjwani, ``AI Agents for Economics Research'' (CEPR/VoxDev webinar, 2026). Private data stays out of the repository: T5d's red lines apply.}}
+\end{frame}
+
+% ==== Phase B · T6-F12 · TIER: READ (harness-neutral, prompt pointer)
+\begin{frame}{First Exercise and Looking Ahead}
+\textbf{Best first exercise:} take one old project and ask an agent to help clean it up safely --- the prompt is on the previous frame.
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item put the project under Git
+    \item create an instructions file (\texttt{CLAUDE.md}, \texttt{AGENTS.md}, or \texttt{GEMINI.md})
+    \item identify one repeated workflow worth encoding
+    \item rerun the cleaned project and compare outputs
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{Lec.~10:} we return to case studies and let students run a full workflow themselves.
+
+\vspace{0.15cm}
+
+\textit{Setup details for each harness: Appendix TA.}
+\end{frame}
+
+
+%=============================================================================
+\section{Next --- Lecture 10}
+%===========================================================
+
+\sectiondivider{Next --- Lecture 10}{From workflow logic to concrete case studies}
+
+% ==== Phase B · T6-F02 · TIER: READ (seven cases)
+\begin{frame}{Lecture 10 Preview: Four Workflow Patterns, Seven Cases}
+\begin{center}
+\small
+\begin{tabular}{|p{2.7cm}|p{3.7cm}|p{4.7cm}|}
+\hline
+\textbf{Pattern} & \textbf{Lecture 10 case} & \textbf{What students will see} \\ \hline
+Reusable skill & Paper-review workflow & staged quality control, quote checks, editorial filter \\ \hline
+Empirical pipeline & MEPS uninsurance & harmonization, survey weights, benchmark validation, figures \\ \hline
+Public-web dataset & Fellows metadata & source restrictions, provenance, missingness discipline \\ \hline
+Full-lifecycle collaborator & Glue-work project; HA-Ramsey & theory, pipeline design, critique, claims discipline \\ \hline
+\emph{Cautionary case} & MPE shortcut (Case 7) & a solver that passed every gate for the wrong reason \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+\textbf{Why this matters:} Lec.~9 gives the workflow logic. Lec.~10 shows how the same logic changes shape across different research artifacts.
+\end{frame}
+
+% ---- T6-F03 · MOVE · TIER: READ · from T6:62
+\begin{frame}{One Visual Hook from Lecture 10: MEPS Uninsurance}
+\textbf{Case Study 2 asks:} who is uninsured in the United States, 2000--2023, and how did the ACA change the distribution?
+
+\vspace{0.25cm}
+
+\begin{center}
+\includegraphics[height=0.38\textheight]{fig_overall_uninsurance.pdf}
+\end{center}
+
+\textbf{Why keep this figure here:} it is an accessible policy example for economists outside macro, and it shows what a validated empirical artifact looks like after the workflow succeeds.
+
+\vspace{0.15cm}
+
+\textbf{Lec.~10 adds the full pipeline:} prompts, schema harmonization, survey weights, external benchmarks, and subgroup figures.
+\end{frame}
+
+% ==== Phase B · T6-F04 · TIER: READ (rewritten without IV vocabulary)
+\begin{frame}{What Role Does the Agent's Output Play in Your Inference?}
+\textbf{The same toolkit produces different kinds of evidence. Ask what the agent's output \emph{is} in your argument --- that decides what you must check.}
+
+\vspace{0.15cm}
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{3.0cm}|>{\raggedright\arraybackslash}p{3.4cm}|}
+\hline
+\textbf{Pattern} & \textbf{The agent produces} & \textbf{Its role in your argument} & \textbf{What you must check} \\ \hline
+Reusable skill (paper review) & a structured critique & an input to your judgment, never the verdict & every quote against the paper \\ \hline
+Empirical pipeline (MEPS) & a harmonized panel & the measurement itself & weights, crosswalks, published benchmarks \\ \hline
+Public-web dataset (Fellows) & coded fields & a measurement with provenance & a source per field; missing stays missing \\ \hline
+Full-lifecycle collaborator & code and drafts across a project & the whole chain of evidence & a gate at every milestone; the contract \\ \hline
+\end{tabular}
+\end{center}
+\end{frame}
+
+% ---- T6-F05 · MOVE · TIER: READ · from T6:100
+\begin{frame}{What to Watch for in Lecture 10}
+\begin{itemize}
+    \item \textbf{Paper review:} how a reusable skill turns a vague prompt into a staged quality-control workflow
+    \item \textbf{MEPS pipeline:} how an empirical question becomes a validated panel and figure set
+    \item \textbf{Fellows dataset:} how provenance and missingness rules matter as much as code
+    \item \textbf{Glue-work project:} how agentic AI can act as a full-lifecycle collaborator without replacing human claims discipline
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Bridge from Lec.~9 to Lec.~10:} today's lecture explains the logic of the workflow; next lecture shows the artifacts it can produce.
+\end{frame}
+
+% ==== Phase B · T5-F21 · TIER: CORE (finale: bands and epigraph)
+\begin{frame}{Your Job Description: PI and Project Manager}
+\textbf{The lecture's three questions, answered:} \emph{how it works} --- a tool-calling loop steered by files (Parts 9.1--9.2); \emph{how to build and use it} --- agents you design and measure (Parts 9.3--9.4); \emph{your role} --- a method, a managed project, and rules (Part 9.5).
+
+\LecNineMap{0}{}
+
+\begin{takeawaybox}
+\footnotesize
+\textbf{Agents can lay bricks quickly. You still design the structure.} \textbf{Set the goal. Define the final product. Gate every intermediate good. Assign the work --- sessions, agents, sub-agents. Cross-verify everything. And remain the client of the outside view:} the one thing your agent cannot give you is a prior other than your own.
+\end{takeawaybox}
+\end{frame}
+
+% ==== Phase B · NEW:Bridge: Lecture 10 Shows the Artifacts · TIER: CORE
+\begin{frame}{Bridge: Lecture 10 Shows the Artifacts}
+\textbf{Lecture 9 explained the logic. Lecture 10 shows the artifacts --- the same morning.}
+
+\vspace{0.2cm}
+\begin{itemize}
+    \item \textbf{You saw the Fellows workflow} --- Lec10 T4 shows the findings, and Exercise B gives you a batch of your own
+    \item \textbf{You saw HA-Ramsey's contract and milestones} --- Lec10 T8 shows the discoveries and the economics
+    \item \textbf{You saw the principal--agent lens} --- Lec10 T9 shows it biting: an assistant that followed every rule it was given
+\end{itemize}
+
+\vspace{0.25cm}
+\begin{takeawaybox}
+\small\textbf{``The agent didn't break the rules --- it followed them. The loophole was in the contract.''} Everything in Lecture 9 --- the brief, the gates, the matrix, the log --- is how you write a better contract, and how you check it was kept.
+\end{takeawaybox}
+\end{frame}
+
+%===========================================================
+\end{document}

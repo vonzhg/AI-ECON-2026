@@ -1,7 +1,7 @@
 # Lec09 Reorg Plan — Critical Review and Amendments (inputs for plan v2)
 
 Date: 2026-09-12 · Reviews `source/Lec09_Agentic_AI/Lec09_Reorg_Plan_2026-09-12.md` (v1, 633 lines)
-Shorthand as in v1: **ROOT** = `/u/zfeng2/Github/Courses/AI-ECON-2026/`, **L9** = `ROOT/source/Lec09_Agentic_AI/`.
+Shorthand as in v1: **ROOT** = the repository root, **L9** = `ROOT/source/Lec09_Agentic_AI/`.
 
 ## 0. Context
 

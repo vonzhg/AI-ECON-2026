@@ -1,92 +1,125 @@
-%% Lec09 shared MAP slide: "one map, five acts" recurring diagram.
-%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray)
-%% and call \LecNineMap{k} inside a frame, where k in {1..5} highlights the
-%% current act ("you are here") and k = 0 renders the closing reprise with all
-%% five acts checked (used by T5's "Your Job Description" frame).
-%% Filename deliberately does not match the build glob Lec*_T*.tex, so the
-%% build script never tries to compile it standalone.
+%% Lec09 shared MAP slide, v2 (September 2026 reorganization): five parts,
+%% eleven decks.  v1 (the July "five acts" map) is archived as
+%% _archive/five_acts_2026-07/lec09_map_v1.tex.
+%%
+%% Input this file AFTER ../shared_preamble.tex (needs RedTitle, VeryLightGray,
+%% DarkText) and call \LecNineMap{part}{sub} inside a frame:
+%%   part in {1..5} highlights that part ("you are here") and, when sub names a
+%%   sub-deck letter, that deck's chip -- \LecNineMap{2}{b} is T2b, \LecNineMap{4}{}
+%%   is T4;  part = 0 renders the closing reprise with every part complete (the
+%%   "Your Job Description" frame in T5d).
+%% Each part carries its student question and its economic twin (the delegation-
+%% economics thread of Lec09_Reorg_Plan_Review_2026-09-12.md, A3).
+%% Filename deliberately does not match the build glob Lec*_T*.tex, so the build
+%% script never tries to compile it standalone.
 
-\newcommand{\LecNineMap}[1]{%
-% Precompute per-box style selectors and the checkmark token; TikZ option
-% lists are comma-split before TeX conditionals run, so \ifnum must not sit
-% inside a [...] options list.
+% Highlight chip #1 when the requested deck key equals #2 (e.g. 2b).
+\newcommand{\lecmapchip}[2]{%
+  \edef\lecmaptmp{#2}%
+  \ifx\lecmapkey\lecmaptmp\tikzset{#1/.style={lecchipcur}}\fi}
+
+\newcommand{\LecNineMap}[2]{%
+% TikZ option lists are comma-split before TeX conditionals run, so every
+% \ifnum/\ifx is resolved here, into named styles, before the picture starts.
+\edef\lecmapkey{#1#2}%
+\tikzset{lecparta/.style={}, lecpartb/.style={}, lecpartc/.style={},
+         lecpartd/.style={}, lecparte/.style={},
+         chipTone/.style={}, chipTtwoa/.style={}, chipTtwob/.style={},
+         chipTthreea/.style={}, chipTthreeb/.style={}, chipTfour/.style={},
+         chipTfivea/.style={}, chipTfiveb/.style={}, chipTfivec/.style={},
+         chipTfived/.style={}}%
 \ifnum#1=0
-  \tikzset{lecmapa/.style={lecmapdone}, lecmapb/.style={lecmapdone},
-           lecmapc/.style={lecmapdone}, lecmapd/.style={lecmapdone},
-           lecmape/.style={lecmapdone}}%
-  % green fill + the "all five acts complete" banner mark completion; a per-box
-  % checkmark overflows the MANAGEMENT box, so keep the token empty here too.
-  \def\lecmapchk{}%
+  \tikzset{lecparta/.style={lecpartdone}, lecpartb/.style={lecpartdone},
+           lecpartc/.style={lecpartdone}, lecpartd/.style={lecpartdone},
+           lecparte/.style={lecpartdone}, lecchip/.style={lecchipbase, lecchipdone}}%
 \else
-  \tikzset{lecmapa/.style={}, lecmapb/.style={}, lecmapc/.style={},
-           lecmapd/.style={}, lecmape/.style={}}%
-  \def\lecmapchk{}%
-  \ifnum#1=1 \tikzset{lecmapa/.style={lecmapcur}}\fi
-  \ifnum#1=2 \tikzset{lecmapb/.style={lecmapcur}}\fi
-  \ifnum#1=3 \tikzset{lecmapc/.style={lecmapcur}}\fi
-  \ifnum#1=4 \tikzset{lecmapd/.style={lecmapcur}}\fi
-  \ifnum#1=5 \tikzset{lecmape/.style={lecmapcur}}\fi
+  \tikzset{lecchip/.style={lecchipbase}}%
+  \ifnum#1=1 \tikzset{lecparta/.style={lecpartcur}}\fi
+  \ifnum#1=2 \tikzset{lecpartb/.style={lecpartcur}}\fi
+  \ifnum#1=3 \tikzset{lecpartc/.style={lecpartcur}}\fi
+  \ifnum#1=4 \tikzset{lecpartd/.style={lecpartcur}}\fi
+  \ifnum#1=5 \tikzset{lecparte/.style={lecpartcur}}\fi
+  \lecmapchip{chipTone}{1}\lecmapchip{chipTtwoa}{2a}\lecmapchip{chipTtwob}{2b}%
+  \lecmapchip{chipTthreea}{3a}\lecmapchip{chipTthreeb}{3b}\lecmapchip{chipTfour}{4}%
+  \lecmapchip{chipTfivea}{5a}\lecmapchip{chipTfiveb}{5b}%
+  \lecmapchip{chipTfivec}{5c}\lecmapchip{chipTfived}{5d}%
 \fi
 \begin{center}
 \begin{tikzpicture}[
-    act/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
-        minimum width=2.6cm, minimum height=0.92cm, text width=2.5cm,
+    part/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        minimum width=2.62cm, minimum height=0.72cm, text width=2.5cm,
         align=center, font=\scriptsize, text=DarkText},
-    lecmapcur/.style={draw=RedTitle, very thick, fill=orange!20},
-    lecmapdone/.style={draw=green!45!black, thick, fill=green!10},
-    q/.style={font=\tiny\itshape, text width=2.7cm, align=center, text=black!70},
+    lecpartcur/.style={draw=RedTitle, very thick, fill=orange!20},
+    lecpartdone/.style={draw=green!45!black, thick, fill=green!10},
+    lecchipbase/.style={rectangle, rounded corners=1pt, draw=black!30, fill=white,
+        inner xsep=1.5pt, inner ysep=1pt, font=\tiny, text=black!70},
+    lecchipcur/.style={draw=RedTitle, fill=RedTitle!12, text=RedTitle, font=\tiny\bfseries},
+    lecchipdone/.style={draw=green!45!black, fill=green!8},
+    q/.style={font=\tiny\itshape, text width=2.7cm, align=center, text=black!75},
+    twin/.style={font=\tiny, text width=2.7cm, align=center, text=blue!40!black},
     sat/.style={rectangle, rounded corners, draw=black!45, dashed, fill=white,
-        text width=5.0cm, align=center, font=\tiny, text=black!70,
-        minimum height=0.5cm},
+        text width=5.6cm, align=center, font=\tiny, text=black!70, minimum height=0.42cm},
     barlab/.style={font=\tiny\bfseries, text=black!60},
     arr/.style={-{Stealth[length=2mm]}, thick, gray!60}
 ]
-    % --- five act boxes ---
-    \node[act, lecmapa] (a1) at (0,0)
-        {\textbf{9.1 MAP}\lecmapchk\\ \tiny what \& why};
-    \node[act, lecmapb] (a2) at (2.85,0)
-        {\textbf{9.2 MACHINE}\lecmapchk\\ \tiny under the hood};
-    \node[act, lecmapc] (a3) at (5.7,0)
-        {\textbf{9.3 METHOD}\lecmapchk\\ \tiny homotopy workflow};
-    \node[act, lecmapd] (a4) at (8.55,0)
-        {\textbf{9.4 MANAGEMENT}\lecmapchk\\ \tiny run the project};
-    \node[act, lecmape] (a5) at (11.4,0)
-        {\textbf{9.5 MINDSET}\lecmapchk\\ \tiny your role};
-    \draw[arr] (a1) -- (a2);
-    \draw[arr] (a2) -- (a3);
-    \draw[arr] (a3) -- (a4);
-    \draw[arr] (a4) -- (a5);
-    % --- the student question each act answers ---
-    \node[q] at (0,-0.82)    {what is this,\\ and why care?};
-    \node[q] at (2.85,-0.82) {how does it work?\\ how do I start?};
-    \node[q] at (5.7,-0.82)  {how do I structure\\ real work?};
-    \node[q] at (8.55,-0.82) {how do I run a\\ whole project?};
-    \node[q] at (11.4,-0.82) {what goes wrong?\\ what is my job?};
-    % --- "you are here" marker above the current act ---
-    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,0.95)
+    % --- five part boxes ---
+    \node[part, lecparta] (p1) at (0,0)     {\textbf{9.1 SEE}};
+    \node[part, lecpartb] (p2) at (2.85,0)  {\textbf{9.2 UNDER THE HOOD}};
+    \node[part, lecpartc] (p3) at (5.7,0)   {\textbf{9.3 BUILD}};
+    \node[part, lecpartd] (p4) at (8.55,0)  {\textbf{9.4 DESIGN \& VALIDATE}};
+    \node[part, lecparte] (p5) at (11.4,0)  {\textbf{9.5 RUN \& GOVERN}};
+    \draw[arr] (p1) -- (p2);
+    \draw[arr] (p2) -- (p3);
+    \draw[arr] (p3) -- (p4);
+    \draw[arr] (p4) -- (p5);
+    % --- sub-deck chips ---
+    \node[lecchip, chipTone]    at (0,-0.6)     {T1};
+    \node[lecchip, chipTtwoa]   at (2.55,-0.6)  {T2a};
+    \node[lecchip, chipTtwob]   at (3.15,-0.6)  {T2b};
+    \node[lecchip, chipTthreea] at (5.4,-0.6)   {T3a};
+    \node[lecchip, chipTthreeb] at (6.0,-0.6)   {T3b};
+    \node[lecchip, chipTfour]   at (8.55,-0.6)  {T4};
+    \node[lecchip, chipTfivea]  at (10.5,-0.6)  {T5a};
+    \node[lecchip, chipTfiveb]  at (11.1,-0.6)  {T5b};
+    \node[lecchip, chipTfivec]  at (11.7,-0.6)  {T5c};
+    \node[lecchip, chipTfived]  at (12.3,-0.6)  {T5d};
+    % --- the student question each part answers ---
+    \node[q] at (0,-1.08)     {what changed,\\ and why care?};
+    \node[q] at (2.85,-1.08)  {how does it run?\\ how do I start?};
+    \node[q] at (5.7,-1.08)   {how do I build one,\\ and call it?};
+    \node[q] at (8.55,-1.08)  {can I design one\\ and prove it works?};
+    \node[q] at (11.4,-1.08)  {run a project, catch\\ mistakes, stay safe};
+    % --- its economic twin ---
+    \node[twin] at (0,-1.62)     {generation got cheap;\\ verification is scarce};
+    \node[twin] at (2.85,-1.62)  {what am I paying for?\\ tokens, scarce context};
+    \node[twin] at (5.7,-1.62)   {dividing the labour:\\ specialists, boundaries};
+    \node[twin] at (8.55,-1.62)  {write the contract,\\ audit the work};
+    \node[twin] at (11.4,-1.62)  {hidden action: gates,\\ monitoring, priors};
+    % --- "you are here" marker above the current part ---
+    \ifnum#1=1 \node[font=\scriptsize\bfseries, text=RedTitle] at (0,0.62)
         {you are here\ $\blacktriangledown$};\fi
-    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (2.85,0.95)
+    \ifnum#1=2 \node[font=\scriptsize\bfseries, text=RedTitle] at (2.85,0.62)
         {you are here\ $\blacktriangledown$};\fi
-    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (5.7,0.95)
+    \ifnum#1=3 \node[font=\scriptsize\bfseries, text=RedTitle] at (5.7,0.62)
         {you are here\ $\blacktriangledown$};\fi
-    \ifnum#1=4 \node[font=\scriptsize\bfseries, text=RedTitle] at (8.55,0.95)
+    \ifnum#1=4 \node[font=\scriptsize\bfseries, text=RedTitle] at (8.55,0.62)
         {you are here\ $\blacktriangledown$};\fi
-    \ifnum#1=5 \node[font=\scriptsize\bfseries, text=RedTitle] at (11.4,0.95)
+    \ifnum#1=5 \node[font=\scriptsize\bfseries, text=RedTitle] at (11.4,0.62)
         {you are here\ $\blacktriangledown$};\fi
-    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (5.7,0.95)
-        {all five acts complete};\fi
+    \ifnum#1=0 \node[font=\scriptsize\bfseries, text=green!45!black] at (5.7,0.62)
+        {all five parts complete};\fi
     % --- bottom band: the three questions of the lecture ---
-    \fill[blue!10]   (-1.3,-1.55) rectangle (4.15,-1.22);
-    \fill[green!10]  (4.4,-1.55)  rectangle (9.85,-1.22);
-    \fill[orange!15] (10.1,-1.55)  rectangle (12.7,-1.22);
-    \node[barlab] at (1.425,-1.385)  {HOW IT WORKS};
-    \node[barlab] at (7.125,-1.385)  {HOW TO USE IT WELL};
-    \node[barlab] at (11.4,-1.385)   {YOUR ROLE};
-    % --- dashed satellites: the two decks outside these five acts ---
-    \node[sat] at (2.0,-2.2)
-        {\textit{after 9.1:} optional interlude \textbf{9.1b} --- the agent landscape (MCP, A2A, benchmarks, safety)};
-    \node[sat] at (9.8,-2.2)
-        {\textit{after 9.5:} \textbf{9.6} wrap-up $\to$ \textbf{Lec10} full case studies (same morning)};
+    \fill[blue!10]   (-1.3,-2.37) rectangle (4.15,-2.07);
+    \fill[green!10]  (4.4,-2.37)  rectangle (9.85,-2.07);
+    \fill[orange!15] (10.1,-2.37) rectangle (12.7,-2.07);
+    \node[barlab] at (1.425,-2.22)  {HOW IT WORKS};
+    \node[barlab] at (7.125,-2.22)  {HOW TO BUILD \& USE IT};
+    \node[barlab] at (11.4,-2.22)   {YOUR ROLE};
+    % --- dashed satellites ---
+    \node[sat] at (1.9,-2.8)
+        {\textbf{Appendix TA} --- the dated landscape and setup details, read on demand};
+    \node[sat] at (9.9,-2.8)
+        {\textbf{Lab} Parts A--B, Design Lab scenarios $\to$ \textbf{Lec10} cases (same morning)};
 \end{tikzpicture}
 \end{center}
 }

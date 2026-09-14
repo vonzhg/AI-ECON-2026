@@ -10,6 +10,7 @@ fi
 
 find "$ROOT_DIR" \
   -path '*/archive_pre_split/*' -prune -o \
+  -path '*/_archive/*' -prune -o \
   -path '*/papers-to-discuss/*' -prune -o \
   -name 'MPE_Hyper_v44.tex' -prune -o \
   -path '*/Lec*/Lec*_T*.tex' -print0 \

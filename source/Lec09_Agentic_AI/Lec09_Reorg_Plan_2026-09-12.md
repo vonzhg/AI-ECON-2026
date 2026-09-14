@@ -1,7 +1,113 @@
 # Lecture 9 Reorganization Plan — "See → Under the Hood → Build → Design & Validate → Run & Govern"
 
-Date: 2026-09-12 · Status: proposed, awaiting approval · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
-Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = `/u/zfeng2/Github/Courses/AI-ECON-2026/`.
+Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phases A and B complete on branch `lec09-reorg`, site updated on the branch; **not merged** · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
+Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = the repository root.
+
+## 0. Plan v2 — status, amendments, and where the truth lives
+
+v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1 and this section disagree, **this section wins**, and where either disagrees with the manifest, **the manifest wins**. The review (`Lec09_Reorg_Plan_Review_2026-09-12.md`) holds the evidence behind each amendment.
+
+### 0.1 Decisions recorded on 2026-09-12
+- The notes to rewrite are **the eleven slide decks** (Phase B). `Lec09_讲稿.md` stays a follow-up (§14).
+- The hands-on parts run **live on Thu 2026-10-22 with mixed tools** (Claude Code, Codex CLI, Gemini CLI): the lab and the design exercise must pass on a second harness (A2).
+- Accepted recommendations: delegation-economics spine (A3), capability ladder with Navier–Stokes demoted (A4), S2 as a transfer case (A6.2), T4 renamed *Design Lab*, baseline commit before archiving (A8.1).
+- **2026-09-13:** the cold open uses an example from the instructor's own research — health insurance coverage by age — recorded as a real agent run from an empty folder (transcript in `labs/Lec09_Agent_Lab/transcripts/`). The borrowed homeownership example and its attribution are dropped. This supersedes the review's A9 line on the cold open.
+
+### 0.2 Changelog v1 → v2
+| # | Amendment | Changes to v1 |
+|---|---|---|
+| A1 | Tiers instead of cuts | Every frame carries `TIER: CORE / LAB / READ`; CORE (45 frames) is the Oct 22 path; replaces §13 decision 11's `% OPTIONAL` marks. Run sheet: `Lec09_RunSheet_2026-10-22.md` |
+| A2 | Mixed tools | Portability spike (Gemini CLI 0.47.0, Codex CLI) before scenarios; harness-neutral brief; acceptance test at rung 3 (`labs/Lec09_Agent_Lab/scripts/detection_matrix.py`); harness mapping moves from TA to T2b (CORE); `agent_lab.py` Tier 2 generalized |
+| A3 | Delegation-economics spine | Economic twin per part on map v2 and bridges; NEW T1 lens frame; Lec10 T9 added to §3, §9, §12; "collaborating with AI" owned by T5b |
+| A4 | One capability ladder | Replaces the §2 ladder; T1 drops "Story 3" and the separate "Three Harnesses" frame; Navier–Stokes only in T3b §F and TA; GDP trace recorded for real |
+| A5 | Accuracy | T1-F07 table, T1-F02 (9.x meanings), T1-F11 (seven cases), T5-F09 (clustering), T6-F07 (non-delegable, not incapable), T4-F15 (hook semantics), T5-F12 (AEA citation), T1b-F09 numbers → TA, T6-F04, T2c-F05 footer |
+| A6 | Design Lab validates the design | T1b-F13 moves from T5d to T4; rubric grades rates over k=3, not one dispatch; S2 transfer case; rename; scenarios must pass on both harnesses |
+| A7 | Framework registry | §0.4; at most five named frameworks at CORE |
+| A8 | Safety and anchors | Baseline commit 515f50d on `main`; branch `lec09-reorg`; Appendix A made executable (`reorg_manifest.yaml` + `tools/lec09_assemble.py`); two phases; `CLI_FACTS_2026-09.md`; T5d disclosure frame |
+| A9 | Small fixes | T3a is 20 + 2; `\LecNineMap{part}{sub}`; T5d k=0 finale last; one hub link + QR; whole syllabus block; cold-open attribution |
+
+### 0.3 Where the truth lives now
+| Question | Source of truth |
+|---|---|
+| Which old frame goes where, in what order, at what tier, with which reference edits | `reorg_manifest.yaml` (§6 and Appendix A below are superseded as specs) |
+| Is every old frame accounted for; has an assembled frame drifted | `python3 tools/lec09_assemble.py check [--strict]` |
+| Frame and tier counts | `python3 tools/lec09_assemble.py summary` — 219 frames: 45 CORE, 20 LAB, 154 READ; 36 new, 8 merged, 4 cut |
+| What each deck owns and defers | the `owns` / `defers` lines in each deck header (generated from the manifest) |
+| Dated CLI and harness facts | `CLI_FACTS_2026-09.md` (each fact labelled RUN / HELP / SRC / OPEN) |
+| Outside claims (papers, policies, vendor and press reports) | `Lec09_External_Facts_2026-09.md` (each labelled PAGE / SEARCH / PRESS / BIB; rows to re-check at the gate) |
+| Does a scenario work, on which harness, at what k | `labs/Lec09_Agent_Lab/transcripts/` (S1 k=3; S2 and S3 k=1; Claude Code only so far) and each run's `summary.json` |
+| What the Oct 22 session teaches | `Lec09_RunSheet_2026-10-22.md` (the 45 CORE frames; minute budget is the instructor's call) |
+
+### 0.4 Framework registry (A7)
+| Framework | Owner | Cited by | Named at CORE? | Phase B action |
+|---|---|---|---|---|
+| The agentic loop | T1 (T1-F08) | T2a ReAct, Lab Part A | **yes** | keep |
+| Eight steps = the eight-cell canvas | T3a (T2b-F13, F20) | T4, lab canvas | **yes** (one object) | present as one object |
+| Three rungs | T3b (T2c-F02) | T4, lab Step 8 | **yes** | keep |
+| Six homotopy steps + 5 pillars | T5a (T3-F03, T2-F23) | Lec10 T8 (labels verbatim), capstone | **yes** | keep verbatim |
+| Seven tests | T5d (T1-F13 + T6-F06) | T1 teaser | **yes** | keep |
+| Four research patterns | T1 (T1-F11) | Lec10 T1 (says "three") | no | keep the names (principle 8) |
+| Four orchestration patterns | T1 (T1b-F04) | T3b wirings | no | keep the names, READ |
+| Five plan-grading criteria | T5a (T3-F07) | T2b-F16 | no | keep, distinct by name |
+| Four features; three components; four moving parts | T1; T2a; T2a | T3a F14 | no | unnumbered prose |
+| Three error channels; three dials; three ceilings; three wirings | T3a; T3a/T3b; T3b; T3b | T3b, lab Part A | no | unnumbered prose ("the dials", "the ceilings") |
+| Twelve commands; four zones; three memories | T2b | T3b, T5b | no | READ |
+| Six instruments; three lifetimes; PM chain | T5b | syllabus | no | READ |
+| Three operator mistakes; four mistakes at scale; Failure Cases 0–3 | T5c | — | cases only (FC0, FC1) | unnumbered where possible |
+| Three things AI cannot do | T5d (T6-F07) | — | no | reframe as non-delegable responsibility (A5) |
+
+### 0.5 Schedule and status (replaces §11)
+| # | Step | Latest by | Status |
+|---|---|---|---|
+| 0 | Save review; baseline commit; branch | Sep 14 | **done** — review saved, `515f50d` on `main`, branch `lec09-reorg` |
+| 1 | Plan v2 in place (this section); manifest with tiers; framework registry | Sep 16 | **done** — manifest + registry; this section |
+| 2 | Portability spike + `CLI_FACTS_2026-09.md`; assembler dry run; map v2 compiled | Sep 19 | **done** — `8ef29c0`. Claude Code facts from runs; Gemini CLI 0.47.0 and Codex CLI 0.154.0 from help and source only (headless calls wait on a login) |
+| 3 | Phase A: eleven decks compile, `check --strict` passes | Sep 23 | **done** — `d1da743` (all eleven compile ×2; page totals consistent) |
+| 4 | Lab: brief format, rung-3 runner, setup check, S1–S3 on two harnesses (k=3), Ex.4 transcripts + replay | Oct 3 | **mostly done** — runner and setup check `527a6a0`; S1 k=3, S2/S3 k=1 on Claude Code `c50c337`, `4c56892`; S3 k=3 (all defects 3/3, controls silent) `cc3ac95`; GDP transcript `447f38f`; Part A Step 4b replay `b210d31`; cold-open session transcript `cc3ac95`. S2 k=3 (each specialist 3/3 on its own defects, controls silent), 13 Sep. **Open:** S1–S3 on a second harness (needs `gemini` or `codex` login) |
+| 5 | Phase B: CORE frames in all decks (A3–A6), T4 deck | Oct 5 | **done** — `05e2a0a` (T1) … `3e2087a` (TA); T4 `c50c337` |
+| 6 | Student setup announcement + harness survey (**instructor action**) | Oct 9 | open |
+| 7 | Phase B: LAB/READ frames, TA; content freeze | Oct 12 | **done** — sweep `fc6cf74`; freeze after the QA fixes below |
+| 8 | §10 A–K cross-references; QA gate; merge; publish; links live | Oct 16 | **on the branch, merge pending** — cross-references, syllabus, site pages, published PDFs (`ccd7c66`, `a5558ea`). QA gate run on 12 Sep: `check` clean, 219 frames tiered (45/20/154), page totals, `build_slides --check` and `check_site` clean; `claim-checker` on all 95 Phase B frames and `boundary-auditor` on seven topics. About 20 errors fixed (see `Lec09_External_Facts_2026-09.md`, "Corrections"); outside claims checked on the web and recorded there. **Awaiting the instructor:** merge to `main`, push, and the live-link check. |
+| 9 | Freshness gate; run sheet; teams by harness | Oct 20 | open |
+
+Phase B works deck by deck, CORE first, to the rewrite standard in the review (§5 there): one claim per frame in the bold lead; economic twin on map frames and bridges; harness-neutral concepts with verified per-harness boxes; tagged and sourced numbers; no deck-history self-reference; at most five named frameworks at CORE. Delete a frame's `% ---- ID` marker only when its Phase B rewrite is done; `check` then stops tracking it.
+
+### 0.6 Verification added by v2 (on top of §12)
+- End of Phase A: `lec09_assemble.py check --strict` clean; all decks compile ×2; no `/ 100` page totals (poppler is not installed here — check totals with PyMuPDF).
+- Must be empty in the decks at the end of Phase B: `six cases`, `Cases 4--6`, `Can run Python`, `cluster at county`, `categorically outside`, "rejected" in the hook frame, `Placeholder --- written in Phase B`, `MERGE-PENDING`, `TODO(Phase B)`. Hand-review every `\b9\.[1-5]\b` hit.
+- Must hit: Lec10 T9 / Case 7 in T1 and T5c/T5d; the economic twin on every map frame; the harness mapping table in T2b.
+- Course agents: `boundary-auditor` on the ownership lines; `claim-checker` on every NEW or EDIT frame with a number; external dated claims web-verified with a date.
+- Portability: Step 0 detects `claude`, `gemini`, `codex`; S1–S3 at k=3 on each tested harness; one dry run of the 50-minute Design Lab with two harnesses in the room.
+
+### 0.7 Close-out (2026-09-13)
+
+**State.** All work is committed on branch `lec09-reorg` (baseline `515f50d` on `main`). It is **not merged or pushed**: nothing is live on the public site until the instructor approves.
+
+**Before merging, re-run:**
+```bash
+python3 tools/lec09_assemble.py check        # 195 source frames, 0 errors, 0 drifted
+python3 tools/build_slides.py --check         # 0 stale, 0 unresolved
+python3 tools/check_site.py                   # all checks passed
+```
+
+**Merge and publish (instructor):** `git checkout main && git merge --no-ff lec09-reorg && git push`. Then check that the eleven `slides/Lec09_*.pdf` links, `labs/`, and the T4 QR code (the labs hub) resolve.
+
+**Open items**
+
+| Item | Who | By | How |
+|---|---|---|---|
+| Merge and publish | instructor | Oct 16 | above |
+| S1–S3 on a second harness, k=3 | instructor logs in; then re-run | Oct 16 | fix Gemini CLI auth or `codex login`; `python3 scripts/detection_matrix.py scenarios/S1_aiyagari_audit --harness codex --k 3` (and S2, S3) |
+| Student harness survey and setup announcement | instructor | Oct 9 | Step 0: `python3 scripts/setup_check.py --live` |
+| Minute budget for the 45 CORE frames | instructor | Oct 16 | `Lec09_RunSheet_2026-10-22.md` |
+| Dry run of the 50-minute Design Lab with two harnesses | instructor | Oct 20 | T4 |
+| Freshness gate | Oct 19–20 | Oct 20 | `tools/lec09_cli_probes.sh`; update `CLI_FACTS_2026-09.md`; re-check the rows marked re-check in `Lec09_External_Facts_2026-09.md` (Navier–Stokes, Codex Goal Mode, METR per-model minutes) |
+| 讲稿 rewrite (follow-up) | — | after Oct 22 | known drift: OpenAI's MCP date (still DevDay, Oct 2025), "four" broken benchmarks (eight), the old hooks table |
+
+**Found outside Lecture 9, not changed here**
+- `source/Lec07_LLM/Lec07_T5b_Applications_Validation.tex:665` and `source/Lec08_RAG/Lec08_T5_Research_Applications_Demo_Eval.tex:444` repeat the unsourced "AEA … October 2024" disclosure claim that T5d replaced with the quoted AER rule.
+- `Lec10_T4_Case3_ESFellows.tex:84` dates the roster April 14, 2026; `Lec10_T7_Synthesis_Appendix.tex:261` says April 13. T4's age-status counts (44 + 1 + 836) sum to 881, not the 882 on its roster slide.
+- `source/Docs/Capstone_Projects_2026.md:526-528` still lists the Goldsmith-Pinkham guides; `figures/homeownership_by_age.jpg` is no longer used by any live deck.
 
 ## 1. Context
 
@@ -22,6 +128,8 @@ The seven asks and where they land:
 | 7 | Inventory of existing slides for copy-paste into the new set | Appendix A (every frame → new home) |
 
 ## 2. Motivating examples — the lecture's hook
+
+> **v2 (A4):** superseded by one capability ladder — chat window (Fellows in chat) → one agent, one sitting (six minutes) → files, many sittings (882 Fellows) → human gates, weeks (HA-Ramsey; counter-rung Lec10 T9) → team of sub-agents (the ledger) → scripted fan-out + verifier (Lec10 T6b). The GDP trap spans every rung; Navier–Stokes is a dated sidebar in T3b and TA only.
 
 The lecture opens on a **ladder of six real examples**, ordered by how long the agent worked, from six minutes to eighty-eight hours. Each rung shows what the agent did, what the economist still had to do, and the failure that would have gone unnoticed without that economist. Every example already exists in the course material; T1 shows the ladder once, and each later part returns to its rung.
 
@@ -82,6 +190,8 @@ Frame-by-frame dispositions are in **Appendix A**; archive items in **Appendix B
 8. **Preserve what other lectures cite verbatim** (six-step labels, restate-the-spec sentence, "Context Dilemma", four pattern names, 5-pillar names) and fix the five inbound "Lec09 T3" strings.
 
 ## 5. The new agenda
+
+> **v2:** T4 is *Design Lab* (`Lec09_T4_Design_Lab.tex`); the map is `\LecNineMap{part}{sub}` with sub-deck chips and each part's economic twin; frame counts come from `lec09_assemble.py summary` (T1 19, T2a 17, T2b 26, T3a 22, T3b 21, T4 14, T5a 24, T5b 20, T5c 21, T5d 21, TA 14).
 
 ### 5.1 Structure map (this is also the spec for the new `lec09_map.tex` slide)
 
@@ -187,6 +297,8 @@ flowchart LR
 ```
 
 ## 6. Per-deck outlines
+
+> **v2:** the authoritative order, tiers and edits are in `reorg_manifest.yaml` (assembled in `d1da743`). The outlines below remain the rationale. Differences from them: T1 drops Story 3, the subjects frame and the separate Three Harnesses frame, and gains the principal–agent lens frame; T2b's `.claude` tree becomes the harness-neutral *Project Files Across Harnesses*; T3b edits in v1 attributed to T2b-F27 actually live in T2b-F26; T1b-F13 moves to T4; T5d gains the disclosure frame and ends on the k=0 job description before its bridge; TA loses the harness-file mapping (now T2b).
 
 Tags: [KEEP] as-is (refs updated) · [EDIT] content change · [MERGE a+b] · [MOVE] · [NEW] · [OPT] droppable (mark `% OPTIONAL` in the source). IDs and line numbers in Appendix A. House voice unchanged (bold lead sentence, "Why this matters for economists", tcolorboxes, no `\framesubtitle`, `[fragile]` on listings). Every deck except TA opens with `\LecNineMap{k}` (k = part number; T5d's job-description frame uses k=0).
 
@@ -324,6 +436,8 @@ Sections: *The Landscape (Dated)* / *Setup Details* / *Resources*
 
 ## 7. The Design Sprint (T4) in detail
 
+> **v2 (A2, A6):** renamed *Design Lab*. The deliverable is a harness-neutral brief compiled to a sub-agent, a skill, or a headless prompt; the acceptance test runs at rung 3 with k=3 fresh processes per cell; the rubric grades rates and design, never one dispatch; S2 becomes a transfer case (new data, same leading-verb anatomy, unambiguous planted defects); S3's gate is a PreToolUse hook where hooks exist and a runner check elsewhere; every scenario must pass on both tested harnesses.
+
 ### 7.1 Sprint workflow (frame 2 of T4 shows exactly this)
 
 ```
@@ -404,6 +518,8 @@ Every mechanism frame gets a picture. [EXISTS] = TikZ already in a current deck 
 
 ## 9. Cross-cutting changes
 
+> **v2:** ownership additions — the principal–agent lens → T1 (evidence: Lec10 T9); collaborating with AI → T5b; harness file mapping → T2b; reliability under repetition → T4. MCP remains explained only in TA.
+
 - **Map v2** (`L9/lec09_map.tex`, rewrite in place, spec = §5.1): five part boxes with the student question beneath; sub-deck chips (T1 | T2a T2b | T3a T3b | T4 | T5a T5b T5c T5d); `\LecNineMap{k}`, k∈{1..5} highlights the part, k=0 = all-complete reprise; dashed satellites "Appendix TA (dated landscape)" and "Lab / Lec10"; bottom band HOW IT WORKS / HOW TO BUILD & USE IT / YOUR ROLE. Keep the style names and the precomputed-`\tikzset` idiom (the file's own comment explains why `\ifnum` cannot sit inside a TikZ option list). Measure once for 16:9.
 - **Ownership map** (topic → owner; everyone else cross-references): chat/copilot/agent, loop, four features, spectrum, orchestration-pattern names, multi-agent cost-benefit, METR horizons, four research patterns, the example ladder → **T1** · harness/LLM/files, JSON tool call, privacy boundary, session-as-list, twenty-line loop, ReAct, GDP trace → **T2a** · terminal, install, Git, global/local files, `.claude` tree, init, three memories, resolution rule, the twelve commands/modes/keys/permissions, first session, tokens/context/compaction mechanics → **T2b** · why three agents, eight steps, canvas, tool/skill/sub-agent by who-reasons, what a skill is (+folder), plain English vs skill, playbooks, economist skills → **T3a** · dials, ceilings, isolation, wirings, router myth, dispatch evidence, three rungs and their surfaces (`/agents`, `--agent`, `--agents`, `-p`, `--bg`), four-digit runs, ledger, corrections table → **T3b** · sprint protocol, scenarios, rubric, links → **T4** · six-step pipeline (verbatim), 5-pillar spine, restate-the-spec, five plan-grading criteria, validation checklist, V0/seed, OLG demo, tool choice, prompt specificity → **T5a** · PM chain, milestones, division-of-labor contract, gates, instruments on disk, corrections file, skills/agents/rules *when they load*, rules+hooks, settings.json, lifetimes, RA team, orchestration at scale, HPC → **T5b** · tracing, operator mistakes, Failure Cases 0–3, four mistakes at scale, compaction cost, context-as-prior, dilemma + evidence, epistemic caveat, remedy → **T5c** · security, prompt injection, reliability/pass^k, chain of custody, seven tests, cannot-do, when-not, trust-but-verify, what changes, paradigm shift completed, job description, 30-day plan, clean-up prompt, Lec10 preview → **T5d** · interop stack (MCP/A2A explained), frameworks, reasoning models, scheduled runtimes, computer use, dated install/keys/templates, harness-file map, resources, references → **TA** · 13k-call numbers → Lec10 T6b · "no resets, no parallel worlds" → Lec05.
 - **Retired header rules** (T2b:7–17, T2c:6–24 boundary blocks): "MCP appears ONLY in T1b" → "MCP is explained only in TA; T1's timeline names it once (dated); no other deck." "T2 owns the CLI surface; T2c may own `/agents`" → "T2b owns the twelve commands/modes/permissions; T3b owns the rung surfaces." Every new deck header carries the ownership map, one line per topic.
@@ -428,6 +544,8 @@ K. `Lec09_讲稿.md`: regenerate after the decks freeze (out of scope; note in t
 
 ## 11. Implementation steps
 
+> **v2:** superseded by the dated schedule in §0.5 (baseline commit and branch first; manifest-driven Phase A before the Phase B rewrite).
+
 0. This plan is saved at `L9/Lec09_Reorg_Plan_2026-09-12.md` (done) and mirrored in the session plan file.
 1. Archive: `mkdir -p L9/_archive/five_acts_2026-07/`; move the nine decks + build artifacts + map v1; patch `build_all_topic_decks.sh`. Verify `ls L9/Lec09_T*.tex` is empty.
 2. Write `lec09_map.tex` v2 (§5.1); compile inside T1 first; visually QA k=1 and k=0.
@@ -441,6 +559,8 @@ K. `Lec09_讲稿.md`: regenerate after the decks freeze (out of scope; note in t
 
 ## 12. Verification
 
+> **v2:** extended by §0.6.
+
 - Each of the eleven decks compiles clean (pdflatex ×2); `qa_page_numbers.sh` passes; frame counts within ±3 of §5.3.
 - Must be empty: `grep -n 'framesubtitle' L9/Lec09_T*.tex` · `grep -n 'April 2026' L9/Lec09_T*.tex` · `grep -rn -E 'Lec09 T3\b|Lec09_T3_Homotopy' source/Lec10_Case_Studies/` · `grep -n -E '\bT6\b|9\.1b|9\.2b|9\.2c|\bAct [1-5]\b' L9/Lec09_T*.tex | grep -v ':%'` · `grep -rn -E 'Topic 9\.[0-9][bc]?' labs/Lec09_Agent_Lab/` · `grep -n 'never run\|four days old\|TODO Pass B' L9/Lec09_T*.tex`.
 - Must hit: the six labels `1.\\Design … 6.\\Extend` in T5a (count 6) and the sentence "ask the agent to restate the specification in its own words before it writes code" (count 1); "Context Dilemma" in T5c; the four pattern names in T1; `\LecNineMap` once per deck except TA, exactly one `{0}` (T5d); `MCP` only in T1 (≤1) and TA.
@@ -451,6 +571,8 @@ K. `Lec09_讲稿.md`: regenerate after the decks freeze (out of scope; note in t
 - Inbound check: `grep -rn "Lec09" source/Lec07_LLM source/Lec08_RAG source/Lec10_Case_Studies source/Docs` — every hit still points at an existing deck.
 
 ## 13. Decisions taken (override before implementation if you disagree)
+
+> **v2:** decision 8 is replaced (the baseline was committed before archiving, `515f50d`); decision 11's `% OPTIONAL` marks are replaced by tiers; decision 3 stands, with the ladder of §0.2 A4. New decisions are in §0.1.
 
 1. **Numbering follows the agenda** (T1, T2a/b, T3a/b, T4, T5a–d, TA); costs five string edits in Lec10_T8 plus the syllabus/site links.
 2. **T1b survives as the Appendix deck** (TA), with three frames promoted into T1 §C and four into T5d; T1b-F07 cut.
@@ -471,6 +593,8 @@ K. `Lec09_讲稿.md`: regenerate after the decks freeze (out of scope; note in t
 - Combined PDF regeneration if wanted; `notes/09-04-2026.txt` is fully answered by T2a/T3a/T3b (archive or keep as a design record).
 
 ## Appendix A — Disposition of every existing frame
+
+> **v2:** executable form: `reorg_manifest.yaml`; list the source frames with `python3 tools/lec09_assemble.py inventory`.
 
 Format: `ID (line) · title → new deck §section (tag)`. IDs = k-th `\begin{frame}` in file order excluding the title frame and `\sectiondivider`s (all verified). S: = section divider.
 

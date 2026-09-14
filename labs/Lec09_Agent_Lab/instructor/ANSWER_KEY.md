@@ -41,6 +41,11 @@ a solver that crashes teaches nothing about silent failure.
    `1 - sigma = 0`. The constant is currently 2, so it does not bite, but the
    function is presented as general.
 
+> **Run on 2026-09-12 (rung 3, Claude Code 2.1.270, `scripts/detection_matrix.py`).** Asked whether the printed
+> number is the quantity the docstring claims, `econ-agent` wrote: *"This is a stated scope limit, not a defect."*
+> That is why the walkthrough's matrix now scores partial equilibrium as a **scope row that must stay silent**,
+> not as a defect to catch.
+
 ## What `domain-reviewer` should explicitly clear
 
 7. **`EV = P @ V.T` is correct.** `EV[iz, ia']` is
@@ -97,11 +102,11 @@ derives finding #2 from first principles — no hint, no key:
 
 It also organised the report under this key's own headings ("## 1. Outright
 bugs") — those come from the `description` and body of `code-reviewer.md`, which
-is the §4 point about prose being the mechanism, visible in the output.
+is T3b's point about prose being the mechanism, visible in the output.
 
 ## Teaching use
 
 Findings 1–2 are `code-reviewer`'s and finding 5 is `domain-reviewer`'s, and
 neither agent can produce the other's. That is the argument for specialisation.
 Finding 7 is the trap that shows why agreement between agents is weak evidence
-(Topic 9.5's point, made concrete).
+(T5c's point, made concrete).

@@ -129,29 +129,59 @@
     "master_md5": "4747c79446f5f884c23689edc3a2afe4",
     "pages": 24
   },
-  "Lec09_T1_Framing_Setup.pdf": {
-    "master": "source/Lec09_Agentic_AI/Lec09_T1_Framing_Setup.pdf",
-    "master_md5": "287b9eb5365b276430bdb0c888f39e29",
+  "Lec09_T1_Agent_Opportunity.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T1_Agent_Opportunity.pdf",
+    "master_md5": "9291ce1e8d36ee08c2f023d7bf538058",
+    "pages": 24
+  },
+  "Lec09_T2a_How_an_Agent_Runs.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T2a_How_an_Agent_Runs.pdf",
+    "master_md5": "482f56599235326d23c391ac783baabb",
     "pages": 21
   },
-  "Lec09_T2_Under_the_Hood_FirstSession.pdf": {
-    "master": "source/Lec09_Agentic_AI/Lec09_T2_Under_the_Hood_FirstSession.pdf",
-    "master_md5": "8b139606a9b3155c267cad226e02cdbc",
-    "pages": 31
+  "Lec09_T2b_Setup_Files_Commands.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T2b_Setup_Files_Commands.pdf",
+    "master_md5": "2cd5b4f283747c25bd6e98b8f88f81a9",
+    "pages": 32
   },
-  "Lec09_T3_Homotopy_Tools.pdf": {
-    "master": "source/Lec09_Agentic_AI/Lec09_T3_Homotopy_Tools.pdf",
-    "master_md5": "9fdbbdc88f55e215d5180711fe963534",
-    "pages": 23
+  "Lec09_T3a_Build_an_Agent.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T3a_Build_an_Agent.pdf",
+    "master_md5": "515bb97aa9fcf3b91cd19bcc5530e7ac",
+    "pages": 26
   },
-  "Lec09_T4_Project_Org.pdf": {
-    "master": "source/Lec09_Agentic_AI/Lec09_T4_Project_Org.pdf",
-    "master_md5": "1dffc2850c7530d1c29092a4c3466e01",
+  "Lec09_T3b_Invoking_Agents.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T3b_Invoking_Agents.pdf",
+    "master_md5": "77327d0195ce4314439d1642104310c4",
     "pages": 28
   },
-  "Lec09_T5_Tracing_Mistakes_Context.pdf": {
-    "master": "source/Lec09_Agentic_AI/Lec09_T5_Tracing_Mistakes_Context.pdf",
-    "master_md5": "319e1480f0ee422395d3cde03b38a882",
+  "Lec09_T4_Design_Lab.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T4_Design_Lab.pdf",
+    "master_md5": "1361cb995063cf924fa3d41ad7402c8f",
+    "pages": 15
+  },
+  "Lec09_T5a_Homotopy_Method.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5a_Homotopy_Method.pdf",
+    "master_md5": "f50d70d1d6bf034c1a9f3136f22ddd33",
+    "pages": 28
+  },
+  "Lec09_T5b_Project_Management.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5b_Project_Management.pdf",
+    "master_md5": "23b8c1d9e534eb4f1007f751c54c87c6",
+    "pages": 25
+  },
+  "Lec09_T5c_Tracing_Mistakes_Context.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5c_Tracing_Mistakes_Context.pdf",
+    "master_md5": "d9635cdd800bbb2224d58a91b43b4541",
+    "pages": 25
+  },
+  "Lec09_T5d_Governance_Action_Plan.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5d_Governance_Action_Plan.pdf",
+    "master_md5": "1b3a0d7556324ef608ee68bde3aa351e",
     "pages": 27
+  },
+  "Lec09_TA_Appendix_Landscape.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_TA_Appendix_Landscape.pdf",
+    "master_md5": "fc22261852886a50c083daa52637f298",
+    "pages": 18
   }
 }

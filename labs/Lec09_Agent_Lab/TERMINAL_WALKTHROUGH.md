@@ -3,18 +3,22 @@
 *Lecture 9 lab, part 2. Part A stubbed the model so you could see the loop.
 This part uses a real one.*
 
-**Time:** about 30 minutes. **Cost:** a few cents of your Claude Code
-subscription. **You need:** `claude` on your PATH and a completed `/login`.
+**Time:** about 30 minutes. **Cost:** a few cents of your subscription.
+**You need:** one terminal agent on your PATH and logged in. Run
+`python3 scripts/setup_check.py --live` first; it tells you which you have.
 
-> Everything here works the same way in other terminal agents (Codex CLI,
-> Gemini CLI, Aider). The file layout and slash-commands differ; the mechanism
-> does not. A portability note is at the end.
+> **Which route is yours.** Steps 1–8 are written for Claude Code, where custom
+> sub-agents were tested end to end. On Gemini CLI or Codex CLI, read Steps 1–6
+> for the ideas, do Step 7 at rung 3 with `scripts/detection_matrix.py`, and use
+> the table at the end for the equivalent files and commands. As of 12 Sep 2026
+> those two routes are built from each CLI's help and installed source, not yet
+> from a logged-in run; the table says which fact is which.
 
 ---
 
 ## What you are about to test
 
-Topic 9.2b made four claims. You are going to try to break each one:
+T3b made four claims. You are going to try to break each one:
 
 | # | Claim | The check |
 |---|---|---|
@@ -43,7 +47,7 @@ Three specialists ship with this lab, in `.claude/agents/`:
 | `domain-reviewer.md` | does the code implement the economics? | Read, Grep, Glob |
 | `verifier.md` | run it; report only what happened | Read, Bash, Glob |
 
-These are the same three names Topic 9.4 uses for the RA team. Now they are
+These are the same three names T5b uses for the RA team. Now they are
 real files.
 
 Each is **YAML frontmatter plus prose**. There is no code in them. Note in
@@ -157,7 +161,7 @@ produce the other's finding.
 
 > **⚠️ The trap.** All three workers received *your* framing through the task
 > string you wrote. If they agree, that is weak evidence — they inherited a
-> common prior. Topic 9.5 makes this argument in full. A clean context window
+> common prior. T5c makes this argument in full. A clean context window
 > buys focus, not independence, and no number of extra workers fixes it.
 
 **A worked example of that trap, from building this lab.** Two earlier drafts
@@ -229,7 +233,7 @@ model. Nobody checks the stated model against the *correct* one — look at
 `instructor/ANSWER_KEY.md` after class and you will find a limiting-case defect
 filed under `domain-reviewer`, because no file owns the mathematics.
 
-Three more agents ship in this lab, cut that second way (Topic 9.2b §2):
+Three more agents ship in this lab, cut that second way (T3a):
 
 | File | Background | Tools |
 |---|---|---|
@@ -246,7 +250,7 @@ against the model stated in its docstring. The calibration is annual.
 
 Compare what comes back with what `domain-reviewer` said in Step 3. They
 overlap less than you expect — and notice that you just used rung 2 (you named
-the agent), where Step 3 used rung 1 (the model chose). Topic 9.2c §1.
+the agent), where Step 3 used rung 1 (the model chose). T3b's three rungs.
 
 Now write a fourth of your own, from the eight cells of
 `AGENT_DESIGN_CANVAS.md`. The canvas is the assignment; this is the shape its
@@ -303,8 +307,8 @@ rather than detection.
 |---|---|---|---|
 | the loop never tests a convergence criterion |  |  |  |
 | a utility function evaluated outside its domain |  |  |  |
-| an aggregate computed and then discarded |  |  |  |
 | *control:* `EV = P @ V.T`, which is **correct** | silent? | silent? | silent? |
+| *scope:* partial equilibrium, stated in the docstring --- a limitation to state, **not a bug** | silent? | silent? | silent? |
 
 What the matrix tells you, and what no single report can:
 
@@ -312,9 +316,9 @@ What the matrix tells you, and what no single report can:
   dispatched, or it was and found nothing it owns.
 - **A full column** — too broad. You do not have a specialist, you have a third
   copy of one generalist.
-- **Anything in the control row** — a false positive, and the most important
+- **Anything in the control or scope row** — a false positive, and the most important
   result in the lab. An agent that finds something in every category is not
-  being careful; it is being agreeable. Topic 9.5 is about why.
+  being careful; it is being agreeable. T5c is about why.
 - **A cell where two agents agree** — weak evidence, not strong. They read the
   same file, with a framing you wrote.
 
@@ -326,7 +330,7 @@ the teaching material found the answers, not the defects.
 
 ## Step 8 — The same task at all three rungs
 
-Topic 9.2c claims there are exactly three ways to invoke an agent, and that they
+T3b claims there are exactly three ways to invoke an agent, and that they
 differ only in who chooses. Run one task three ways and see it.
 
 **Rung 1 — you describe, the model chooses.** No agent named:
@@ -362,28 +366,44 @@ wait
 **What to notice.** Rung 3 never asked your permission and never showed you a
 transcript. That is the trade: you stopped spending a turn per dispatch, and in
 exchange you now need something other than your own reading to decide whether
-each answer is any good. Topic 9.2c §4 is about choosing which.
+each answer is any good. T3b's last section is about choosing which.
 
-*Verified on Claude Code 2.1.269. There is no `--max-turns` at the CLI; the
-per-run ceiling is the `model:` line in the agent file.*
+*Verified on Claude Code 2.1.269. There is no per-run turn-cap flag
+(`--max-turns` does not exist): budget a scripted run through the model, the
+tool allowlist, and the brief.*
 
 ---
 
 ## Portability: the same thing elsewhere
 
-The pattern outlives any one product (Topic 9.1b's point).
+The pattern outlives any one product (Appendix TA's point); the surfaces do
+not. Facts below are from `source/Lec09_Agentic_AI/CLI_FACTS_2026-09.md`,
+established 12 Sep 2026: **RUN** = observed by running it, **HELP** = read from
+the CLI's own help, **SRC** = read from the installed package but not yet run,
+**OPEN** = not yet established.
 
-| | Claude Code | Codex CLI / others |
-|---|---|---|
-| Specialist definitions | `.claude/agents/*.md` | equivalent config dir |
-| Inspect them | `/agents` | the tool's list command |
-| Dispatch appears as | an `Agent` tool call | a tool/function call |
-| Selection driven by | the `description` prose | the same |
+| | Claude Code 2.1.269 | Gemini CLI 0.47.0 | Codex CLI 0.154.0 |
+|---|---|---|---|
+| Specialist definitions | `.claude/agents/*.md` — RUN | `.gemini/agents/*.md`, same front-matter fields — SRC; ignored until you trust the folder — RUN | a `spawn_agent` tool with an `agent_type` — SRC; where custom types live — OPEN |
+| A dispatch appears as | an `Agent` tool call with `subagent_type` — RUN | OPEN | a `spawn_agent` tool call — SRC |
+| Instructions file | `CLAUDE.md` — RUN | `GEMINI.md` — SRC | `AGENTS.md` — SRC |
+| Rung 3, scripted | `claude -p "…" --output-format json` — RUN | `gemini -p "…" -o json` — HELP | `codex exec "…" --json` — HELP |
+| Read-only run | `--allowedTools Read Grep Glob --permission-mode dontAsk` — RUN | `--approval-mode plan` — HELP | `-s read-only` — HELP |
+| Per-run turn cap | no flag — HELP | OPEN | OPEN |
 
-`codex` was **not installed on the machine this lab was written on**, so the
-Claude Code path is the tested one and the right-hand column is stated from the
-shared mechanism rather than from a run. If you have Codex CLI, repeat Step 3
-under it and compare: the vocabulary differs, the loop does not.
+**What this means for you.** Rungs 1 and 2 (Steps 3–6) run on each harness's
+own sub-agent surface, and those surfaces differ. Rung 3 is the same idea
+everywhere: one fresh process per question, the answer parsed rather than read.
+That is why the acceptance test is scripted:
+
+```bash
+python3 scripts/detection_matrix.py scenarios/S1_aiyagari_audit --harness gemini --k 3   # or codex, claude
+```
+
+`agent_lab.harness_ask` holds the exact command it runs for each harness, and
+the runner records the CLI's `--version` in each run's `summary.json`. If a
+command in the table fails on your version, say so in your hand-in: that is a
+finding, not a failure.
 
 ---
 
@@ -407,4 +427,4 @@ under it and compare: the vocabulary differs, the loop does not.
 
 Part B calls a live model; it will **not** reproduce verbatim. Record the date,
 `claude --version`, and the model name next to anything you keep — the
-chain-of-custody discipline from Topic 9.1b.
+chain-of-custody discipline from T5d.

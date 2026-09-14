@@ -1,0 +1,588 @@
+%% FullCourse_10Lecs -- Lecture 9, Part 9.1
+%% Assembled by tools/lec09_assemble.py from reorg_manifest.yaml: Phase A of
+%% Lec09_Reorg_Plan_2026-09-12.md as amended by Lec09_Reorg_Plan_Review_2026-09-12.md.
+%% Each "% ---- <ID> · <TAG> · TIER" marker names a frame's source deck and line;
+%% keep the markers until Phase B is done (lec09_assemble.py check reads them).
+%% Owns: the example ladder (capability rungs); the principal-agent lens (Lec10 T9 owns the evidence)
+%% Owns: chat vs agent (where the loop runs), the agentic loop, four features, the spectrum
+%% Owns: orchestration-pattern names, multi-agent cost-benefit, measured task horizons (concept only)
+%% Owns: the four research patterns (Lec10 T1 cites the names)
+%% Defers: JSON tool call, session-as-list -> T2a; Git -> T2b; seven tests -> T5d
+%% Defers: MCP is named once in the timeline and explained only in TA; model-specific numbers -> TA
+
+\input{../shared_preamble.tex}
+
+% Suppress redundant auto-generated metropolis section page; \sectiondivider frames are the dividers we keep.
+\metroset{sectionpage=none}
+
+\graphicspath{{./pic/}{./figures/}{../}}
+
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{array} % >{\raggedright\arraybackslash}p{} columns in Phase B tables
+
+\input{lec09_map.tex}
+
+\title[AI for Econ Research]{AI for Economic Research: Dynamic Models, Language, and Agents\\
+Lecture 9.1: The Agent Opportunity --- From Chatbox to Agent Swarms}
+
+\begin{document}
+
+\makebeamertitle
+
+% ==== Phase B · NEW:From an Empty Folder to a Figure · TIER: CORE
+\begin{frame}{From an Empty Folder to a Figure}
+\textbf{Who gained health coverage after 2013? An empty folder, four prompts, and 22 minutes of agent time --- including the one decision the agent stopped to ask for.}
+
+\vspace{0.04cm}
+
+\begin{columns}[T]
+\begin{column}{0.47\textwidth}
+\centering
+\includegraphics[width=\linewidth]{uninsured_by_age_agent.png}
+
+{\tiny\textit{The agent's figure (ACS, 2008--2024). Lec10 T3 takes the question further.}}
+\end{column}
+\begin{column}{0.51\textwidth}
+\footnotesize
+\textbf{What the agent did}
+\begin{itemize}\scriptsize
+  \item Found the right Census table, then hit a wall: the data API now requires a key that is emailed to a person
+  \item Tried the no-key tables, patched a spreadsheet-parsing bug --- and stopped to ask: wait for a key, or accept gaps? (11 minutes, 59 tool calls)
+  \item Given a decision, built three consistent age groups with margins of error in under 4 minutes; then the figure and the labels
+\end{itemize}
+
+\vspace{0.04cm}
+\textbf{What stayed with the economist}
+\begin{itemize}\scriptsize
+  \item Choosing the data: it assumed one year's age groups hold in every year (they were redrawn in 2017), and its fallback crossed a survey redesign
+  \item The question, what to mark --- and one catch in the final figure: 2020 ACS data were collected; only the standard estimates were not released
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.04cm}
+{\scriptsize \textit{Recorded 13 Sep 2026 (Claude Code 2.1.270); transcript in the lab's \texttt{transcripts/}; numbers re-checked against Census tables. \textbf{[solid]}}}
+\end{frame}
+
+% ==== Phase B · T1-F01 · TIER: CORE
+\begin{frame}{Lecture 9 in One Map}
+\textbf{One lecture, five parts, eleven decks, three questions: how agentic AI works, how to use it well, and what your role is.}
+
+\LecNineMap{1}{}
+
+\vspace{0.1cm}
+\footnotesize\textit{Two research threads run through all five parts: \textbf{HA-Ramsey} (a published research program, full case in Lec10 T8) and the \textbf{ES Fellows dataset} (a project you could build this week, full case in Lec10 T4). Here we study the workflows; the cases themselves come later this morning. Under each part, in blue, is the economist's version of its question.}
+\end{frame}
+
+
+%=============================================================================
+\section{The Agent Opportunity}
+%===========================================================
+
+\sectiondivider{The Agent Opportunity}{What changed, and why an economist should care}
+
+% ---- T1-F02 · EDIT · TIER: READ · from T1:45
+\begin{frame}{Why Economists Should Care: Execution Is the Bottleneck}
+\textbf{The bottleneck in applied research is often not ideas. It is execution.}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+    \item Turning a good question into clean code, diagnostics, tables, and figures is slow
+    \item Many research tasks are repetitive: reshape data, rerun specifications, trace sources, refactor scripts, update plots
+    \item Agentic tools compress the time from \textit{idea} to \textit{first defensible result}
+    \item That raises the return to the skills economists uniquely provide: question design, institutional knowledge, validation, and judgment
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{The promise is not ``AI does research for you.''} It is faster implementation and iteration around a question you still define and defend. The rest of the lecture supplies what that takes: how an agent runs (9.2), how to build and call one (9.3), how to design and validate one (9.4), and how to run, check, and govern a whole project (9.5).
+\end{frame}
+
+% ==== Phase B · NEW:The Ladder: From a Chat Window to a Verified Swarm · TIER: CORE
+\begin{frame}{The Ladder: From a Chat Window to a Verified Swarm}
+\textbf{Every example in this lecture sits on one rung of the same ladder. Each rung buys reach and scale --- and moves the economist's job from doing the work to checking it.}
+
+\vspace{0.02cm}
+\begin{center}
+\begin{tikzpicture}[
+    rung/.style={font=\tiny\bfseries, text=RedTitle, text width=2.15cm, align=center},
+    ex/.style={rectangle, rounded corners=2pt, draw=black!55, fill=VeryLightGray,
+        text width=2.08cm, minimum height=1.02cm, align=center, font=\tiny, inner sep=2pt},
+    hum/.style={font=\tiny, text width=2.15cm, align=center, text=blue!40!black},
+    ret/.style={font=\tiny\itshape, text width=2.15cm, align=center, text=black!55},
+    arr/.style={-{Stealth[length=1.5mm]}, thick, gray!55}
+]
+  \node[rung] at (0,1.02)     {chat window};
+  \node[rung] at (2.36,1.02)  {one agent,\\ one sitting};
+  \node[rung] at (4.72,1.02)  {one agent,\\ many sittings};
+  \node[rung] at (7.08,1.02)  {agent $+$ human\\ gates, weeks};
+  \node[rung] at (9.44,1.02)  {a team of\\ sub-agents};
+  \node[rung] at (11.8,1.02)  {fan-out $+$\\ a verifier};
+
+  \node[ex] (e1) at (0,0)     {\textbf{Fellows in a chat}\\ four things break\\ in the first hour};
+  \node[ex] (e2) at (2.36,0)  {\textbf{An empty folder}\\ Census data to a figure;\\ one decision asked};
+  \node[ex] (e3) at (4.72,0)  {\textbf{882 ES Fellows}\\ 18 batches of 50,\\ a URL per field};
+  \node[ex] (e4) at (7.08,0)  {\textbf{HA-Ramsey}\\ weeks, not years;\\ three discoveries};
+  \node[ex] (e5) at (9.44,0)  {\textbf{The ledger}\\ four sub-agents,\\ 448{,}576 tokens};
+  \node[ex] (e6) at (11.8,0)  {\textbf{11{,}171 labels}\\ one five-hour window};
+  \foreach \i/\j in {1/2,2/3,3/4,4/5,5/6} {\draw[arr] (e\i) -- (e\j);}
+
+  \node[hum] at (0,-0.95)     {notices what breaks};
+  \node[hum] at (2.36,-0.95)  {asks the question; chooses the data};
+  \node[hum] at (4.72,-0.95)  {redesigns the variable when birth year is unmeasurable};
+  \node[hum] at (7.08,-0.95)  {catches the timing bug; signs each gate};
+  \node[hum] at (9.44,-0.95)  {writes the four briefs; pays for its mistakes};
+  \node[hum] at (11.8,-0.95)  {specs the rubric; reads a dozen labels};
+
+  \node[ret] at (0,-1.62)     {T1};
+  \node[ret] at (2.36,-1.62)  {this deck};
+  \node[ret] at (4.72,-1.62)  {T2b, T5c, Lec10 T4};
+  \node[ret] at (7.08,-1.62)  {T5a, T5b, Lec10 T8};
+  \node[ret] at (9.44,-1.62)  {T3b, T5c};
+  \node[ret] at (11.8,-1.62)  {T3b, Lec10 T6b};
+
+  \node[font=\tiny\bfseries, text=blue!40!black, anchor=east] at (-1.12,-0.95) {human};
+  \node[font=\tiny\itshape, text=black!55, anchor=east] at (-1.12,-1.62) {returns};
+
+  \node[rectangle, rounded corners=2pt, draw=red!55!black, dashed, fill=red!4, font=\tiny,
+        text width=5.0cm, align=center, inner sep=2.5pt] at (9.2,-2.3)
+        {\textbf{Counter-rung (Lec10 T9):} an assistant passed every gate by fitting the answer it was graded on. The loophole was in the contract.};
+  \node[font=\tiny, text width=6.9cm, align=left, anchor=west] at (-1.1,-2.3)
+        {\textbf{On every rung:} a leading prompt survives. ``Rationalize how party affiliation affects GDP growth'' (T2a) --- no number of agents fixes the verb.};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.02cm}
+{\scriptsize \textit{Not on the ladder: a vendor-reported ten-thousand-agent proof run, still disputed --- a dated sidebar in T3b and Appendix TA.}}
+\end{frame}
+
+% ==== Phase B · NEW:Delegating to an Agent Is a Principal--Agent Problem · TIER: CORE
+\begin{frame}{Delegating to an Agent Is a Principal--Agent Problem}
+\textbf{Economists already own the theory behind this lecture. Hand a task to an agent and you become a principal: you see what comes back, not how it was made.}
+
+\vspace{0.1cm}
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners, draw=black!60, fill=VeryLightGray,
+        text width=3.1cm, minimum height=0.8cm, align=center, font=\scriptsize},
+    bad/.style={box, draw=red!55!black, fill=red!5},
+    a/.style={-{Stealth[length=2mm]}, thick, gray!70}
+]
+  \node[box] (w) at (0,0)    {\textbf{What you want}\\ the research object};
+  \node[box] (c) at (4.5,0)  {\textbf{What you wrote down}\\ prompt, brief, tests};
+  \node[bad] (x) at (9.0,0)  {\textbf{What the agent optimizes}\\ whatever passes the tests};
+  \draw[a] (w) -- node[above, font=\tiny] {encoded as} (c);
+  \draw[a] (c) -- node[above, font=\tiny] {maximized by} (x);
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.05cm}
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\footnotesize\textbf{Frictions you already know}
+\begin{itemize}\footnotesize
+  \item \textbf{Hidden action:} you observe the output, not the process (Holmstr\"om 1979)
+  \item \textbf{A proxy objective:} a measure that becomes a target stops measuring (Goodhart 1975)
+  \item \textbf{Relative prices moved:} generation got cheap; verification did not (Tao, ICM 2026)
+\end{itemize}
+\end{column}
+\begin{column}{0.53\textwidth}
+\footnotesize\textbf{So Lecture 9 is the principal's toolkit}\\[3pt]
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}p{0.9cm}p{5.3cm}@{}}
+\textbf{9.2} & know what you pay for: tokens, context, reach \\
+\textbf{9.3} & write the contract: one job description per agent \\
+\textbf{9.4} & audit it: planted defects, repeated trials \\
+\textbf{9.5} & monitor the action: gates, traces, red lines \\
+\end{tabular}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+{\scriptsize \textit{``Agent'' means three things in this course: an LLM in a loop (here), a household in Aiyagari or HA-Ramsey, and the agent of contract theory. Evidence that this lens bites: Lec10 T9, where an assistant passed every gate by fitting the answer.}}
+\end{frame}
+
+% ==== Phase B · NEW:From Chatbox to Agent Swarm, 2022--2026 · TIER: READ
+% TODO(freshness gate): web-verify every date on this frame; keep each tagged. Source frames: TA's landscape section.
+\begin{frame}{From Chatbox to Agent Team, 2022--2026}
+\textbf{Four years, five capabilities: answering, calling tools, sharing plumbing, acting on your files, and running without you watching.}
+
+\vspace{0.15cm}
+\begin{center}
+\begin{tikzpicture}[
+    yr/.style={font=\scriptsize\bfseries, text=RedTitle},
+    capab/.style={rectangle, rounded corners=2pt, draw=black!50, fill=VeryLightGray,
+        text width=2.3cm, align=center, font=\tiny, minimum height=0.85cm, inner sep=2pt},
+    evt/.style={font=\tiny, text width=2.4cm, align=center, text=black!75}
+]
+  \draw[-{Stealth[length=2mm]}, very thick, gray!55] (-1.35,0) -- (12.95,0);
+  \foreach \x/\y in {0/2022, 2.9/2023, 5.8/2024, 8.7/2025, 11.6/2026} {
+     \fill[RedTitle] (\x,0) circle (2pt);
+     \node[yr] at (\x,-0.27) {\y};
+  }
+  \node[capab] at (0,0.8)    {\textbf{answers}\\ a chat window reaches the public};
+  \node[capab] at (2.9,0.8)  {\textbf{calls tools}\\ structured tool calls in the APIs};
+  \node[capab] at (5.8,0.8)  {\textbf{shares plumbing}\\ one protocol for tools and data};
+  \node[capab] at (8.7,0.8)  {\textbf{acts on your files}\\ terminal agents and sub-agents};
+  \node[capab] at (11.6,0.8) {\textbf{runs unattended}\\ background and scheduled runs};
+  \node[evt] at (0,-0.95)    {ChatGPT (Nov 2022)};
+  \node[evt] at (2.9,-0.95)  {function calling (Jun 2023); IDE assistants go mainstream};
+  \node[evt] at (5.8,-0.95)  {Anthropic's Model Context Protocol, MCP (Nov 2024)};
+  \node[evt] at (8.7,-1.05)  {Claude Code, Codex CLI, Gemini CLI; the protocol goes multi-vendor (Mar 2025), then to a neutral foundation (Dec 2025)};
+  \node[evt] at (11.6,-1.05) {scheduled and cloud agent runs (Apr--May 2026); thousand-task runs behind a verifier (Lec10 T6b)};
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.2cm}
+\begin{takeawaybox}
+\footnotesize\textbf{The model improved every year. What changed research practice was where the loop runs and what it can touch.} Each step lowered the cost of doing the work --- none lowered the cost of checking it.
+\end{takeawaybox}
+
+\vspace{0.05cm}
+{\scriptsize \textit{Dates as of September 2026; sources in Appendix TA, which also explains MCP.}}
+\end{frame}
+
+% ---- T1-F03 · KEEP · TIER: READ · from T1:62
+\begin{frame}{Story 1 --- HA-Ramsey: Weeks, Not Years}
+\textbf{Proper use of an agentic workflow turned one published solver into a new research program.}
+
+\vspace{0.15cm}
+
+\begin{examplebox}
+\small
+\textbf{Seed:} a working, validated representative-agent (RA) ``deep Ramsey'' neural solver --- the complete code behind Feng--Han--Zhu (2026).\\
+\textbf{Target:} the heterogeneous-agent (HA) Ramsey model of Chien--Feng--Wen (2027) --- the entire paper: idiosyncratic risk, borrowing constraints, a 4--5D state.\\
+\textbf{Outcome:} a full HA research codebase \emph{plus} three methodological discoveries that surfaced from the AI iteration itself --- $\alpha$-shapes for non-convex feasible sets, the admissible set as a viability kernel, and a Lyapunov-type penalty for saddle-path selection.
+\end{examplebox}
+
+\vspace{0.2cm}
+
+\begin{itemize}
+    \item The AI supplied \textbf{throughput} --- LaTeX drafting, PyTorch translation, diagnostics, 32+ sweeps; ``time from seed to working solver: \textbf{weeks, not years}; the binding constraint was economist judgment at the milestones, not implementation labor''
+\end{itemize}
+
+\textbf{Why show this first:} this is what ``using it properly'' buys. Not autocomplete --- research.
+
+{\scriptsize \textit{Full case with the economics and the figures: Lec10 T8, later this morning. Source: HA-Ramsey case-study package.}}
+\end{frame}
+
+% ---- T1-F04 · EDIT · TIER: READ · from T1:85
+\begin{frame}{Story 2 --- 882 Fellows: A Dataset You Could Build This Week}
+\textbf{The second thread is deliberately ordinary: build a credible dataset about the economics profession from the public web.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{Task:} career metadata for all 882 current Econometric Society Fellows --- election year, PhD year, research fields, career stage
+    \item \textbf{Seed:} the official Society roster, split into 18 batches of 50; every filled field must carry a source URL from an official or institutional page
+    \item \textbf{What makes it hard:} roster control, source discipline, state across sessions, auditable provenance --- \emph{bookkeeping, not intelligence}
+    \item \textbf{What happened:} the agentic workflow scaled the search massively; the honest headline was about what still could \emph{not} be measured (T5c tells that part)
+\end{itemize}
+
+\vspace{0.25cm}
+
+\textbf{Why two stories:} HA-Ramsey shows the ceiling of the method. The fellows dataset is the floor you can stand on immediately --- in Exercise B, you build one batch of 50 yourself.
+
+\vspace{0.1cm}
+{\scriptsize \textit{Full case with the coverage results: Lec10 T4, later this morning.}}
+\end{frame}
+
+
+%=============================================================================
+\section{Chat, Copilot, Agent}
+%===========================================================
+
+\sectiondivider{Chat, Copilot, Agent}{Where the loop runs, and what it can touch}
+
+% ---- T1-F05 · KEEP · TIER: READ · from T1:111
+\begin{frame}{What Modern Web Chat Already Does Well}
+\textbf{As of mid-2026, a strong web-chat product is already useful for economists.}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item Brainstorming model setups, empirical strategies, review rubrics, and robustness checks
+    \item Summarizing papers, referee reports, and lecture notes
+    \item Inspecting uploaded files and explaining code snippets
+    \item Sometimes browsing the web or running limited sandboxed tools
+    \item Helping you draft a specification before you open your editor
+\end{itemize}
+
+\vspace{0.3cm}
+
+\textbf{So the weak baseline is not ``a browser cannot do anything.''} The weak baseline is a \textit{single chat session without a durable harness}.
+\end{frame}
+
+% ==== Phase B · T1-F06 · TIER: READ (sandboxed chat stated accurately)
+\begin{frame}{What Breaks Without a Harness: The Fellows Test}
+\textbf{Try the fellows task in a plain chat window. It is a job of many sittings --- and four things break within the first hour.}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Durable context is weak.} The task spans days of separate sessions. The coding rules you settle today --- which sources count, how to record a missing PhD year --- are not reliably remembered by tomorrow's fresh chat
+    \item \textbf{Reusable workflow is weak.} Your checklist lives in prompts you retype (slightly differently) each time, not in a file the tool reads automatically
+    \item \textbf{Controlled execution is weak.} The chat works on copies you upload, inside its own sandbox; it cannot rerun a check against the files in your project --- \emph{you} become the copy-paste machine between the model and your folder
+    \item \textbf{Audit trail is weak.} Six weeks later: which source URL backed the PhD year of fellow \#312? A scrolled-away transcript cannot answer field-level questions
+\end{enumerate}
+
+\vspace{0.2cm}
+
+\textbf{That is the real contrast.} Agents are not magic because they are ``smarter.'' They are useful because they operate inside a structured project with files, tools, and repeatable workflows.
+\end{frame}
+
+% ==== Phase B · T1-F07..T1-F10 · TIER: CORE
+\begin{frame}{Same Model, Different Reach: Where the Loop Runs}
+\textbf{Same model. What changes is where the loop runs, what it can touch, and what survives.}
+
+\vspace{0.1cm}
+\begin{center}
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.1cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.3cm}|>{\raggedright\arraybackslash}p{3.9cm}|}
+\hline
+ & \textbf{Web chat} & \textbf{IDE assistant} & \textbf{Terminal agent} \\ \hline
+\textbf{Loop runs} & on the vendor's servers, in a sandbox & inside your editor & on your machine or your cluster \\ \hline
+\textbf{Can touch} & files you upload; sandboxed code & the project open in the editor & your files, your Python, R or Stata, your shell --- within your permissions \\ \hline
+\textbf{Persists} & the conversation & open files and their edits & files on disk: code, data, notes, standing instructions \\ \hline
+\textbf{Presses run} & you, one exchange at a time & you, or its agent mode & the agent, until a check stops it \\ \hline
+\textbf{Economist's use} & design the specification & clean one regression file & run the whole pipeline \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.06cm}
+\begin{takeawaybox}
+\footnotesize\textbf{These are rungs, not brands.} Web chats now run sandboxed code, and IDE assistants ship agent modes that run commands. Terminal agents --- Claude Code (our running example), Codex CLI, Gemini CLI --- differ in \emph{reach}, not intelligence: they work where your data and compute already live.
+\end{takeawaybox}
+
+\vspace{0.04cm}
+{\scriptsize \textit{T2a opens the loop; T5a returns to tool choice; dated product details: Appendix TA.}}
+\end{frame}
+
+% ---- T1-F08 · KEEP · TIER: CORE · from T1:172
+\begin{frame}{The Agentic Loop: Plan, Act, Observe, Verify, Repeat}
+\textbf{An agentic workflow is not one long generation. It is a control loop wrapped around tools, files, and checks.}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={rectangle, rounded corners, draw=RedTitle!70, fill=blue!5,
+        minimum width=2.0cm, minimum height=0.75cm, text width=1.9cm,
+        align=center, font=\scriptsize, text=DarkText},
+    mem/.style={rectangle, rounded corners, draw=black!55, fill=VeryLightGray,
+        minimum width=2.4cm, minimum height=0.8cm, text width=2.3cm,
+        align=center, font=\scriptsize, text=DarkText},
+    arr/.style={-{Stealth[length=2mm]}, thick, gray!60},
+    lab/.style={font=\tiny\itshape, text=black!60}
+]
+    \node[box] (goal) at (-3.6,0.75) {User goal\\+ success criteria};
+    \node[box] (plan) at (0,1.5)   {Plan\\next step};
+    \node[box] (act)  at (3.1,0.75)  {Act\\shell, Python, files, web};
+    \node[box] (obs)  at (3.1,-0.75) {Observe\\real outputs, real errors};
+    \node[box] (ver)  at (0,-1.5)  {Verify\\tests, benchmarks, review};
+    \node[mem] (memo) at (0,0)    {Project files\\+ memory on disk};
+    \node[box] (art)  at (-3.6,-0.75) {Artifact\\+ report};
+    \draw[arr] (goal) -- (plan);
+    \draw[arr] (plan) to[bend left=18] (act);
+    \draw[arr] (act) -- (obs);
+    \draw[arr] (obs) to[bend left=18] (ver);
+    \draw[arr] (ver) to[bend left=18] node[lab, below left] {not done yet: loop} (plan);
+    \draw[arr] (ver) -- node[lab, below] {checks pass} (art);
+    \draw[arr, dashed] (memo) -- (plan);
+    \draw[arr, dashed] (act) -- (memo);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+    \item \textbf{Orchestrator:} the loop deciding what to do next --- plan, act, observe, verify
+    \item \textbf{Memory:} saved project state on disk, not just chat history (dashed arrows: the loop reads it and writes it)
+    \item \textbf{Verifier:} tests, benchmarks, or review checks deciding whether output survives
+\end{itemize}
+\end{frame}
+
+% ==== Phase B · T1-F09 · TIER: READ (title and wording unnumbered, framework registry)
+% MiniCourse refinement: cleaner autonomy spectrum framing from M4_T3
+\begin{frame}{What Makes Something ``Agentic''?}
+\begin{itemize}
+    \item \textbf{Tool use} --- invokes \texttt{pandas}, \texttt{curl}, \texttt{R}, \texttt{statsmodels}, the shell, whatever the task requires
+    \medskip
+    \item \textbf{Autonomy} --- plans a multi-step empirical workflow without re-prompting.\\
+    \textit{e.g.,} ``download FRED $\to$ clean $\to$ regress $\to$ plot $\to$ save table'' as one command
+    \medskip
+    \item \textbf{Iteration} --- observes that a regression failed, identifies the bad column, fixes the formula, reruns
+    \medskip
+    \item \textbf{Persistence} --- remembers your project conventions across sessions (variable names, preferred packages, validated benchmarks)
+\end{itemize}
+
+\bigskip
+\textbf{The features are cumulative.} Tool use without autonomy = a glorified interactive console (a REPL --- \emph{read--eval--print loop}, like the Python \texttt{>>>} prompt). Autonomy without iteration = a script that dies on the first error. You need all of them for ``agentic.''
+\end{frame}
+
+
+%=============================================================================
+\section{The Landscape in Three Frames}
+%===========================================================
+
+\sectiondivider{The Landscape in Three Frames}{Patterns, costs, and how long agents really work}
+
+% ---- T1b-F04 · EDIT · TIER: READ · from T1b:102
+\begin{frame}{Four Orchestration Patterns}
+\textbf{Production agent systems are built from a small set of recurring control structures.}
+
+\vspace{0.18cm}
+
+\begin{center}
+\footnotesize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{3.0cm}|p{7.4cm}|}
+\hline
+\textbf{Pattern} & \textbf{Shape} \\ \hline
+Orchestrator--worker & a lead agent decomposes a task and dispatches workers; \emph{dominant in production} \\ \hline
+Planner--executor & one component plans, another executes step by step \\ \hline
+Reflection & the agent critiques and revises its own output before returning \\ \hline
+Handoff & control passes between specialized agents (e.g.\ triage $\to$ specialist) \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace{0.16cm}
+
+\footnotesize\textbf{The agent team you will build in Part 9.3 and run as an RA team in T5b is an orchestrator--worker system}: the main agent orchestrates; \texttt{code-reviewer}, \texttt{domain-reviewer}, and \texttt{verifier} sub-agents are the workers. The landscape just adds vocabulary and tooling around the same loop.
+\end{frame}
+
+% ==== Phase B · T1b-F06 · TIER: READ
+\begin{frame}{The Multi-Agent Cost--Benefit Decision}
+\textbf{More agents is not free. Treat it as marginal value vs.\ marginal cost.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}
+    \item Anthropic reports its multi-agent research system beat a single-agent baseline by \textbf{+90.2\%} on its own research eval\ldots\ \textbf{[hype]}
+    \item \ldots at roughly \textbf{15$\times$ the token cost} \textbf{[hype]}
+    \item So multi-agent pays off when the task is broad, parallelizable, and the answer's value is high relative to tokens
+    \item It is wasteful for narrow, sequential, or cheap tasks
+\end{itemize}
+
+\vspace{0.12cm}
+{\scriptsize \textbf{[hype: vendor-internal eval]} --- a self-defined research task, not an external suite. Read the $+90.2\%$ as directional, not portable.}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{takeawaybox}
+\footnotesize\textbf{Economist framing.} You are choosing a point where marginal research value $=$ marginal token (and latency, and debugging) cost. The Aiyagari sub-agent review in T5b is justified on \emph{wall-clock}, not because ``more agents are better.''
+\end{takeawaybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ==== Phase B · T1b-F09 · TIER: READ
+\begin{frame}{How Long Can an Agent Actually Work? Measure, Don't Trust Marketing}
+\textbf{Vendors say ``works for hours'' or ``runs for days.'' METR gives a \emph{measured} alternative.}
+
+\vspace{0.18cm}
+
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{itemize}\footnotesize
+    \item METR's \emph{task-length-doubling} result: the task length an agent completes at \textbf{50\% reliability} has doubled about every \textbf{7 months} since 2019, and faster lately: about \textbf{4 months} from 2023 on, about \textbf{3} from 2024 on (Time Horizon 1.1, Jan 2026). \textbf{[solid]}
+    \item The horizon is the length of task --- timed on skilled humans --- that an agent finishes at that reliability
+    \item Model-by-model minutes change with every release: see Appendix TA (dated), not this slide
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{cautionbox}
+\footnotesize\textbf{Metric fragility.} The number is tied to a \textbf{50\% reliability} threshold and a specific task suite; the horizon at 80\% reliability is much shorter, and it shifts across suites. A measured-but-fragile number still beats a vendor claim. \\[2pt]
+\textbf{[hype counterpoint]} product pages advertising ``multi-hour'' or ``multi-day'' autonomy --- no reliability threshold stated.
+\end{cautionbox}
+\end{column}
+\end{columns}
+
+\vspace{0.12cm}
+\footnotesize\textbf{Research translation:} the right question is not ``can it run for hours?'' but ``at what reliability, on what task distribution, validated how?'' {\scriptsize\textit{The rest of the landscape, dated: Appendix TA.}}
+\end{frame}
+
+
+%=============================================================================
+\section{What This Means for Research}
+%===========================================================
+
+\sectiondivider{What This Means for Research}{Four patterns, and what stays human}
+
+% ==== Phase B · T1-F11 · TIER: READ
+\begin{frame}{Four Research Patterns Across the Lec10 Cases}
+\small
+\begin{tabular}{p{2.55cm}p{3.5cm}p{5.2cm}}
+\toprule
+\textbf{Pattern} & \textbf{Lec10 case(s)} & \textbf{Main risk if you use the wrong workflow} \\
+\midrule
+Reusable skill & Case 1: referee-style paper review & Generic comments, hallucinated quotes, missing quality gate \\
+Empirical pipeline & Case 2: MEPS harmonization and figures & Wrong crosswalk, dropped survey weights, silent validation failure \\
+Public-web dataset & Case 3: fellows metadata with field-level provenance & Weak sources, hidden missingness, no audit trail \\
+Full-lifecycle collaborator & Cases 4--7: collaborator, 4-day sprint, HA-Ramsey, MPE shortcut & Polished output built on weak framing, loose claims discipline, or a gate that can be gamed \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.05cm}
+\textbf{Four patterns organize Lec10's seven cases} --- our two threads are instances: the fellows dataset (Case 3) and HA-Ramsey (Case 6, the full-lifecycle pattern at research scale). Case 7 is the cautionary one: every gate passed, and the model was not solved.
+
+\vspace{0.1cm}
+\scriptsize\textbf{Where RAG fits.} Agentic RAG (Lec08 T5) differs from single-shot RAG: the agent decides \emph{dynamically}, via the same tool-call mechanism, whether and when to retrieve. RAG is one tool among many that the agent can compose.
+\end{frame}
+
+% ==== Phase B · T1-F12..T2-F24 · TIER: READ
+\begin{frame}{What Remains Human}
+\textbf{The gain is not that judgment disappears. Disciplined execution becomes cheap --- which raises the return to judgment.}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{You still own}
+\begin{itemize}\small
+    \item the question and its identification logic
+    \item the success criteria and the benchmark
+    \item the coding and source rules
+    \item knowledge of the data, the model, the institutions
+    \item the interpretation --- and its defense in a seminar
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{The agent accelerates}
+\begin{itemize}\small
+    \item code generation and refactoring
+    \item file handling, scripts, and test runs
+    \item decomposition you can prompt for
+    \item reruns and iteration on visible errors
+    \item draft diagnostics and reports
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.25cm}
+\textbf{Research version of the slogan:} the agent can be a strong RA; you remain the principal investigator.
+
+\vspace{0.1cm}
+\footnotesize\textit{Hold on to the left column: T5b turns it into a signed division-of-labor contract, and T5d into seven tests and a job description.}
+\end{frame}
+
+% ==== Phase B · T1-F17 · TIER: READ
+\begin{frame}{Bridge: Open the Hood}
+\textbf{You have seen what agents do and what proper use produced. The question now changes from ``what is this?'' to ``how does it actually run, and how do I start?''}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+    \item \textbf{T2a} opens the loop in machine language: one JSON line, a session that is only a list, and a real research question traced call by call
+    \item \textbf{T2b} puts the loop on your machine: install, files, commands, permissions, a first session
+    \item \textbf{The economist's version of Part 9.2:} what exactly am I paying for --- and what can the agent see when it acts?
+\end{itemize}
+
+\vspace{0.2cm}
+\footnotesize\textit{Dated detail on the wider landscape: Appendix TA.}
+
+\vspace{0.1cm}
+\footnotesize\textit{Arc: \textbf{9.1 See} $\to$ 9.2 Under the Hood $\to$ 9.3 Build $\to$ 9.4 Design \& Validate $\to$ 9.5 Run \& Govern.}
+\end{frame}
+
+%===========================================================
+\end{document}

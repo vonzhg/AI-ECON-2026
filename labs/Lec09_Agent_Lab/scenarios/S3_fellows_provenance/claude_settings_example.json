@@ -1,0 +1,7 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {"matcher": "Write", "hooks": [{"type": "command", "command": "python3 checks/require_source_url.py"}]}
+    ]
+  }
+}
