@@ -1,6 +1,6 @@
 # Lecture 9 Reorganization Plan — "See → Under the Hood → Build → Design & Validate → Run & Govern"
 
-Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phases A and B complete on branch `lec09-reorg`, site updated on the branch; **not merged** · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
+Date: 2026-09-12 · Status: **v2 — approved with amendments** (`Lec09_Reorg_Plan_Review_2026-09-12.md`); Phases A and B complete; **merged to `main` and published 2026-09-14** (`f4892ed`) · Supersedes the five-act structure of `Lec09_Rewrite_Plan_2026-07-06.md`.
 Path shorthand: **L9** = `source/Lec09_Agentic_AI/`, **ROOT** = the repository root.
 
 ## 0. Plan v2 — status, amendments, and where the truth lives
@@ -67,7 +67,7 @@ v1 (sections 1–14 and the appendices below) is kept as the rationale. Where v1
 | 5 | Phase B: CORE frames in all decks (A3–A6), T4 deck | Oct 5 | **done** — `05e2a0a` (T1) … `3e2087a` (TA); T4 `c50c337` |
 | 6 | Student setup announcement + harness survey (**instructor action**) | Oct 9 | open |
 | 7 | Phase B: LAB/READ frames, TA; content freeze | Oct 12 | **done** — sweep `fc6cf74`; freeze after the QA fixes below |
-| 8 | §10 A–K cross-references; QA gate; merge; publish; links live | Oct 16 | **on the branch, merge pending** — cross-references, syllabus, site pages, published PDFs (`ccd7c66`, `a5558ea`). QA gate run on 12 Sep: `check` clean, 219 frames tiered (45/20/154), page totals, `build_slides --check` and `check_site` clean; `claim-checker` on all 95 Phase B frames and `boundary-auditor` on seven topics. About 20 errors fixed (see `Lec09_External_Facts_2026-09.md`, "Corrections"); outside claims checked on the web and recorded there. **Awaiting the instructor:** merge to `main`, push, and the live-link check. |
+| 8 | §10 A–K cross-references; QA gate; merge; publish; links live | Oct 16 | **on the branch, merge pending** — cross-references, syllabus, site pages, published PDFs (`ccd7c66`, `a5558ea`). QA gate run on 12 Sep: `check` clean, 219 frames tiered (45/20/154), page totals, `build_slides --check` and `check_site` clean; `claim-checker` on all 95 Phase B frames and `boundary-auditor` on seven topics. About 20 errors fixed (see `Lec09_External_Facts_2026-09.md`, "Corrections"); outside claims checked on the web and recorded there. **Merged and published 2026-09-14** (`f4892ed`): the eleven deck PDFs, syllabus, labs page, and GitHub lab links return 200; the old July PDFs are gone. |
 | 9 | Freshness gate; run sheet; teams by harness | Oct 20 | open |
 
 Phase B works deck by deck, CORE first, to the rewrite standard in the review (§5 there): one claim per frame in the bold lead; economic twin on map frames and bridges; harness-neutral concepts with verified per-harness boxes; tagged and sourced numbers; no deck-history self-reference; at most five named frameworks at CORE. Delete a frame's `% ---- ID` marker only when its Phase B rewrite is done; `check` then stops tracking it.
@@ -81,7 +81,7 @@ Phase B works deck by deck, CORE first, to the rewrite standard in the review (�
 
 ### 0.7 Close-out (2026-09-13)
 
-**State.** All work is committed on branch `lec09-reorg` (baseline `515f50d` on `main`). It is **not merged or pushed**: nothing is live on the public site until the instructor approves.
+**State.** Merged from `lec09-reorg` into `main` and pushed on 2026-09-14 (`f4892ed`); GitHub Pages rebuilt and every Lecture 9 link was checked live. The branch is kept on GitHub for history.
 
 **Before merging, re-run:**
 ```bash
@@ -90,13 +90,12 @@ python3 tools/build_slides.py --check         # 0 stale, 0 unresolved
 python3 tools/check_site.py                   # all checks passed
 ```
 
-**Merge and publish (instructor):** `git checkout main && git merge --no-ff lec09-reorg && git push`. Then check that the eleven `slides/Lec09_*.pdf` links, `labs/`, and the T4 QR code (the labs hub) resolve.
+**Re-publishing after later edits:** rebuild the deck, `python3 tools/build_slides.py <deck>`, run the three checks above, commit, push.
 
 **Open items**
 
 | Item | Who | By | How |
 |---|---|---|---|
-| Merge and publish | instructor | Oct 16 | above |
 | S1–S3 on a second harness, k=3 | instructor logs in; then re-run | Oct 16 | fix Gemini CLI auth or `codex login`; `python3 scripts/detection_matrix.py scenarios/S1_aiyagari_audit --harness codex --k 3` (and S2, S3) |
 | Student harness survey and setup announcement | instructor | Oct 9 | Step 0: `python3 scripts/setup_check.py --live` |
 | Minute budget for the 45 CORE frames | instructor | Oct 16 | `Lec09_RunSheet_2026-10-22.md` |
