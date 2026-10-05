@@ -173,8 +173,20 @@ def check_claims() -> None:
     decks = glob.glob(os.path.join(ROOT, "slides", "*.pdf"))
     per_deck = {os.path.basename(p): len(fitz.open(p)) for p in decks}
     total_pages = sum(per_deck.values())
-    n_decks = len(decks)
+    # deck counts are claimed for the Session course: per session ("Session 2 ... 6 decks")
+    # or overall ("32 decks"); the combined SessionNN_All_Decks.pdf and the archived
+    # Summer 2026 Lec*.pdf decks are not counted
+    per_session: dict[int, int] = {}
+    for name in per_deck:
+        m = re.match(r"Session(\d+)_Deck\d+_", name)
+        if m:
+            per_session[int(m.group(1))] = per_session.get(int(m.group(1)), 0) + 1
+    n_decks = sum(per_session.values())
     n_nbs = len(glob.glob(os.path.join(ROOT, "labs", "*.ipynb")))
+    # a number right after one of these words is a label ("Lecture 9 decks", "Summer 2026
+    # notebooks"), not a count
+    label = re.compile(r"(?:Lecture|Session|Summer|Fall|Spring)(?:\s|&nbsp;)+$")
+    session_mark = re.compile(r'id="session-(\d+)"|Session(?:\s|&nbsp;)+(\d+)\b')
 
     n = 0
     for page in pages():
@@ -183,15 +195,24 @@ def check_claims() -> None:
         txt = open(page, encoding="utf-8").read()
         rel = os.path.relpath(page, ROOT)
 
-        for pattern, actual, label in (
+        for pattern, actual, what in (
                 (r"([\d,]+)\s+slides in total", total_pages, "slides in total"),
                 (r"(\d+)\s+decks\b", n_decks, "decks"),
                 (r"(\d+)\s+(?:Jupyter\s+)?notebooks\b", n_nbs, "notebooks")):
             for m in re.finditer(pattern, txt, re.I):
+                if label.search(txt[max(0, m.start() - 20):m.start()]):
+                    continue
+                expected = actual
+                if what == "decks":
+                    # the nearest session named in the preceding 800 characters owns the claim
+                    marks = list(session_mark.finditer(txt[max(0, m.start() - 800):m.start()]))
+                    if marks:
+                        s = int(marks[-1].group(1) or marks[-1].group(2))
+                        expected = per_session.get(s, 0)
                 n += 1
                 claimed = int(m.group(1).replace(",", ""))
-                if claimed != actual:
-                    fail(f"{rel}: claims {claimed} {label}, actual is {actual}")
+                if claimed != expected:
+                    fail(f"{rel}: claims {claimed} {what}, actual is {expected}")
 
     notes.append(f"{n} numeric claims cross-checked against disk")
 

@@ -1,0 +1,262 @@
+{
+ "Session01_All_Decks.pdf": {
+  "master": "source/Session01 (all decks, in order)",
+  "pages": 140,
+  "decks": 5,
+  "published": "2026-10-04"
+ },
+ "Session01_Deck1_AI_in_Science.pdf": {
+  "master": "source/Session01/Session01_Deck1_AI_in_Science.pdf",
+  "md5": "d42f807789a522f2a362392b3ec22e1c",
+  "pages": 21,
+  "title": "AI in Science: What Has Already Happened",
+  "published": "2026-10-04"
+ },
+ "Session01_Deck2_AI_as_an_Economic_Object.pdf": {
+  "master": "source/Session01/Session01_Deck2_AI_as_an_Economic_Object.pdf",
+  "md5": "1ee028ff22cc34a01f9b57bd8445a41e",
+  "pages": 22,
+  "title": "The Economics of Producing Intelligence",
+  "published": "2026-10-04"
+ },
+ "Session01_Deck3_What_Is_AI_Foundations.pdf": {
+  "master": "source/Session01/Session01_Deck3_What_Is_AI_Foundations.pdf",
+  "md5": "dcbbcdeddd1c8e04b11e9cf33ecb1a4f",
+  "pages": 29,
+  "title": "What Is AI? Foundations",
+  "published": "2026-10-04"
+ },
+ "Session01_Deck4_Workhorse_Macro_Models.pdf": {
+  "master": "source/Session01/Session01_Deck4_Workhorse_Macro_Models.pdf",
+  "md5": "24db13d7d31bd3444f1c4af44e55e18f",
+  "pages": 29,
+  "title": "Workhorse Macroeconomic Models",
+  "published": "2026-10-04"
+ },
+ "Session01_Deck5_Workbench_Python_Git_GitHub.pdf": {
+  "master": "source/Session01/Session01_Deck5_Workbench_Python_Git_GitHub.pdf",
+  "md5": "6f95a89baad05e3a934bc61837264aa1",
+  "pages": 39,
+  "title": "The Workbench: Python, VS Code, Git and GitHub",
+  "published": "2026-10-04"
+ },
+ "Session02_All_Decks.pdf": {
+  "master": "source/Session02 (all decks, in order)",
+  "pages": 172,
+  "decks": 6,
+  "published": "2026-10-04"
+ },
+ "Session02_Deck1_Learning_Problem_Digits_Neuron.pdf": {
+  "master": "source/Session02/Session02_Deck1_Learning_Problem_Digits_Neuron.pdf",
+  "md5": "8f6ba8dc62361e6695c9b7cbfd2c5fc5",
+  "pages": 21,
+  "title": "The Learning Problem: a Handwritten Digit, and the Neuron",
+  "published": "2026-10-04"
+ },
+ "Session02_Deck2_Activation_XOR_Approximation.pdf": {
+  "master": "source/Session02/Session02_Deck2_Activation_XOR_Approximation.pdf",
+  "md5": "f32ce08509c3e98e6e8938f81ec6ccc3",
+  "pages": 28,
+  "title": "Nonlinearity: the Activation, XOR, and What a Network Can Approximate",
+  "published": "2026-10-04"
+ },
+ "Session02_Deck3_Forward_Backprop_Training.pdf": {
+  "master": "source/Session02/Session02_Deck3_Forward_Backprop_Training.pdf",
+  "md5": "b4eba54c0b28a4c8bb56c1b946734376",
+  "pages": 31,
+  "title": "Forward Propagation, Backpropagation, and Training",
+  "published": "2026-10-04"
+ },
+ "Session02_Deck4_PyTorch_Curve_Fitting_Yields.pdf": {
+  "master": "source/Session02/Session02_Deck4_PyTorch_Curve_Fitting_Yields.pdf",
+  "md5": "3764a6252954acfb52079d9e78b5c0d3",
+  "pages": 31,
+  "title": "PyTorch, Curve Fitting, and Yield Forecasts",
+  "published": "2026-10-04"
+ },
+ "Session02_Deck5_Growth_Model_Supervised_Euler.pdf": {
+  "master": "source/Session02/Session02_Deck5_Growth_Model_Supervised_Euler.pdf",
+  "md5": "3ebab87b14e89753a3e7675dfc0a2700",
+  "pages": 29,
+  "title": "Solving the Growth Model as Supervised Learning on the Euler Equation",
+  "published": "2026-10-04"
+ },
+ "Session02_Deck6_Architecture_Constraints_Capacity.pdf": {
+  "master": "source/Session02/Session02_Deck6_Architecture_Constraints_Capacity.pdf",
+  "md5": "124cef4fdba8a27da1996727f64fc8b8",
+  "pages": 32,
+  "title": "Architecture as a Constraint on W, and What More Parameters Buy",
+  "published": "2026-10-04"
+ },
+ "Session03_All_Decks.pdf": {
+  "master": "source/Session03 (all decks, in order)",
+  "pages": 162,
+  "decks": 6,
+  "published": "2026-10-04"
+ },
+ "Session03_Deck1_Growth_Model_One_Thing_Hidden.pdf": {
+  "master": "source/Session03/Session03_Deck1_Growth_Model_One_Thing_Hidden.pdf",
+  "md5": "9b4eee787fd471f16437b506d17adfd2",
+  "pages": 28,
+  "title": "The Growth Model, With One Thing Hidden",
+  "published": "2026-10-04"
+ },
+ "Session03_Deck2_Simplest_Actor_Critic.pdf": {
+  "master": "source/Session03/Session03_Deck2_Simplest_Actor_Critic.pdf",
+  "md5": "cae6049f83df1e074584a61d78e2b53e",
+  "pages": 30,
+  "title": "The Simplest Actor\u2013Critic: How It Works, Why It Works, and the Wall It Meets",
+  "published": "2026-10-04"
+ },
+ "Session03_Deck3_Monte_Carlo.pdf": {
+  "master": "source/Session03/Session03_Deck3_Monte_Carlo.pdf",
+  "md5": "3da038f6186773918c32b1f81cbe5cae",
+  "pages": 26,
+  "title": "Monte Carlo: Evaluation, Control, and the Data",
+  "published": "2026-10-04"
+ },
+ "Session03_Deck4_Temporal_Difference.pdf": {
+  "master": "source/Session03/Session03_Deck4_Temporal_Difference.pdf",
+  "md5": "6ee4f7418f6886981d465d8418ba4bc2",
+  "pages": 26,
+  "title": "Temporal Difference: TD(0), SARSA, Q-Learning",
+  "published": "2026-10-04"
+ },
+ "Session03_Deck5_Tables_to_Networks.pdf": {
+  "master": "source/Session03/Session03_Deck5_Tables_to_Networks.pdf",
+  "md5": "a20b43a8070ead32e228513fcf6a5327",
+  "pages": 26,
+  "title": "From Tables to Networks: Function Approximation, Policy Gradient, Actor\u2013Critic",
+  "published": "2026-10-04"
+ },
+ "Session03_Deck6_Growth_Model_Across_Algorithms.pdf": {
+  "master": "source/Session03/Session03_Deck6_Growth_Model_Across_Algorithms.pdf",
+  "md5": "7914e6ada8212e72d30aa74287e012fc",
+  "pages": 26,
+  "title": "The Growth Model Across Algorithms",
+  "published": "2026-10-04"
+ },
+ "Session04_All_Decks.pdf": {
+  "master": "source/Session04 (all decks, in order)",
+  "pages": 168,
+  "decks": 4,
+  "published": "2026-10-04"
+ },
+ "Session04_Deck1_Stationary_Economy_Aiyagari.pdf": {
+  "master": "source/Session04/Session04_Deck1_Stationary_Economy_Aiyagari.pdf",
+  "md5": "f136e7e182d9462a8ff1915119807a00",
+  "pages": 30,
+  "title": "Aiyagari, Solved Twice: A Fixed Point, Then a Law of Motion",
+  "published": "2026-10-04"
+ },
+ "Session04_Deck2_Krusell_Smith_Three_Ways.pdf": {
+  "master": "source/Session04/Session04_Deck2_Krusell_Smith_Three_Ways.pdf",
+  "md5": "9ce7fa85b2cae1a0d4887c847284df8e",
+  "pages": 55,
+  "title": "Krusell\u2013Smith, Solved Three Ways",
+  "published": "2026-10-04"
+ },
+ "Session04_Deck3_OLG_Aggregate_Risk.pdf": {
+  "master": "source/Session04/Session04_Deck3_OLG_Aggregate_Risk.pdf",
+  "md5": "5c19ffc56cc5c279d7a362df68a27995",
+  "pages": 45,
+  "title": "Cohorts Under Aggregate Risk",
+  "published": "2026-10-04"
+ },
+ "Session04_Deck4_Optimal_Taxation_Without_Commitment.pdf": {
+  "master": "source/Session04/Session04_Deck4_Optimal_Taxation_Without_Commitment.pdf",
+  "md5": "ed50fc8f46fa2a91628bdabf148e8ae2",
+  "pages": 38,
+  "title": "Optimal Taxation Without Commitment",
+  "published": "2026-10-04"
+ },
+ "Session05_All_Decks.pdf": {
+  "master": "source/Session05 (all decks, in order)",
+  "pages": 208,
+  "decks": 6,
+  "published": "2026-10-04"
+ },
+ "Session05_Deck1_Text_As_Economic_Data.pdf": {
+  "master": "source/Session05/Session05_Deck1_Text_As_Economic_Data.pdf",
+  "md5": "887ac645fac8497e6a363c485ec53adb",
+  "pages": 38,
+  "title": "Text as Economic Data: From Documents to Counts",
+  "published": "2026-10-04"
+ },
+ "Session05_Deck2_Meaning_In_Vectors.pdf": {
+  "master": "source/Session05/Session05_Deck2_Meaning_In_Vectors.pdf",
+  "md5": "4958cfa27feba70329710b351e2cb36b",
+  "pages": 43,
+  "title": "Meaning in Vectors: Embeddings, Attention, the Transformer",
+  "published": "2026-10-04"
+ },
+ "Session05_Deck3_Pretrained_Language_Models.pdf": {
+  "master": "source/Session05/Session05_Deck3_Pretrained_Language_Models.pdf",
+  "md5": "5f8acd5ccc6bb982b062465dedc5a6c1",
+  "pages": 37,
+  "title": "Pretrained Language Models: BERT, GPT, Alignment, and Five Limits",
+  "published": "2026-10-04"
+ },
+ "Session05_Deck4_LLM_As_Measurement_Instrument.pdf": {
+  "master": "source/Session05/Session05_Deck4_LLM_As_Measurement_Instrument.pdf",
+  "md5": "6f2f3c65fb5305410fe5ae4b2f32523e",
+  "pages": 30,
+  "title": "The LLM as a Measurement Instrument",
+  "published": "2026-10-04"
+ },
+ "Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf": {
+  "master": "source/Session05/Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf",
+  "md5": "ac3f6922c0f82a000431ca72967e0a6b",
+  "pages": 30,
+  "title": "Simulated Agents, Prompts as Design, and Reproducible LLM Research",
+  "published": "2026-10-04"
+ },
+ "Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf": {
+  "master": "source/Session05/Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf",
+  "md5": "71fa81008acd4dfe9a647eeb86c996e9",
+  "pages": 30,
+  "title": "Text Signals and the Bond-Yield Forecast",
+  "published": "2026-10-04"
+ },
+ "Session06_All_Decks.pdf": {
+  "master": "source/Session06 (all decks, in order)",
+  "pages": 176,
+  "decks": 5,
+  "published": "2026-10-04"
+ },
+ "Session06_Deck1_From_Chat_Window_To_Research_Partner.pdf": {
+  "master": "source/Session06/Session06_Deck1_From_Chat_Window_To_Research_Partner.pdf",
+  "md5": "9086924594c94c95b3f02f644e3b301d",
+  "pages": 36,
+  "title": "From Chat Window to Agentic AI: What an Agent Is, and Where It Pays",
+  "published": "2026-10-04"
+ },
+ "Session06_Deck2_How_Agentic_AI_Works.pdf": {
+  "master": "source/Session06/Session06_Deck2_How_Agentic_AI_Works.pdf",
+  "md5": "fc792c47a5c219bcdc02765b4beaaa08",
+  "pages": 35,
+  "title": "How Agentic AI Works: A Loop Built From Scratch, the Harness, the Session, and the Team",
+  "published": "2026-10-04"
+ },
+ "Session06_Deck3_How_To_Build_With_Agentic_AI.pdf": {
+  "master": "source/Session06/Session06_Deck3_How_To_Build_With_Agentic_AI.pdf",
+  "md5": "00662b078e29f17bc5177a01c17ec1c2",
+  "pages": 35,
+  "title": "How to Build With Agentic AI: The System, the Homotopy Method, a Research Case, and the Checks",
+  "published": "2026-10-04"
+ },
+ "Session06_Deck4_Build_Your_Own_RAG.pdf": {
+  "master": "source/Session06/Session06_Deck4_Build_Your_Own_RAG.pdf",
+  "md5": "c8fce9d34b6fd8bd2136442e218bf704",
+  "pages": 35,
+  "title": "Build Your Own RAG: Give Your Agent a Library",
+  "published": "2026-10-04"
+ },
+ "Session06_Deck5_GRAM.pdf": {
+  "master": "source/Session06/Session06_Deck5_GRAM.pdf",
+  "md5": "9e6918e335b3f3db02838e0fb3b648a1",
+  "pages": 35,
+  "title": "GRAM: A Retrieval System Built for One Literature \u2013- and What Agents Do to Research",
+  "published": "2026-10-04"
+ }
+}

@@ -90,7 +90,7 @@
 			result &mdash; a classical solution, a published number, a documented benchmark &mdash; on
 			public data or at small scale. Finding &ldquo;something more interesting&rdquo; is the
 			<strong>stretch goal</strong>, and it only counts once the replication validates. This mirrors
-			how real research works, and it is how Lectures&nbsp;9&ndash;10 teach you to use AI: build the
+			how real research works, and it is how Session&nbsp;6 teaches you to use AI: build the
 			trusted benchmark, <em>then</em> extend.</p>
 		</div>
 
@@ -120,7 +120,7 @@
 				<p style="margin:0 0 10px;">Solve the workhorse growth model with a neural net; verify it
 				against the classical solution.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like macro modeling,
-				dynamic programming, PyTorch. <em>Builds on Lec&nbsp;3, 4, 5.</em></p>
+				dynamic programming, PyTorch. <em>Builds on Sessions&nbsp;2&ndash;3.</em></p>
 				<span class="lec-links"><a href="#track-a">Read Track A →</a></span>
 			</div>
 			<div class="lecture-card track-card">
@@ -129,7 +129,7 @@
 				<p style="margin:0 0 10px;">Construct &amp; validate a task-level AI-exposure index from
 				public data.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like empirical work,
-				data engineering, labor/macro. <em>Builds on Lec&nbsp;2, 7, 10.</em></p>
+				data engineering, labor/macro. <em>Builds on Sessions&nbsp;1, 5 and 6.</em></p>
 				<span class="lec-links"><a href="#track-b">Read Track B →</a></span>
 			</div>
 			<div class="lecture-card track-card">
@@ -138,7 +138,7 @@
 				<p style="margin:0 0 10px;">Turn a text corpus into a validated quantitative measure with a
 				small RAG.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like NLP, measurement,
-				finance/policy text. <em>Builds on Lec&nbsp;7, 8.</em></p>
+				finance/policy text. <em>Builds on Sessions&nbsp;5&ndash;6.</em></p>
 				<span class="lec-links"><a href="#track-c">Read Track C →</a></span>
 			</div>
 			<div class="lecture-card track-card">
@@ -147,7 +147,7 @@
 				<p style="margin:0 0 10px;">Build a small typed-retrieval system or a validated agent
 				skill.</p>
 				<p style="margin:0 0 10px; font-size:0.9em; color:#666;">Best if you like tooling, retrieval,
-				methodology. <em>Builds on Lec&nbsp;8, 9, 10.</em></p>
+				methodology. <em>Builds on Session&nbsp;6.</em></p>
 				<span class="lec-links"><a href="#track-d">Read Track D →</a></span>
 			</div>
 		</div>
@@ -167,7 +167,8 @@
 		not the achievement; a correct result you can defend, a benchmark you verified by hand, and a clear
 		account of who did what &mdash; that is.</p>
 
-		<p>The <strong>5-pillar workflow</strong> from Lecture&nbsp;9 is your scaffold on every track:</p>
+		<p>The <strong>5-pillar workflow</strong> (taught in the Summer&nbsp;2026 Lecture&nbsp;9 decks, kept on the
+		<a href="archive/summer-2026.html">archive page</a>) is your scaffold on every track:</p>
 		<ul class="pillars">
 			<li><strong>Economic theory</strong> &mdash; state the problem precisely (objective,
 				constraints, equilibrium or estimand).</li>
@@ -244,7 +245,7 @@
 				a data dictionary, and a record of every external source with access date.</li>
 			<li><strong>Referee report on someone else's project</strong> <em>(optional, and worth it if
 				you have a partner or reading group)</em> &mdash; a structured, confidence-gated peer review
-				in the style of the Lecture&nbsp;10 <code>/review-paper</code> skill: cite exact passages,
+				in the style of a <code>/review-paper</code> skill: cite exact passages,
 				assert only what you can support, separate &ldquo;must fix&rdquo; from
 				&ldquo;suggestions,&rdquo; and stay constructive. Reviewing someone else's replication is the
 				fastest way to see the holes in your own.</li>
@@ -284,11 +285,12 @@
 		<p><strong>Who it's for.</strong> Students drawn to macro modeling, dynamic programming, and
 		PyTorch; people who want to <em>understand</em> a deep-learning solver rather than treat it as a
 		black box.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;3 (neural nets, training), Lecture&nbsp;4 (the
-		optimal growth model is the running example; Euler-equation-as-supervised-loss; actor&ndash;critic),
-		Lecture&nbsp;5 (RL framing; Bellman, VFI vs. Euler iteration). The Lecture&nbsp;4 dynamic-model labs
-		(<code>Lab4A/4B_Dynamic_Models.ipynb</code>, on the <a href="labs/index.html">Labs</a> page) are your
-		starting point.</p>
+		<p><strong>Connections.</strong> Session&nbsp;2 (neural networks and training; the optimal growth
+		model solved by supervised learning on its Euler equation) and Session&nbsp;3 (reinforcement learning
+		on the same model: actor&ndash;critic, Monte Carlo, temporal difference, and the comparison across
+		algorithms). The Session&nbsp;2 and&nbsp;3 labs are your starting point; the Summer&nbsp;2026
+		dynamic-model labs (<code>Lab4A/4B_Dynamic_Models.ipynb</code>, on the <a href="labs/index.html">Labs</a>
+		page) add a classical value-function-iteration benchmark.</p>
 		<p><strong>Goal.</strong> A neural solution to the deterministic (then optionally stochastic)
 		optimal growth model whose <strong>Euler-equation errors are at or below the classical
 		benchmark</strong>, with a written account of the method and its accuracy.</p>
@@ -304,8 +306,8 @@
 			<li><strong>Neural solution.</strong> Parameterize the policy <code>c = &pi;&theta;(k)</code>
 				(and/or value <code>V&theta;(k)</code>) with a small network. Train it two ways and compare:
 				<strong>Euler-equation-as-supervised-loss</strong> (minimize the mean squared Euler residual
-				on sampled states &mdash; Lec&nbsp;4, T3) and <strong>actor&ndash;critic</strong> (critic
-				learns <code>V</code>, actor improves <code>&pi;</code> &mdash; Lec&nbsp;4, T2).</li>
+				on sampled states &mdash; Deck&nbsp;2.5) and <strong>actor&ndash;critic</strong> (critic
+				learns <code>V</code>, actor improves <code>&pi;</code> &mdash; Decks&nbsp;3.2 and&nbsp;3.6).</li>
 			<li><strong>Verify.</strong> Overlay the neural and classical policy functions; report
 				Euler-equation errors across the state space; check the steady state and the deterministic
 				limit. Document where (if anywhere) the network is less accurate and why.</li>
@@ -315,7 +317,7 @@
 		capital good or a simple labor choice); or an <strong>AI-as-capital / automation</strong> twist
 		&mdash; a productivity shift that raises the return to capital, traced through the savings policy
 		(a thematic bridge to Track&nbsp;B).</p>
-		<p><strong>Data &amp; tools (all public).</strong> The Lecture&nbsp;4 lab notebooks;
+		<p><strong>Data &amp; tools (all public).</strong> The Session&nbsp;2 and&nbsp;3 lab notebooks;
 		<a href="https://python.quantecon.org/cass_koopmans_1.html" target="_blank" rel="noopener">QuantEcon Cass&ndash;Koopmans</a>
 		and the <a href="https://quantecon.org/lectures/" target="_blank" rel="noopener">QuantEcon lecture series</a>;
 		Maliar, Maliar &amp; Winant (2021), <em>Deep learning for solving dynamic economic models</em> (JME).
@@ -341,11 +343,12 @@
 		across occupations</strong>, and show it holds up against external benchmarks.</p>
 		<p><strong>Who it's for.</strong> Empiricists and data engineers; students interested in AI &amp;
 		labor markets, the economics of automation, and measurement.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;2 (AI as cognitive capital; measuring AI exposure via
-		task-level deployment, Anthropic Economic Index &times; O*NET), Lecture&nbsp;10 (Case&nbsp;2 MEPS
-		&mdash; the agentic empirical pipeline: discover data &rarr; harmonize &rarr; weight &rarr; validate
-		against an external benchmark). This is measurement work of exactly the kind the AI-and-labor
-		literature is now built on.</p>
+		<p><strong>Connections.</strong> Session&nbsp;1 (AI as an economic object: the factor, its unit, its
+		measurement), Session&nbsp;5 (text as measurement, and how to validate a measure) and Session&nbsp;6
+		(a recorded agent run on public Census data, traced call by call and audited). The Summer&nbsp;2026
+		Lecture&nbsp;2 decks, on the <a href="archive/summer-2026.html">archive page</a>, measure AI exposure
+		via task-level deployment (Anthropic Economic Index &times; O*NET). This is measurement work of
+		exactly the kind the AI-and-labor literature is now built on.</p>
 		<p><strong>Goal.</strong> A reproducible pipeline that produces an occupation-level AI-exposure
 		index, plus a short validation showing it behaves sensibly and lines up with published measures.</p>
 		<p><strong>Baseline &mdash; replicate &amp; verify.</strong></p>
@@ -401,10 +404,11 @@
 		the way.</p>
 		<p><strong>Who it's for.</strong> Students interested in NLP, measurement, finance, and
 		monetary/policy text.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;7 (tokenization, embeddings, transformers, LLMs as
-		measurement instruments; FinBERT vs. CentralBankRoBERTa; the validation checklist), Lecture&nbsp;8
-		(RAG: chunking &rarr; embeddings &rarr; vector store &rarr; retrieval; RAGAS evaluation). The
-		Lecture&nbsp;7&ndash;8 FOMC labs are your starting point.</p>
+		<p><strong>Connections.</strong> Session&nbsp;5 (tokenization, embeddings, transformers; pretrained
+		models including FinBERT and CentralBankRoBERTa; the LLM as a measurement instrument and how to
+		validate it; prompts and reproducibility) and Session&nbsp;6 (your own RAG: chunks, embeddings,
+		retrieval, citation, evaluation). The Session&nbsp;5 lab, on the FOMC statements, is your starting
+		point.</p>
 		<p><strong>Goal.</strong> A measurement instrument that reproduces a <em>known</em> text-based
 		result and is validated against an external benchmark &mdash; plus a small RAG pipeline over the
 		same corpus for question-answering / retrieval.</p>
@@ -461,9 +465,10 @@
 		validated agent skill</strong> for a recurring research task.</p>
 		<p><strong>Who it's for.</strong> Students who like tooling, retrieval systems, evaluation
 		methodology, and the meta-question of <em>how AI should be wired into research</em>.</p>
-		<p><strong>Connections.</strong> Lecture&nbsp;8 (RAG, GraphRAG, and the GRAM case study &mdash;
-		&ldquo;wrong-by-prominence&rdquo; vs. condition-aware retrieval), Lecture&nbsp;9 (project harness;
-		skills, agents, rules; validation gates), Lecture&nbsp;10 (Case&nbsp;1 paper-review skill).</p>
+		<p><strong>Connections.</strong> Session&nbsp;6 (agents, the harness and its gates; your own RAG; the
+		GRAM case study &mdash; &ldquo;wrong-by-prominence&rdquo; vs. condition-aware retrieval). GraphRAG is
+		covered in the Summer&nbsp;2026 Lecture&nbsp;8 decks, on the <a href="archive/summer-2026.html">archive
+		page</a>.</p>
 		<p><strong>Goal.</strong> A small but genuinely working artifact with a measured comparison against
 		a sensible baseline. <strong>Choose one flavor:</strong></p>
 		<div class="session-box">
@@ -488,7 +493,7 @@
 				<li>Pick a recurring research task: e.g. <code>/replicate-table</code>,
 					<code>/solve-model</code> (the 5-step model&rarr;equilibrium&rarr;algorithm&rarr;
 					pseudocode&rarr;code workflow), or <code>/referee</code>.</li>
-				<li>Author it as a <strong>multi-phase skill</strong> in the Lecture&nbsp;10 style: explicit
+				<li>Author it as a <strong>multi-phase skill</strong> in the style Session&nbsp;6 builds: explicit
 					phases, <strong>confidence gates</strong> (&ldquo;assert only what you can derive&rdquo;),
 					<strong>quote verification</strong>, and a <strong>validation harness</strong> (a known
 					input yields a known output).</li>
@@ -505,9 +510,9 @@
 		<a href="https://github.com/microsoft/graphrag" target="_blank" rel="noopener">Microsoft GraphRAG</a>,
 		<a href="https://github.com/OSU-NLP-Group/HippoRAG" target="_blank" rel="noopener">HippoRAG</a>;
 		<a href="https://www.claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a> and the
-		Lecture&nbsp;9 project-harness patterns.</p>
+		project-harness patterns of Session&nbsp;6.</p>
 		<p><strong>AI-usage guidance.</strong> This is the most &ldquo;meta&rdquo; track &mdash; you are
-		engineering how AI does research. The Lecture&nbsp;9&ndash;10 discipline <em>is</em> the deliverable:
+		engineering how AI does research. Session&nbsp;6's discipline <em>is</em> the deliverable:
 		confidence gates, quote verification, validation harnesses, honest evaluation. Your
 		<code>AI_LOG.md</code> should read like an engineering log of the harness itself.</p>
 		<p><strong>Validation checklist.</strong></p>
@@ -559,9 +564,9 @@ Do not write the full solution yet — I want the plan, and I will verify it.</c
 		<div class="supp-box">
 			<h3>Course foundations</h3>
 			<ul style="margin:0;">
-				<li><a href="syllabus.html">Full syllabus</a> and <a href="slides/index.html">lecture slides</a>;
-					<a href="labs/index.html">lab notebooks</a> (Lecture&nbsp;4 dynamic-model labs;
-					Lecture&nbsp;5 RL lab; Lecture&nbsp;7&ndash;8 text and RAG labs).</li>
+				<li><a href="syllabus.html">Full syllabus</a> and <a href="slides/index.html">session slides</a>;
+					<a href="labs/index.html">lab notebooks</a> (one per session, plus the Summer&nbsp;2026
+					notebooks).</li>
 				<li>Companion course for the classical foundation &mdash;
 					<a href="https://vonzhg.github.io/Quant_Macro/" target="_blank" rel="noopener"><em>Quantitative Macroeconomics with AI and Machine Learning</em></a>:
 					twelve topics with slides and labs on numerical methods, dynamic programming,
@@ -621,7 +626,7 @@ Do not write the full solution yet — I want the plan, and I will verify it.</c
 
 	<div class="site-footer">
 		AI for Economic Research: Dynamic Models, Language, and Agents &middot; &copy; Zhigang Feng
-		&nbsp;·&nbsp; <a href="archive/summer-2026.html">Past offering: Summer 2026</a>
+		&nbsp;·&nbsp; <a href="archive/summer-2026.html">Past offering: Summer 2026 (Zhejiang University)</a>
 	</div>
 </body>
 </html>

@@ -1,10 +1,31 @@
-# Labs — AI/ML for Macroeconomics (2026)
+# Labs — AI for Economic Research (2026)
 
-Hands-on notebooks, numbered by **lecture**. Built for students in **China**: no
-Google/Colab required, and setup uses **Tsinghua (TUNA) mirrors**. Every notebook runs
-**top-to-bottom offline**.
+Hands-on notebooks, one per **session** (`SessionNN_Lab.ipynb`, with its helpers and data in
+`sessionNN_assets/`). Each is posted here before its session, so clone the course once and pull
+before every session. Built for students in **China**: no Google/Colab required, and setup uses
+the **Tsinghua (TUNA) mirror**. Every Session lab runs **top to bottom, offline, on a laptop CPU**,
+with fixed seeds.
 
-## Notebooks
+## Setup (the same steps as Session 1's last deck, *The Workbench*)
+
+1. Install Python 3.11, git, and VS Code with Microsoft's **Python** and **Jupyter** extensions.
+2. Clone the course, then create and activate an environment inside the course folder:
+   ```bash
+   python3 -m venv .venv                # Windows: py -3.11 -m venv .venv
+   source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
+   ```
+3. Install the packages every Session lab uses, through the mirror:
+   ```bash
+   python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple \
+       numpy pandas matplotlib scipy scikit-learn torch jupyter ipykernel
+   ```
+4. Open a notebook in VS Code → **Select Kernel** → the `.venv` environment. Run the first cells of
+   the Session 1 lab: they print READY, or name what is missing.
+
+## Notebooks from the Summer 2026 version (Zhejiang University)
+
+These are numbered by **lecture** of the ten-lecture version taught in July 2026; their decks are
+on [the archive page](../archive/summer-2026.html).
 
 | Notebook | Lectures | What you do |
 |---|---|---|
@@ -15,23 +36,8 @@ Google/Colab required, and setup uses **Tsinghua (TUNA) mirrors**. Every noteboo
 | `Lec08_RAG_Lab/Lec08_Lab_RAG.ipynb` | 8 | Build a **RAG** pipeline over 405 Ren Zhengfei speeches: chunk → TF-IDF index → retrieve → audit → **cited** grounded answer; **implement** a minimal retriever. Runs offline, stdlib-only |
 | `Lec09_Agent_Lab/` | 9 | **Part A** (offline notebook): a session as a list, tools, the agent loop, cost and multi-agent patterns, all against a scripted model. **Part B** and the **Design Lab** need one terminal agent (Claude Code, Codex CLI, or Gemini CLI) and network access — see the folder's README |
 
-**Start with the Getting Started lab** — it sets up the environment used by every later lab.
-
-## Setup (summary — full steps are inside the Getting Started notebook)
-
-1. In VS Code, install the **Python** and **Jupyter** extensions.
-2. Install **Miniconda** from the Tsinghua mirror: <https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/>
-3. Point pip at the mirror (one time):
-   ```bash
-   pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-   ```
-4. Create the course environment and install packages:
-   ```bash
-   conda create -n aiml2026 python=3.11 -y
-   conda activate aiml2026
-   pip install -r requirements.txt
-   ```
-5. Open a notebook in VS Code → **Select Kernel** → **aiml2026**.
+The Getting Started notebook sets up a conda environment for these labs; the environment above also
+has every package in `requirements.txt`.
 
 ## `data/`
 
@@ -44,8 +50,8 @@ Bundled CSVs so the Getting Started lab runs offline:
 **Sources:** Stanford AI Index 2025 (hai.stanford.edu), Epoch AI (epoch.ai), and Our
 World in Data (ourworldindata.org). Values are illustrative figures drawn from these
 reports for teaching — see each file's `Source` column. The Getting Started lab also
-includes an **optional** cell that fetches the latest data live from Our World in Data
-(which is reachable in China).
+includes a cell that fetches the latest data live from Our World in Data (which is reachable
+in China).
 
 ## Notes for instructors
 
@@ -63,4 +69,4 @@ jupyter nbconvert --to notebook --execute Lec09_Agent_Lab/Lec09_Lab_Agents.ipynb
 The **Lecture 8 RAG lab** lives in its own subfolder (`Lec08_RAG_Lab/`) because it
 ships a small retrieval engine (`rag_ren.py`) alongside the notebook. Its default
 path is **standard-library only** — nothing in `requirements.txt` is needed for it
-to run; the optional embedding section asks for `sentence-transformers` separately.
+to run; its embedding section asks for `sentence-transformers` separately.

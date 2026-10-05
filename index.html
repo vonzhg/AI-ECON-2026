@@ -18,17 +18,17 @@
 		</div>
 
 		<p>This course covers what modern AI changes about how economic research is actually done. It
-		runs across six modules: foundations and what AI is; machine-learning essentials for
-		macroeconomists; deep learning for solving dynamic models; reinforcement learning and
-		heterogeneous-agent models; large language models and text as economic data, including
-		retrieval-augmented generation; and agentic AI with case studies. The organizing premise is
-		that as AI absorbs more of the implementation, the economist's edge shifts to designing
-		algorithms and validating results.</p>
+		runs in six sessions: an orientation to AI as a tool, an economic object and an agent; deep
+		learning, where functions become trainable and equations become losses; reinforcement learning,
+		where decisions are learned from interaction; heterogeneous-agent models, where distributions
+		become state variables; text and large language models as data, measurement and generation; and
+		retrieval and agents in one research workflow. The organizing premise is that as AI absorbs more
+		of the implementation, the economist's edge shifts to designing algorithms and validating
+		results.</p>
 
-		<p>Every lab is a Jupyter notebook that runs on CPU alone &mdash; in GitHub Codespaces or on
-		your own machine &mdash; so nothing is gated behind special hardware. In practice the
-		deep-learning and reinforcement-learning labs train noticeably faster on a GPU, so use one if
-		you have access; none of them require it.</p>
+		<p>Every session ends in a lab: a Jupyter notebook that runs offline on a laptop CPU with fixed
+		seeds &mdash; no API key, no GPU. Session&nbsp;1's last deck, <em>The Workbench</em>, sets up
+		everything the labs need: Python, VS&nbsp;Code, git and GitHub.</p>
 
 		<p><strong>Prerequisites and where to start.</strong> The course assumes you are comfortable
 		with dynamic macroeconomic models &mdash; if you would like that theory firmer first, a
@@ -49,11 +49,11 @@
 		<div class="quicklinks">
 			<a class="quicklink" href="syllabus.html">
 				<span class="ql-title">📋 Syllabus</span>
-				<span class="ql-sub">Modules, topics, resources</span>
+				<span class="ql-sub">Sessions, decks, resources</span>
 			</a>
 			<a class="quicklink" href="slides/index.html">
 				<span class="ql-title">📑 Slides</span>
-				<span class="ql-sub">Lecture decks (&copy; Z. Feng)</span>
+				<span class="ql-sub">Session decks (&copy; Z. Feng)</span>
 			</a>
 			<a class="quicklink" href="labs/index.html">
 				<span class="ql-title">💻 Labs</span>
@@ -68,38 +68,39 @@
 		<!-- Start here -->
 		<h2>Start here</h2>
 		<div class="session-box">
-			<h3>Three steps per module</h3>
+			<h3>Three steps per session</h3>
 			<ol style="list-style:decimal; padding-left:28px; margin:0;">
-				<li><strong>Read the module in the <a href="syllabus.html">syllabus</a></strong> &mdash; it
-					lists what each lecture covers and which lab goes with it.</li>
-				<li><strong>Download the topic decks</strong> from the <a href="slides/index.html">slides</a>
-					page and work through them.</li>
+				<li><strong>Read the session in the <a href="syllabus.html">syllabus</a></strong> &mdash; it
+					lists what each deck covers and what the lab asks.</li>
+				<li><strong>Download the decks</strong> from the <a href="slides/index.html">slides</a>
+					page &mdash; one at a time, or the whole session in one PDF.</li>
 				<li><strong>Run the lab.</strong> The <a href="labs/index.html">notebooks</a> are the point
-					where the material becomes yours &mdash; every one is offline-friendly and runs on CPU.</li>
+					where the material becomes yours &mdash; each runs offline on a laptop CPU.</li>
 			</ol>
 		</div>
 
-		<p><strong>Where to enter.</strong> With no Python background, take the companion course's
+		<p><strong>Where to enter.</strong> Everyone starts with Session&nbsp;1; its last deck,
+		<em>The Workbench</em>, teaches the Python the labs are written in and sets up the tools. For more
+		Python, the companion course's
 		<a href="https://vonzhg.github.io/Quant_Macro/syllabus.html#topic-3" target="_blank" rel="noopener">Topic&nbsp;3</a>
-		first, then start here at Module&nbsp;1 with the setup lab. With classical computational
-		training already in hand, Modules&nbsp;3&ndash;4
-		(deep learning and RL for dynamic models) are the bridge you are looking for. Interested only in
-		text and agents, Modules&nbsp;5&ndash;6 stand on their own. When you want to build something,
-		go to the <a href="capstone.html">project tracks</a>.</p>
+		teaches it from scratch. With classical computational training already in hand,
+		Sessions&nbsp;2&ndash;4 (deep learning, reinforcement learning and heterogeneous agents) are the
+		bridge you are looking for. Interested only in text and agents, Sessions&nbsp;5&ndash;6 stand on
+		their own. When you want to build something, go to the <a href="capstone.html">project tracks</a>.</p>
 
 		<!-- Class meetings -->
 		<h2>Class Meetings &mdash; Fall&nbsp;2026 <span style="font-size:0.6em; color:#666; font-weight:400;">· 上課安排</span></h2>
 		<table>
 			<thead>
-				<tr><th>Date</th><th>Time</th><th>Location</th><th>Module</th></tr>
+				<tr><th>Date</th><th>Time</th><th>Location</th><th>Session</th></tr>
 			</thead>
 			<tbody>
-				<tr><td>Tue, October&nbsp;13</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Module 1 &mdash; Foundations (Lec&nbsp;1&ndash;2)</td></tr>
-				<tr><td>Tue, October&nbsp;13</td><td>Afternoon 14:30&ndash;17:30</td><td>TBA &middot; 待定</td><td>Module 2 &mdash; ML Essentials (Lec&nbsp;3)</td></tr>
-				<tr><td>Thu, October&nbsp;15</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Module 3 &mdash; Deep Learning for Macro (Lec&nbsp;4)</td></tr>
-				<tr><td>Fri, October&nbsp;16</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Module 4 &mdash; RL &amp; Heterogeneous Agents (Lec&nbsp;5&ndash;6)</td></tr>
-				<tr><td>Tue, October&nbsp;20</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Module 5 &mdash; LLMs &amp; Text (Lec&nbsp;7&ndash;8)</td></tr>
-				<tr><td>Thu, October&nbsp;22</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Module 6 &mdash; Agentic AI &amp; Case Studies (Lec&nbsp;9&ndash;10)</td></tr>
+				<tr><td>Tue, October&nbsp;13</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Session 1 &mdash; Orientation</td></tr>
+				<tr><td>Tue, October&nbsp;13</td><td>Afternoon 14:30&ndash;17:30</td><td>TBA &middot; 待定</td><td>Session 2 &mdash; Deep learning</td></tr>
+				<tr><td>Thu, October&nbsp;15</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Session 3 &mdash; Reinforcement learning</td></tr>
+				<tr><td>Fri, October&nbsp;16</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Session 4 &mdash; Heterogeneous agents</td></tr>
+				<tr><td>Tue, October&nbsp;20</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Session 5 &mdash; Text and LLMs</td></tr>
+				<tr><td>Thu, October&nbsp;22</td><td>Morning 9:30&ndash;12:30</td><td>TBA &middot; 待定</td><td>Session 6 &mdash; RAG and agents</td></tr>
 			</tbody>
 		</table>
 
@@ -107,70 +108,56 @@
 		<h2>Course Map <span style="font-size:0.6em; color:#666; font-weight:400;">· 課程結構</span></h2>
 		<table>
 			<thead>
-				<tr><th>Module</th><th>Focus</th><th>Lectures</th><th>Length</th></tr>
+				<tr><th>Session</th><th>Object</th><th>What changes</th><th>Decks</th></tr>
 			</thead>
 			<tbody>
-				<tr><td><strong>1</strong></td><td>Foundations &mdash; AI and economic research; what AI is</td><td>1&ndash;2</td><td>≈4 hrs</td></tr>
-				<tr><td><strong>2</strong></td><td>Machine learning essentials for macroeconomists</td><td>3</td><td>≈4 hrs</td></tr>
-				<tr><td><strong>3</strong></td><td>Deep learning for dynamic macro models</td><td>4</td><td>≈4 hrs</td></tr>
-				<tr><td><strong>4</strong></td><td>Reinforcement learning &amp; heterogeneous agents</td><td>5&ndash;6</td><td>≈4 hrs</td></tr>
-				<tr><td><strong>5</strong></td><td>Language models &amp; text as economic data</td><td>7&ndash;8</td><td>≈4 hrs</td></tr>
-				<tr><td><strong>6</strong></td><td>Agentic AI &amp; case studies</td><td>9&ndash;10</td><td>≈4 hrs</td></tr>
+				<tr><td><strong>1</strong></td><td>Orientation</td><td>AI as tool, as object, and as an agent with incentives</td><td>5</td></tr>
+				<tr><td><strong>2</strong></td><td>Deep learning</td><td>Functions become trainable; equations become losses</td><td>6</td></tr>
+				<tr><td><strong>3</strong></td><td>Reinforcement learning</td><td>Sequential decisions are learned from interaction</td><td>6</td></tr>
+				<tr><td><strong>4</strong></td><td>Heterogeneous agents</td><td>Distributions and equilibrium become state variables</td><td>4</td></tr>
+				<tr><td><strong>5</strong></td><td>Text and LLMs</td><td>Language becomes data, measurement, and generation</td><td>6</td></tr>
+				<tr><td><strong>6</strong></td><td>RAG and agents</td><td>Retrieval, tools, traces, and governance in one workflow</td><td>5</td></tr>
 			</tbody>
 		</table>
 
-		<!-- Lectures -->
-		<h2>Lectures</h2>
+		<!-- Sessions -->
+		<h2>Sessions</h2>
 		<div class="lecture-grid">
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 1 · Module 1</span>
-				<span class="lec-title">Introduction — AI and Economic Research</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
+				<span class="lec-num">Session 1 · 5 decks, 140 pages</span>
+				<span class="lec-title">Orientation</span>
+				<span style="color:#555; font-size:0.92em;">AI in science · the economics of intelligence · what AI is · workhorse macro models · the workbench</span>
+				<span class="lec-links"><a href="slides/index.html#session-1">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 2 · Module 1</span>
-				<span class="lec-title">What is AI?</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a></span>
+				<span class="lec-num">Session 2 · 6 decks, 172 pages</span>
+				<span class="lec-title">Deep learning</span>
+				<span style="color:#555; font-size:0.92em;">a digit and a neuron · nonlinearity and approximation · backpropagation · PyTorch and a yield forecast · the growth model on its Euler equation · architecture</span>
+				<span class="lec-links"><a href="slides/index.html#session-2">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 3 · Module 2</span>
-				<span class="lec-title">Machine Learning for Quantitative Macroeconomists</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
+				<span class="lec-num">Session 3 · 6 decks, 162 pages</span>
+				<span class="lec-title">Reinforcement learning</span>
+				<span style="color:#555; font-size:0.92em;">the growth model with one thing hidden · the simplest actor&ndash;critic · Monte Carlo · temporal difference · from tables to networks · across algorithms</span>
+				<span class="lec-links"><a href="slides/index.html#session-3">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 4 · Module 3</span>
-				<span class="lec-title">Solving Macro Models via Deep Learning &amp; RL</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
+				<span class="lec-num">Session 4 · 4 decks, 168 pages</span>
+				<span class="lec-title">Heterogeneous agents</span>
+				<span style="color:#555; font-size:0.92em;">Aiyagari, solved twice · Krusell&ndash;Smith three ways · cohorts under aggregate risk · optimal taxation without commitment</span>
+				<span class="lec-links"><a href="slides/index.html#session-4">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 5 · Module 4</span>
-				<span class="lec-title">Reinforcement Learning in a Nutshell</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
+				<span class="lec-num">Session 5 · 6 decks, 208 pages</span>
+				<span class="lec-title">Text and LLMs</span>
+				<span style="color:#555; font-size:0.92em;">text as data · embeddings and the Transformer · pretrained models and five limits · the LLM as an instrument · prompts and reproducibility · the yield lab</span>
+				<span class="lec-links"><a href="slides/index.html#session-5">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 			<div class="lecture-card">
-				<span class="lec-num">Lecture 6 · Module 4</span>
-				<span class="lec-title">Heterogeneous Agent Models via RL</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-soon">In preparation</span></a> <a href="labs/index.html">Lab</a></span>
-			</div>
-			<div class="lecture-card">
-				<span class="lec-num">Lecture 7 · Module 5</span>
-				<span class="lec-title">Large Language Models &amp; Text as Economic Data</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
-			</div>
-			<div class="lecture-card">
-				<span class="lec-num">Lecture 8 · Module 5</span>
-				<span class="lec-title">Retrieval-Augmented Generation (RAG)</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
-			</div>
-			<div class="lecture-card">
-				<span class="lec-num">Lecture 9 · Module 6</span>
-				<span class="lec-title">Agentic AI for Research Workflows</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-ready">Available</span></a></span>
-			</div>
-			<div class="lecture-card">
-				<span class="lec-num">Lecture 10 · Module 6</span>
-				<span class="lec-title">Case Studies</span>
-				<span class="lec-links"><a href="slides/index.html">Slides <span class="badge badge-soon">In preparation</span></a> <a href="labs/index.html">Lab</a></span>
+				<span class="lec-num">Session 6 · 5 decks, 176 pages</span>
+				<span class="lec-title">RAG and agents</span>
+				<span style="color:#555; font-size:0.92em;">what an agent is · how the loop works · building with agents · your own RAG · GRAM</span>
+				<span class="lec-links"><a href="slides/index.html#session-6">Slides <span class="badge badge-ready">Available</span></a> <a href="labs/index.html">Lab</a></span>
 			</div>
 		</div>
 
@@ -204,8 +191,10 @@
 		</div>
 
 		<div class="notice info">
-			New here? Start with the <a href="syllabus.html">full syllabus</a> for the module-by-module
-			plan, prerequisites, and supplementary resources.
+			New here? Start with the <a href="syllabus.html">full syllabus</a> for the session-by-session
+			plan, prerequisites, and supplementary resources. The earlier ten-lecture version, taught at
+			Zhejiang University in Summer&nbsp;2026, is kept on the
+			<a href="archive/summer-2026.html">Summer 2026 page</a>.
 		</div>
 	</div>
 
@@ -213,7 +202,7 @@
 		AI for Economic Research: Dynamic Models, Language, and Agents &middot; &copy; Zhigang Feng<br>
 		Slides are watermarked and shared for personal study &mdash; please do not redistribute them
 		without permission. &nbsp;·&nbsp;
-		<a href="archive/summer-2026.html">Past offering: Summer 2026</a>
+		<a href="archive/summer-2026.html">Past offering: Summer 2026 (Zhejiang University)</a>
 	</div>
 </body>
 </html>

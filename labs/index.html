@@ -23,11 +23,11 @@
 
 		<h1>Lab Notebooks</h1>
 
-		<p>The labs are Jupyter notebooks, one per lecture. Every one runs on <strong>CPU alone</strong>
-		and works <strong>offline</strong> once its data is bundled &mdash; no GPU required, no API key,
-		no paid service. Run them in the cloud with a single click, or locally if you prefer your own
-		machine. In practice the deep-learning and reinforcement-learning labs train noticeably faster
-		on a GPU, so use one if you have access.</p>
+		<p>The labs are Jupyter notebooks, one per session. Every one runs <strong>offline</strong> on a
+		laptop <strong>CPU</strong> with fixed seeds &mdash; no GPU, no API key, no paid service. Clone the
+		course repository once and <code>git pull</code> before each session; the labs read helpers and data
+		from the folders beside them, so a notebook downloaded on its own will not run. Session&nbsp;1's last
+		deck, <em>The Workbench</em>, walks through every step below.</p>
 
 		<p style="margin:22px 0;">
 			<a class="btn" href="https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1" target="_blank" rel="noopener">▶&nbsp; Open in GitHub Codespaces</a>
@@ -53,25 +53,54 @@
 		</div>
 
 		<h2>Option 2 — run locally</h2>
-		<p>Python 3.11 or newer, then:</p>
+		<p>Install Python&nbsp;3.11, git and VS&nbsp;Code, then, in a terminal:</p>
 		<pre style="background:#e9ecef; padding:14px 18px; border-radius:8px; overflow-x:auto; font-size:0.9em; line-height:1.5;"><code style="background:none; padding:0;">git clone https://github.com/vonzhg/AI-ECON-2026.git
 cd AI-ECON-2026
-python -m venv .venv &amp;&amp; source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-jupyter lab</code></pre>
-		<p><code>requirements.txt</code> pins the CPU build of PyTorch, so the install stays small. If you
-		would rather not install anything, do the setup lab for Lectures&nbsp;1&ndash;2 first &mdash; it
-		walks through VS&nbsp;Code, Python, and PyTorch step by step.</p>
+python3 -m venv .venv                # Windows: py -3.11 -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    numpy pandas matplotlib scipy scikit-learn torch jupyter ipykernel</code></pre>
+		<p>Then open the folder in VS&nbsp;Code, select the <code>.venv</code> kernel for the notebook, and
+		run its first cells: they print every package's version and say <strong>READY</strong> or what is
+		missing. On Windows and macOS the standard PyTorch install is already the CPU build.</p>
 
 		<div class="notice info">
-			<strong>Installing from China.</strong> <a href="requirements.txt">labs/requirements.txt</a>
-			carries version pins and a Tsinghua (TUNA) mirror recipe, which is usually much faster:
-			<code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r labs/requirements.txt</code>.
-			No Google or Colab access is needed for any lab. See
-			<a href="README.md">labs/README.md</a> for a notebook-by-notebook summary.
+			<strong>Installing from China.</strong> The install line above already uses the Tsinghua (TUNA)
+			mirror, which is usually much faster than the default index. No Google or Colab access is needed
+			for any lab.
 		</div>
 
-		<h2>Notebooks</h2>
+		<h2>Session labs</h2>
+		<p>One notebook per session, posted to the repository before the session meets; the
+		<a href="../syllabus.html">syllabus</a> says what each one asks.</p>
+		<div class="res-row">
+			<span class="res-name">Session 1 &mdash; Orientation: <em>Two Machines, One Environment</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Session 2 &mdash; Deep learning: <em>From One Neuron to a Solved Growth Model</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Session 3 &mdash; Reinforcement learning: <em>One Growth Model, Every Reinforcement-Learning Method</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Session 4 &mdash; Heterogeneous agents: <em>Distributions as State, Solved Two Ways</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Session 5 &mdash; Text and LLMs: <em>Words as Data, and What a Language Model Measures</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+		<div class="res-row">
+			<span class="res-name">Session 6 &mdash; RAG and agents: <em>An Agent You Can Audit, and the Retrieval It Reads From</em>
+				<span class="badge badge-soon">Released before the session</span></span>
+		</div>
+
+		<h2>Notebooks from the Summer 2026 version</h2>
+		<p>The labs of the ten-lecture version taught at Zhejiang University in Summer&nbsp;2026 stay
+		available; the <a href="../archive/summer-2026.html">Summer 2026 page</a> keeps the decks they went with.</p>
 
 		<!-- Lectures 1–2 -->
 		<div class="res-row">
@@ -106,13 +135,6 @@ jupyter lab</code></pre>
 			<a class="btn" href="https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1" target="_blank" rel="noopener">▶ Run in Codespaces</a>
 		</div>
 
-		<!-- Lecture 6 — in preparation -->
-		<div class="res-row">
-			<span class="res-name">Lecture 6 &mdash; Krusell&ndash;Smith with Deep Equilibrium Nets
-				<span class="badge badge-soon">In preparation</span></span>
-			<a class="btn btn-ghost" href="https://github.com/vonzhg/AI-ECON-2026/blob/main/labs/Lab6_KS1998_DEQN_ComingSoon.ipynb" target="_blank" rel="noopener">Preview</a>
-		</div>
-
 		<!-- Lecture 7 — two-part -->
 		<div class="res-row">
 			<span class="res-name">Lecture 7 &mdash; LLMs &amp; Text as Economic Data
@@ -142,13 +164,6 @@ jupyter lab</code></pre>
 			<a class="btn" href="https://codespaces.new/vonzhg/AI-ECON-2026?quickstart=1" target="_blank" rel="noopener">▶ Run in Codespaces</a>
 		</div>
 
-		<!-- Lecture 10 — in preparation -->
-		<div class="res-row">
-			<span class="res-name">Lecture 10 &mdash; Agentic AI Case-Study Replication
-				<span class="badge badge-soon">In preparation</span></span>
-			<a class="btn btn-ghost" href="https://github.com/vonzhg/AI-ECON-2026/blob/main/labs/Lab9_10_Agentic_CaseStudy_ComingSoon.ipynb" target="_blank" rel="noopener">Preview</a>
-		</div>
-
 		<div class="notice info">
 			Finished the labs and want to build something of your own? The
 			<a href="../capstone.html">project tracks</a> take you from a lab exercise to a small,
@@ -158,7 +173,7 @@ jupyter lab</code></pre>
 
 	<div class="site-footer">
 		AI for Economic Research: Dynamic Models, Language, and Agents &middot; &copy; Zhigang Feng
-		&nbsp;·&nbsp; <a href="../archive/summer-2026.html">Past offering: Summer 2026</a>
+		&nbsp;·&nbsp; <a href="../archive/summer-2026.html">Past offering: Summer 2026 (Zhejiang University)</a>
 	</div>
 </body>
 </html>
