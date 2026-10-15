@@ -1,0 +1,163 @@
+{
+  "helper": "session02_growth.py",
+  "domain": [
+    0.2,
+    2.0
+  ],
+  "off_domain": [
+    0.1,
+    3.0
+  ],
+  "gauss_hermite_nodes": 7,
+  "rungs": {
+    "0": {
+      "calibration": {
+        "name": "rung 0: log, delta=1, deterministic",
+        "alpha": 0.33,
+        "beta": 0.96,
+        "delta": 1.0,
+        "gamma": 1.0,
+        "productivity": 1.0,
+        "rho": 0.0,
+        "sigma": 0.0,
+        "steps": 500,
+        "learning_rate": 0.003,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": false
+      },
+      "elapsed_seconds": 1.3896606280468404,
+      "final_training_loss": 5.300774319039192e-06,
+      "validation": {
+        "held_out_feasible": true,
+        "held_out_log10_max_euler_error": -1.9495238065719604,
+        "held_out_log10_mean_euler_error": -2.693927764892578,
+        "held_out_max_relative_policy_error": 0.006406563334167004,
+        "held_out_median_relative_policy_error": 0.0009084187331609428,
+        "off_domain_feasible": true,
+        "off_domain_log10_max_euler_error": -1.2921457290649414,
+        "off_domain_log10_mean_euler_error": -1.7132413387298584,
+        "off_domain_max_relative_policy_error": 0.0335136353969574,
+        "off_domain_median_relative_policy_error": 0.011701246723532677,
+        "k_ss_analytical": 0.17984701877776357,
+        "k_ss_simulated": 0.17900685966014862,
+        "k_ss_relative_gap": 0.004671520958894152
+      },
+      "gates": {
+        "feasible": true,
+        "max policy error < 1% (held-out)": true,
+        "steady state within 1%": true
+      },
+      "checkpoint_sha256": "b3860e467cb20afbebd81b50070a30c42729c27ed75ed06547b3a184c6596602",
+      "session01_regression": {
+        "session01_max_relative_error": 0.004367520101368427,
+        "session02_max_relative_error": 0.006406563334167004,
+        "both_below_one_percent": true,
+        "calibration_matches": true
+      }
+    },
+    "1": {
+      "calibration": {
+        "name": "rung 1: CRRA gamma=2, delta=0.025, deterministic",
+        "alpha": 0.33,
+        "beta": 0.99,
+        "delta": 0.025,
+        "gamma": 2.0,
+        "productivity": 1.0,
+        "rho": 0.0,
+        "sigma": 0.0,
+        "steps": 3000,
+        "learning_rate": 0.002,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": true
+      },
+      "elapsed_seconds": 4.575947495177388,
+      "final_training_loss": 4.302168576941767e-08,
+      "validation": {
+        "held_out_feasible": true,
+        "held_out_log10_max_euler_error": -3.340604543685913,
+        "held_out_log10_mean_euler_error": -4.089710712432861,
+        "held_out_max_relative_policy_error": 0.00041280541764329373,
+        "held_out_median_relative_policy_error": 0.0002064155056853992,
+        "off_domain_feasible": true,
+        "off_domain_log10_max_euler_error": -1.5941232442855835,
+        "off_domain_log10_mean_euler_error": -2.2288527488708496,
+        "off_domain_max_relative_policy_error": 0.012749679378057311,
+        "off_domain_median_relative_policy_error": 0.0007930198971978543,
+        "k_ss_analytical": 28.348419061048435,
+        "k_ss_simulated": 28.297266006469727,
+        "k_ss_relative_gap": 0.0018044411742521012
+      },
+      "gates": {
+        "feasible": true,
+        "max policy error < 1% (held-out)": true,
+        "steady state within 1%": true
+      },
+      "checkpoint_sha256": "3da75279411211c180fe0197bb4a34c3e50fd8eeab6ef3f9ea251f48af33198d",
+      "uninformed_start": {
+        "held_out_feasible": true,
+        "held_out_log10_max_euler_error": -1.7394556999206543,
+        "held_out_log10_mean_euler_error": -2.3784213066101074,
+        "held_out_max_relative_policy_error": 0.2518503540109654,
+        "held_out_median_relative_policy_error": 0.00809901313603175,
+        "off_domain_feasible": true,
+        "off_domain_log10_max_euler_error": -0.5385838747024536,
+        "off_domain_log10_mean_euler_error": -1.039002537727356,
+        "off_domain_max_relative_policy_error": 0.5119119279623315,
+        "off_domain_median_relative_policy_error": 0.30003910144160956,
+        "k_ss_analytical": 28.348419061048435,
+        "k_ss_simulated": 0.055327076464891434,
+        "k_ss_relative_gap": 0.998048318802338
+      },
+      "time_iteration": {
+        "iterations": 292,
+        "sup_change": 9.684810422744939e-11,
+        "grid_points": 400
+      }
+    },
+    "2": {
+      "calibration": {
+        "name": "rung 2: Brock-Mirman, log, delta=1, AR(1) TFP",
+        "alpha": 0.33,
+        "beta": 0.96,
+        "delta": 1.0,
+        "gamma": 1.0,
+        "productivity": 1.0,
+        "rho": 0.9,
+        "sigma": 0.05,
+        "steps": 1500,
+        "learning_rate": 0.003,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": false
+      },
+      "elapsed_seconds": 4.035516774049029,
+      "final_training_loss": 1.5918317330942955e-06,
+      "validation": {
+        "held_out_feasible": true,
+        "held_out_log10_max_euler_error": -2.153773784637451,
+        "held_out_log10_mean_euler_error": -2.969305992126465,
+        "held_out_max_relative_policy_error": 0.005636034533381462,
+        "held_out_median_relative_policy_error": 0.0007486686808988452,
+        "off_domain_feasible": true,
+        "off_domain_log10_max_euler_error": -1.4214608669281006,
+        "off_domain_log10_mean_euler_error": -1.8287714719772339,
+        "off_domain_max_relative_policy_error": 0.028779223561286926,
+        "off_domain_median_relative_policy_error": 0.0098686208948493,
+        "k_ss_analytical": 0.17984701877776357,
+        "k_ss_simulated": 0.17984406650066376,
+        "k_ss_relative_gap": 1.64154908982058e-05
+      },
+      "gates": {
+        "feasible": true,
+        "max policy error < 1% (held-out)": true,
+        "steady state within 1%": true
+      },
+      "checkpoint_sha256": "55a5555b77b45339376891d1fbe79f385b5b104b14429a7ab0fcd7f1d225835c"
+    }
+  }
+}

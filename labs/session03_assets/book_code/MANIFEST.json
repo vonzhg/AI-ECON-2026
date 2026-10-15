@@ -1,0 +1,107 @@
+{
+  "source": "Miao & Feng, AI for Economists (面向经济学家的人工智能), code for ch. 11 and ch. 12",
+  "frozen": "2026-09-20",
+  "book_git_commit": "9cf89b540a636d80981d629a0bf665180cfce5c1",
+  "book_worktree_uncommitted_entries": 85,
+  "note": "The book worktree had uncommitted changes when frozen; the per-file SHA-256 values, not the commit, identify this snapshot.",
+  "changes": [
+    {
+      "file": "ch12/growth_env.py",
+      "line": 50,
+      "from": "os.pardir, \"ch12\"",
+      "to": "os.pardir, \"ch11\"",
+      "why": "after the chapters were renumbered the path pointed at the file's own folder: ModuleNotFoundError growth_mdp"
+    },
+    {
+      "file": "ch12/running_example.py",
+      "line": 42,
+      "from": "\"..\", \"ch12\"",
+      "to": "\"..\", \"ch11\"",
+      "why": "same renumbering: the script loaded and executed itself: RecursionError"
+    }
+  ],
+  "files": {
+    "ch11/README.md": {
+      "book_path": "code/ch11/README.md",
+      "sha256_book_original": "c27eb4f3cc1fe6f3317c1ad1501fb1d6b3e89502a0448c0c02302f870537c669",
+      "sha256_vendored": "c27eb4f3cc1fe6f3317c1ad1501fb1d6b3e89502a0448c0c02302f870537c669",
+      "identical": true
+    },
+    "ch11/growth_mdp.py": {
+      "book_path": "code/ch11/growth_mdp.py",
+      "sha256_book_original": "25dfdb385e2b6736fcd7e0d249d99353da6ad6c25fb0489e7beab3a208c7daa2",
+      "sha256_vendored": "25dfdb385e2b6736fcd7e0d249d99353da6ad6c25fb0489e7beab3a208c7daa2",
+      "identical": true
+    },
+    "ch11/mc_control.py": {
+      "book_path": "code/ch11/mc_control.py",
+      "sha256_book_original": "d9bfe39ed4f8bffa020994934f6556424a28eb591c9b643000642a5305d42aa1",
+      "sha256_vendored": "d9bfe39ed4f8bffa020994934f6556424a28eb591c9b643000642a5305d42aa1",
+      "identical": true
+    },
+    "ch11/mc_prediction.py": {
+      "book_path": "code/ch11/mc_prediction.py",
+      "sha256_book_original": "b6be6c48ac583ac3f8efaf1619c21a53ddd3100f0a1f32ef6d1db693289dbe8a",
+      "sha256_vendored": "b6be6c48ac583ac3f8efaf1619c21a53ddd3100f0a1f32ef6d1db693289dbe8a",
+      "identical": true
+    },
+    "ch11/running_example.py": {
+      "book_path": "code/ch11/running_example.py",
+      "sha256_book_original": "529f05c5475e2b587ef772c8be27c51691d63a8177cf89c89dba13f06d6bdc7f",
+      "sha256_vendored": "529f05c5475e2b587ef772c8be27c51691d63a8177cf89c89dba13f06d6bdc7f",
+      "identical": true
+    },
+    "ch12/README.md": {
+      "book_path": "code/ch12/README.md",
+      "sha256_book_original": "cc529a242b5ee0aa45e61a01e1aff02a5a902dd2494a9d67dc9cd8b022543981",
+      "sha256_vendored": "cc529a242b5ee0aa45e61a01e1aff02a5a902dd2494a9d67dc9cd8b022543981",
+      "identical": true
+    },
+    "ch12/dqn_growth.py": {
+      "book_path": "code/ch12/dqn_growth.py",
+      "sha256_book_original": "e6d5ef06306fd6e9a0d61a9f7299d12d17bd409751ebb834cfd8bdfadb631ad5",
+      "sha256_vendored": "e6d5ef06306fd6e9a0d61a9f7299d12d17bd409751ebb834cfd8bdfadb631ad5",
+      "identical": true
+    },
+    "ch12/growth_env.py": {
+      "book_path": "code/ch12/growth_env.py",
+      "sha256_book_original": "5ca4457b1525e0e95c80b0589d65f0753343df4bb69b045e533a1fafd4aed507",
+      "sha256_vendored": "fab67aaafe5c0d3b347cfafbbb8c482f312bec42e5ebf12aa6fbd49f036718f1",
+      "identical": false
+    },
+    "ch12/linear_td_approx.py": {
+      "book_path": "code/ch12/linear_td_approx.py",
+      "sha256_book_original": "c2a4a98f0a03b6c89c6475cf0159f88ba4b60bdc0272f5a8c01ec9db98227185",
+      "sha256_vendored": "c2a4a98f0a03b6c89c6475cf0159f88ba4b60bdc0272f5a8c01ec9db98227185",
+      "identical": true
+    },
+    "ch12/policy_gradient.py": {
+      "book_path": "code/ch12/policy_gradient.py",
+      "sha256_book_original": "bf0a9de5d07ea02c6a223f61377123d4e15bcd3298e960d3dbb4a982b4aacdf9",
+      "sha256_vendored": "bf0a9de5d07ea02c6a223f61377123d4e15bcd3298e960d3dbb4a982b4aacdf9",
+      "identical": true
+    },
+    "ch12/portfolio_ac.py": {
+      "book_path": "code/ch12/portfolio_ac.py",
+      "sha256_book_original": "a916a4655d237aedfeeda90012a0a05d685a3e934391fb91fa139061b4e5fc11",
+      "sha256_vendored": "a916a4655d237aedfeeda90012a0a05d685a3e934391fb91fa139061b4e5fc11",
+      "identical": true
+    },
+    "ch12/running_example.py": {
+      "book_path": "code/ch12/running_example.py",
+      "sha256_book_original": "dd8b04bc2565210043a051e21b39b10d05e86aaa6d5eacc41e31c60d67e86403",
+      "sha256_vendored": "0e54a68d44fc8a2f1feaeb8498250fac5b9cf84b7387732d97d59bb19f1e3376",
+      "identical": false
+    },
+    "ch12/tabular_td_control.py": {
+      "book_path": "code/ch12/tabular_td_control.py",
+      "sha256_book_original": "919eb84e93e66dbad14587222386e6daf6c85c069117dd7bc92e86e494bd1469",
+      "sha256_vendored": "919eb84e93e66dbad14587222386e6daf6c85c069117dd7bc92e86e494bd1469",
+      "identical": true
+    }
+  },
+  "course_files_not_from_the_book": [
+    "MANIFEST.json",
+    "README_COURSE.md"
+  ]
+}

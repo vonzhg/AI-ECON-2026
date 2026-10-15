@@ -1,0 +1,23 @@
+{
+  "source_notebook": "labs/Lab4B_Dynamic_Models.ipynb",
+  "source_notebook_sha256": "534082f08f678c4bf6154492e8112d39d9e74ce7ae64d7af841c3463a355ed61",
+  "helper_sha256": "02b960c7aeb5ff32ff2bd55baba598eacf304b3f317244f3968261fe347b1b04",
+  "seed": 2026,
+  "steps": 500,
+  "batch_size": 256,
+  "optimizer": "Adam",
+  "learning_rate": 0.003,
+  "loss": "mean squared log Euler-equation residual",
+  "model": {
+    "alpha": 0.33,
+    "beta": 0.96,
+    "productivity": 1.0,
+    "hidden_width": 32
+  },
+  "final_training_loss": 3.2482425922353286e-06,
+  "checkpoint_sha256": "fff6f8abc12d36fd97370ba8af6211fbfe8540bf310d55ea60d78dc37e96bd2d",
+  "elapsed_seconds": 0.6435189661569893,
+  "median_relative_error": 0.0010706731118261814,
+  "max_relative_error": 0.004367520101368427,
+  "residual_p95": 0.003445324255153537
+}

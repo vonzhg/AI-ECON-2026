@@ -1,0 +1,187 @@
+{
+  "Lec01_T1_AI_and_Economics.pdf": {
+    "master": "source/Lec01_Introduction/Lec01_T1_AI_and_Economics.pdf",
+    "master_md5": "f6266f81b8dfe6bf54d5c4ec92202605",
+    "pages": 21
+  },
+  "Lec01_T2_AI_Research_Collaborator.pdf": {
+    "master": "source/Lec01_Introduction/Lec01_T2_AI_Research_Collaborator.pdf",
+    "master_md5": "874d093206bd83a82c235de5429b738f",
+    "pages": 24
+  },
+  "Lec01_T3_Course_Tools_Projects.pdf": {
+    "master": "source/Lec01_Introduction/Lec01_T3_Course_Tools_Projects.pdf",
+    "master_md5": "a58ebe6d077512419d181c666b9361c4",
+    "pages": 20
+  },
+  "Lec02_T1_ML_Predictive_Stack.pdf": {
+    "master": "source/Lec02_What_is_AI/Lec02_T1_ML_Predictive_Stack.pdf",
+    "master_md5": "237b75f690c97fdb2eff8b281379c403",
+    "pages": 33
+  },
+  "Lec02_T2_Generative_Agentic.pdf": {
+    "master": "source/Lec02_What_is_AI/Lec02_T2_Generative_Agentic.pdf",
+    "master_md5": "6777fb18bb4c1c30d4a98bf5ca016c2d",
+    "pages": 26
+  },
+  "Lec03_T1_Why_ML_Pattern_Recognition.pdf": {
+    "master": "source/Lec03_ML_for_Macro/Lec03_T1_Why_ML_Pattern_Recognition.pdf",
+    "master_md5": "e77a8b40e04bce954be74052a344b264",
+    "pages": 16
+  },
+  "Lec03_T2_NN_Concepts.pdf": {
+    "master": "source/Lec03_ML_for_Macro/Lec03_T2_NN_Concepts.pdf",
+    "master_md5": "e979f2aebe36f385f9ccff9178411caf",
+    "pages": 19
+  },
+  "Lec03_T3_Training_Backprop.pdf": {
+    "master": "source/Lec03_ML_for_Macro/Lec03_T3_Training_Backprop.pdf",
+    "master_md5": "59ae06a4a6a61b32d9116fee202c3690",
+    "pages": 33
+  },
+  "Lec03_T4_Specialized_Networks_Lab.pdf": {
+    "master": "source/Lec03_ML_for_Macro/Lec03_T4_Specialized_Networks_Lab.pdf",
+    "master_md5": "13597c2ed3c29d01866b3811527a33d1",
+    "pages": 32
+  },
+  "Lec04_T1_Motivation_Growth.pdf": {
+    "master": "source/Lec04_DL_RL_Macro/Lec04_T1_Motivation_Growth.pdf",
+    "master_md5": "5bc8df3ce0684ca47075d32e71a85bea",
+    "pages": 35
+  },
+  "Lec04_T2_VFI_DL_ActorCritic.pdf": {
+    "master": "source/Lec04_DL_RL_Macro/Lec04_T2_VFI_DL_ActorCritic.pdf",
+    "master_md5": "399918dcc2d3b945394a2b613b3960c0",
+    "pages": 23
+  },
+  "Lec04_T3_Euler_PyTorch.pdf": {
+    "master": "source/Lec04_DL_RL_Macro/Lec04_T3_Euler_PyTorch.pdf",
+    "master_md5": "1ad3340215ff43f6d1f07d3b8b837594",
+    "pages": 24
+  },
+  "Lec04_T4_Structured_NNs_Validation.pdf": {
+    "master": "source/Lec04_DL_RL_Macro/Lec04_T4_Structured_NNs_Validation.pdf",
+    "master_md5": "1f351a9d192beeecf4330e1ce492f87f",
+    "pages": 30
+  },
+  "Lec05_T1_RL_Framework_DP.pdf": {
+    "master": "source/Lec05_RL_Nutshell/Lec05_T1_RL_Framework_DP.pdf",
+    "master_md5": "ee8b0e47d862968d405bfac1601e3d8c",
+    "pages": 41
+  },
+  "Lec05_T2_MC_TD_QLearning.pdf": {
+    "master": "source/Lec05_RL_Nutshell/Lec05_T2_MC_TD_QLearning.pdf",
+    "master_md5": "4488fa5ecbd857978556dda952732e02",
+    "pages": 38
+  },
+  "Lec05_T3_ActorCritic_Apps.pdf": {
+    "master": "source/Lec05_RL_Nutshell/Lec05_T3_ActorCritic_Apps.pdf",
+    "master_md5": "46a8b9bc510f548003ad5d893db7c1d1",
+    "pages": 38
+  },
+  "Lec07_T1_Text_as_Measurement.pdf": {
+    "master": "source/Lec07_LLM/Lec07_T1_Text_as_Measurement.pdf",
+    "master_md5": "3ff0ff021a45d11cd3009bc49084329a",
+    "pages": 18
+  },
+  "Lec07_T2a_Preprocessing_BoW.pdf": {
+    "master": "source/Lec07_LLM/Lec07_T2a_Preprocessing_BoW.pdf",
+    "master_md5": "55bf09bfa46575c6f5bcee3ba350d48b",
+    "pages": 17
+  },
+  "Lec07_T2b_Word_Embeddings.pdf": {
+    "master": "source/Lec07_LLM/Lec07_T2b_Word_Embeddings.pdf",
+    "master_md5": "6a7be7041f6bcda2f5b5437892008163",
+    "pages": 16
+  },
+  "Lec07_T3a_Attention.pdf": {
+    "master": "source/Lec07_LLM/Lec07_T3a_Attention.pdf",
+    "master_md5": "19d8a34d6153c4b46b0e36a5e91affe4",
+    "pages": 20
+  },
+  "Lec07_T3b_Transformer.pdf": {
+    "master": "source/Lec07_LLM/Lec07_T3b_Transformer.pdf",
+    "master_md5": "64b58b4a24874b2c2c93a38b7f8cefdc",
+    "pages": 27
+  },
+  "Lec08_T1_The_Wall_Naive_Prompting.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T1_The_Wall_Naive_Prompting.pdf",
+    "master_md5": "d6d7d1d6b38381c0742266838e7ed2d9",
+    "pages": 17
+  },
+  "Lec08_T2_Index_Chunking_Embeddings.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T2_Index_Chunking_Embeddings.pdf",
+    "master_md5": "c42fc906b49b50da010f6c7995b19da1",
+    "pages": 20
+  },
+  "Lec08_T3_Retrieval_Vector_GraphRAG.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T3_Retrieval_Vector_GraphRAG.pdf",
+    "master_md5": "ef95419acf4065e07b432cdce06429d6",
+    "pages": 18
+  },
+  "Lec08_T4_Grounded_Generation_vs_FineTuning.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T4_Grounded_Generation_vs_FineTuning.pdf",
+    "master_md5": "d2a95738b9460fc7a202b832a3a1a167",
+    "pages": 14
+  },
+  "Lec08_T5_Research_Applications_Demo_Eval.pdf": {
+    "master": "source/Lec08_RAG/Lec08_T5_Research_Applications_Demo_Eval.pdf",
+    "master_md5": "4747c79446f5f884c23689edc3a2afe4",
+    "pages": 24
+  },
+  "Lec09_T1_Agent_Opportunity.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T1_Agent_Opportunity.pdf",
+    "master_md5": "9291ce1e8d36ee08c2f023d7bf538058",
+    "pages": 24
+  },
+  "Lec09_T2a_How_an_Agent_Runs.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T2a_How_an_Agent_Runs.pdf",
+    "master_md5": "482f56599235326d23c391ac783baabb",
+    "pages": 21
+  },
+  "Lec09_T2b_Setup_Files_Commands.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T2b_Setup_Files_Commands.pdf",
+    "master_md5": "2cd5b4f283747c25bd6e98b8f88f81a9",
+    "pages": 32
+  },
+  "Lec09_T3a_Build_an_Agent.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T3a_Build_an_Agent.pdf",
+    "master_md5": "515bb97aa9fcf3b91cd19bcc5530e7ac",
+    "pages": 26
+  },
+  "Lec09_T3b_Invoking_Agents.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T3b_Invoking_Agents.pdf",
+    "master_md5": "77327d0195ce4314439d1642104310c4",
+    "pages": 28
+  },
+  "Lec09_T4_Design_Lab.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T4_Design_Lab.pdf",
+    "master_md5": "1361cb995063cf924fa3d41ad7402c8f",
+    "pages": 15
+  },
+  "Lec09_T5a_Homotopy_Method.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5a_Homotopy_Method.pdf",
+    "master_md5": "f50d70d1d6bf034c1a9f3136f22ddd33",
+    "pages": 28
+  },
+  "Lec09_T5b_Project_Management.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5b_Project_Management.pdf",
+    "master_md5": "23b8c1d9e534eb4f1007f751c54c87c6",
+    "pages": 25
+  },
+  "Lec09_T5c_Tracing_Mistakes_Context.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5c_Tracing_Mistakes_Context.pdf",
+    "master_md5": "d9635cdd800bbb2224d58a91b43b4541",
+    "pages": 25
+  },
+  "Lec09_T5d_Governance_Action_Plan.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_T5d_Governance_Action_Plan.pdf",
+    "master_md5": "1b3a0d7556324ef608ee68bde3aa351e",
+    "pages": 27
+  },
+  "Lec09_TA_Appendix_Landscape.pdf": {
+    "master": "source/Lec09_Agentic_AI/Lec09_TA_Appendix_Landscape.pdf",
+    "master_md5": "fc22261852886a50c083daa52637f298",
+    "pages": 18
+  }
+}

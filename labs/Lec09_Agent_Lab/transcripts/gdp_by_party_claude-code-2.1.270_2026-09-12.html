@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US Real GDP Growth by Year and Presidential Party, 2000–2025</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page:           #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --dem:            #2a78d6;
+    --rep:            #e34948;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page:           #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --dem:            #3987e5;
+      --rep:            #e66767;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page:           #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --dem:            #3987e5;
+    --rep:            #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+  }
+  .viz-root { max-width: 980px; margin: 0 auto; padding: 32px 24px 48px; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 4px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { font-size: 13px; color: var(--text-secondary); margin: 0; }
+  .toggle-btn {
+    flex: none;
+    font: inherit; font-size: 13px; font-weight: 500;
+    color: var(--text-primary);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .toggle-btn:hover { background: var(--grid); }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 20px 12px;
+    margin-top: 16px;
+    position: relative;
+  }
+
+  .legend { display: flex; gap: 20px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .bar { cursor: pointer; }
+  .bar:hover, .bar.focused { filter: brightness(1.08); }
+  .bar:focus { outline: none; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .axis-label.year { font-size: 10px; }
+  .gridline { stroke: var(--grid); stroke-width: 1; shape-rendering: crispEdges; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; shape-rendering: crispEdges; }
+  .value-label { fill: var(--text-secondary); font-size: 10px; font-variant-numeric: tabular-nums; }
+  .era-label { fill: var(--text-muted); font-size: 10.5px; font-weight: 600; }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.08s ease;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip .tt-value { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tooltip .tt-sub { color: var(--text-secondary); margin-top: 2px; }
+  .tooltip .tt-key { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  table.data-table caption { text-align: left; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-variant-numeric: normal; }
+  table.data-table th, table.data-table td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+  table.data-table th { color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.02em; }
+  table.data-table .party-dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  .hidden { display: none; }
+
+  .analysis { margin-top: 28px; font-size: 14px; line-height: 1.6; color: var(--text-primary); }
+  .analysis h2 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+  .analysis h2:first-child { margin-top: 0; }
+  .analysis p { margin: 0 0 12px; }
+  .analysis ul { margin: 0 0 12px; padding-left: 20px; }
+  .analysis li { margin-bottom: 6px; }
+  .stat-row { display: flex; gap: 24px; margin: 12px 0 16px; flex-wrap: wrap; }
+  .stat-tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; min-width: 150px; }
+  .stat-tile .stat-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-tile .stat-value { font-size: 22px; font-weight: 600; }
+  .stat-tile .stat-value.dem { color: var(--dem); }
+  .stat-tile .stat-value.rep { color: var(--rep); }
+  .source { font-size: 11px; color: var(--text-muted); margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+
+  <div class="header">
+    <div>
+      <h1>US real GDP growth by year, 2000–2025</h1>
+      <p class="subtitle">Annual % change, chained dollars &middot; bars colored by the party holding the White House that year</p>
+    </div>
+    <button class="toggle-btn" id="viewToggle" aria-pressed="false">Show table</button>
+  </div>
+
+  <div class="card" id="chartCard">
+    <div class="legend" role="list" aria-label="Party">
+      <span class="legend-item" role="listitem"><span class="legend-swatch" style="background:var(--dem)"></span>Democrat</span>
+      <span class="legend-item" role="listitem"><span class="legend-swatch" style="background:var(--rep)"></span>Republican</span>
+    </div>
+    <svg id="chart" viewBox="0 0 900 380" role="img" aria-label="Bar chart of US real GDP annual growth rate from 2000 to 2025, colored by the political party holding the presidency"></svg>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <div class="card hidden" id="tableCard">
+    <table class="data-table">
+      <caption>US real GDP growth by year with the president and party in office</caption>
+      <thead>
+        <tr><th>Year</th><th>Real GDP growth</th><th>President</th><th>Party</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="analysis">
+    <h2>Does the president's party move GDP growth?</h2>
+    <p>Splitting the 26 years from 2000–2025 by which party held the presidency (crediting each calendar year to whoever was inaugurated that January) gives:</p>
+
+    <div class="stat-row">
+      <div class="stat-tile">
+        <div class="stat-label">Avg. growth, Democratic years (n=13)</div>
+        <div class="stat-value dem">2.4%</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Avg. growth, Republican years (n=13)</div>
+        <div class="stat-value rep">2.0%</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">Median growth, both parties</div>
+        <div class="stat-value">2.5%</div>
+      </div>
+    </div>
+
+    <p>The 0.4-point gap in the average looks like a Democratic edge, but the <strong>medians are identical</strong>. That gap is not a broad, consistent pattern — it's produced almost entirely by two outlier years: the +6.2% snapback in 2021 (Biden) after the COVID crash, and the −2.6% trough of the 2008–09 financial crisis, which is booked to 2009 (Obama's first year) even though the crisis began in 2007–08 under Bush. Pull those two years out and the party averages converge to essentially the same number.</p>
+
+    <h2>Why the pattern is mostly noise, not policy</h2>
+    <ul>
+      <li><strong>Recessions aren't partisan.</strong> All three downturns in this period — the 2001 dot-com bust, the 2008 financial crisis, and the 2020 COVID shock — began under Republican presidents, but that reflects when global/financial shocks happened to hit, not a Republican effect on growth. A random reshuffling of which party held office in those years would reshuffle the averages just as much.</li>
+      <li><strong>First-year attribution is arbitrary.</strong> A president inherits the outgoing administration's budget, Fed policy stance, and business-cycle momentum for most of year one. Crediting 2009's collapse to Obama (in office 11 months of that year) or 2021's rebound to Biden is a common convention, but it's a labeling choice, not evidence of causation — shift the boundary by a year and the party averages move noticeably.</li>
+      <li><strong>The president doesn't set fiscal or monetary policy alone.</strong> Congress controls taxes and spending, and growth-relevant policy often reflects which party controls the House/Senate, not just the White House. Interest-rate policy — arguably the biggest short-run growth lever — is set by the Fed, an independent body that spans party turnovers.</li>
+      <li><strong>Growth is dominated by things no president controls</strong>: productivity trends, demographics, oil-price shocks, global financial contagion, a pandemic. These swamp any plausible policy effect on a 1–4 year horizon.</li>
+      <li><strong>Small sample.</strong> 26 annual observations spanning only 3–4 complete business cycles is nowhere near enough to detect a genuine partisan growth effect even if one existed at a plausible size (academic studies, e.g. Blinder &amp; Watson 2016, find a similar "Democratic edge" back to 1947 but attribute nearly all of it to luck — oil shocks, productivity swings, and consumer/business confidence — rather than to policy differences).</li>
+    </ul>
+
+    <h2>Bottom line</h2>
+    <p>The data show essentially no reliable relationship between the president's party and real GDP growth over 2000–2025. What looks like a Democratic advantage in the mean evaporates once you use the median or reassign a couple of boundary years, and the underlying drivers of the growth swings — financial crises, a pandemic, Fed policy — aren't things a party affiliation causes.</p>
+
+    <p class="source">Source: US Bureau of Economic Analysis, Real GDP percent change (annual), via FRED series A191RL1A225NBEA. 2025 reflects the latest available annual estimate.</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const data = [
+    {year: 2000, growth: 4.1, party: 'D', president: 'Clinton'},
+    {year: 2001, growth: 1.0, party: 'R', president: 'G.W. Bush'},
+    {year: 2002, growth: 1.7, party: 'R', president: 'G.W. Bush'},
+    {year: 2003, growth: 2.8, party: 'R', president: 'G.W. Bush'},
+    {year: 2004, growth: 3.8, party: 'R', president: 'G.W. Bush'},
+    {year: 2005, growth: 3.5, party: 'R', president: 'G.W. Bush'},
+    {year: 2006, growth: 2.8, party: 'R', president: 'G.W. Bush'},
+    {year: 2007, growth: 2.0, party: 'R', president: 'G.W. Bush'},
+    {year: 2008, growth: 0.1, party: 'R', president: 'G.W. Bush'},
+    {year: 2009, growth: -2.6, party: 'D', president: 'Obama'},
+    {year: 2010, growth: 2.7, party: 'D', president: 'Obama'},
+    {year: 2011, growth: 1.6, party: 'D', president: 'Obama'},
+    {year: 2012, growth: 2.3, party: 'D', president: 'Obama'},
+    {year: 2013, growth: 2.1, party: 'D', president: 'Obama'},
+    {year: 2014, growth: 2.5, party: 'D', president: 'Obama'},
+    {year: 2015, growth: 2.9, party: 'D', president: 'Obama'},
+    {year: 2016, growth: 1.8, party: 'D', president: 'Obama'},
+    {year: 2017, growth: 2.5, party: 'R', president: 'Trump'},
+    {year: 2018, growth: 3.0, party: 'R', president: 'Trump'},
+    {year: 2019, growth: 2.6, party: 'R', president: 'Trump'},
+    {year: 2020, growth: -2.1, party: 'R', president: 'Trump'},
+    {year: 2021, growth: 6.2, party: 'D', president: 'Biden'},
+    {year: 2022, growth: 2.5, party: 'D', president: 'Biden'},
+    {year: 2023, growth: 2.9, party: 'D', president: 'Biden'},
+    {year: 2024, growth: 2.8, party: 'D', president: 'Biden'},
+    {year: 2025, growth: 2.1, party: 'R', president: 'Trump'},
+  ];
+
+  const root = document.querySelector('.viz-root');
+  const cs = getComputedStyle(root);
+  const color = (name) => cs.getPropertyValue(name).trim();
+
+  const svg = document.getElementById('chart');
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 900, H = 380;
+  const plotLeft = 36, plotRight = 884, plotTop = 16, plotBottom = 330;
+  const plotW = plotRight - plotLeft, plotH = plotBottom - plotTop;
+
+  const minV = Math.min(...data.map(d => d.growth), 0);
+  const maxV = Math.max(...data.map(d => d.growth), 0);
+  const yMin = Math.floor(minV) - 1;
+  const yMax = Math.ceil(maxV) + 1;
+  const yScale = (v) => plotBottom - ((v - yMin) / (yMax - yMin)) * plotH;
+  const zeroY = yScale(0);
+
+  const bandW = plotW / data.length;
+  const barW = Math.min(24, bandW * 0.62);
+
+  function el(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // gridlines (every 2%)
+  const gridStep = 2;
+  for (let v = Math.ceil(yMin / gridStep) * gridStep; v <= yMax; v += gridStep) {
+    const y = yScale(v);
+    svg.appendChild(el('line', {class: 'gridline', x1: plotLeft, x2: plotRight, y1: y, y2: y}));
+    const label = el('text', {class: 'axis-label', x: plotLeft - 8, y: y + 3, 'text-anchor': 'end'});
+    label.textContent = v + '%';
+    svg.appendChild(label);
+  }
+
+  // baseline (zero)
+  svg.appendChild(el('line', {class: 'baseline', x1: plotLeft, x2: plotRight, y1: zeroY, y2: zeroY}));
+
+  // era separators + labels (presidential terms)
+  const terms = [];
+  data.forEach((d, i) => {
+    const x = plotLeft + i * bandW;
+    if (d.president !== (terms.length ? terms[terms.length - 1].president : null)) {
+      terms.push({president: d.president, party: d.party, x0: x});
+    }
+  });
+  terms.forEach((t, i) => {
+    const x1 = i + 1 < terms.length ? terms[i + 1].x0 : plotRight;
+    const midX = (t.x0 + x1) / 2;
+    const txt = el('text', {class: 'era-label', x: midX, y: plotTop - 2, 'text-anchor': 'middle'});
+    txt.textContent = t.president;
+    svg.appendChild(txt);
+    if (i > 0) {
+      svg.appendChild(el('line', {class: 'gridline', x1: t.x0, x2: t.x0, y1: plotTop - 12, y2: plotBottom, 'stroke-dasharray': '2,2'}));
+    }
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  const card = document.getElementById('chartCard');
+
+  data.forEach((d, i) => {
+    const x = plotLeft + i * bandW + (bandW - barW) / 2;
+    const barColor = d.party === 'D' ? color('--dem') : color('--rep');
+    const y0 = yScale(Math.max(0, d.growth));
+    const y1 = yScale(Math.min(0, d.growth));
+    const h = Math.max(1, y1 - y0);
+
+    const rectAttrs = {
+      class: 'bar', x: x, y: y0, width: barW, height: h,
+      fill: barColor, rx: 3, ry: 3,
+      tabindex: '0', role: 'img',
+      'aria-label': d.year + ': ' + d.growth + '% real GDP growth, ' + d.president + ' (' + (d.party === 'D' ? 'Democrat' : 'Republican') + ')'
+    };
+    const rect = el('rect', rectAttrs);
+    svg.appendChild(rect);
+
+    // year tick (every other year to avoid crowding)
+    if (i % 2 === 0) {
+      const yl = el('text', {class: 'axis-label year', x: x + barW / 2, y: plotBottom + 16, 'text-anchor': 'middle'});
+      yl.textContent = "'" + String(d.year).slice(2);
+      svg.appendChild(yl);
+    }
+
+    // direct labels on the extremes
+    if (d.growth === Math.max(...data.map(v => v.growth)) || d.growth === Math.min(...data.map(v => v.growth))) {
+      const above = d.growth >= 0;
+      const lbl = el('text', {
+        class: 'value-label', x: x + barW / 2, y: above ? y0 - 6 : y1 + 12,
+        'text-anchor': 'middle'
+      });
+      lbl.textContent = (d.growth > 0 ? '+' : '') + d.growth + '%';
+      svg.appendChild(lbl);
+    }
+
+    function showTooltip(evt) {
+      rect.classList.add('focused');
+      const partyName = d.party === 'D' ? 'Democrat' : 'Republican';
+      tooltip.innerHTML = '';
+      const valueDiv = document.createElement('div');
+      valueDiv.className = 'tt-value';
+      valueDiv.textContent = (d.growth > 0 ? '+' : '') + d.growth + '%';
+      const subDiv = document.createElement('div');
+      subDiv.className = 'tt-sub';
+      const key = document.createElement('span');
+      key.className = 'tt-key';
+      key.style.background = barColor;
+      subDiv.appendChild(key);
+      subDiv.appendChild(document.createTextNode(d.year + ' · ' + d.president + ' (' + partyName + ')'));
+      tooltip.appendChild(valueDiv);
+      tooltip.appendChild(subDiv);
+      tooltip.classList.add('visible');
+
+      const cardRect = card.getBoundingClientRect();
+      const svgRect = svg.getBoundingClientRect();
+      const scale = svgRect.width / W;
+      const barCenterX = svgRect.left - cardRect.left + (x + barW / 2) * scale;
+      const barTopY = svgRect.top - cardRect.top + Math.min(y0, y1) * scale;
+      tooltip.style.left = Math.min(Math.max(barCenterX - tooltip.offsetWidth / 2, 4), cardRect.width - tooltip.offsetWidth - 4) + 'px';
+      tooltip.style.top = Math.max(barTopY - tooltip.offsetHeight - 10, 4) + 'px';
+    }
+    function hideTooltip() {
+      rect.classList.remove('focused');
+      tooltip.classList.remove('visible');
+    }
+
+    rect.addEventListener('pointerenter', showTooltip);
+    rect.addEventListener('pointermove', showTooltip);
+    rect.addEventListener('pointerleave', hideTooltip);
+    rect.addEventListener('focus', showTooltip);
+    rect.addEventListener('blur', hideTooltip);
+  });
+
+  // table view
+  const tbody = document.getElementById('tableBody');
+  data.forEach(d => {
+    const tr = document.createElement('tr');
+    const partyName = d.party === 'D' ? 'Democrat' : 'Republican';
+    const swatch = d.party === 'D' ? 'var(--dem)' : 'var(--rep)';
+    const tdYear = document.createElement('td'); tdYear.textContent = d.year;
+    const tdGrowth = document.createElement('td'); tdGrowth.textContent = (d.growth > 0 ? '+' : '') + d.growth.toFixed(1) + '%';
+    const tdPres = document.createElement('td'); tdPres.textContent = d.president;
+    const tdParty = document.createElement('td');
+    const dot = document.createElement('span');
+    dot.className = 'party-dot';
+    dot.style.background = swatch;
+    tdParty.appendChild(dot);
+    tdParty.appendChild(document.createTextNode(partyName));
+    tr.appendChild(tdYear); tr.appendChild(tdGrowth); tr.appendChild(tdPres); tr.appendChild(tdParty);
+    tbody.appendChild(tr);
+  });
+
+  const toggle = document.getElementById('viewToggle');
+  const chartCard = document.getElementById('chartCard');
+  const tableCard = document.getElementById('tableCard');
+  toggle.addEventListener('click', () => {
+    const showingTable = !tableCard.classList.contains('hidden');
+    tableCard.classList.toggle('hidden', !showingTable);
+    chartCard.classList.toggle('hidden', showingTable);
+    toggle.textContent = showingTable ? 'Show table' : 'Show chart';
+    toggle.setAttribute('aria-pressed', String(!showingTable));
+  });
+})();
+</script>
+
+</body>
+</html>

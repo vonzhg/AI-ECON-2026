@@ -1,0 +1,186 @@
+{
+  "helper": "session03_value.py",
+  "domain": [
+    0.2,
+    2.0
+  ],
+  "off_domain": [
+    0.1,
+    3.0
+  ],
+  "session02_helper_sha256": "ad1728cdeef8ebc4ff4ef730e56570649a3541048e5e1104d62fcfc69b4217db",
+  "rungs": {
+    "0": {
+      "config": {
+        "rung_id": 0,
+        "n_step": 10,
+        "steps": 1500,
+        "lr_actor": 0.003,
+        "lr_critic": 0.01,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": true
+      },
+      "calibration": {
+        "name": "rung 0: log, delta=1, deterministic",
+        "alpha": 0.33,
+        "beta": 0.96,
+        "delta": 1.0,
+        "gamma": 1.0,
+        "productivity": 1.0,
+        "rho": 0.0,
+        "sigma": 0.0,
+        "steps": 500,
+        "learning_rate": 0.003,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": false
+      },
+      "benchmark": "closed form",
+      "elapsed_seconds": 18.915210834005848,
+      "validation": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.0014388508861884475,
+        "held_out_max_value_error_ce": 0.0006487369537353516,
+        "held_out_log10_max_bellman_residual": -1.7668259143829346,
+        "held_out_log10_max_euler_error": -2.781081438064575,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.0018746822606772184,
+        "off_domain_max_value_error_ce": 0.008581399917602539,
+        "off_domain_log10_max_bellman_residual": -0.6664069294929504,
+        "off_domain_log10_max_euler_error": -2.6507813930511475,
+        "k_ss_analytical": 0.17984701877776357,
+        "k_ss_simulated": 0.18005530536174774,
+        "k_ss_relative_gap": 0.0011581319801666975
+      },
+      "gates": {
+        "feasible": true,
+        "max policy error < 1% (held-out)": true,
+        "max value error < 0.1% of consumption (held-out)": true,
+        "steady state within 1%": true,
+        "log10 max Bellman residual < -1.5 (held-out)": true
+      },
+      "checkpoint_sha256": "0f8de97e86f31e306a05efade74e949da11cf6ae25c0c3fa31e234c852080ea8",
+      "one_step": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.9973440170288086,
+        "held_out_max_value_error_ce": 0.08974814414978027,
+        "held_out_log10_max_bellman_residual": -1.775334119796753,
+        "held_out_log10_max_euler_error": -0.0008927403250709176,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.9973928928375244,
+        "off_domain_max_value_error_ce": 0.09484827518463135,
+        "off_domain_log10_max_bellman_residual": -0.9795073866844177,
+        "off_domain_log10_max_euler_error": -0.0008887457079254091,
+        "k_ss_analytical": 0.17984701877776357,
+        "k_ss_simulated": 0.01590278185904026,
+        "k_ss_relative_gap": 0.9115760607703413,
+        "elapsed_seconds": 3.609985115006566
+      },
+      "uninformed_start": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.08431492745876312,
+        "held_out_max_value_error_ce": 0.007940411567687988,
+        "held_out_log10_max_bellman_residual": -0.6894277930259705,
+        "held_out_log10_max_euler_error": -0.9370677471160889,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.18680454790592194,
+        "off_domain_max_value_error_ce": 0.020213603973388672,
+        "off_domain_log10_max_bellman_residual": -0.2838306427001953,
+        "off_domain_log10_max_euler_error": -0.5741862654685974,
+        "k_ss_analytical": 0.17984701877776357,
+        "k_ss_simulated": 0.18158750236034393,
+        "k_ss_relative_gap": 0.00967757816842697,
+        "elapsed_seconds": 11.9323471179232
+      }
+    },
+    "1": {
+      "config": {
+        "rung_id": 1,
+        "n_step": 80,
+        "steps": 3000,
+        "lr_actor": 0.002,
+        "lr_critic": 0.005,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": true
+      },
+      "calibration": {
+        "name": "rung 1: CRRA gamma=2, delta=0.025, deterministic",
+        "alpha": 0.33,
+        "beta": 0.99,
+        "delta": 0.025,
+        "gamma": 2.0,
+        "productivity": 1.0,
+        "rho": 0.0,
+        "sigma": 0.0,
+        "steps": 3000,
+        "learning_rate": 0.002,
+        "batch_size": 256,
+        "hidden": 32,
+        "seed": 2026,
+        "informed_start": true
+      },
+      "benchmark": "time iteration",
+      "elapsed_seconds": 164.66616243077442,
+      "validation": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.0024843227232477206,
+        "held_out_max_value_error_ce": 0.000787184757026882,
+        "held_out_log10_max_bellman_residual": -1.8362585306167603,
+        "held_out_log10_max_euler_error": -2.2042508125305176,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.028857383009401258,
+        "off_domain_max_value_error_ce": 0.008697681362171417,
+        "off_domain_log10_max_bellman_residual": -0.796890139579773,
+        "off_domain_log10_max_euler_error": -1.3462693691253662,
+        "k_ss_analytical": 28.348419061048435,
+        "k_ss_simulated": 28.43838882446289,
+        "k_ss_relative_gap": 0.003173713610649854
+      },
+      "gates": {
+        "feasible": true,
+        "max policy error < 1% (held-out)": true,
+        "max value error < 0.1% of consumption (held-out)": true,
+        "steady state within 1%": true,
+        "log10 max Bellman residual < -1.5 (held-out)": true
+      },
+      "checkpoint_sha256": "2e4ddd9f92f4252ec88b17140864e8137febc5037d5106e119a617d658162078",
+      "one_step": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.016305232490370847,
+        "held_out_max_value_error_ce": 0.025193859449208156,
+        "held_out_log10_max_bellman_residual": -0.6918226480484009,
+        "held_out_log10_max_euler_error": -1.7364498376846313,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.0416281727678815,
+        "off_domain_max_value_error_ce": 0.052208015797508556,
+        "off_domain_log10_max_bellman_residual": -0.10054033994674683,
+        "off_domain_log10_max_euler_error": -1.1106369495391846,
+        "k_ss_analytical": 28.348419061048435,
+        "k_ss_simulated": 27.082983016967773,
+        "k_ss_relative_gap": 0.044638681309019046,
+        "elapsed_seconds": 7.296862276038155
+      },
+      "uninformed_start": {
+        "held_out_feasible": true,
+        "held_out_max_relative_policy_error": 0.0028864649013657794,
+        "held_out_max_value_error_ce": 0.003567526758702977,
+        "held_out_log10_max_bellman_residual": -0.871781051158905,
+        "held_out_log10_max_euler_error": -2.2408502101898193,
+        "off_domain_feasible": true,
+        "off_domain_max_relative_policy_error": 0.016694583783994178,
+        "off_domain_max_value_error_ce": 0.041533458617020846,
+        "off_domain_log10_max_bellman_residual": -0.3154011368751526,
+        "off_domain_log10_max_euler_error": -1.7343063354492188,
+        "k_ss_analytical": 28.348419061048435,
+        "k_ss_simulated": 28.67991828918457,
+        "k_ss_relative_gap": 0.01169374656915611,
+        "elapsed_seconds": 169.94969184091315
+      }
+    }
+  }
+}
