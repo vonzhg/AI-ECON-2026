@@ -131,37 +131,37 @@
  },
  "Session04_All_Decks.pdf": {
   "master": "source/Session04 (all decks, in order)",
-  "pages": 168,
+  "pages": 180,
   "decks": 4,
-  "published": "2026-10-04"
+  "published": "2026-10-15"
  },
  "Session04_Deck1_Stationary_Economy_Aiyagari.pdf": {
   "master": "source/Session04/Session04_Deck1_Stationary_Economy_Aiyagari.pdf",
-  "md5": "f136e7e182d9462a8ff1915119807a00",
+  "md5": "a97979d7d3f62319fe9287ea17679fa7",
   "pages": 30,
   "title": "Aiyagari, Solved Twice: A Fixed Point, Then a Law of Motion",
-  "published": "2026-10-04"
+  "published": "2026-10-15"
  },
  "Session04_Deck2_Krusell_Smith_Three_Ways.pdf": {
   "master": "source/Session04/Session04_Deck2_Krusell_Smith_Three_Ways.pdf",
-  "md5": "9ce7fa85b2cae1a0d4887c847284df8e",
-  "pages": 55,
+  "md5": "e83d5b92126c11193f3d302540ca653f",
+  "pages": 61,
   "title": "Krusell\u2013Smith, Solved Three Ways",
-  "published": "2026-10-04"
+  "published": "2026-10-15"
  },
  "Session04_Deck3_OLG_Aggregate_Risk.pdf": {
   "master": "source/Session04/Session04_Deck3_OLG_Aggregate_Risk.pdf",
-  "md5": "5c19ffc56cc5c279d7a362df68a27995",
-  "pages": 45,
+  "md5": "faabd4812e0b63d9224914b1d933d8c0",
+  "pages": 51,
   "title": "Cohorts Under Aggregate Risk",
-  "published": "2026-10-04"
+  "published": "2026-10-15"
  },
  "Session04_Deck4_Optimal_Taxation_Without_Commitment.pdf": {
   "master": "source/Session04/Session04_Deck4_Optimal_Taxation_Without_Commitment.pdf",
-  "md5": "ed50fc8f46fa2a91628bdabf148e8ae2",
+  "md5": "501a8c1852178f6210a1c2b5171fe118",
   "pages": 38,
   "title": "Optimal Taxation Without Commitment",
-  "published": "2026-10-04"
+  "published": "2026-10-15"
  },
  "Session05_All_Decks.pdf": {
   "master": "source/Session05 (all decks, in order)",
