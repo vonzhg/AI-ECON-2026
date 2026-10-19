@@ -165,51 +165,51 @@
  },
  "Session05_All_Decks.pdf": {
   "master": "source/Session05 (all decks, in order)",
-  "pages": 208,
+  "pages": 216,
   "decks": 6,
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session05_Deck1_Text_As_Economic_Data.pdf": {
   "master": "source/Session05/Session05_Deck1_Text_As_Economic_Data.pdf",
-  "md5": "887ac645fac8497e6a363c485ec53adb",
-  "pages": 38,
+  "md5": "6a252b706e31ac22d71d0424f8b221a5",
+  "pages": 48,
   "title": "Text as Economic Data: From Documents to Counts",
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session05_Deck2_Meaning_In_Vectors.pdf": {
   "master": "source/Session05/Session05_Deck2_Meaning_In_Vectors.pdf",
-  "md5": "4958cfa27feba70329710b351e2cb36b",
-  "pages": 43,
+  "md5": "bc51f66ddd7bc201f7bdcb721f311619",
+  "pages": 47,
   "title": "Meaning in Vectors: Embeddings, Attention, the Transformer",
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session05_Deck3_Pretrained_Language_Models.pdf": {
   "master": "source/Session05/Session05_Deck3_Pretrained_Language_Models.pdf",
-  "md5": "5f8acd5ccc6bb982b062465dedc5a6c1",
-  "pages": 37,
-  "title": "Pretrained Language Models: BERT, GPT, Alignment, and Five Limits",
-  "published": "2026-10-04"
+  "md5": "0ac73982214298e77520cdbfcfd2f46d",
+  "pages": 31,
+  "title": "Pretrained Language Models: Encoders That Read, Decoders That Write",
+  "published": "2026-10-19"
  },
  "Session05_Deck4_LLM_As_Measurement_Instrument.pdf": {
   "master": "source/Session05/Session05_Deck4_LLM_As_Measurement_Instrument.pdf",
-  "md5": "6f2f3c65fb5305410fe5ae4b2f32523e",
+  "md5": "dfb48988ddcddbc8131216141adc8156",
   "pages": 30,
   "title": "The LLM as a Measurement Instrument",
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf": {
   "master": "source/Session05/Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf",
   "md5": "ac3f6922c0f82a000431ca72967e0a6b",
   "pages": 30,
   "title": "Simulated Agents, Prompts as Design, and Reproducible LLM Research",
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf": {
   "master": "source/Session05/Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf",
   "md5": "71fa81008acd4dfe9a647eeb86c996e9",
   "pages": 30,
   "title": "Text Signals and the Bond-Yield Forecast",
-  "published": "2026-10-04"
+  "published": "2026-10-19"
  },
  "Session06_All_Decks.pdf": {
   "master": "source/Session06 (all decks, in order)",

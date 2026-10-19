@@ -1,0 +1,983 @@
+{
+ "_meta": {
+  "module": "session05_attention.py",
+  "run_date": "2026-09-20",
+  "seed": 42,
+  "python": "3.9.21",
+  "numpy": "1.24.4",
+  "torch": "2.8.0+cu128",
+  "device": "cpu",
+  "torch_threads": 4,
+  "corpus_manifest_sha256": "03649155c29b53c1119c2c808543b82db549c539259ea9804d151f94c0de4c8a",
+  "machine_b_manifest_sha256": "9e83525b63f827a51681a14cd9c4e2352a84fe50e3bef75054a9bca0a1879216",
+  "omp_num_threads": "4",
+  "elapsed_seconds": 17.72
+ },
+ "attention_by_hand": {
+  "tokens": [
+   "The",
+   "central",
+   "bank",
+   "raised",
+   "interest",
+   "rates",
+   "amid",
+   "rising",
+   "inflation"
+  ],
+  "d_model": 16,
+  "head_dim": 8,
+  "scale": 0.353553,
+  "scale_note": "scores are divided by sqrt(d_h); at d_h = 8 that is 1 / 2.8284 = 0.3536",
+  "query_position": 5,
+  "query_token": "interest",
+  "bidirectional": {
+   "scores_raw": [
+    -0.1571,
+    -0.0631,
+    -0.0948,
+    0.023,
+    0.1309,
+    0.0107,
+    -0.188,
+    -0.0293,
+    -0.0955
+   ],
+   "scores_scaled": [
+    -0.0555,
+    -0.0223,
+    -0.0335,
+    0.0081,
+    0.0463,
+    0.0038,
+    -0.0665,
+    -0.0104,
+    -0.0338
+   ],
+   "weights": [
+    0.107,
+    0.1106,
+    0.1094,
+    0.114,
+    0.1184,
+    0.1135,
+    0.1058,
+    0.1119,
+    0.1093
+   ],
+   "weights_sum": 1.0,
+   "entropy": 2.1967
+  },
+  "causal": {
+   "scores_masked": [
+    -0.0555,
+    -0.0223,
+    -0.0335,
+    0.0081,
+    0.0463,
+    null,
+    null,
+    null,
+    null
+   ],
+   "weights": [
+    0.1912,
+    0.1977,
+    0.1955,
+    0.2038,
+    0.2117,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "upper_triangle_is_zero": true,
+   "row_entropies": [
+    -0.0,
+    0.6931,
+    1.0986,
+    1.3858,
+    1.6088,
+    1.7917,
+    1.9443,
+    2.0773,
+    2.1968
+   ],
+   "entropy_of_last_row": 2.1968,
+   "max_possible_entropy": 2.1972
+  },
+  "untrained_is_flat": {
+   "note": "with untrained projections every row is near-uniform: attention patterns are learned, not built into the mechanism",
+   "mean_row_entropy": 2.1914,
+   "max_possible": 2.1972
+  },
+  "two_token_check": {
+   "note": "Q = K = V = I2, so the scores are 1/sqrt(2) on the diagonal and 0 off it",
+   "sigma_by_hand": 0.669762,
+   "weights": [
+    [
+     0.669762,
+     0.330238
+    ],
+    [
+     0.330238,
+     0.669762
+    ]
+   ],
+   "agrees": true
+  },
+  "multi_head": {
+   "n_heads": 4,
+   "head_dim": 4,
+   "note": "four heads of width 4 cost exactly what one head of width 16 costs",
+   "per_head_mean_entropy": [
+    1.5996,
+    1.5991,
+    1.5993,
+    1.5991
+   ],
+   "output_shape": [
+    9,
+    16
+   ]
+  }
+ },
+ "book_example": {
+  "sentence": "The central bank raised interest rates amid rising inflation",
+  "tokens": [
+   "The",
+   "central",
+   "bank",
+   "raised",
+   "interest",
+   "rates",
+   "amid",
+   "rising",
+   "inflation"
+  ],
+  "query_position": 5,
+  "query_token": "interest",
+  "scores": {
+   "The": -0.2,
+   "central": 0.0,
+   "bank": 0.5,
+   "raised": 1.1,
+   "interest": 0.0,
+   "rates": 2.3,
+   "amid": 0.0,
+   "rising": 0.0,
+   "inflation": 1.9
+  },
+  "exponentials": {
+   "The": 0.8187,
+   "central": 1.0,
+   "bank": 1.6487,
+   "raised": 3.0042,
+   "interest": 1.0,
+   "rates": 9.9742,
+   "amid": 1.0,
+   "rising": 1.0,
+   "inflation": 6.6859
+  },
+  "sum_of_exponentials": 26.1317,
+  "weights": {
+   "The": 0.0313,
+   "central": 0.0383,
+   "bank": 0.0631,
+   "raised": 0.115,
+   "interest": 0.0383,
+   "rates": 0.3817,
+   "amid": 0.0383,
+   "rising": 0.0383,
+   "inflation": 0.2559
+  },
+  "weights_sum": 1.0,
+  "entropy": 1.7474,
+  "zero_score_positions": [
+   "central",
+   "interest",
+   "amid",
+   "rising"
+  ],
+  "comparison": [
+   {
+    "quantity": "sum_of_exponentials",
+    "computed": 26.1317,
+    "printed": "26.1",
+    "computed_to_printed_precision": "26.1",
+    "agrees": true
+   },
+   {
+    "quantity": "rates",
+    "computed": 0.3817,
+    "printed": "0.38",
+    "computed_to_printed_precision": "0.38",
+    "agrees": true
+   },
+   {
+    "quantity": "inflation",
+    "computed": 0.2559,
+    "printed": "0.26",
+    "computed_to_printed_precision": "0.26",
+    "agrees": true
+   },
+   {
+    "quantity": "raised",
+    "computed": 0.115,
+    "printed": "0.11",
+    "computed_to_printed_precision": "0.11",
+    "agrees": true
+   },
+   {
+    "quantity": "bank",
+    "computed": 0.0631,
+    "printed": "0.06",
+    "computed_to_printed_precision": "0.06",
+    "agrees": true
+   },
+   {
+    "quantity": "The",
+    "computed": 0.0313,
+    "printed": "0.03",
+    "computed_to_printed_precision": "0.03",
+    "agrees": true
+   },
+   {
+    "quantity": "each_zero_score_position",
+    "computed": 0.0383,
+    "printed": "0.04",
+    "computed_to_printed_precision": "0.04",
+    "agrees": true
+   },
+   {
+    "quantity": "remaining_five_total",
+    "computed": 0.1844,
+    "printed": "0.18",
+    "computed_to_printed_precision": "0.18",
+    "agrees": true
+   }
+  ],
+  "all_agree": true,
+  "stipulation": "The chapter's example box states that these values are illustrative and set for exposition, not the output of any model. The lab therefore reproduces the arithmetic from the stated scores; it does not claim to recover the scores themselves from a trained network.",
+  "rounding_note": "Adding the chapter's already-rounded display figures gives 0.03 + 4 x 0.04 = 0.19, while the printed remainder is 0.18. Both are right: the unrounded weights are 0.0313 and four times 0.0383, which sum to 0.1844 and round to 0.18. The gap is an artefact of adding rounded numbers, not an arithmetic error.",
+  "lab7b_five_score_variant": {
+   "note": "softmax over the five named scores only, as Lab 7B cell 3 did",
+   "tokens": [
+    "rates",
+    "inflation",
+    "raised",
+    "bank",
+    "The"
+   ],
+   "scores": {
+    "rates": 2.3,
+    "inflation": 1.9,
+    "raised": 1.1,
+    "bank": 0.5,
+    "The": -0.2
+   },
+   "weights": {
+    "rates": 0.4507,
+    "inflation": 0.3021,
+    "raised": 0.1357,
+    "bank": 0.0745,
+    "The": 0.037
+   },
+   "printed": {
+    "rates": "0.45",
+    "inflation": "0.30",
+    "raised": "0.14",
+    "bank": "0.07",
+    "The": "0.04"
+   },
+   "difference_from_the_nine_token_softmax": "the nine-token denominator is 26.13, the five-token one is 22.13; every weight is larger by the ratio 26.13 / 22.13 = 1.18"
+  }
+ },
+ "machine_b": {
+  "mirror": {
+   "copied": "2026-09-20",
+   "source": "labs/session01_assets",
+   "authority": "notes/Session05_06_Freeze_Manifest_2026-09-20.json, group 'session01_minigpt'",
+   "note": "Byte-identical copies. Session 1's lab hash-checks these files where they live, so the originals are never moved or modified; this folder is a read-only mirror for Session 5, and session05_attention.py asserts every hash before loading anything.",
+   "n": 5,
+   "files": [
+    {
+     "file": "minigpt_fomc.pt",
+     "bytes": 2590681,
+     "sha256": "0abf6609ae6dabf4926443bf0ce51aa4e9e9500a7fd634e9d995cb14574bbecc",
+     "matches_freeze": true
+    },
+    {
+     "file": "minigpt_vocab.json",
+     "bytes": 561,
+     "sha256": "4193927fdca904c0475672463ef584bdbab2523870b4f96ea10bd6e9ae06cb38",
+     "matches_freeze": true
+    },
+    {
+     "file": "minigpt_config.json",
+     "bytes": 90,
+     "sha256": "e6ad5810483f378696d68b2c00705b85d7d72c9200667482e61e61a4e7bcf428",
+     "matches_freeze": true
+    },
+    {
+     "file": "training_report.json",
+     "bytes": 2374,
+     "sha256": "9dc200fba76629699b6f812a64dbc07766744cab1ed4e77d5e1e9f876d5df60a",
+     "matches_freeze": true
+    },
+    {
+     "file": "session01_demo.py",
+     "bytes": 12041,
+     "sha256": "02b960c7aeb5ff32ff2bd55baba598eacf304b3f317244f3968261fe347b1b04",
+     "matches_freeze": true
+    }
+   ]
+  },
+  "architecture": {
+   "d_model": 128,
+   "n_heads": 4,
+   "n_layers": 3,
+   "context": 128,
+   "dropout": 0.1,
+   "vocabulary_size": 78
+  },
+  "parameters": 631424,
+  "parameters_expected": 631424,
+  "parameters_match": true,
+  "parameter_table": [
+   {
+    "part": "blocks.*.feed_forward.0",
+    "parameters": 198144,
+    "share": 0.3138
+   },
+   {
+    "part": "blocks.*.feed_forward.2",
+    "parameters": 196992,
+    "share": 0.312
+   },
+   {
+    "part": "blocks.*.attention.qkv",
+    "parameters": 148608,
+    "share": 0.2354
+   },
+   {
+    "part": "blocks.*.attention.projection",
+    "parameters": 49536,
+    "share": 0.0785
+   },
+   {
+    "part": "position_embedding",
+    "parameters": 16384,
+    "share": 0.0259
+   },
+   {
+    "part": "token_embedding",
+    "parameters": 9984,
+    "share": 0.0158
+   },
+   {
+    "part": "head",
+    "parameters": 9984,
+    "share": 0.0158
+   },
+   {
+    "part": "blocks.*.norm1",
+    "parameters": 768,
+    "share": 0.0012
+   },
+   {
+    "part": "blocks.*.norm2",
+    "parameters": 768,
+    "share": 0.0012
+   },
+   {
+    "part": "final_norm",
+    "parameters": 256,
+    "share": 0.0004
+   }
+  ],
+  "state_dict_keys": [
+   "blocks.0.attention.mask",
+   "blocks.0.attention.projection.bias",
+   "blocks.0.attention.projection.weight",
+   "blocks.0.attention.qkv.bias",
+   "blocks.0.attention.qkv.weight",
+   "blocks.0.feed_forward.0.bias",
+   "blocks.0.feed_forward.0.weight",
+   "blocks.0.feed_forward.2.bias",
+   "blocks.0.feed_forward.2.weight",
+   "blocks.0.norm1.bias",
+   "blocks.0.norm1.weight",
+   "blocks.0.norm2.bias",
+   "blocks.0.norm2.weight",
+   "blocks.1.attention.mask",
+   "blocks.1.attention.projection.bias",
+   "blocks.1.attention.projection.weight",
+   "blocks.1.attention.qkv.bias",
+   "blocks.1.attention.qkv.weight",
+   "blocks.1.feed_forward.0.bias",
+   "blocks.1.feed_forward.0.weight",
+   "blocks.1.feed_forward.2.bias",
+   "blocks.1.feed_forward.2.weight",
+   "blocks.1.norm1.bias",
+   "blocks.1.norm1.weight",
+   "blocks.1.norm2.bias",
+   "blocks.1.norm2.weight",
+   "blocks.2.attention.mask",
+   "blocks.2.attention.projection.bias",
+   "blocks.2.attention.projection.weight",
+   "blocks.2.attention.qkv.bias",
+   "blocks.2.attention.qkv.weight",
+   "blocks.2.feed_forward.0.bias",
+   "blocks.2.feed_forward.0.weight",
+   "blocks.2.feed_forward.2.bias",
+   "blocks.2.feed_forward.2.weight",
+   "blocks.2.norm1.bias",
+   "blocks.2.norm1.weight",
+   "blocks.2.norm2.bias",
+   "blocks.2.norm2.weight",
+   "final_norm.bias",
+   "final_norm.weight",
+   "head.weight",
+   "position_embedding.weight",
+   "token_embedding.weight"
+  ],
+  "n_state_dict_keys": 44,
+  "training": {
+   "steps": 3000,
+   "batch_size": 32,
+   "optimizer": "AdamW",
+   "learning_rate": 0.0003,
+   "seed": 2026,
+   "elapsed_seconds": 1067.39,
+   "corpus_characters": 568966,
+   "final_validation_loss": 0.7608224606513977,
+   "hold_out": "every 20th statement",
+   "train_curve": [
+    [
+     1,
+     4.520279407501221
+    ],
+    [
+     250,
+     2.4129021167755127
+    ],
+    [
+     500,
+     2.2872965335845947
+    ],
+    [
+     750,
+     2.021493911743164
+    ],
+    [
+     1000,
+     1.6147816181182861
+    ],
+    [
+     1250,
+     1.3841818571090698
+    ],
+    [
+     1500,
+     1.3874225616455078
+    ],
+    [
+     1750,
+     1.212842345237732
+    ],
+    [
+     2000,
+     1.0571045875549316
+    ],
+    [
+     2250,
+     1.001421332359314
+    ],
+    [
+     2500,
+     0.9031624794006348
+    ],
+    [
+     2750,
+     0.8363574147224426
+    ],
+    [
+     3000,
+     0.9694402813911438
+    ]
+   ],
+   "validation_curve": [
+    [
+     1,
+     4.515514240264893
+    ],
+    [
+     250,
+     2.4063283252716063
+    ],
+    [
+     500,
+     2.256942014694214
+    ],
+    [
+     750,
+     1.9502095079421997
+    ],
+    [
+     1000,
+     1.645894503593445
+    ],
+    [
+     1250,
+     1.3901879167556763
+    ],
+    [
+     1500,
+     1.2050647497177125
+    ],
+    [
+     1750,
+     1.0807800197601318
+    ],
+    [
+     2000,
+     0.9494244146347046
+    ],
+    [
+     2250,
+     0.8984442210197449
+    ],
+    [
+     2500,
+     0.8315928101539611
+    ],
+    [
+     2750,
+     0.7750075316429138
+    ],
+    [
+     3000,
+     0.7608224606513977
+    ]
+   ]
+  },
+  "return_attn": {
+   "change": "MultiHeadSelfAttention.forward, TransformerBlock.forward and MiniGPT.forward take return_attn=False and hand back the softmax weights when it is True",
+   "why": "Session 1 computed `weights` on every forward pass and returned only the projected output, so the attention map could not be seen",
+   "numerics": "unchanged: the weights are the same tensor the original computed, and dropout still applies to the projection, never to the weights",
+   "state_dict_keys_match": true
+  }
+ },
+ "attention_maps": {
+  "sentence": "The Committee decided to raise the target range for the federal funds rate.",
+  "characters": 75,
+  "n_layers": 3,
+  "n_heads": 4,
+  "max_possible_entropy": 4.3175,
+  "mean_entropy_by_layer_and_head": [
+   [
+    3.2716,
+    3.2494,
+    3.3008,
+    3.1042
+   ],
+   [
+    2.0384,
+    1.6788,
+    1.0007,
+    1.7376
+   ],
+   [
+    1.4889,
+    1.5704,
+    1.113,
+    1.5208
+   ]
+  ],
+  "lowest_entropy_head": {
+   "layer": 2,
+   "head": 3,
+   "mean_entropy": 1.0007
+  },
+  "highest_entropy_head": {
+   "layer": 1,
+   "head": 3,
+   "mean_entropy": 3.3008
+  },
+  "causal_check": {
+   "largest_weight_above_the_diagonal": 0.0,
+   "is_zero": true
+  },
+  "layer1_head1_first_rows": [
+   [
+    1.0
+   ],
+   [
+    0.7213,
+    0.2787
+   ],
+   [
+    0.2586,
+    0.3717,
+    0.3697
+   ],
+   [
+    0.2702,
+    0.1332,
+    0.3578,
+    0.2389
+   ],
+   [
+    0.111,
+    0.3342,
+    0.2082,
+    0.2274,
+    0.1193
+   ],
+   [
+    0.085,
+    0.1381,
+    0.1474,
+    0.1674,
+    0.4083,
+    0.0538
+   ]
+  ],
+  "reading": "layer 1 stays diffuse across all four heads; by layer 2 at least one head has collapsed onto a narrow band. Nobody asked for the division of labour",
+  "comparison_note": "Lab 7B printed 3.22 / 3.30 / 3.18 / 3.29 for layer 1 and 1.54 / 1.84 / 0.45 / 1.77 for layer 2 on the same 75-character sentence. Those came from a model trained inside that notebook; Machine B is Session 1's separate run at seed 2026. Same architecture, same corpus, different weights -- so the pattern repeats (layer 1 diffuse near ln T, one layer-2 head far below it) while the digits do not, and should not be expected to."
+ },
+ "generation": {
+  "prompt": "The Committee decided",
+  "n_new": 200,
+  "seed": 42,
+  "temperatures": [
+   0.5,
+   0.8,
+   1.2
+  ],
+  "samples": {
+   "0.5": "The Committee decided today to keep the economic outlook as a support maturing price stability. The Committee will continue to monitor its exis employment and inflation expected prevated to remains the Committee will cont",
+   "0.8": "The Committee decided today to keep the path affects the target range for the federal funds rate will restipace the U. Fest month setarget funds rate funds rate at 5-1/4 percent. The Committee is measures the economic con",
+   "1.2": "The Committee decided time conditions, in policy action will continue to be anticipates to aut poing to this comigDensours. The Committee will was the could reduciums in the time range sowary at the termint its expability"
+  },
+  "note": "one character at a time from a 0.6M-parameter model; the spelling, the house phrasing and the sentence ends are all learned from the next-character objective"
+ },
+ "training_from_scratch": {
+  "n_steps": 60,
+  "batch": 32,
+  "learning_rate": 0.0003,
+  "warmup": 100,
+  "clip": 1.0,
+  "seed": 42,
+  "context": 128,
+  "parameters": 631424,
+  "uniform_loss": 4.356708826689592,
+  "first_loss": 4.57930850982666,
+  "last_loss": 3.2604150772094727,
+  "first_validation": 4.581015300750733,
+  "last_validation": 3.1804860115051268,
+  "train_curve": [
+   [
+    1,
+    4.5793
+   ],
+   [
+    2,
+    4.5781
+   ],
+   [
+    3,
+    4.5708
+   ],
+   [
+    4,
+    4.5792
+   ],
+   [
+    5,
+    4.5732
+   ],
+   [
+    6,
+    4.5685
+   ],
+   [
+    7,
+    4.5774
+   ],
+   [
+    8,
+    4.5581
+   ],
+   [
+    9,
+    4.5462
+   ],
+   [
+    10,
+    4.5444
+   ],
+   [
+    11,
+    4.5381
+   ],
+   [
+    12,
+    4.5252
+   ],
+   [
+    13,
+    4.505
+   ],
+   [
+    14,
+    4.5008
+   ],
+   [
+    15,
+    4.4611
+   ],
+   [
+    16,
+    4.4626
+   ],
+   [
+    17,
+    4.4425
+   ],
+   [
+    18,
+    4.439
+   ],
+   [
+    19,
+    4.4082
+   ],
+   [
+    20,
+    4.4045
+   ],
+   [
+    21,
+    4.3793
+   ],
+   [
+    22,
+    4.3529
+   ],
+   [
+    23,
+    4.3313
+   ],
+   [
+    24,
+    4.303
+   ],
+   [
+    25,
+    4.2798
+   ],
+   [
+    26,
+    4.2827
+   ],
+   [
+    27,
+    4.2637
+   ],
+   [
+    28,
+    4.2221
+   ],
+   [
+    29,
+    4.1863
+   ],
+   [
+    30,
+    4.1503
+   ],
+   [
+    31,
+    4.1418
+   ],
+   [
+    32,
+    4.0833
+   ],
+   [
+    33,
+    4.066
+   ],
+   [
+    34,
+    4.0483
+   ],
+   [
+    35,
+    4.0141
+   ],
+   [
+    36,
+    3.9824
+   ],
+   [
+    37,
+    3.9616
+   ],
+   [
+    38,
+    3.8851
+   ],
+   [
+    39,
+    3.8897
+   ],
+   [
+    40,
+    3.8551
+   ],
+   [
+    41,
+    3.8292
+   ],
+   [
+    42,
+    3.7751
+   ],
+   [
+    43,
+    3.7471
+   ],
+   [
+    44,
+    3.6993
+   ],
+   [
+    45,
+    3.6519
+   ],
+   [
+    46,
+    3.6311
+   ],
+   [
+    47,
+    3.5958
+   ],
+   [
+    48,
+    3.5474
+   ],
+   [
+    49,
+    3.503
+   ],
+   [
+    50,
+    3.4891
+   ],
+   [
+    51,
+    3.4878
+   ],
+   [
+    52,
+    3.4356
+   ],
+   [
+    53,
+    3.3871
+   ],
+   [
+    54,
+    3.3765
+   ],
+   [
+    55,
+    3.3183
+   ],
+   [
+    56,
+    3.2892
+   ],
+   [
+    57,
+    3.317
+   ],
+   [
+    58,
+    3.2473
+   ],
+   [
+    59,
+    3.2341
+   ],
+   [
+    60,
+    3.2604
+   ]
+  ],
+  "validation_curve": [
+   [
+    1,
+    4.581
+   ],
+   [
+    10,
+    4.5245
+   ],
+   [
+    20,
+    4.3754
+   ],
+   [
+    30,
+    4.1382
+   ],
+   [
+    40,
+    3.8022
+   ],
+   [
+    50,
+    3.4493
+   ],
+   [
+    60,
+    3.1805
+   ]
+  ],
+  "sample_after": "The Committee decided eiqv e7o Turos bo arpttifetkad;d2$Eo at i-eaae e rt eee op4ioH$oid n euiop c8lo  te ohao atiDsUsoQ;st montcmontaH\nt0 Cm",
+  "session1_final_validation": 0.7608224606513977,
+  "session1_steps": 3000,
+  "data": {
+   "n_statements": 245,
+   "n_held_out": 13,
+   "characters": 568966,
+   "vocabulary_size": 78,
+   "train_characters": 537303,
+   "validation_characters": 31661,
+   "every": 20
+  },
+  "seconds": 14.96,
+  "corpus": {
+   "characters": 568966,
+   "expected_characters": 568966,
+   "sha256": "3d0d1fa7edd925daede5f29666580e86917b19ca1f65537f4a6e1fa17e5ac7ae",
+   "expected_sha256": "3d0d1fa7edd925daede5f29666580e86917b19ca1f65537f4a6e1fa17e5ac7ae",
+   "agrees": true
+  },
+  "split_check": {
+   "lab7b_printed": {
+    "train_characters": 537303,
+    "validation_characters": 31661,
+    "vocabulary_size": 78,
+    "corpus_characters": 568966
+   },
+   "agrees": true,
+   "note": "the hold-out unit is a whole statement, 13 of 245"
+  }
+ }
+}

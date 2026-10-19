@@ -1,0 +1,1970 @@
+{
+ "copied": "2026-09-20",
+ "from": "labs/Lec07_LLM_Lab/data/fomc",
+ "note": "Byte-identical copy. The legacy folder is read-only: Session 1's lab hash-checks the corpus at that path, so it is never modified or moved.",
+ "n": 245,
+ "first": "1994-02-04",
+ "last": "2026-06-17",
+ "files": [
+  {
+   "file": "fomc_19940204.txt",
+   "date": "1994-02-04",
+   "chars": 638,
+   "words": 99,
+   "source": "https://www.federalreserve.gov/fomc/19940204default.htm",
+   "sha256": "1c4b93ff08af078bedfec013362e8586aa513f8ab5d89cf45dde99710d87b839"
+  },
+  {
+   "file": "fomc_19940322.txt",
+   "date": "1994-03-22",
+   "chars": 258,
+   "words": 39,
+   "source": "https://www.federalreserve.gov/fomc/19940322default.htm",
+   "sha256": "175a53cf2778fd8bb225f162ac0f66481fa8dbeca46619ea708e3f21ebfeec2e"
+  },
+  {
+   "file": "fomc_19940418.txt",
+   "date": "1994-04-18",
+   "chars": 238,
+   "words": 36,
+   "source": "https://www.federalreserve.gov/fomc/19940418default.htm",
+   "sha256": "4c6380b64963b4f3ce6c5c59a5fe78f68a862ffb699fde6f9739e74eec005a18"
+  },
+  {
+   "file": "fomc_19940517.txt",
+   "date": "1994-05-17",
+   "chars": 1121,
+   "words": 164,
+   "source": "https://www.federalreserve.gov/fomc/19940517default.htm",
+   "sha256": "1f815beedddb5e0a599478984e0e24e686cd591ea893ad10c3996daf9683d350"
+  },
+  {
+   "file": "fomc_19940816.txt",
+   "date": "1994-08-16",
+   "chars": 1189,
+   "words": 179,
+   "source": "https://www.federalreserve.gov/fomc/19940816default.htm",
+   "sha256": "a3bf0bd8d5a30d59f4ca33f316df757e8c51daf37607e34ad8a91a852de57335"
+  },
+  {
+   "file": "fomc_19941115.txt",
+   "date": "1994-11-15",
+   "chars": 917,
+   "words": 142,
+   "source": "https://www.federalreserve.gov/fomc/19941115default.htm",
+   "sha256": "ed3f4d5d4b60a062bb4c293f018da899aa1a3b13ec1cea04bc5bd737f47f308d"
+  },
+  {
+   "file": "fomc_19950201.txt",
+   "date": "1995-02-01",
+   "chars": 949,
+   "words": 145,
+   "source": "https://www.federalreserve.gov/fomc/19950201default.htm",
+   "sha256": "142fd5691c96b5c49f451d1754665de1045cd8fbc280280eedfa880da4b6e8b9"
+  },
+  {
+   "file": "fomc_19950706.txt",
+   "date": "1995-07-06",
+   "chars": 457,
+   "words": 71,
+   "source": "https://www.federalreserve.gov/fomc/19950706default.htm",
+   "sha256": "a2ace98e26f12a6f550f9a75d9bc16f60284327fd46d37940ac90b7bdcd4a1b4"
+  },
+  {
+   "file": "fomc_19951219.txt",
+   "date": "1995-12-19",
+   "chars": 540,
+   "words": 86,
+   "source": "https://www.federalreserve.gov/fomc/19951219default.htm",
+   "sha256": "dc340609a60c8eaabf3b012ec24aa95e93dc7c1054c6e837dd1d8aba1039f720"
+  },
+  {
+   "file": "fomc_19960131.txt",
+   "date": "1996-01-31",
+   "chars": 930,
+   "words": 140,
+   "source": "https://www.federalreserve.gov/fomc/19960131DEFAULT.htm",
+   "sha256": "7dfab2624643935267aa18223cb917139ea82f9b73e3ed97dfd32a1901c450f3"
+  },
+  {
+   "file": "fomc_19970325.txt",
+   "date": "1997-03-25",
+   "chars": 899,
+   "words": 135,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1997/19970325/",
+   "sha256": "176ac6183e4116df0075bad9a38e067ba7d2cdb48fc45291b27a7b5a09c74231"
+  },
+  {
+   "file": "fomc_19980929.txt",
+   "date": "1998-09-29",
+   "chars": 665,
+   "words": 101,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1998/19980929/",
+   "sha256": "7728c2fc1037e5af2cadac4a5cabde93d61e22ff4a106b72464aae8fcf9ea6d1"
+  },
+  {
+   "file": "fomc_19981015.txt",
+   "date": "1998-10-15",
+   "chars": 787,
+   "words": 126,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1998/19981015/",
+   "sha256": "544d08b3220d16d3a84e29f0514d941ecdc39e4361eda7d83ecbdadfbe923e89"
+  },
+  {
+   "file": "fomc_19981117.txt",
+   "date": "1998-11-17",
+   "chars": 954,
+   "words": 145,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1998/19981117/",
+   "sha256": "7f74df0c8159b316128a6f6f6ff7df79b68cbde65c957b314e85dc62e29f98e0"
+  },
+  {
+   "file": "fomc_19990518.txt",
+   "date": "1999-05-18",
+   "chars": 984,
+   "words": 148,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19990518/",
+   "sha256": "c4e2137b3416dde3ad3765bceea2081b9566cda00c37de206a6131d739b58e9c"
+  },
+  {
+   "file": "fomc_19990630.txt",
+   "date": "1999-06-30",
+   "chars": 1035,
+   "words": 157,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19990630/",
+   "sha256": "3ec4da2b1b30ee1fd59268cbe4425727747064b4b2a332f8ac67c664dc717dfb"
+  },
+  {
+   "file": "fomc_19990824.txt",
+   "date": "1999-08-24",
+   "chars": 1382,
+   "words": 213,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19990824/",
+   "sha256": "6ef9bed4b98435f05b3a73e4a85a831e9c028983b3217b8bc966564ba6d580b3"
+  },
+  {
+   "file": "fomc_19991005.txt",
+   "date": "1999-10-05",
+   "chars": 1105,
+   "words": 168,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19991005/",
+   "sha256": "a6654654ad280c61d47e0a0bfa5cf5fd0cceceff929c3cf9ce85193a8b50647d"
+  },
+  {
+   "file": "fomc_19991116.txt",
+   "date": "1999-11-16",
+   "chars": 1533,
+   "words": 240,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19991116/",
+   "sha256": "083ae3f287250c68818d8d5365e3dd307db6b2684252507cf11555e6aa49d252"
+  },
+  {
+   "file": "fomc_19991221.txt",
+   "date": "1999-12-21",
+   "chars": 975,
+   "words": 149,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/1999/19991221/",
+   "sha256": "83c5d2695ac5c5ce71a7133012b5f7f3b05976449ae0ffb879e2d1bb41aa4e5b"
+  },
+  {
+   "file": "fomc_20000202.txt",
+   "date": "2000-02-02",
+   "chars": 1257,
+   "words": 188,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20000202/",
+   "sha256": "1cc5e9840da2918b62f05349755588fc0fc537eecc0cca87bfb8583779b729a9"
+  },
+  {
+   "file": "fomc_20000321.txt",
+   "date": "2000-03-21",
+   "chars": 1307,
+   "words": 194,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20000321/",
+   "sha256": "8d4a8900949ed83b85f9ae76b01950d942e04407d7b8bb4eb1f944db8c07b964"
+  },
+  {
+   "file": "fomc_20000516.txt",
+   "date": "2000-05-16",
+   "chars": 1249,
+   "words": 187,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20000516/",
+   "sha256": "2d817124ac1264e453631d65d99e0b4248e8a90eb35890a8d8ef7fb184bee266"
+  },
+  {
+   "file": "fomc_20000628.txt",
+   "date": "2000-06-28",
+   "chars": 1057,
+   "words": 162,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20000628/",
+   "sha256": "983eaa47417c0570640b38a4e4a5616fd474668b573346b86ac00d9298922b47"
+  },
+  {
+   "file": "fomc_20000822.txt",
+   "date": "2000-08-22",
+   "chars": 1060,
+   "words": 165,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20000822/",
+   "sha256": "c6426fcd1b1fc086ac37cce8fff61928e7021000ceef169ed2e3e65f15af7aca"
+  },
+  {
+   "file": "fomc_20001003.txt",
+   "date": "2000-10-03",
+   "chars": 1150,
+   "words": 175,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20001003/",
+   "sha256": "e8bdfd3504a87c432bad9b05b4eb225b3d55d06faf8d1a9016055b841a8de0fb"
+  },
+  {
+   "file": "fomc_20001115.txt",
+   "date": "2000-11-15",
+   "chars": 1174,
+   "words": 179,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20001115/",
+   "sha256": "0e76776fa67b6d880554f0aac39be63c95fc0078232633eda9a929be45f207bb"
+  },
+  {
+   "file": "fomc_20001219.txt",
+   "date": "2000-12-19",
+   "chars": 1008,
+   "words": 151,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2000/20001219/",
+   "sha256": "743acbd91f7ed35790a30757af607adf27acccab47697bea36bdd8c56473646a"
+  },
+  {
+   "file": "fomc_20010103.txt",
+   "date": "2001-01-03",
+   "chars": 1392,
+   "words": 215,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010103/",
+   "sha256": "12e79eb1abb18b1778e81d00d2d61e2b14045d8834935e36d3f8166a86fd9066"
+  },
+  {
+   "file": "fomc_20010131.txt",
+   "date": "2001-01-31",
+   "chars": 1683,
+   "words": 252,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010131/",
+   "sha256": "bcd0ad49a239ed5bc7147321a9431f79cfb2d2487f15a07e91e680564efa7d49"
+  },
+  {
+   "file": "fomc_20010320.txt",
+   "date": "2001-03-20",
+   "chars": 1538,
+   "words": 230,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010320/",
+   "sha256": "471db06087ecc730f477d0ed3c7ce08c2f74c315a8869bb74c918f6db83cdd5b"
+  },
+  {
+   "file": "fomc_20010418.txt",
+   "date": "2001-04-18",
+   "chars": 1876,
+   "words": 280,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010418/",
+   "sha256": "704ee24d6a7907ac30e22c6b3675876c6374d49fed5356e3acf7730d5799a28d"
+  },
+  {
+   "file": "fomc_20010515.txt",
+   "date": "2001-05-15",
+   "chars": 1665,
+   "words": 248,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010515/",
+   "sha256": "97760947ce0bccff91e3e94da7939b74f69995634c5d2d71308f31090dee95a1"
+  },
+  {
+   "file": "fomc_20010627.txt",
+   "date": "2001-06-27",
+   "chars": 1313,
+   "words": 200,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010627/",
+   "sha256": "417da1636f68aba4ceadf337c85fe6ee7b8a3f133713e51b963ce355d2f7381e"
+  },
+  {
+   "file": "fomc_20010821.txt",
+   "date": "2001-08-21",
+   "chars": 1261,
+   "words": 198,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010821/",
+   "sha256": "a82a7d647f217318eb6ccb5a3f0a06853c207394f67c4847d1fb5785d83604a7"
+  },
+  {
+   "file": "fomc_20010917.txt",
+   "date": "2001-09-17",
+   "chars": 1402,
+   "words": 214,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20010917/",
+   "sha256": "e10e0b71289d934b3c630b191ec38e09a723c801c31db47b7dcf0d19d09dde50"
+  },
+  {
+   "file": "fomc_20011002.txt",
+   "date": "2001-10-02",
+   "chars": 967,
+   "words": 146,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20011002/",
+   "sha256": "ba18270be36141273d5f9123d4496fc2fcdc6bb1335e2a1db49ce3db03368b4d"
+  },
+  {
+   "file": "fomc_20011106.txt",
+   "date": "2001-11-06",
+   "chars": 1118,
+   "words": 170,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20011106/",
+   "sha256": "ac28f7e558a41c832ce86228818bd3fb1ca37e754196e1d59432888e592f2bed"
+  },
+  {
+   "file": "fomc_20011211.txt",
+   "date": "2001-12-11",
+   "chars": 1245,
+   "words": 190,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2001/20011211/",
+   "sha256": "e587617ddc50e99f8b10f70be2bccf333297d2a3664273b1f8ef190e6a82950f"
+  },
+  {
+   "file": "fomc_20020130.txt",
+   "date": "2002-01-30",
+   "chars": 869,
+   "words": 128,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2002/20020130/",
+   "sha256": "f38a20100b84f124a91590dc3ad3298cf473cc66eb2df63fa0d6026cf0a4bd4f"
+  },
+  {
+   "file": "fomc_20020319.txt",
+   "date": "2002-03-19",
+   "chars": 1620,
+   "words": 252,
+   "source": "https://www.federalreserve.gov/boarddocs/press/general/2002/20020319/",
+   "sha256": "e7d5194d6b11420d1016b235c27fe6dd30b7a012b97a67b7ed0403fc789434d7"
+  },
+  {
+   "file": "fomc_20020507.txt",
+   "date": "2002-05-07",
+   "chars": 1111,
+   "words": 169,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20020507/",
+   "sha256": "e69d322177c4f744604a0f7de227408673c59e6395f31f400b069220ed6c769d"
+  },
+  {
+   "file": "fomc_20020626.txt",
+   "date": "2002-06-26",
+   "chars": 1228,
+   "words": 192,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20020626/",
+   "sha256": "8f5d0538690695d047c5d4fe10bb881a650a994c20b3c8b2ef80b6e3e9b8e889"
+  },
+  {
+   "file": "fomc_20020813.txt",
+   "date": "2002-08-13",
+   "chars": 1135,
+   "words": 171,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20020813/",
+   "sha256": "9bf6dedf0340164de9f3929141b0f5ce164bb2cf56add9c0104ae98904ad7c7d"
+  },
+  {
+   "file": "fomc_20020924.txt",
+   "date": "2002-09-24",
+   "chars": 1197,
+   "words": 180,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20020924/",
+   "sha256": "858b45c62442400f5719e8fa95416ca21e09661c5a206dbf73ab4fa13633f33e"
+  },
+  {
+   "file": "fomc_20021106.txt",
+   "date": "2002-11-06",
+   "chars": 1465,
+   "words": 221,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20021106/",
+   "sha256": "a642f3a25edb0bbcd6c291b4eb773a9b831393e9ed981ada27d960527bb80298"
+  },
+  {
+   "file": "fomc_20021210.txt",
+   "date": "2002-12-10",
+   "chars": 1100,
+   "words": 167,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2002/20021210/",
+   "sha256": "be8716964a0d266a0eb04280254905bb03c23423b34fad4d4d96931b88be0f85"
+  },
+  {
+   "file": "fomc_20030129.txt",
+   "date": "2003-01-29",
+   "chars": 1088,
+   "words": 166,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030129/default.htm",
+   "sha256": "7caca70d00af09fcf0ec5c9c4006c61c8fdc58b331ea39502aecb4046f788155"
+  },
+  {
+   "file": "fomc_20030318.txt",
+   "date": "2003-03-18",
+   "chars": 1518,
+   "words": 223,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030318/default.htm",
+   "sha256": "985760b81335c5ba7247adcc93fb0609fb79928c9c69ceb3673b57bc726a9dee"
+  },
+  {
+   "file": "fomc_20030506.txt",
+   "date": "2003-05-06",
+   "chars": 1414,
+   "words": 213,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030506/default.htm",
+   "sha256": "88f270098ea5e8122af5bbd42ddd8acb8e626b7cad13d1ca97b7209500ee0959"
+  },
+  {
+   "file": "fomc_20030625.txt",
+   "date": "2003-06-25",
+   "chars": 1516,
+   "words": 238,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030625/default.htm",
+   "sha256": "2fdee35732730f408b5d6cdb17ef601c8c4b73adaab83f3caaa20440d97ff945"
+  },
+  {
+   "file": "fomc_20030812.txt",
+   "date": "2003-08-12",
+   "chars": 1360,
+   "words": 209,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030812/default.htm",
+   "sha256": "ff61206fead9ec849b56060f8c9669ad7862f1bde269e734accc652f87791780"
+  },
+  {
+   "file": "fomc_20030916.txt",
+   "date": "2003-09-16",
+   "chars": 1351,
+   "words": 207,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20030916/default.htm",
+   "sha256": "856e92b2e6a81b185887217609c8346e9e71d718a638e0335300ab41aec30528"
+  },
+  {
+   "file": "fomc_20031028.txt",
+   "date": "2003-10-28",
+   "chars": 1353,
+   "words": 208,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20031028/default.htm",
+   "sha256": "405dc0e6646a396611f2564fbf2ebb88581a8f3344210a90fb4b4edcf1ebba3d"
+  },
+  {
+   "file": "fomc_20031209.txt",
+   "date": "2003-12-09",
+   "chars": 1060,
+   "words": 161,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2003/20031209/default.htm",
+   "sha256": "4bf6e1af4c227a51cab2c7da425d6a8878b868995fea897a7d85cd2f23db263a"
+  },
+  {
+   "file": "fomc_20040128.txt",
+   "date": "2004-01-28",
+   "chars": 1287,
+   "words": 200,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040128/default.htm",
+   "sha256": "3c05d30697acb70dfdcc33593d0947cc14ea98ba35c239422af0031af1c585ae"
+  },
+  {
+   "file": "fomc_20040316.txt",
+   "date": "2004-03-16",
+   "chars": 1260,
+   "words": 199,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040316/default.htm",
+   "sha256": "d644a32b33b07a70d4c4db62a737e2bbeded8904ebec9b4bcca403c5b3c61af8"
+  },
+  {
+   "file": "fomc_20040504.txt",
+   "date": "2004-05-04",
+   "chars": 1068,
+   "words": 162,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040504/default.htm",
+   "sha256": "066b3555c438e07e3d3badb3cc78af788435f7500f665f322e2a9e1907b75771"
+  },
+  {
+   "file": "fomc_20040630.txt",
+   "date": "2004-06-30",
+   "chars": 1417,
+   "words": 219,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040630/default.htm",
+   "sha256": "74eb5b5a204518a6530dd4e28bf852b276553e32d5d096ff4377c035a8d6573c"
+  },
+  {
+   "file": "fomc_20040810.txt",
+   "date": "2004-08-10",
+   "chars": 1405,
+   "words": 217,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040810/default.htm",
+   "sha256": "11c2a15096412a43911c261d81329a9930cb57d499d056447116cd9618a67cc7"
+  },
+  {
+   "file": "fomc_20040921.txt",
+   "date": "2004-09-21",
+   "chars": 1409,
+   "words": 217,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20040921/default.htm",
+   "sha256": "7d072c6357a44264d0254e381d38d60bc44475e6b7d9dfb4300d825c72f94e00"
+  },
+  {
+   "file": "fomc_20041110.txt",
+   "date": "2004-11-10",
+   "chars": 1184,
+   "words": 182,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20041110/default.htm",
+   "sha256": "794f714dead36ae819028a0f4d86351d3cebd5e49cb6c17299b5a24cb1f42e8b"
+  },
+  {
+   "file": "fomc_20041214.txt",
+   "date": "2004-12-14",
+   "chars": 1125,
+   "words": 169,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2004/20041214/default.htm",
+   "sha256": "698f9707982798c530b91ecd9fa7dc35b447df805f3aca357aaa88101f38a890"
+  },
+  {
+   "file": "fomc_20050202.txt",
+   "date": "2005-02-02",
+   "chars": 1320,
+   "words": 204,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050202/default.htm",
+   "sha256": "3b7ae92fc3731373ab1b8d5ce9bd0106920787f2a092aee8c9d6300508ea5cff"
+  },
+  {
+   "file": "fomc_20050322.txt",
+   "date": "2005-03-22",
+   "chars": 1305,
+   "words": 198,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050322/default.htm",
+   "sha256": "ea7eeb0ed7efb9f95df6e1974de49a20a20dacc0ea7207f10a324e8c97ddf313"
+  },
+  {
+   "file": "fomc_20050503.txt",
+   "date": "2005-05-03",
+   "chars": 1279,
+   "words": 191,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050503/default.htm",
+   "sha256": "f782096ceed9a6f092e222761fe38c0cbdbd65536458ddffd50de311643de73b"
+  },
+  {
+   "file": "fomc_20050630.txt",
+   "date": "2005-06-30",
+   "chars": 1152,
+   "words": 169,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050630/default.htm",
+   "sha256": "5a2a09fd6042f464a10389efbbabe83c38223be8e9931d3e195a8eda4393d2bb"
+  },
+  {
+   "file": "fomc_20050809.txt",
+   "date": "2005-08-09",
+   "chars": 1238,
+   "words": 182,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050809/default.htm",
+   "sha256": "8218c76893b1bbd9dc1ae1c5e1d50417971e80922a258ea2cd59486160a37440"
+  },
+  {
+   "file": "fomc_20050920.txt",
+   "date": "2005-09-20",
+   "chars": 1973,
+   "words": 300,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20050920/",
+   "sha256": "0c372efaae6e9cabcfccd6b0c0fcc713f69bd0a53b6d8493f893b6579ce3e89e"
+  },
+  {
+   "file": "fomc_20051101.txt",
+   "date": "2005-11-01",
+   "chars": 1285,
+   "words": 185,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20051101/",
+   "sha256": "7b1b253fd01edb974125a7b05f31c13dfb9458401e24483fd999b51140e86799"
+  },
+  {
+   "file": "fomc_20051213.txt",
+   "date": "2005-12-13",
+   "chars": 1076,
+   "words": 164,
+   "source": "https://www.federalreserve.gov/boarddocs/press/monetary/2005/20051213/",
+   "sha256": "32470e49b58b58ec19a0bc5a9eb11036463d242f54e343753d688407b5246e50"
+  },
+  {
+   "file": "fomc_20060131.txt",
+   "date": "2006-01-31",
+   "chars": 1030,
+   "words": 159,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060131a.htm",
+   "sha256": "e6bd381c76a1da20360dd98f1bc8827fdd4e659077d17633908b7913c2719e00"
+  },
+  {
+   "file": "fomc_20060328.txt",
+   "date": "2006-03-28",
+   "chars": 1373,
+   "words": 223,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060328a.htm",
+   "sha256": "c3817ac17f316fa3eb6a63acf6a19210b8ec4e8ca1339cc2895e672e6e3dddb6"
+  },
+  {
+   "file": "fomc_20060510.txt",
+   "date": "2006-05-10",
+   "chars": 1695,
+   "words": 271,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060510a.htm",
+   "sha256": "d1cc2cf2ece124181735a9ccf8c04353d35d7d5c416fb15146028bf008106dd3"
+  },
+  {
+   "file": "fomc_20060629.txt",
+   "date": "2006-06-29",
+   "chars": 1457,
+   "words": 231,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060629a.htm",
+   "sha256": "b335013da6dcbec6c2655e82fcd41b56e1b4cad995c0bb0cda0fe20cbcfd489e"
+  },
+  {
+   "file": "fomc_20060808.txt",
+   "date": "2006-08-08",
+   "chars": 1382,
+   "words": 216,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060808a.htm",
+   "sha256": "dd5050db3ca5e8b613a6ebf40ba29ef3ac7e475a0d5e5bead1081955746d95a7"
+  },
+  {
+   "file": "fomc_20060920.txt",
+   "date": "2006-09-20",
+   "chars": 1327,
+   "words": 205,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20060920a.htm",
+   "sha256": "42f9a32eccaf75900ba2ec224702376a545e833873fc200f56fcd7a427d88d14"
+  },
+  {
+   "file": "fomc_20061025.txt",
+   "date": "2006-10-25",
+   "chars": 1344,
+   "words": 209,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20061025a.htm",
+   "sha256": "15b98a006c2e6bf411f9ef58a3422b0436f0dea401d520a2f398cbd5200bd84b"
+  },
+  {
+   "file": "fomc_20061212.txt",
+   "date": "2006-12-12",
+   "chars": 1417,
+   "words": 219,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20061212a.htm",
+   "sha256": "24342e096d4377795830ce317f42113999c83cc59b5fb5d8fc930c41d4218a48"
+  },
+  {
+   "file": "fomc_20070131.txt",
+   "date": "2007-01-31",
+   "chars": 1110,
+   "words": 173,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070131a.htm",
+   "sha256": "00c090b52b90d5b07afd6c28811644ec81b471de9154c59418b79fef9e36a199"
+  },
+  {
+   "file": "fomc_20070321.txt",
+   "date": "2007-03-21",
+   "chars": 1056,
+   "words": 162,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070321a.htm",
+   "sha256": "e1a0cc7a0c85c2e311e17d6e7b0f8b803b56b3eed5ae0c8f711d1e903b062631"
+  },
+  {
+   "file": "fomc_20070509.txt",
+   "date": "2007-05-09",
+   "chars": 1043,
+   "words": 161,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070509a.htm",
+   "sha256": "4e615362c13c6a79446f10a90aea8763a56be248a8f1a9d70c47ff8761abfe27"
+  },
+  {
+   "file": "fomc_20070618.txt",
+   "date": "2007-06-18",
+   "chars": 1138,
+   "words": 175,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070618a.htm",
+   "sha256": "3a751a828f4f641a0208195f06bb102b6e38f5dc2b02f73a7012a3232df9a67f"
+  },
+  {
+   "file": "fomc_20070807.txt",
+   "date": "2007-08-07",
+   "chars": 1348,
+   "words": 204,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070807a.htm",
+   "sha256": "659d530140a126ae6ab50b8b3b0b550ac02d8bb063630a8a010b59b4da041a12"
+  },
+  {
+   "file": "fomc_20070810.txt",
+   "date": "2007-08-10",
+   "chars": 647,
+   "words": 94,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070810a.htm",
+   "sha256": "1f606b4accb1563cb18662b22c289b3de54e53f3071214d9800761534eec290d"
+  },
+  {
+   "file": "fomc_20070817.txt",
+   "date": "2007-08-17",
+   "chars": 817,
+   "words": 123,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070817b.htm",
+   "sha256": "b5d111e54d9a8da5e4209cfd33213f1e2f634d1767e70dbce7cb6f61bdd1b25f"
+  },
+  {
+   "file": "fomc_20070918.txt",
+   "date": "2007-09-18",
+   "chars": 1321,
+   "words": 201,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20070918a.htm",
+   "sha256": "a181a4262df726b98621779f0ae1678b10526dd7f320618d6e687ae28d898d93"
+  },
+  {
+   "file": "fomc_20071031.txt",
+   "date": "2007-10-31",
+   "chars": 1432,
+   "words": 220,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20071031a.htm",
+   "sha256": "57ca6808f4e56adf80fa0e854442e4745e450fa85536b63668e7cc54a16344b8"
+  },
+  {
+   "file": "fomc_20071211.txt",
+   "date": "2007-12-11",
+   "chars": 1525,
+   "words": 227,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20071211a.htm",
+   "sha256": "4749a652b3f19f6fec243290fbd9b8ab9338f208292a6715601f7f2026600a35"
+  },
+  {
+   "file": "fomc_20080122.txt",
+   "date": "2008-01-22",
+   "chars": 1361,
+   "words": 209,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080122b.htm",
+   "sha256": "e95c057de35bffb78c90e886f1b832fb7b8487d8d87cdeca21d74fba15d867ab"
+  },
+  {
+   "file": "fomc_20080130.txt",
+   "date": "2008-01-30",
+   "chars": 1250,
+   "words": 195,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080130a.htm",
+   "sha256": "366c79461321ee94765ac0f235fbe1f2d7c0fb0a45e3b1c3be153b6c653fea8b"
+  },
+  {
+   "file": "fomc_20080311.txt",
+   "date": "2008-03-11",
+   "chars": 2301,
+   "words": 355,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080311a.htm",
+   "sha256": "54ef2d4b41617e80fa80c6c7d015a57d88387fbf60571f2a968bfa91b4c93005"
+  },
+  {
+   "file": "fomc_20080318.txt",
+   "date": "2008-03-18",
+   "chars": 1608,
+   "words": 241,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080318a.htm",
+   "sha256": "8087e7fd189839ebdd61fa2a633261bb1d5983388b58575e6f93c83c06c17195"
+  },
+  {
+   "file": "fomc_20080430.txt",
+   "date": "2008-04-30",
+   "chars": 1709,
+   "words": 256,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080430a.htm",
+   "sha256": "4fe20a17d34b05eaed15003c288ce601ac22fb45270ca39da446bc2263f76a0b"
+  },
+  {
+   "file": "fomc_20080625.txt",
+   "date": "2008-06-25",
+   "chars": 1638,
+   "words": 248,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080625a.htm",
+   "sha256": "9fe999781f21027f46684ee87d337e10b1f9b5364aa50f4cdf0b11dc8fe0ab8d"
+  },
+  {
+   "file": "fomc_20080805.txt",
+   "date": "2008-08-05",
+   "chars": 1601,
+   "words": 243,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080805a.htm",
+   "sha256": "7cd5589f877bf5032f8e22b03ba4a19f179fe9909a7f524a6e174efd63a6fa14"
+  },
+  {
+   "file": "fomc_20080916.txt",
+   "date": "2008-09-16",
+   "chars": 1444,
+   "words": 221,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20080916a.htm",
+   "sha256": "3425a368182ec2c4c3f70ce9ad6f04b93183cc2dd0c5e17594ebdafb8db12e23"
+  },
+  {
+   "file": "fomc_20081008.txt",
+   "date": "2008-10-08",
+   "chars": 1182,
+   "words": 182,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20081008a.htm",
+   "sha256": "107187b2dadc6f531bd142b183fdbcf0fdee04bb4f588a1c468d34c6e591a6be"
+  },
+  {
+   "file": "fomc_20081029.txt",
+   "date": "2008-10-29",
+   "chars": 1610,
+   "words": 238,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20081029a.htm",
+   "sha256": "955f4fe00fe6cfbc10e6ebddc0db29418b8e8770944579f8b71b8acfb11f4c23"
+  },
+  {
+   "file": "fomc_20081216.txt",
+   "date": "2008-12-16",
+   "chars": 2253,
+   "words": 334,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20081216b.htm",
+   "sha256": "6f766961f60a8d284403a4171588d9fccf44b5792830fd3b514951e87ceba79a"
+  },
+  {
+   "file": "fomc_20090128.txt",
+   "date": "2009-01-28",
+   "chars": 3162,
+   "words": 474,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090128a.htm",
+   "sha256": "35124e382043f89713a881758d3154966096ad4fad48993a6c0b72608db39b19"
+  },
+  {
+   "file": "fomc_20090318.txt",
+   "date": "2009-03-18",
+   "chars": 2721,
+   "words": 419,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090318a.htm",
+   "sha256": "67b90ac662f3b101d2cb494f330e9dd8feb0f1ab621ed25283c07fa27a20c968"
+  },
+  {
+   "file": "fomc_20090429.txt",
+   "date": "2009-04-29",
+   "chars": 2764,
+   "words": 425,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090429a.htm",
+   "sha256": "9a16c6cf3ffc4645d12c56246aeb9e1160ebd18b5dadfd10b4784b936ab45664"
+  },
+  {
+   "file": "fomc_20090624.txt",
+   "date": "2009-06-24",
+   "chars": 2426,
+   "words": 378,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090624a.htm",
+   "sha256": "aa0cdecd010856dbd9a7a3283091b7e69e366f4029b57fda393b3ebd39ce0808"
+  },
+  {
+   "file": "fomc_20090812.txt",
+   "date": "2009-08-12",
+   "chars": 2692,
+   "words": 420,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090812a.htm",
+   "sha256": "85b88ffa31dc07f8c86fef85ac6acb65197bf692faf25ef69fcaa0ec40b227fb"
+  },
+  {
+   "file": "fomc_20090923.txt",
+   "date": "2009-09-23",
+   "chars": 2736,
+   "words": 425,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20090923a.htm",
+   "sha256": "ce2b69b7bf5a3ea8b3e56fc354005912973091f0463a5bb91e24a32d7038f041"
+  },
+  {
+   "file": "fomc_20091104.txt",
+   "date": "2009-11-04",
+   "chars": 3027,
+   "words": 463,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20091104a.htm",
+   "sha256": "3e6b11c85bcce104a3cce4fc33a09ecbeb4d9aee0f3aef082c813abc50e9e380"
+  },
+  {
+   "file": "fomc_20091216.txt",
+   "date": "2009-12-16",
+   "chars": 3722,
+   "words": 568,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20091216a.htm",
+   "sha256": "51bb20154b9527dd4c69fff84e04c8f375c58cba893b1d48277dfb62084090c7"
+  },
+  {
+   "file": "fomc_20100127.txt",
+   "date": "2010-01-27",
+   "chars": 3570,
+   "words": 547,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100127a.htm",
+   "sha256": "7953fd5af4d8ce8afd6fa893edecb6c8aef4537164c5f2850bbdeaa927bcd5eb"
+  },
+  {
+   "file": "fomc_20100316.txt",
+   "date": "2010-03-16",
+   "chars": 2947,
+   "words": 442,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100316a.htm",
+   "sha256": "f5e74180bc2e89a8a81b08cce5888db96ab496d71ddd859e816c36e89212460c"
+  },
+  {
+   "file": "fomc_20100428.txt",
+   "date": "2010-04-28",
+   "chars": 2687,
+   "words": 406,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100428a.htm",
+   "sha256": "4fcd6172a7f920eb7be2069286e347f61440ec6748bd9cf42160e5503d35ac4f"
+  },
+  {
+   "file": "fomc_20100509.txt",
+   "date": "2010-05-09",
+   "chars": 1080,
+   "words": 174,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100509a.htm",
+   "sha256": "258f908b878f8558c39fec1ac726b43a6a8d37b5dfc3f8f8a153614c683ec037"
+  },
+  {
+   "file": "fomc_20100623.txt",
+   "date": "2010-06-23",
+   "chars": 2409,
+   "words": 356,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100623a.htm",
+   "sha256": "9b0e16bf416a2c4acf941f34f5666c26e0b4c0309eb953c241e0501c5abe4b21"
+  },
+  {
+   "file": "fomc_20100810.txt",
+   "date": "2010-08-10",
+   "chars": 2238,
+   "words": 333,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100810a.htm",
+   "sha256": "08e4815969c56c753fb6ba8cc78ae2103d6f10ead927d6aa3bb7af04e3e81be3"
+  },
+  {
+   "file": "fomc_20100921.txt",
+   "date": "2010-09-21",
+   "chars": 2248,
+   "words": 337,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20100921a.htm",
+   "sha256": "ceeb4a1f0cb5b455336dcc795cdc10aa857286ee30d3f31595c6763164ef7dfe"
+  },
+  {
+   "file": "fomc_20101103.txt",
+   "date": "2010-11-03",
+   "chars": 2821,
+   "words": 426,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20101103a.htm",
+   "sha256": "03320ada2ff007c83fc37d8e014614cd7bd1526e269e1a46637ee4f6ba637938"
+  },
+  {
+   "file": "fomc_20101214.txt",
+   "date": "2010-12-14",
+   "chars": 2897,
+   "words": 437,
+   "source": "https://www.federalreserve.gov/newsevents/press/monetary/20101214a.htm",
+   "sha256": "fa405d02c209adc7d0d8d15886c8051d3e73bca0ab350eec5d88700bef0093ab"
+  },
+  {
+   "file": "fomc_20110126.txt",
+   "date": "2011-01-26",
+   "chars": 2902,
+   "words": 434,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110126a.htm",
+   "sha256": "ad6e4d3f58c4f3ec6a5fde1fd802177431c4ea41cab2bd5fd2154941a96cd6f9"
+  },
+  {
+   "file": "fomc_20110315.txt",
+   "date": "2011-03-15",
+   "chars": 3048,
+   "words": 460,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110315a.htm",
+   "sha256": "b3980c0eec4dec348d92dadb87bdcf71d4ef586254505d251048047bbdc4d1c2"
+  },
+  {
+   "file": "fomc_20110427.txt",
+   "date": "2011-04-27",
+   "chars": 3047,
+   "words": 461,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110427a.htm",
+   "sha256": "64c796d40549348a042c9cc4e2a739c967d52edca2f1c0d768ad463a1adc4e98"
+  },
+  {
+   "file": "fomc_20110622.txt",
+   "date": "2011-06-22",
+   "chars": 2995,
+   "words": 453,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110622a.htm",
+   "sha256": "081e256d9327ab3795f26c7541d4337fc7d82d519e14e5f19f1484c1b051b5c8"
+  },
+  {
+   "file": "fomc_20110809.txt",
+   "date": "2011-08-09",
+   "chars": 3180,
+   "words": 481,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110809a.htm",
+   "sha256": "795e33ffe053460aedcb498958c1eeb073fc02de56959a74879b07c0a8c83868"
+  },
+  {
+   "file": "fomc_20110921.txt",
+   "date": "2011-09-21",
+   "chars": 3666,
+   "words": 550,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20110921a.htm",
+   "sha256": "e94dd152fcde39280a706838ae034723f1694721619c1fd5ff13e3e3a42b5f4e"
+  },
+  {
+   "file": "fomc_20111102.txt",
+   "date": "2011-11-02",
+   "chars": 3265,
+   "words": 485,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20111102a.htm",
+   "sha256": "c242baf1ee5065fd22e0d7376d054a24fadd1104a3d2f37e601cd6b4ea1e3f00"
+  },
+  {
+   "file": "fomc_20111213.txt",
+   "date": "2011-12-13",
+   "chars": 2906,
+   "words": 429,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20111213a.htm",
+   "sha256": "d15b36fb85797482a41e7a385f4e9f0e7a628370777e7bc150fa8477c762321b"
+  },
+  {
+   "file": "fomc_20120125.txt",
+   "date": "2012-01-25",
+   "chars": 2810,
+   "words": 418,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120125a.htm",
+   "sha256": "6aed3c8883ae8148ecf302e4de6ef64cb140a3390f4323a651d6610e8e758253"
+  },
+  {
+   "file": "fomc_20120313.txt",
+   "date": "2012-03-13",
+   "chars": 2875,
+   "words": 429,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120313a.htm",
+   "sha256": "62a67d669d8fc6b985ecdef6246fa19145dea873d84afc97c52854741d7c68fd"
+  },
+  {
+   "file": "fomc_20120425.txt",
+   "date": "2012-04-25",
+   "chars": 2926,
+   "words": 438,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120425a.htm",
+   "sha256": "014b6abf7615fb0337a415255b7b41082954ba1f58557699fbaa1a99b77a918e"
+  },
+  {
+   "file": "fomc_20120620.txt",
+   "date": "2012-06-20",
+   "chars": 3196,
+   "words": 483,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120620a.htm",
+   "sha256": "bce47503de9bbb4e87dbd384520ad46228ce8f23b4e4f0515e8a1a716762a160"
+  },
+  {
+   "file": "fomc_20120801.txt",
+   "date": "2012-08-01",
+   "chars": 3002,
+   "words": 457,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120801a.htm",
+   "sha256": "77dca1261df7a0b724ff3d6ed25a3d65612bdec37e4e7baead8e7ff2d884e0d0"
+  },
+  {
+   "file": "fomc_20120913.txt",
+   "date": "2012-09-13",
+   "chars": 3687,
+   "words": 551,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20120913a.htm",
+   "sha256": "5488635560504a6cd428190f4b3d1a8c0e312d7c960a7c4de4dc5c7b91c7a2f0"
+  },
+  {
+   "file": "fomc_20121024.txt",
+   "date": "2012-10-24",
+   "chars": 3695,
+   "words": 548,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20121024a.htm",
+   "sha256": "7310f60926a1956d5729c53f91a1d22db680a9fc039219e6cd5833c7a23034de"
+  },
+  {
+   "file": "fomc_20121212.txt",
+   "date": "2012-12-12",
+   "chars": 4614,
+   "words": 676,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20121212a.htm",
+   "sha256": "912b34ebda267b57388f02adcd2dd0e734953404d4b1cb4eaaafa007a2a4b1ce"
+  },
+  {
+   "file": "fomc_20130130.txt",
+   "date": "2013-01-30",
+   "chars": 4409,
+   "words": 645,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130130a.htm",
+   "sha256": "9d0e9f20e15f89f9594ec7ca97e3ec7a7e438814602904dd7f79571e87c3f04c"
+  },
+  {
+   "file": "fomc_20130320.txt",
+   "date": "2013-03-20",
+   "chars": 4376,
+   "words": 643,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130320a.htm",
+   "sha256": "006667a4be332cd1c7aae96219dd183b34054d2bf5c108f31e48e0120f8a3cd9"
+  },
+  {
+   "file": "fomc_20130501.txt",
+   "date": "2013-05-01",
+   "chars": 4545,
+   "words": 669,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130501a.htm",
+   "sha256": "fa88d4d9457a2160153f10b89621068a623368ab7e014ff0d60f90a3c325ba36"
+  },
+  {
+   "file": "fomc_20130619.txt",
+   "date": "2013-06-19",
+   "chars": 4706,
+   "words": 697,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130619a.htm",
+   "sha256": "9677a84e2cc5e5a1e2a380aa0ab007aa58b9c6943ccea73f5cb15b4099880c8d"
+  },
+  {
+   "file": "fomc_20130731.txt",
+   "date": "2013-07-31",
+   "chars": 4731,
+   "words": 700,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130731a.htm",
+   "sha256": "07bcb8c9a0647c919ae9e55783b7b65cb0c523fe6bbfbda3ecc56dfc8ae14852"
+  },
+  {
+   "file": "fomc_20130918.txt",
+   "date": "2013-09-18",
+   "chars": 5389,
+   "words": 798,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20130918a.htm",
+   "sha256": "5775a00481e6e51d47b2fc92c7ad29c7f0b933671b140c4401b85814e727460c"
+  },
+  {
+   "file": "fomc_20131030.txt",
+   "date": "2013-10-30",
+   "chars": 5262,
+   "words": 776,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20131030a.htm",
+   "sha256": "f37d05078b27d779361ba497a42f21dc0a0d637ee189db76884c3b7c98687bdc"
+  },
+  {
+   "file": "fomc_20131218.txt",
+   "date": "2013-12-18",
+   "chars": 5830,
+   "words": 867,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20131218a.htm",
+   "sha256": "ffd7c7aa3707ea94ea3ece5e2a42beb3f773e7c72baf2b7ed1c15edade0c75c8"
+  },
+  {
+   "file": "fomc_20140129.txt",
+   "date": "2014-01-29",
+   "chars": 5617,
+   "words": 830,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140129a.htm",
+   "sha256": "b3c9698f8568b0b7c214341e775da1f926cbe42d19383511cf4ff82f59ef0c39"
+  },
+  {
+   "file": "fomc_20140319.txt",
+   "date": "2014-03-19",
+   "chars": 5684,
+   "words": 833,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140319a.htm",
+   "sha256": "15ca9b719e4595fb7576cd96965a6ea4f87f3eb84cec2e20c2af96709e30630d"
+  },
+  {
+   "file": "fomc_20140430.txt",
+   "date": "2014-04-30",
+   "chars": 5518,
+   "words": 809,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140430a.htm",
+   "sha256": "ce723cfb3e32296fdd983f1bc743a2a7047d9a99013725a8cb3c9d8cae47e1a6"
+  },
+  {
+   "file": "fomc_20140618.txt",
+   "date": "2014-06-18",
+   "chars": 5450,
+   "words": 796,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140618a.htm",
+   "sha256": "00ca29fd8ae134cdda993021f07f6008b1bca6088ae84083560afa41aee1c6ec"
+  },
+  {
+   "file": "fomc_20140730.txt",
+   "date": "2014-07-30",
+   "chars": 5724,
+   "words": 839,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140730a.htm",
+   "sha256": "6a7dc788abbe12ef4ca0bc9c61a415d3e453484fd4578186bbb78688ca03e3d5"
+  },
+  {
+   "file": "fomc_20140917.txt",
+   "date": "2014-09-17",
+   "chars": 6091,
+   "words": 893,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20140917a.htm",
+   "sha256": "df7770a9b3be3c12a5c3604aa0b1f5e796894d4714b95fbf9e428289d3b54951"
+  },
+  {
+   "file": "fomc_20141029.txt",
+   "date": "2014-10-29",
+   "chars": 4870,
+   "words": 705,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20141029a.htm",
+   "sha256": "b07887ffb06802f6c235125857f7930b426e7e39c903021b38403fbb943fb5d5"
+  },
+  {
+   "file": "fomc_20141217.txt",
+   "date": "2014-12-17",
+   "chars": 4122,
+   "words": 593,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20141217a.htm",
+   "sha256": "7c59a15f643c4721c08303e9d6cc8b48eddeab3f5d799a1b0018cc0981b0274f"
+  },
+  {
+   "file": "fomc_20150128.txt",
+   "date": "2015-01-28",
+   "chars": 3961,
+   "words": 567,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150128a.htm",
+   "sha256": "2ce2eb0f15e73ed32d8bc9aef2916d1d71610b34ae9ca1443d012581f69025f3"
+  },
+  {
+   "file": "fomc_20150318.txt",
+   "date": "2015-03-18",
+   "chars": 3984,
+   "words": 582,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150318a.htm",
+   "sha256": "aa686267c38a20075914093ca7200e9f9ba9b96ee809561ad8521f9a6e2166be"
+  },
+  {
+   "file": "fomc_20150429.txt",
+   "date": "2015-04-29",
+   "chars": 3863,
+   "words": 558,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150429a.htm",
+   "sha256": "75085ced9d47de2e0ea04de5a39bd9436c07466b9c49ef788e0bcce8667dcc1a"
+  },
+  {
+   "file": "fomc_20150617.txt",
+   "date": "2015-06-17",
+   "chars": 3739,
+   "words": 543,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150617a.htm",
+   "sha256": "3c82b117da9cfe5dac17a3f80735ae95a69fe15a3e2541f145eaf8c31e450c7e"
+  },
+  {
+   "file": "fomc_20150729.txt",
+   "date": "2015-07-29",
+   "chars": 3701,
+   "words": 537,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150729a.htm",
+   "sha256": "7318e4a10c1b134bea66f411afc24ef5ef43487528ec88d50be0f15676063781"
+  },
+  {
+   "file": "fomc_20150917.txt",
+   "date": "2015-09-17",
+   "chars": 3999,
+   "words": 586,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20150917a.htm",
+   "sha256": "272609d6e0ca59b7902fbf612d5527ca3483d06ca7407a3173019c8786e7f57c"
+  },
+  {
+   "file": "fomc_20151028.txt",
+   "date": "2015-10-28",
+   "chars": 3913,
+   "words": 577,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20151028a.htm",
+   "sha256": "ddebcc06639804f9b07537a56e8544d17abbbf686be443cf0ad51f73be5c06c7"
+  },
+  {
+   "file": "fomc_20151216.txt",
+   "date": "2015-12-16",
+   "chars": 4001,
+   "words": 596,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20151216a.htm",
+   "sha256": "195c474fa5bded6a8e50dfaa5b167c0e943ce9ce330cbf3bafeb8fd299963aa4"
+  },
+  {
+   "file": "fomc_20160127.txt",
+   "date": "2016-01-27",
+   "chars": 3730,
+   "words": 558,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160127a.htm",
+   "sha256": "cc8e8ca1713c1d2ba59079b07b65cca01932c6210da67d4122fd1258023c7604"
+  },
+  {
+   "file": "fomc_20160316.txt",
+   "date": "2016-03-16",
+   "chars": 3794,
+   "words": 571,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160316a.htm",
+   "sha256": "26f870371dc468f89621bc5009255b435375003027780668819206f7917b3ce5"
+  },
+  {
+   "file": "fomc_20160427.txt",
+   "date": "2016-04-27",
+   "chars": 3820,
+   "words": 576,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160427a.htm",
+   "sha256": "7d544390279de64bff6abc33a47e0978998b7675b84d58ed6968c84154144ac7"
+  },
+  {
+   "file": "fomc_20160615.txt",
+   "date": "2016-06-15",
+   "chars": 3593,
+   "words": 540,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160615a.htm",
+   "sha256": "54b786c05cab41e17aea2bfcbf6eab03d4227944c9d207573bfdc4afbd0cd4cb"
+  },
+  {
+   "file": "fomc_20160727.txt",
+   "date": "2016-07-27",
+   "chars": 3737,
+   "words": 565,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160727a.htm",
+   "sha256": "01a57b56c1c5bac096e99c152d24d244f54c36642a5034ce0199453095a1df26"
+  },
+  {
+   "file": "fomc_20160921.txt",
+   "date": "2016-09-21",
+   "chars": 3954,
+   "words": 603,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20160921a.htm",
+   "sha256": "1bd1747fdc77f53d4d6a095152c7672f731d89cd247363c4039f495bcdd69ab5"
+  },
+  {
+   "file": "fomc_20161102.txt",
+   "date": "2016-11-02",
+   "chars": 3930,
+   "words": 597,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20161102a.htm",
+   "sha256": "ca87acdaf4bb2c17c0a7f986155e7368236d8161e7291c8d3f6a70cc07a7158e"
+  },
+  {
+   "file": "fomc_20161214.txt",
+   "date": "2016-12-14",
+   "chars": 3588,
+   "words": 535,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20161214a.htm",
+   "sha256": "be21b137a1c64a0af5577843f82ad21feb2d26dedb2537d80b7429c80709dbbc"
+  },
+  {
+   "file": "fomc_20170201.txt",
+   "date": "2017-02-01",
+   "chars": 3370,
+   "words": 499,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170201a.htm",
+   "sha256": "7beab503572b3e240492237981e8f311ee8a83b689ee1cd5f0510b590d6e78a7"
+  },
+  {
+   "file": "fomc_20170315.txt",
+   "date": "2017-03-15",
+   "chars": 3534,
+   "words": 521,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170315a.htm",
+   "sha256": "98f2c8fd1c42aaaaed132e6c6f6053da7b1463b42200457a9cc423559d23b7c2"
+  },
+  {
+   "file": "fomc_20170503.txt",
+   "date": "2017-05-03",
+   "chars": 3522,
+   "words": 517,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170503a.htm",
+   "sha256": "03e3a5f01a63ef8adb1414667f5734e3d9f3a468f7c994d9756380e25806a89b"
+  },
+  {
+   "file": "fomc_20170614.txt",
+   "date": "2017-06-14",
+   "chars": 3714,
+   "words": 551,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170614a.htm",
+   "sha256": "c40f978e473e8c01802868b709f7b2a486ceaf85070c8f2ad1e0ade673631b2b"
+  },
+  {
+   "file": "fomc_20170726.txt",
+   "date": "2017-07-26",
+   "chars": 3402,
+   "words": 506,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170726a.htm",
+   "sha256": "86681048b56a635534b984357cdd0a75f943eb33fe93843da9c758c7fd628c1f"
+  },
+  {
+   "file": "fomc_20170920.txt",
+   "date": "2017-09-20",
+   "chars": 3563,
+   "words": 534,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20170920a.htm",
+   "sha256": "635c090ee523a1fb2aaaf85309ec537209d77f50bca8caded9303a697e90331c"
+  },
+  {
+   "file": "fomc_20171101.txt",
+   "date": "2017-11-01",
+   "chars": 3447,
+   "words": 512,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20171101a.htm",
+   "sha256": "8719398822bd3028881cc19358804a35ddc109a4ed73e7f9b559f7267ac0b4c5"
+  },
+  {
+   "file": "fomc_20171213.txt",
+   "date": "2017-12-13",
+   "chars": 3230,
+   "words": 485,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20171213a.htm",
+   "sha256": "572c53af1171f758bff3de190ebf4e3e16d4a9578ee3c73bcd8a80972be1a687"
+  },
+  {
+   "file": "fomc_20180131.txt",
+   "date": "2018-01-31",
+   "chars": 2773,
+   "words": 420,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180131a.htm",
+   "sha256": "37cf65054f382a4327ac40dc25f1e02712b70d223fe8eb9c2ab85d2e584002c5"
+  },
+  {
+   "file": "fomc_20180321.txt",
+   "date": "2018-03-21",
+   "chars": 2945,
+   "words": 446,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180321a.htm",
+   "sha256": "9bec7568285a9b542f4b9d6b63bf4da0d0de7fc90b91c5f926f863dc8fa8c99a"
+  },
+  {
+   "file": "fomc_20180502.txt",
+   "date": "2018-05-02",
+   "chars": 2768,
+   "words": 420,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180502a.htm",
+   "sha256": "111c35e53ecf8ec25d286e8cc178ca02373ee5ebe39a9a598d1e85d106e88426"
+  },
+  {
+   "file": "fomc_20180613.txt",
+   "date": "2018-06-13",
+   "chars": 2126,
+   "words": 320,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180613a.htm",
+   "sha256": "365e80d6f59e846303b775a7def73563fbbaddd20add292f41c32ade3f00b984"
+  },
+  {
+   "file": "fomc_20180801.txt",
+   "date": "2018-08-01",
+   "chars": 2062,
+   "words": 308,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180801a.htm",
+   "sha256": "d48276fe655a57efcc89c109b6828df2e7675df56b28735b0239da17e9b2c50f"
+  },
+  {
+   "file": "fomc_20180926.txt",
+   "date": "2018-09-26",
+   "chars": 1931,
+   "words": 290,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20180926a.htm",
+   "sha256": "4c2102fbe866777f8b2024b3462e4708c9b2121e04c39decb3c889e75b508f03"
+  },
+  {
+   "file": "fomc_20181108.txt",
+   "date": "2018-11-08",
+   "chars": 2009,
+   "words": 303,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181108a.htm",
+   "sha256": "0fb6358b5a9dc4e5706d3a7f2966bdf3cb880c1780b76fb1212a047cae6ea8d8"
+  },
+  {
+   "file": "fomc_20181219.txt",
+   "date": "2018-12-19",
+   "chars": 2188,
+   "words": 330,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20181219a.htm",
+   "sha256": "cb14ba5cd38f53a78f5c7788f8958c8399f37adb47f968677b354c66632ed94f"
+  },
+  {
+   "file": "fomc_20190130.txt",
+   "date": "2019-01-30",
+   "chars": 2188,
+   "words": 327,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190130a.htm",
+   "sha256": "117ddc06188f4d621d56fa22ccc61b4e9a59804102abb5a8cebd09b35afc4564"
+  },
+  {
+   "file": "fomc_20190320.txt",
+   "date": "2019-03-20",
+   "chars": 2286,
+   "words": 343,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190320a.htm",
+   "sha256": "6f22cd698e9e77b2ac9f46411e757b0b5efed562653fa0b88208799ab1cdc0a8"
+  },
+  {
+   "file": "fomc_20190501.txt",
+   "date": "2019-05-01",
+   "chars": 2123,
+   "words": 319,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190501a.htm",
+   "sha256": "bfb92a984360fd08e3e66488010f3edb53ddca8441a941642fd6bcf3cb13e258"
+  },
+  {
+   "file": "fomc_20190619.txt",
+   "date": "2019-06-19",
+   "chars": 2361,
+   "words": 356,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190619a.htm",
+   "sha256": "f0061909e732017587eb8d587bab48afe07535937c773b3236005c60f59acb73"
+  },
+  {
+   "file": "fomc_20190731.txt",
+   "date": "2019-07-31",
+   "chars": 2646,
+   "words": 403,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190731a.htm",
+   "sha256": "b8feb88276c3fb96cbde2aa535fd85f2e6b93cba9d2d9fd036056e34f14b5998"
+  },
+  {
+   "file": "fomc_20190918.txt",
+   "date": "2019-09-18",
+   "chars": 2536,
+   "words": 388,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20190918a.htm",
+   "sha256": "3c7232901c79b6d18d0c3c8d485e223f4b4e0da1bf9570b4d3b9fbd4894781c5"
+  },
+  {
+   "file": "fomc_20191011.txt",
+   "date": "2019-10-11",
+   "chars": 4060,
+   "words": 606,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20191011a.htm",
+   "sha256": "b5cf028f86e75ae4b05883dfdd11415a69746ddd4a5c9588eaccbc67b6dbc33e"
+  },
+  {
+   "file": "fomc_20191030.txt",
+   "date": "2019-10-30",
+   "chars": 2313,
+   "words": 348,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20191030a.htm",
+   "sha256": "565d445e283e087056ea9c29bb3353df4d8587570b09814e80ef045f179df3d0"
+  },
+  {
+   "file": "fomc_20191211.txt",
+   "date": "2019-12-11",
+   "chars": 2104,
+   "words": 311,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20191211a.htm",
+   "sha256": "59b9a54cd651a27eca48510ece340d1758ea4eacb4f91247945186ac0f5d0a27"
+  },
+  {
+   "file": "fomc_20200129.txt",
+   "date": "2020-01-29",
+   "chars": 2113,
+   "words": 311,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200129a.htm",
+   "sha256": "590926b9ea05b0faad7492c1174360c002bf3fda93c434234a40741e1665ba2e"
+  },
+  {
+   "file": "fomc_20200303.txt",
+   "date": "2020-03-03",
+   "chars": 825,
+   "words": 130,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200303a.htm",
+   "sha256": "fa3a4c602a7626a5ecd2489a01e142f50f344c1c8c42eb9ddeb7d3489d0eadff"
+  },
+  {
+   "file": "fomc_20200315.txt",
+   "date": "2020-03-15",
+   "chars": 1898,
+   "words": 291,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200315a.htm",
+   "sha256": "78a4610dd10bc2c2ad2d388873509e0d55730eb075c162284308b623e3aa5b6c"
+  },
+  {
+   "file": "fomc_20200323.txt",
+   "date": "2020-03-23",
+   "chars": 3906,
+   "words": 573,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200323a.htm",
+   "sha256": "d8a87a2d14c23d4fc41826a9faf6005cc0f4a92d29a0270bc1f72ce853e2f620"
+  },
+  {
+   "file": "fomc_20200429.txt",
+   "date": "2020-04-29",
+   "chars": 2822,
+   "words": 422,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200429a.htm",
+   "sha256": "8042b4ec186cc43f010d1615bec0430e1f1cf7c75e28ebcd953216e2a7a59697"
+  },
+  {
+   "file": "fomc_20200610.txt",
+   "date": "2020-06-10",
+   "chars": 2825,
+   "words": 425,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200610a.htm",
+   "sha256": "ee52886f21e276bed3f22111763858125d968a2ff810bd9c83213e1771dc4186"
+  },
+  {
+   "file": "fomc_20200729.txt",
+   "date": "2020-07-29",
+   "chars": 2959,
+   "words": 446,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200729a.htm",
+   "sha256": "072589bad4533e886d6ed984e28551c64f91e5d2813b699273e192d35bb38900"
+  },
+  {
+   "file": "fomc_20200916.txt",
+   "date": "2020-09-16",
+   "chars": 2948,
+   "words": 451,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20200916a.htm",
+   "sha256": "43c45b430663ed0ac2f91df8005edb9dad01ebf7c7b86e58ba8c8d0f6ff0f55d"
+  },
+  {
+   "file": "fomc_20201105.txt",
+   "date": "2020-11-05",
+   "chars": 3025,
+   "words": 464,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20201105a.htm",
+   "sha256": "e60782a28579de2965b898578e9270b9e17baa495fdf5793105dd17326b00d53"
+  },
+  {
+   "file": "fomc_20201216.txt",
+   "date": "2020-12-16",
+   "chars": 3135,
+   "words": 478,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20201216a.htm",
+   "sha256": "1e81f432193acd1933ff1b99fdb2bb74931e55e196daf1532fbd9b8a8e3bf872"
+  },
+  {
+   "file": "fomc_20210127.txt",
+   "date": "2021-01-27",
+   "chars": 3205,
+   "words": 485,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210127a.htm",
+   "sha256": "ac7019a018f576d1aa22a8ee980629003925ecbd0520355a339f8cbc985e651d"
+  },
+  {
+   "file": "fomc_20210317.txt",
+   "date": "2021-03-17",
+   "chars": 3173,
+   "words": 480,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210317a.htm",
+   "sha256": "b766079b123e4a5fb797804badac2cf457b761951b8cded5a0b6290ddb0e2bc5"
+  },
+  {
+   "file": "fomc_20210428.txt",
+   "date": "2021-04-28",
+   "chars": 3161,
+   "words": 476,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210428a.htm",
+   "sha256": "005133c22f8461719e2f6060af4348337d159188a7c0f2bd131fdb2d25e91b44"
+  },
+  {
+   "file": "fomc_20210616.txt",
+   "date": "2021-06-16",
+   "chars": 3124,
+   "words": 474,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210616a.htm",
+   "sha256": "21f42353531297535bb68b236c7aff740ad410a1d7ca85573245a3c8637429e8"
+  },
+  {
+   "file": "fomc_20210728.txt",
+   "date": "2021-07-28",
+   "chars": 3207,
+   "words": 488,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210728a.htm",
+   "sha256": "12983251da375beb161c6e8002c75d825e660a15427f018ce8249ed3e60480e4"
+  },
+  {
+   "file": "fomc_20210922.txt",
+   "date": "2021-09-22",
+   "chars": 3311,
+   "words": 506,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20210922a.htm",
+   "sha256": "5367a4764f3873c76e7544cd95fa4897b803a0b16de76a67940764fb315884e2"
+  },
+  {
+   "file": "fomc_20211103.txt",
+   "date": "2021-11-03",
+   "chars": 3994,
+   "words": 614,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20211103a.htm",
+   "sha256": "234c2395ac0289bc59445bdb2d7173cf720a1b4b1b6f34dcb668e97f620625f8"
+  },
+  {
+   "file": "fomc_20211215.txt",
+   "date": "2021-12-15",
+   "chars": 3391,
+   "words": 521,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20211215a.htm",
+   "sha256": "2f633fa5e5b8ed5eef9ce332ade2f75a1b9239c3dce4a741fad90968c150a782"
+  },
+  {
+   "file": "fomc_20220126.txt",
+   "date": "2022-01-26",
+   "chars": 2768,
+   "words": 430,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220126a.htm",
+   "sha256": "14237851fae871aa3a95aa33441b9b099d6c4b106e981fa7be97b165659fb1a3"
+  },
+  {
+   "file": "fomc_20220316.txt",
+   "date": "2022-03-16",
+   "chars": 2269,
+   "words": 348,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220316a.htm",
+   "sha256": "595b7f7088edbd94c14ba00997c07d1267f9272914964253782ced74cb66c350"
+  },
+  {
+   "file": "fomc_20220504.txt",
+   "date": "2022-05-04",
+   "chars": 2429,
+   "words": 366,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220504a.htm",
+   "sha256": "da23a3c4fb9adc65c6f3aee4070425774f3ce2a336e6496933825ee96b80f860"
+  },
+  {
+   "file": "fomc_20220615.txt",
+   "date": "2022-06-15",
+   "chars": 2410,
+   "words": 368,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220615a.htm",
+   "sha256": "fac263613505885ba9420ee044295ab3da4224326e17180d1ec6f9b12afe619f"
+  },
+  {
+   "file": "fomc_20220727.txt",
+   "date": "2022-07-27",
+   "chars": 2078,
+   "words": 313,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220727a.htm",
+   "sha256": "17e73bc8918fd3c74f2961d8eb0323b561e83c0ab6785f53069128f76eda2d4a"
+  },
+  {
+   "file": "fomc_20220921.txt",
+   "date": "2022-09-21",
+   "chars": 2070,
+   "words": 314,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20220921a.htm",
+   "sha256": "ecdc63c982fdd9fee1a2d5112b0955a6c5d75c71689bb28b3b48e4b8785901cb"
+  },
+  {
+   "file": "fomc_20221102.txt",
+   "date": "2022-11-02",
+   "chars": 2470,
+   "words": 375,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20221102a.htm",
+   "sha256": "e3f2590eea30a67bae0a5b0a4bbd20dfbf46072a6c0e176afddb1892315acf20"
+  },
+  {
+   "file": "fomc_20221214.txt",
+   "date": "2022-12-14",
+   "chars": 2470,
+   "words": 375,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20221214a.htm",
+   "sha256": "4e2e7b566deb54c96adc367d5c829d96f447e499c63c9502f2f56ba5172f8266"
+  },
+  {
+   "file": "fomc_20230201.txt",
+   "date": "2023-02-01",
+   "chars": 2217,
+   "words": 333,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230201a.htm",
+   "sha256": "1d086d4184e1f2d9f61c4e9698f42a71bd1f1281e636e551b0d381316aff7219"
+  },
+  {
+   "file": "fomc_20230322.txt",
+   "date": "2023-03-22",
+   "chars": 2421,
+   "words": 365,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230322a.htm",
+   "sha256": "0438b59b5fbbda834455439bc60145324e84a18160c8f0d5f37f15e623d30324"
+  },
+  {
+   "file": "fomc_20230503.txt",
+   "date": "2023-05-03",
+   "chars": 2211,
+   "words": 331,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230503a.htm",
+   "sha256": "2dbff8c70aab1676fe2e5be3fee8f3d61d506775b66268c80830756c0f2b64e5"
+  },
+  {
+   "file": "fomc_20230614.txt",
+   "date": "2023-06-14",
+   "chars": 2277,
+   "words": 341,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230614a.htm",
+   "sha256": "d9fffe68317f2e6606792e7964c34d897871f763b72e044a04ce64323c9f5ce3"
+  },
+  {
+   "file": "fomc_20230726.txt",
+   "date": "2023-07-26",
+   "chars": 2234,
+   "words": 333,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230726a.htm",
+   "sha256": "261a344d9387da9b06d4f437ed3f671e6fd2395ce1a942e3188632d045177f91"
+  },
+  {
+   "file": "fomc_20230920.txt",
+   "date": "2023-09-20",
+   "chars": 2266,
+   "words": 338,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20230920a.htm",
+   "sha256": "fa0c846adf895f97660a0eff95436c8d3a56e357e8aa17db121aa4a7bb5ee541"
+  },
+  {
+   "file": "fomc_20231101.txt",
+   "date": "2023-11-01",
+   "chars": 2304,
+   "words": 344,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20231101a.htm",
+   "sha256": "7da9849930cfe30aee99f55d7526995d37ad2827c491c68a229bfc58f07ef1fe"
+  },
+  {
+   "file": "fomc_20231213.txt",
+   "date": "2023-12-13",
+   "chars": 2357,
+   "words": 355,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20231213a.htm",
+   "sha256": "1791a6c62833d257e1b72d21aff2ac69656b51c4eafd7ea2d36d8ba77f751a15"
+  },
+  {
+   "file": "fomc_20240131.txt",
+   "date": "2024-01-31",
+   "chars": 2172,
+   "words": 334,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240131a.htm",
+   "sha256": "00523718b823f710111a9f8fcf15b866ffb07f78e81777760371abca77d8a223"
+  },
+  {
+   "file": "fomc_20240320.txt",
+   "date": "2024-03-20",
+   "chars": 2138,
+   "words": 328,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240320a.htm",
+   "sha256": "16a98daed15b6e375e5049b14c86a5ae43f7565ccffbb1fdd973a007f60b660c"
+  },
+  {
+   "file": "fomc_20240501.txt",
+   "date": "2024-05-01",
+   "chars": 2627,
+   "words": 406,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240501a.htm",
+   "sha256": "e5f3b9127713c68130277ed6b1d8af7e2cf0e20efbd629e29a377ddd24544259"
+  },
+  {
+   "file": "fomc_20240612.txt",
+   "date": "2024-06-12",
+   "chars": 2227,
+   "words": 342,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240612a.htm",
+   "sha256": "306517450c71962f280bb1ce473b5c3f1257f1432e7ba2feaab899f28d5623a4"
+  },
+  {
+   "file": "fomc_20240731.txt",
+   "date": "2024-07-31",
+   "chars": 2307,
+   "words": 359,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240731a.htm",
+   "sha256": "fc64ebfb33eef4ff78590cdbdb406ee08f75acd79dccb954ca819a8f29d65f47"
+  },
+  {
+   "file": "fomc_20240918.txt",
+   "date": "2024-09-18",
+   "chars": 2291,
+   "words": 356,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20240918a.htm",
+   "sha256": "db78bae2a2be75687633aa9caf1fac9fd4177d7756f06ee177b10bf0393c681a"
+  },
+  {
+   "file": "fomc_20241107.txt",
+   "date": "2024-11-07",
+   "chars": 2070,
+   "words": 318,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20241107a.htm",
+   "sha256": "87aa4256361ce3626e18997351da61e6b57c8460d667ab18d782aeed727b0386"
+  },
+  {
+   "file": "fomc_20241218.txt",
+   "date": "2024-12-18",
+   "chars": 2222,
+   "words": 345,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20241218a.htm",
+   "sha256": "6a3f553022ea33e1d50675088331d83dc0fd62175be68e81cc3aefe0b318b651"
+  },
+  {
+   "file": "fomc_20250129.txt",
+   "date": "2025-01-29",
+   "chars": 2001,
+   "words": 306,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250129a.htm",
+   "sha256": "6b607983f2dd272da8596f645128947ecb0035c22cc6e9f166bf799a872c6957"
+  },
+  {
+   "file": "fomc_20250319.txt",
+   "date": "2025-03-19",
+   "chars": 2386,
+   "words": 365,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250319a.htm",
+   "sha256": "2f9d8a0ef6f48f2a74c517445e14e57f371639914da8ea208fd9dff54b4ff270"
+  },
+  {
+   "file": "fomc_20250507.txt",
+   "date": "2025-05-07",
+   "chars": 2108,
+   "words": 322,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250507a.htm",
+   "sha256": "b57218099f44c7495a1f40324b2ec9ff532308a2e54d33da67f360d332475e3e"
+  },
+  {
+   "file": "fomc_20250618.txt",
+   "date": "2025-06-18",
+   "chars": 1950,
+   "words": 295,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250618a.htm",
+   "sha256": "e1c73f3f7935e69e8f2d04f12d84d51ecf0a288de5fccd1dff4409c33c29026c"
+  },
+  {
+   "file": "fomc_20250730.txt",
+   "date": "2025-07-30",
+   "chars": 2115,
+   "words": 325,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250730a.htm",
+   "sha256": "ca0ca4ee955057bf2a457c0d8f7b67e1bbda6126378761f9a92809a6072e1ed4"
+  },
+  {
+   "file": "fomc_20250822.txt",
+   "date": "2025-08-22",
+   "chars": 1155,
+   "words": 176,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250822a.htm",
+   "sha256": "a2d6c694b792e10ecd5b1462cb22a43712f7f68f00492ccf944ccd96eff10537"
+  },
+  {
+   "file": "fomc_20250917.txt",
+   "date": "2025-09-17",
+   "chars": 2141,
+   "words": 335,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20250917a.htm",
+   "sha256": "b2944faed4705b2ffda9e296aca8da9056e67fed74a44571f3c95b066f4cb83f"
+  },
+  {
+   "file": "fomc_20251029.txt",
+   "date": "2025-10-29",
+   "chars": 2323,
+   "words": 366,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20251029a.htm",
+   "sha256": "628410359fb3b7a1042b3d38094f2777eafcb587ba7169e367e5ef820753a71a"
+  },
+  {
+   "file": "fomc_20251210.txt",
+   "date": "2025-12-10",
+   "chars": 2450,
+   "words": 386,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20251210a.htm",
+   "sha256": "0f4f89bd0a3b2253ca1956a529e608b178eb8dc0e05066fcd9094604b290cb9c"
+  },
+  {
+   "file": "fomc_20260128.txt",
+   "date": "2026-01-28",
+   "chars": 1890,
+   "words": 292,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260128a.htm",
+   "sha256": "074cef5f8b4d74c634991f64c49cf568a9c73428f77b4f0cdd4fa50eb841cb9c"
+  },
+  {
+   "file": "fomc_20260318.txt",
+   "date": "2026-03-18",
+   "chars": 1977,
+   "words": 306,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm",
+   "sha256": "525a096145d5503db56835caccb3fa10bbdcd85768f21565d838652855aae8df"
+  },
+  {
+   "file": "fomc_20260429.txt",
+   "date": "2026-04-29",
+   "chars": 2157,
+   "words": 341,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260429a.htm",
+   "sha256": "9b7f6900d8262191d20d0c71ffe5b003a2bc026b83b8449e3f102c3592048508"
+  },
+  {
+   "file": "fomc_20260617.txt",
+   "date": "2026-06-17",
+   "chars": 840,
+   "words": 131,
+   "source": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260617a.htm",
+   "sha256": "ef7e737e371e0bc0c1f188f4732d735cef45281747dbe21ab93d5ee0708efef5"
+  }
+ ]
+}

@@ -1,0 +1,83 @@
+{
+ "_note": "Bounds fixed before the notebook is run. Every gate in Session 5 is one of two kinds and there are no others. (1) REPRODUCTION: a digit some frozen artefact already carries -- the corpus manifest, Session 2's published baselines, chapter 14's printed figures, the recorded run in recorded_*.json -- which this notebook has to return. A reproduction bound has no preferred direction: it would pass exactly as it does now if the embedding signal in block B had validated, if the byte-identical repeat in block D had agreed more than the reworded prompt, and if text had improved the forecast in block F, because what it compares against is a recorded number and not a threshold. (2) PROCEDURE: a property of how the run was done -- hashes checked before a byte is read, every fitted object confined to the 1994-2014 window, the attention map causal, the test window scored once and a second attempt refused. No gate anywhere in this notebook is on an outcome. Nothing passes because a number came out large, or small, or in a direction the lab would prefer.",
+ "_no_pilot": "Session 4 took the bounds of its torch blocks from a five-seed pilot because those blocks were graded on a loss. Session 5 grades no block on a loss: the torch work in block C is a forward pass in eval mode, a seeded sample, and sixty seeded training steps, and what is gated about it is structural -- the parameter count, the file hashes, the causal mask, the held-out split. So there is no pilot file beside this one, and no bound below was chosen by watching a distribution of seeds.",
+
+ "corpus_statements": 245,
+ "corpus_training_statements": 149,
+ "corpus_held_back_statements": 96,
+ "corpus_training_end": "2014-12-31",
+ "corpus_first": "1994-02-04",
+ "corpus_last": "2026-06-17",
+
+ "bpe_merges": 200,
+ "bpe_first_merges_checked": 20,
+ "bpe_word_level_vocabulary": 1628,
+ "bpe_out_of_vocabulary_probes": ["reflationary", "disinflationary"],
+ "bpe_min_pieces_for_an_unseen_word": 2,
+
+ "tfidf_n_fit": 149,
+ "tfidf_vocabulary": 1163,
+ "tfidf_min_df": 2,
+ "lda_K": 4,
+ "lda_sweeps": 300,
+ "lda_vocabulary": 719,
+ "lda_tokens": 21673,
+
+ "embedding_n_fit": 149,
+ "embedding_vocabulary": 624,
+ "embedding_min_count": 10,
+ "embedding_window": 5,
+ "embedding_dim": 100,
+
+ "validation_horizon": 3,
+ "validation_tolerance": 1e-06,
+
+ "book_attention_sum_of_exponentials": 26.1317,
+ "book_attention_digits_checked": 8,
+
+ "machine_b_parameters": 631424,
+ "machine_b_context": 128,
+ "machine_b_vocabulary": 78,
+ "machine_b_layers": 3,
+ "machine_b_heads": 4,
+ "machine_b_state_dict_keys": 44,
+ "machine_b_files": 5,
+ "attention_weight_above_diagonal_max": 0.0,
+ "attention_row_sum_error_max": 1e-06,
+
+ "fresh_model_parameters": 631424,
+ "fresh_model_held_out_statements": 13,
+ "fresh_model_character_accounting_error_max": 0,
+
+ "llm_replies": 389,
+ "llm_variants": 4,
+ "llm_variant_a_scored": 245,
+ "llm_common_dates": 48,
+ "llm_labels": ["DOVISH", "HAWKISH", "NEUTRAL"],
+ "llm_errors_max": 0,
+ "llm_identical_prompt_pair": ["A", "D"],
+ "llm_reply_fields": ["model_used", "harness", "recorded_at", "prompt_sha256_16"],
+
+ "chapter14_digits_estimation": 18,
+ "chapter14_digits_agreement": 30,
+ "chapter14_digits_total": 48,
+ "chapter14_digits_that_may_differ": 0,
+
+ "forecast_protocol_sha256": "42ae9f04550d6f2973832702dbefe293da00d395387616a673d0968df8cbb9ff",
+ "forecast_input_sha256": {
+  "baseline_predictions.csv": "a8e815d45edc48872cedeb37bd12e725b46c7c2b5cc99294837c2bc48c923332",
+  "yield_panel.csv": "b1687bce6a37f4270a9014d89e7ef1b5351aca982dbfff8c77d36c2e1ca37e64"
+ },
+ "forecast_split_sizes": {"train": 250, "valid": 60, "test": 79},
+ "forecast_missing_forecast_dates": ["2025-11-30"],
+ "forecast_frozen_baselines": {
+  "random_walk": {"rmse": 0.2658, "mae": 0.2097},
+  "ar1": {"rmse": 0.2647, "mae": 0.2089},
+  "ols": {"rmse": 0.2855, "mae": 0.2255}
+ },
+ "forecast_frozen_decimals": 4,
+ "forecast_text_training_cutoff": "2014-12-31",
+ "forecast_excluded_releases": 5,
+ "forecast_test_scored_times": 1,
+ "forecast_record_decimals": 10
+}

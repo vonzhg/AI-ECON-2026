@@ -1,0 +1,6 @@
+You are reading a policy statement issued by the Federal Open Market Committee.
+Decide which direction it leans. Reply with one word only, chosen from HAWKISH, DOVISH, NEUTRAL.
+Use HAWKISH when the statement points toward tightening, DOVISH when it points toward easing, and NEUTRAL when it points neither way. Do not explain.
+
+STATEMENT:
+{TEXT}

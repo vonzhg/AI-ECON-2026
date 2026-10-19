@@ -1,0 +1,5 @@
+Label the monetary-policy stance of the Federal Open Market Committee statement below.
+Answer with exactly one word: DOVISH if it leans toward easier policy, NEUTRAL if it leans neither way, HAWKISH if it leans toward tighter policy. Output the single word and nothing else.
+
+STATEMENT:
+{TEXT}

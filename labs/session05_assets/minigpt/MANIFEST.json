@@ -1,0 +1,39 @@
+{
+ "copied": "2026-09-20",
+ "source": "labs/session01_assets",
+ "authority": "notes/Session05_06_Freeze_Manifest_2026-09-20.json, group 'session01_minigpt'",
+ "note": "Byte-identical copies. Session 1's lab hash-checks these files where they live, so the originals are never moved or modified; this folder is a read-only mirror for Session 5, and session05_attention.py asserts every hash before loading anything.",
+ "n": 5,
+ "files": [
+  {
+   "file": "minigpt_fomc.pt",
+   "bytes": 2590681,
+   "sha256": "0abf6609ae6dabf4926443bf0ce51aa4e9e9500a7fd634e9d995cb14574bbecc",
+   "matches_freeze": true
+  },
+  {
+   "file": "minigpt_vocab.json",
+   "bytes": 561,
+   "sha256": "4193927fdca904c0475672463ef584bdbab2523870b4f96ea10bd6e9ae06cb38",
+   "matches_freeze": true
+  },
+  {
+   "file": "minigpt_config.json",
+   "bytes": 90,
+   "sha256": "e6ad5810483f378696d68b2c00705b85d7d72c9200667482e61e61a4e7bcf428",
+   "matches_freeze": true
+  },
+  {
+   "file": "training_report.json",
+   "bytes": 2374,
+   "sha256": "9dc200fba76629699b6f812a64dbc07766744cab1ed4e77d5e1e9f876d5df60a",
+   "matches_freeze": true
+  },
+  {
+   "file": "session01_demo.py",
+   "bytes": 12041,
+   "sha256": "02b960c7aeb5ff32ff2bd55baba598eacf304b3f317244f3968261fe347b1b04",
+   "matches_freeze": true
+  }
+ ]
+}

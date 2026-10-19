@@ -1,0 +1,73 @@
+{
+ "what": "Byte-identical copies of eight scripts from the book repository, vendored so that Session 5's lab runs the chapter's own code rather than a paraphrase of it.",
+ "copied_on": "2026-09-20",
+ "book_repo": {
+  "path": "<BOOK_REPO:Book1-AI-for-Econonomist>/面向经济学家的人工智能",
+  "head": "9cf89b540a636d80981d629a0bf665180cfce5c1",
+  "head_short": "9cf89b5",
+  "head_date": "2026-09-16",
+  "head_subject": "Rebuild main.pdf with the revised ch10 and ch11",
+  "dirty": true,
+  "dirty_entry_count": 85,
+  "copied_from": "the working tree, not a git checkout",
+  "why_working_tree": "code/ch13 and code/ch14 are STAGED RENAMES of the old code/ch14 and code/ch15 and the renumbering is still in progress. At HEAD these paths still hold the pre-renumbering content, so a `git show` or a checkout of 9cf89b5 would deliver different files. The working tree is the only place the intended ch13/ch14 content exists.",
+  "written_to": "nothing; the book repository is read-only for this lab"
+ },
+ "files": [
+  {
+   "path": "ch13/attention_walkthrough.py",
+   "source_in_book_repo": "code/ch13/attention_walkthrough.py",
+   "size_bytes": 5208,
+   "sha256": "76d32052b93d6776b8f696b9d217efa4181a089133c09039fdb3ca70f4e53fb5"
+  },
+  {
+   "path": "ch13/bpe_tokenization.py",
+   "source_in_book_repo": "code/ch13/bpe_tokenization.py",
+   "size_bytes": 4555,
+   "sha256": "f87e5f8bd35f5bde3dde9f8b12ec899c51cc63c14b95c7360975897afca13ffe"
+  },
+  {
+   "path": "ch13/finbert_sentiment.py",
+   "source_in_book_repo": "code/ch13/finbert_sentiment.py",
+   "size_bytes": 5235,
+   "sha256": "2bcf1c35778f2adb6f13ecb43aeb7a2da2f2af50af3b692de455409015d2717d"
+  },
+  {
+   "path": "ch13/yin_vu_persico_kappa.py",
+   "source_in_book_repo": "code/ch13/yin_vu_persico_kappa.py",
+   "size_bytes": 7285,
+   "sha256": "020e493f1c0cbcfb59f2e4d16f2e7d7b457fed7646a91277646e804a75a7d96a"
+  },
+  {
+   "path": "ch14/bias_correction.py",
+   "source_in_book_repo": "code/ch14/bias_correction.py",
+   "size_bytes": 14103,
+   "sha256": "0962d7579a3cd183c24b44c2405ee03cc801e5f11888853f35366af61ae4fd75"
+  },
+  {
+   "path": "ch14/human_llm_kappa.py",
+   "source_in_book_repo": "code/ch14/human_llm_kappa.py",
+   "size_bytes": 9449,
+   "sha256": "5c6b70d685d5939806c423bec351256e761a2c8c106d46051e32a1e6e51f418a"
+  },
+  {
+   "path": "ch14/prompt_permutation_test.py",
+   "source_in_book_repo": "code/ch14/prompt_permutation_test.py",
+   "size_bytes": 12081,
+   "sha256": "3163ddeae9f2b5efd87ebd0f9d4ad16e74c8497897025b8446a393430bdc6d43"
+  },
+  {
+   "path": "ch14/self_consistency_check.py",
+   "source_in_book_repo": "code/ch14/self_consistency_check.py",
+   "size_bytes": 11806,
+   "sha256": "678695817bf157e1290209fe3c33a3e09fbdb0cc2b40eef5fda26a7c754f7725"
+  }
+ ],
+ "notes": [
+  "There is no code/ch15 in the working tree: the old code/ch15 was renamed to code/ch14, and nothing took its place.",
+  "Neither code/ch13 nor code/ch14 carries a README. The old code/ch13/README.md is staged for deletion and describes the reinforcement-learning chapter that used to live there.",
+  "The docstrings inside these files still carry the PRE-RENAME chapter numbers. The four ch14 files announce themselves as companions to 'Chapter 15' and cite sections 15.x; the four ch13 files announce 'Chapter 14' and cite 14.x. human_llm_kappa.py also points at 'code/ch14/yin_vu_persico_kappa.py', which is now code/ch13/yin_vu_persico_kappa.py. The copies are byte-identical, so these stale references are preserved rather than corrected; chapters/chapter14.tex, by contrast, has already been renumbered and cites code/ch14/.",
+  "The .png figures that sit beside these scripts in the book repository were not copied: the lab draws its own figures, and the scripts regenerate theirs on demand."
+ ],
+ "_path_note": "Absolute paths are written as <BOOK_REPO:Book1-AI-for-Econonomist> so that no private filesystem layout ships with the lab. The chapter-relative part of each path is the provenance that matters and is preserved verbatim."
+}

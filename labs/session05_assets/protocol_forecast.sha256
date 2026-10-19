@@ -1,0 +1,14 @@
+42ae9f04550d6f2973832702dbefe293da00d395387616a673d0968df8cbb9ff  protocol_forecast.md
+
+Taken 2026-09-20 at 19:54:24 -0500 (CDT).
+Bytes hashed: 14424.
+
+This hash was taken BEFORE the first scored run of the test window, and before
+session05_forecast.py existed in runnable form.  The design in protocol_forecast.md -- the
+estimation sample, the information rule, the hand-listed exclusion set of its section 5, the
+treatment of stale months, the two named models, and the gates -- was settled in full first.  The
+exclusion set is hashed here because it sits inside the protocol file: it cannot be revised after
+the fact without changing this digest.
+
+Verify with:
+    sha256sum -c protocol_forecast.sha256
