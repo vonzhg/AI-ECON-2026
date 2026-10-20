@@ -6,6 +6,7 @@ release worktree as the destination:
 
     python3 tools/publish_session_decks.py ../AI-ECON-2026.release/slides
     python3 tools/publish_session_decks.py ../AI-ECON-2026.release/slides --sessions 1 5
+    python3 tools/publish_session_decks.py ../AI-ECON-2026.release/slides --sessions 5 --decks 1 2 3
 
 For every source/SessionNN/SessionNN_DeckK_*.pdf it writes slides/SessionNN_DeckK_*.pdf with the same
 overlay tools/build_slides.py stamps on the Lecture decks (tools/watermark.tex), and one combined
@@ -51,6 +52,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("dest", help="the site's slides/ folder (in the release worktree)")
     ap.add_argument("--sessions", type=int, nargs="*", default=[1, 2, 3, 4, 5, 6])
+    ap.add_argument("--decks", type=int, nargs="*", default=[],
+                    help="publish only these deck numbers of the listed session(s); the others leave SESSIONS.json "
+                         "(git rm their PDFs by hand). 2026-10-19: Session 5 goes out as Decks 5.1-5.3, his ruling")
     args = ap.parse_args()
     import fitz
     import pikepdf
@@ -69,6 +73,13 @@ def main() -> int:
                            key=lambda p: int(re.search(r"_Deck(\d+)_", p).group(1)))
             if not decks:
                 sys.exit(f"no decks in source/{sess}")
+            if args.decks:
+                decks = [p for p in decks if int(re.search(r"_Deck(\d+)_", p).group(1)) in args.decks]
+                if not decks:
+                    sys.exit(f"none of decks {args.decks} in source/{sess}")
+                kept = {os.path.basename(p) for p in decks}
+                for key in [k for k in manifest if k.startswith(f"{sess}_Deck") and k not in kept]:
+                    del manifest[key]
             combined, toc = fitz.open(), []
             for p in decks:
                 k = int(re.search(r"_Deck(\d+)_", p).group(1))

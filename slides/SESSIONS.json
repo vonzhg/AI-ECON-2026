@@ -165,8 +165,8 @@
  },
  "Session05_All_Decks.pdf": {
   "master": "source/Session05 (all decks, in order)",
-  "pages": 216,
-  "decks": 6,
+  "pages": 126,
+  "decks": 3,
   "published": "2026-10-19"
  },
  "Session05_Deck1_Text_As_Economic_Data.pdf": {
@@ -188,27 +188,6 @@
   "md5": "0ac73982214298e77520cdbfcfd2f46d",
   "pages": 31,
   "title": "Pretrained Language Models: Encoders That Read, Decoders That Write",
-  "published": "2026-10-19"
- },
- "Session05_Deck4_LLM_As_Measurement_Instrument.pdf": {
-  "master": "source/Session05/Session05_Deck4_LLM_As_Measurement_Instrument.pdf",
-  "md5": "dfb48988ddcddbc8131216141adc8156",
-  "pages": 30,
-  "title": "The LLM as a Measurement Instrument",
-  "published": "2026-10-19"
- },
- "Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf": {
-  "master": "source/Session05/Session05_Deck5_Simulated_Agents_Prompts_Reproducibility.pdf",
-  "md5": "ac3f6922c0f82a000431ca72967e0a6b",
-  "pages": 30,
-  "title": "Simulated Agents, Prompts as Design, and Reproducible LLM Research",
-  "published": "2026-10-19"
- },
- "Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf": {
-  "master": "source/Session05/Session05_Deck6_Text_Signals_Bond_Yield_Lab.pdf",
-  "md5": "71fa81008acd4dfe9a647eeb86c996e9",
-  "pages": 30,
-  "title": "Text Signals and the Bond-Yield Forecast",
   "published": "2026-10-19"
  },
  "Session06_All_Decks.pdf": {
