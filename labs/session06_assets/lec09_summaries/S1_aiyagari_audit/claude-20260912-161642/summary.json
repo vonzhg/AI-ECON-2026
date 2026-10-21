@@ -1,0 +1,42 @@
+{
+  "scenario": "S1 -- Aiyagari solver audit",
+  "harness": "claude",
+  "k": 1,
+  "harness_status": "RUN on Claude Code 2.1.269",
+  "when": "20260912-161642",
+  "table": {
+    "tooling-agent": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "convergence": 1,
+        "domain": 1,
+        "aggregate": 0
+      },
+      "control": 0,
+      "other": 0
+    },
+    "math-agent": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "convergence": 1,
+        "domain": 1,
+        "aggregate": 0
+      },
+      "control": 0,
+      "other": 0
+    },
+    "econ-agent": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "convergence": 1,
+        "domain": 1,
+        "aggregate": 0
+      },
+      "control": 0,
+      "other": 0
+    }
+  }
+}

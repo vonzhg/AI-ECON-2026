@@ -1,0 +1,74 @@
+{
+ "what": "Deck 6.2's toy index: one row per passage of the 245 statements, cut as the slide's Step 1 cuts them, encoded by the slide's Step 2; and the toy's question with the lab's 26 graded questions, encoded by the same model. The lab reads these instead of downloading the encoder.",
+ "model": "sentence-transformers/all-MiniLM-L6-v2",
+ "revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+ "normalized": true,
+ "dtype": "float32",
+ "dimension": 384,
+ "passages": 1264,
+ "deck_run": {
+  "passages": 1264,
+  "dimension": 384,
+  "question": "What did the Committee say about inflation in March 2022?",
+  "top5": [
+   [
+    "fomc_20090128#3",
+    0.66
+   ],
+   [
+    "fomc_20180131#2",
+    0.66
+   ],
+   [
+    "fomc_20131218#2",
+    0.65
+   ],
+   [
+    "fomc_20090429#2",
+    0.65
+   ],
+   [
+    "fomc_20090318#2",
+    0.65
+   ]
+  ],
+  "prompt_chars": 2518,
+  "run_date": "20 October 2026",
+  "job": "23039019",
+  "note": "the rows and prompt length printed on Deck 6.2, read from figures/numbers_toy.tex"
+ },
+ "recorded": {
+  "date": "2026-10-20",
+  "job": "23046892",
+  "reencode_max_abs_diff": 2.384185791015625e-07,
+  "device": "cpu",
+  "sentence_transformers": "5.6.0",
+  "torch": "2.11.0+cu128"
+ },
+ "questions": {
+  "rows": 27,
+  "order": "row 0 is the toy question; rows 1-26 follow gold_questions.json"
+ },
+ "files": [
+  {
+   "file": "vectors.npy",
+   "bytes": 1941632,
+   "sha256": "8b661bd1ecda7e010ad821570ab80f1fb365ae0774509583d4836ee8774888d7"
+  },
+  {
+   "file": "ids.json",
+   "bytes": 24054,
+   "sha256": "37cc9330194e73a0425a23a3ffa6686e08919304e42e7da42d218f3c017e5de3"
+  },
+  {
+   "file": "questions.npy",
+   "bytes": 41600,
+   "sha256": "1fbd24aed16c66f88161b4bf69ce788023a547ff15616bc2de729947fd66b29a"
+  },
+  {
+   "file": "questions.json",
+   "bytes": 3727,
+   "sha256": "3e67616dd26d8c2db3e07a94575b3befc690a2d7f447f8f30cb42041a7870a77"
+  }
+ ]
+}

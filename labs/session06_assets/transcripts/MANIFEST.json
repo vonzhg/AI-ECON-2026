@@ -1,0 +1,173 @@
+{
+ "what": "Two real agent runs of 12-13 September 2026, redacted for the repository. The raw session files stay in scratch and are never committed: they carry the absolute path of the machine they ran on, the operator's account name, and the harness's session, prompt and request identifiers.",
+ "redacted_on": "2026-09-20",
+ "redacted_by": "labs/session06_assets/session06_agent.py -- transcript_rules() is the rule, redact()/redact_text() apply it, check_redaction() re-runs the proof. The build script that digests the raw files lives in scratch beside them, because its inputs cannot be committed; it imports the rules from this module rather than restating them.",
+ "relation_to_Lec09_transcripts": "labs/Lec09_Agent_Lab/transcripts/ holds the same two runs TRUNCATED to 400 characters per tool result. These copies are REDACTED instead: identity is removed and content is kept. Two caps remain and are recorded per result rather than applied silently -- 20000 characters, fifty times the Lec09 copies -- and three results that were downloaded bytes echoed to the terminal are elided with their length and sha256 rather than carried as base64.",
+ "redaction_rule": "Two passes. (1) Structural: the digest is rebuilt from the raw rows and the identity-bearing fields are never copied -- uuid, parentUuid, sessionId, session_id, promptId, requestId, request_id, leafUuid, sourceToolAssistantUUID, id, signature, cwd, gitBranch, userType, entrypoint, container, messaging_socket_path, memory_paths, apiKeySource, tool_use_id, parent_tool_use_id. (2) Textual: every surviving string is rewritten by the ordered substitutions below, most specific first, so a scratch path can never fall through to a generic rule.",
+ "substitutions": [
+  {
+   "pattern": "/tmp/claude-\\d+/[^\\s\\\"'`,;:)\\]}]*?/scratchpad/[A-Za-z0-9_.\\-]+/run\\b",
+   "replacement": "<RUN_DIR>",
+   "why": "the folder the recorded run worked in"
+  },
+  {
+   "pattern": "/tmp/claude-\\d+/[^\\s\\\"'`,;:)\\]}]*?/scratchpad",
+   "replacement": "<SCRATCH>",
+   "why": "the session scratchpad root"
+  },
+  {
+   "pattern": "/tmp/claude-\\d+",
+   "replacement": "<SCRATCH>",
+   "why": "any remaining session scratch root"
+  },
+  {
+   "pattern": "\\.claude/projects/[A-Za-z0-9._\\-]+",
+   "replacement": ".claude/projects/<PROJECT>",
+   "why": "the harness's project slug, which spells a whole absolute path with dashes"
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9/])/u/[A-Za-z0-9_.\\-]+",
+   "replacement": "<HOME>",
+   "why": "the operator's home directory"
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9/])/(?:home|Users)/[A-Za-z0-9_.\\-]+",
+   "replacement": "<HOME>",
+   "why": "a home directory on any other machine"
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9/])/projects/[A-Za-z0-9_.\\-]+/<USER>",
+   "replacement": "<HOME>",
+   "why": "a home directory on a shared filesystem, which is under neither /u nor /home"
+  },
+  {
+   "pattern": "\\b<USER>\\b",
+   "replacement": "<USER>",
+   "why": "the account name anywhere else: a bare word, or a segment of a path on a shared filesystem"
+  },
+  {
+   "pattern": "\\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\b",
+   "replacement": "<UUID>",
+   "why": "session, prompt and message identifiers"
+  },
+  {
+   "pattern": "\\b(?:msg|toolu|req)_[A-Za-z0-9]{8,}\\b",
+   "replacement": "<ID>",
+   "why": "API message, tool-use and request identifiers"
+  },
+  {
+   "pattern": "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}",
+   "replacement": "<EMAIL>",
+   "why": "a user identifier"
+  }
+ ],
+ "rules_added_after_the_first_pass": [
+  "The harness writes a copy of every session under .claude/projects/<slug>, where the slug spells a whole absolute path with its slashes turned into dashes. It is not path-shaped, so no rule about paths caught it.",
+  "A shell PATH echoed by `which` named a home directory on a shared filesystem, under neither /u nor /home.",
+  "Both were found by running the proof, not by reading the rules."
+ ],
+ "kept_deliberately": "Paths of the form /tmp/<filename> naming a file the agent itself created during the run, for example /tmp/hic04_acs.xlsx. They carry no account, machine or session identity, and removing them would hide what the agent did.",
+ "proof": {
+  "run": "session06_agent.check_redaction()",
+  "on": "2026-09-20",
+  "clean": true,
+  "counts": {
+   "home directory": 0,
+   "session scratch root": 0,
+   "harness project slug": 0,
+   "other home directory": 0,
+   "shared-filesystem home": 0,
+   "account name": 0,
+   "e-mail address": 0,
+   "UUID": 0,
+   "API identifier": 0,
+   "session field": 0
+  },
+  "note": "the account-name check uses the account running it, so this proof was run by the operator who produced the files"
+ },
+ "row_schema": {
+  "prompt": "a prompt typed by the person: {n, text}",
+  "attachment_note": "a screenshot handed back to the model, as the harness recorded it",
+  "text": "one assistant text block",
+  "thinking": "one assistant thinking block, its cryptographic signature removed",
+  "tool_use": "{n, name, input} -- the call the model asked for",
+  "tool_result": "{is_error, chars, content}; chars is always the FULL length before any cap, capped_at appears when content was cut, and elided/sha256 appear when the result was downloaded bytes rather than text",
+  "turn_usage": "one row per API request, not per streamed block: {turn, model, input_tokens, cache_creation_input_tokens, cache_read_input_tokens, output_tokens, thinking_tokens}",
+  "result": "the harness's own closing summary: duration, cost, total usage"
+ },
+ "files": [
+  {
+   "file": "uninsured_by_age_2026-09-13.redacted.jsonl",
+   "what": "Who gained health coverage after 2013 -- the run Session 6 audits",
+   "recorded": "2026-09-13",
+   "model": "claude-sonnet-5",
+   "harness": "Claude Code 2.1.270, headless",
+   "source_file": "uninsured_raw.jsonl",
+   "source_sha256": "5a5ebd98f8d292ce07a87541a93facbd5484e53b459c35281ee61567b109c088",
+   "source_bytes": 4118817,
+   "redacted_sha256": "cbb4e3151a634b5c193258e8110a1d728c93e90fec389c255eb4617501be1fa9",
+   "redacted_bytes": 241972,
+   "rows": 306,
+   "row_types": {
+    "attachment_note": 2,
+    "prompt": 4,
+    "text": 14,
+    "tool_result": 95,
+    "tool_use": 95,
+    "turn_usage": 96
+   },
+   "tool_results_capped": 2,
+   "chars_dropped_by_cap": 6202,
+   "tool_results_elided_as_binary": 3,
+   "chars_elided_as_binary": 1396944
+  },
+  {
+   "file": "gdp_by_party_2026-09-12.redacted.jsonl",
+   "what": "US real GDP growth by party of the White House -- the leading-question run",
+   "recorded": "2026-09-12",
+   "model": "claude-sonnet-5",
+   "harness": "Claude Code 2.1.270, headless",
+   "source_file": "gdp_raw.jsonl",
+   "source_sha256": "2f7275ced13ffb618cb8d478c3746abe06af296736ccdb4fac9eac8279a640e7",
+   "source_bytes": 487141,
+   "redacted_sha256": "1e2ee13acf992b1e5ddac8a9f818a6392715558ff13b65ab17190d84cede156b",
+   "redacted_bytes": 87063,
+   "rows": 79,
+   "row_types": {
+    "prompt": 1,
+    "text": 10,
+    "tool_result": 24,
+    "tool_use": 24,
+    "turn_usage": 20
+   },
+   "tool_results_capped": 0,
+   "chars_dropped_by_cap": 0,
+   "tool_results_elided_as_binary": 0,
+   "chars_elided_as_binary": 0
+  },
+  {
+   "file": "gdp_by_party_trace_2026-09-12.redacted.jsonl",
+   "what": "The same GDP-by-party run as a stream-json trace, with the harness's own usage and cost row",
+   "recorded": "2026-09-12",
+   "model": "claude-sonnet-5",
+   "harness": "Claude Code 2.1.270, headless (--output-format stream-json)",
+   "source_file": "gdp_trace_full.jsonl",
+   "source_sha256": "a4a4dcf20d6da4ad3f4eb820d7afc8d46a6b3978b61915376c8ad5e529ad18be",
+   "source_bytes": 330781,
+   "redacted_sha256": "ee7f1f0cc77da413d4067734cdf79a6dad19277d7c0bef365228ae267010ca28",
+   "redacted_bytes": 91528,
+   "rows": 79,
+   "row_types": {
+    "result": 1,
+    "text": 10,
+    "tool_result": 24,
+    "tool_use": 24,
+    "turn_usage": 20
+   },
+   "tool_results_capped": 0,
+   "chars_dropped_by_cap": 0,
+   "tool_results_elided_as_binary": 0,
+   "chars_elided_as_binary": 0
+  }
+ ]
+}

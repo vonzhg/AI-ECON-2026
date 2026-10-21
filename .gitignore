@@ -39,3 +39,6 @@ DEPLOY_NOTES.local.md
 
 # Misc
 *.bak
+
+# Session 6 lab: block B1 writes the index a student builds beside the notebook
+labs/my_toy_index/

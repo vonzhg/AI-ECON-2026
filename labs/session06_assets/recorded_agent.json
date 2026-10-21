@@ -1,0 +1,3280 @@
+{
+ "_meta": {
+  "what": "Session 6, the agent half: the replayed run, the rules that bound it, the audit of a real run, and the reliability of the recorded scenarios.",
+  "built": "2026-09-20",
+  "built_by": "labs/session06_assets/session06_agent.py record()",
+  "seed": 20260920,
+  "determinism": "nothing in this module draws a random number: the replay is a fixed script and every figure here is recomputed from a file on disk",
+  "python_imports": [
+   "numpy",
+   "pandas",
+   "matplotlib (only in plot_cost_curve)",
+   "the standard library"
+  ],
+  "offline": true,
+  "chars_per_token": 4,
+  "fomc_corpus": "labs/session06_assets/fomc",
+  "yield_panel": "labs/session02_assets/yield_panel.csv",
+  "yield_panel_sha256": "b1687bce6a37f4270a9014d89e7ef1b5351aca982dbfff8c77d36c2e1ca37e64",
+  "census_manifest_sha256": "081b06337207b10ce427aefbfb419131bb7e7cd6740e413f753282c85a80a60d",
+  "transcripts_manifest_sha256": "e9918a885200d26c57b7ccff36d642cadbc9a2ce3e45e6230327abb4d46a822a",
+  "recorded_run_files": {
+   "SOURCES.md": "da7c2edd47726dd986bf2748ad247e6d7a104954277e2243f976698251cb4216",
+   "make_chart.py": "b40be4e66a3a8bc015ea5eec6402444ad90958aadc8f106b7a692f08cf3e4640",
+   "uninsured_by_age.csv": "c143675e7dca21d4dd54a9d1e7c982594d1bb9c34c4b0bf69a81df66fe932b18",
+   "uninsured_by_age.png": "16ae2509a682ef705025a2b8d9cf973d19438f70a58e21b08cab5d084d71c0b3"
+  }
+ },
+ "task": {
+  "meeting": "2022-03-16",
+  "system": "You answer one bounded question about a single FOMC meeting: what the Committee said about inflation, and what the ten-year Treasury yield did over the following month. Quote the statement and give its URL. State the window your yield numbers cover.",
+  "prompt": "At the FOMC meeting of 2022-03-16, what did the Committee say about inflation, and what did the ten-year Treasury yield do over the following month? Cite the statement.",
+  "allow_list": [
+   "fomc_search",
+   "fomc_statement",
+   "yield_change",
+   "panel_stats",
+   "Write"
+  ],
+  "tools": [
+   {
+    "name": "fomc_search",
+    "description": "Rank FOMC statements by how often they use the query's words.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "query": {
+       "type": "string",
+       "description": "words to score statements by"
+      },
+      "start": {
+       "type": "string",
+       "description": "earliest meeting date, YYYY-MM-DD"
+      },
+      "end": {
+       "type": "string",
+       "description": "latest meeting date, YYYY-MM-DD"
+      },
+      "k": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 20,
+       "description": "how many hits"
+      }
+     },
+     "required": [
+      "query"
+     ]
+    }
+   },
+   {
+    "name": "fomc_statement",
+    "description": "Return one FOMC statement, or only its sentences on a topic, with its URL.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "date": {
+       "type": "string",
+       "description": "meeting date, YYYY-MM-DD"
+      },
+      "topic": {
+       "type": "string",
+       "description": "keep only sentences containing this word"
+      }
+     },
+     "required": [
+      "date"
+     ]
+    }
+   },
+   {
+    "name": "yield_change",
+    "description": "Ten-year Treasury yield over the month after a meeting, from the Session 2 panel.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "meeting_date": {
+       "type": "string",
+       "description": "meeting date, YYYY-MM-DD"
+      }
+     },
+     "required": [
+      "meeting_date"
+     ]
+    }
+   },
+   {
+    "name": "panel_stats",
+    "description": "Mean, sd, min and max of one Session 2 panel column over a window.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "column": {
+       "type": "string",
+       "enum": [
+        "y10_next",
+        "y10",
+        "spread",
+        "fedfunds_lag1",
+        "unrate_lag1",
+        "inflation_lag1"
+       ]
+      },
+      "start": {
+       "type": "string",
+       "description": "earliest panel date, YYYY-MM-DD"
+      },
+      "end": {
+       "type": "string",
+       "description": "latest panel date, YYYY-MM-DD"
+      }
+     },
+     "required": [
+      "column"
+     ]
+    }
+   },
+   {
+    "name": "Write",
+    "description": "Write a file. Guarded by the source-column gate on data/*.csv.",
+    "input_schema": {
+     "type": "object",
+     "properties": {
+      "file_path": {
+       "type": "string",
+       "description": "where the table goes"
+      },
+      "content": {
+       "type": "string",
+       "description": "the file's whole contents"
+      }
+     },
+     "required": [
+      "file_path",
+      "content"
+     ]
+    }
+   }
+  ]
+ },
+ "replayed_run": {
+  "turns": 7,
+  "stop": "end_turn",
+  "ledger": [
+   {
+    "turn": 1,
+    "tokens_sent": 50,
+    "tokens_new": 50,
+    "tokens_out": 51,
+    "tool_calls": 1,
+    "cumulative_sent": 50,
+    "cumulative_out": 51
+   },
+   {
+    "turn": 2,
+    "tokens_sent": 240,
+    "tokens_new": 190,
+    "tokens_out": 48,
+    "tool_calls": 1,
+    "cumulative_sent": 290,
+    "cumulative_out": 99
+   },
+   {
+    "turn": 3,
+    "tokens_sent": 580,
+    "tokens_new": 340,
+    "tokens_out": 43,
+    "tool_calls": 1,
+    "cumulative_sent": 870,
+    "cumulative_out": 142
+   },
+   {
+    "turn": 4,
+    "tokens_sent": 748,
+    "tokens_new": 168,
+    "tokens_out": 47,
+    "tool_calls": 1,
+    "cumulative_sent": 1618,
+    "cumulative_out": 189
+   },
+   {
+    "turn": 5,
+    "tokens_sent": 874,
+    "tokens_new": 126,
+    "tokens_out": 54,
+    "tool_calls": 1,
+    "cumulative_sent": 2492,
+    "cumulative_out": 243
+   },
+   {
+    "turn": 6,
+    "tokens_sent": 998,
+    "tokens_new": 124,
+    "tokens_out": 80,
+    "tool_calls": 1,
+    "cumulative_sent": 3490,
+    "cumulative_out": 323
+   },
+   {
+    "turn": 7,
+    "tokens_sent": 1146,
+    "tokens_new": 148,
+    "tokens_out": 145,
+    "tool_calls": 0,
+    "cumulative_sent": 4636,
+    "cumulative_out": 468
+   }
+  ],
+  "tokens_sent_total": 4636,
+  "tokens_out_total": 468,
+  "final_text": "At its meeting of 2022-03-16 the Committee said: \"Inflation remains elevated, reflecting supply and demand imbalances related to the pandemic, higher energy prices, and broader price pressures.\" Source: https://www.federalreserve.gov/newsevents/pressreleases/monetary20220316a.htm . Over the following month the ten-year Treasury yield rose 57.0 basis points, from 2.32 percent to 2.89 percent. The panel is monthly, so that window runs 2022-03-31 to 2022-04-30 -- it opens 15 days after the Committee met, and does not cover the fortnight in between.",
+  "files_written": [
+   "data/answer.csv"
+  ],
+  "blocked": [
+   {
+    "tool": "Bash",
+    "by": "allow-list",
+    "reason": "Error: 'Bash' is not on this agent's allow-list ['Write', 'fomc_search', 'fomc_statement', 'panel_stats', 'yield_change']. The call was refused before the tool ran."
+   },
+   {
+    "tool": "Write",
+    "by": "hook:require_source_column",
+    "reason": "data/answer.csv: no source column among ['meeting_date', 'change_bp']"
+   }
+  ],
+  "verification": {
+   "meeting_date": "2022-03-16",
+   "truth": {
+    "meeting_date": "2022-03-16",
+    "window_start": "2022-03-31",
+    "window_end": "2022-04-30",
+    "y10_start": 2.32,
+    "y10_end": 2.89,
+    "change_pct_points": 0.57,
+    "change_basis_points": 57.0,
+    "days_from_meeting_to_window_start": 15,
+    "caveat": "the window begins at the end of the meeting's month, 15 days after the meeting itself"
+   },
+   "checks": [
+    {
+     "claim": "change_basis_points",
+     "stated": 57.0,
+     "expected": 57.0,
+     "verdict": "matches"
+    },
+    {
+     "claim": "y10_start",
+     "stated": 2.32,
+     "expected": 2.32,
+     "verdict": "matches"
+    },
+    {
+     "claim": "y10_end",
+     "stated": 2.89,
+     "expected": 2.89,
+     "verdict": "matches"
+    },
+    {
+     "claim": "window_dates_stated",
+     "stated": true,
+     "expected": true,
+     "verdict": "matches"
+    },
+    {
+     "claim": "statement_cited",
+     "stated": true,
+     "expected": true,
+     "verdict": "matches"
+    }
+   ],
+   "n_checks": 5,
+   "counts": {
+    "matches": 5
+   },
+   "passes": true
+  }
+ },
+ "cost_curve": {
+  "model": [
+   900,
+   2700,
+   5400,
+   9000,
+   13500,
+   18900,
+   25200,
+   32400,
+   40500,
+   49500,
+   59400,
+   70200
+  ],
+  "new_tokens_per_turn": 900,
+  "actual": [
+   50,
+   290,
+   870,
+   1618,
+   2492,
+   3490,
+   4636
+  ]
+ },
+ "budget": {
+  "demonstration": {
+   "max_steps": 3,
+   "turns": 3,
+   "stop": "budget",
+   "final_text": "",
+   "tokens_sent_total": 870,
+   "note": "a budget is a rule about money that is also a rule about completeness"
+  },
+  "default": {
+   "max_steps": 8,
+   "max_tokens": 60000
+  }
+ },
+ "verifier": {
+  "on_the_real_answer": {
+   "meeting_date": "2022-03-16",
+   "truth": {
+    "meeting_date": "2022-03-16",
+    "window_start": "2022-03-31",
+    "window_end": "2022-04-30",
+    "y10_start": 2.32,
+    "y10_end": 2.89,
+    "change_pct_points": 0.57,
+    "change_basis_points": 57.0,
+    "days_from_meeting_to_window_start": 15,
+    "caveat": "the window begins at the end of the meeting's month, 15 days after the meeting itself"
+   },
+   "checks": [
+    {
+     "claim": "change_basis_points",
+     "stated": 57.0,
+     "expected": 57.0,
+     "verdict": "matches"
+    },
+    {
+     "claim": "y10_start",
+     "stated": 2.32,
+     "expected": 2.32,
+     "verdict": "matches"
+    },
+    {
+     "claim": "y10_end",
+     "stated": 2.89,
+     "expected": 2.89,
+     "verdict": "matches"
+    },
+    {
+     "claim": "window_dates_stated",
+     "stated": true,
+     "expected": true,
+     "verdict": "matches"
+    },
+    {
+     "claim": "statement_cited",
+     "stated": true,
+     "expected": true,
+     "verdict": "matches"
+    }
+   ],
+   "n_checks": 5,
+   "counts": {
+    "matches": 5
+   },
+   "passes": true
+  },
+  "on_a_wrong_answer": {
+   "wrong_number": {
+    "meeting_date": "2022-03-16",
+    "truth": {
+     "meeting_date": "2022-03-16",
+     "window_start": "2022-03-31",
+     "window_end": "2022-04-30",
+     "y10_start": 2.32,
+     "y10_end": 2.89,
+     "change_pct_points": 0.57,
+     "change_basis_points": 57.0,
+     "days_from_meeting_to_window_start": 15,
+     "caveat": "the window begins at the end of the meeting's month, 15 days after the meeting itself"
+    },
+    "checks": [
+     {
+      "claim": "change_basis_points",
+      "stated": 12.0,
+      "expected": 57.0,
+      "verdict": "contradicted"
+     },
+     {
+      "claim": "y10_start",
+      "stated": 2.32,
+      "expected": 2.32,
+      "verdict": "matches"
+     },
+     {
+      "claim": "y10_end",
+      "stated": 2.89,
+      "expected": 2.89,
+      "verdict": "matches"
+     },
+     {
+      "claim": "window_dates_stated",
+      "stated": true,
+      "expected": true,
+      "verdict": "matches"
+     },
+     {
+      "claim": "statement_cited",
+      "stated": true,
+      "expected": true,
+      "verdict": "matches"
+     }
+    ],
+    "n_checks": 5,
+    "counts": {
+     "contradicted": 1,
+     "matches": 4
+    },
+    "passes": false
+   },
+   "window_dropped": {
+    "meeting_date": "2022-03-16",
+    "truth": {
+     "meeting_date": "2022-03-16",
+     "window_start": "2022-03-31",
+     "window_end": "2022-04-30",
+     "y10_start": 2.32,
+     "y10_end": 2.89,
+     "change_pct_points": 0.57,
+     "change_basis_points": 57.0,
+     "days_from_meeting_to_window_start": 15,
+     "caveat": "the window begins at the end of the meeting's month, 15 days after the meeting itself"
+    },
+    "checks": [
+     {
+      "claim": "change_basis_points",
+      "stated": 12.0,
+      "expected": 57.0,
+      "verdict": "contradicted"
+     },
+     {
+      "claim": "y10_start",
+      "stated": 2.32,
+      "expected": 2.32,
+      "verdict": "matches"
+     },
+     {
+      "claim": "y10_end",
+      "stated": 2.89,
+      "expected": 2.89,
+      "verdict": "matches"
+     },
+     {
+      "claim": "window_dates_stated",
+      "stated": false,
+      "expected": true,
+      "verdict": "absent"
+     },
+     {
+      "claim": "statement_cited",
+      "stated": true,
+      "expected": true,
+      "verdict": "matches"
+     }
+    ],
+    "n_checks": 5,
+    "counts": {
+     "contradicted": 1,
+     "matches": 3,
+     "absent": 1
+    },
+    "passes": false
+   }
+  }
+ },
+ "gate": {
+  "doc": "matcher filters a hook group by tool name; the separate `if` field filters an individual hook by tool name and arguments, in permission-rule syntax (Claude Code hooks guide)",
+  "found": "2026-09-12: a Write(data/*.csv) matcher never fired",
+  "settings": {
+   "broken": {
+    "settings_json": {
+     "hooks": {
+      "PreToolUse": [
+       {
+        "matcher": "Write(data/*.csv)",
+        "hooks": [
+         {
+          "type": "command",
+          "command": "python3 checks/require_source_column.py"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "matcher": "Write(data/*.csv)",
+    "if": "",
+    "matcher_is_valid_regex": true,
+    "matcher_matches_any_tool_name": false,
+    "fired": 0,
+    "blocked": 0,
+    "probes": [
+     {
+      "label": "the call the rule is meant to catch",
+      "tool": "Write",
+      "file_path": "data/answer.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     },
+     {
+      "label": "the same write, now carrying its source",
+      "tool": "Write",
+      "file_path": "data/answer.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     },
+     {
+      "label": "a write outside data/",
+      "tool": "Write",
+      "file_path": "notes/scratch.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     },
+     {
+      "label": "a different tool entirely",
+      "tool": "Bash",
+      "file_path": "rm data/answer.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     }
+    ]
+   },
+   "working": {
+    "settings_json": {
+     "hooks": {
+      "PreToolUse": [
+       {
+        "matcher": "Write",
+        "hooks": [
+         {
+          "type": "command",
+          "if": "Write(data/*.csv)",
+          "command": "python3 checks/require_source_column.py"
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "matcher": "Write",
+    "if": "Write(data/*.csv)",
+    "matcher_is_valid_regex": true,
+    "matcher_matches_any_tool_name": true,
+    "fired": 2,
+    "blocked": 1,
+    "probes": [
+     {
+      "label": "the call the rule is meant to catch",
+      "tool": "Write",
+      "file_path": "data/answer.csv",
+      "hook_fires": true,
+      "blocked": true,
+      "reason": "data/answer.csv: no source column among ['meeting_date', 'change_bp']"
+     },
+     {
+      "label": "the same write, now carrying its source",
+      "tool": "Write",
+      "file_path": "data/answer.csv",
+      "hook_fires": true,
+      "blocked": false,
+      "reason": ""
+     },
+     {
+      "label": "a write outside data/",
+      "tool": "Write",
+      "file_path": "notes/scratch.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     },
+     {
+      "label": "a different tool entirely",
+      "tool": "Bash",
+      "file_path": "rm data/answer.csv",
+      "hook_fires": false,
+      "blocked": false,
+      "reason": ""
+     }
+    ]
+   }
+  },
+  "verdict": "broken settings: the hook fired 0 of 4 times and blocked 0; working settings: fired 2 and blocked 1. The broken matcher is a valid regular expression (True) that matches no tool name, so it raises nothing and is mistaken for a rule that is in force."
+ },
+ "audit": {
+  "source": "labs/session06_assets/census/ -- HIC-4/5/6_ACS, fetched 2026-09-20",
+  "recorded_run": "labs/session06_assets/recorded_run/uninsured_by_age.csv",
+  "tolerance_points": 0.1,
+  "n_cells": 48,
+  "n_numbers_checked": 96,
+  "years": [
+   2008,
+   2024
+  ],
+  "year_omitted": 2020,
+  "n_mismatched": 0,
+  "mismatched": [],
+  "max_abs_diff_pct_vs_rounded": 0.0,
+  "max_abs_diff_moe_vs_rounded": 0.0,
+  "max_abs_diff_pct_vs_unrounded": 0.0495,
+  "max_abs_diff_moe_vs_unrounded": 0.0468,
+  "verdict": "all 48 rows reproduce, percent and margin of error alike, to 0.1 point",
+  "cells": [
+   {
+    "year": 2008,
+    "age_group": "Under 19",
+    "agent_pct": 9.7,
+    "recomputed_pct": 9.7,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2008,
+    "age_group": "19 to 64",
+    "agent_pct": 19.4,
+    "recomputed_pct": 19.414,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1323,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2008,
+    "age_group": "65 and over",
+    "agent_pct": 0.9,
+    "recomputed_pct": 0.9409,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.9,
+    "recomputed_moe": 0.8782,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2009,
+    "age_group": "Under 19",
+    "agent_pct": 9.0,
+    "recomputed_pct": 9.0,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2009,
+    "age_group": "19 to 64",
+    "agent_pct": 20.7,
+    "recomputed_pct": 20.7025,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1332,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2009,
+    "age_group": "65 and over",
+    "agent_pct": 0.9,
+    "recomputed_pct": 0.9474,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.9,
+    "recomputed_moe": 0.8783,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2010,
+    "age_group": "Under 19",
+    "agent_pct": 8.5,
+    "recomputed_pct": 8.5,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2010,
+    "age_group": "19 to 64",
+    "agent_pct": 21.5,
+    "recomputed_pct": 21.5389,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1235,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2010,
+    "age_group": "65 and over",
+    "agent_pct": 1.0,
+    "recomputed_pct": 0.9974,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.8,
+    "recomputed_moe": 0.8084,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2011,
+    "age_group": "Under 19",
+    "agent_pct": 7.9,
+    "recomputed_pct": 7.9,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2011,
+    "age_group": "19 to 64",
+    "agent_pct": 21.2,
+    "recomputed_pct": 21.1526,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.123,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2011,
+    "age_group": "65 and over",
+    "agent_pct": 1.0,
+    "recomputed_pct": 0.9975,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.8,
+    "recomputed_moe": 0.7935,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2012,
+    "age_group": "Under 19",
+    "agent_pct": 7.5,
+    "recomputed_pct": 7.5,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2012,
+    "age_group": "19 to 64",
+    "agent_pct": 20.8,
+    "recomputed_pct": 20.8097,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1063,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2012,
+    "age_group": "65 and over",
+    "agent_pct": 1.0,
+    "recomputed_pct": 0.9809,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.7,
+    "recomputed_moe": 0.6547,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2013,
+    "age_group": "Under 19",
+    "agent_pct": 7.5,
+    "recomputed_pct": 7.5,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2013,
+    "age_group": "19 to 64",
+    "agent_pct": 20.5,
+    "recomputed_pct": 20.4863,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.108,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2013,
+    "age_group": "65 and over",
+    "agent_pct": 1.0,
+    "recomputed_pct": 1.0138,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.6,
+    "recomputed_moe": 0.6468,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2014,
+    "age_group": "Under 19",
+    "agent_pct": 6.3,
+    "recomputed_pct": 6.3,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2014,
+    "age_group": "19 to 64",
+    "agent_pct": 16.4,
+    "recomputed_pct": 16.4126,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1016,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2014,
+    "age_group": "65 and over",
+    "agent_pct": 0.9,
+    "recomputed_pct": 0.9354,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.6,
+    "recomputed_moe": 0.5922,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2015,
+    "age_group": "Under 19",
+    "agent_pct": 5.1,
+    "recomputed_pct": 5.1,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2015,
+    "age_group": "19 to 64",
+    "agent_pct": 13.2,
+    "recomputed_pct": 13.241,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0959,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2015,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.8387,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.5,
+    "recomputed_moe": 0.5414,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2016,
+    "age_group": "Under 19",
+    "agent_pct": 4.7,
+    "recomputed_pct": 4.7,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2016,
+    "age_group": "19 to 64",
+    "agent_pct": 12.1,
+    "recomputed_pct": 12.1091,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0862,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2016,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.7724,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.5,
+    "recomputed_moe": 0.4739,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2017,
+    "age_group": "Under 19",
+    "agent_pct": 5.0,
+    "recomputed_pct": 5.0,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2017,
+    "age_group": "19 to 64",
+    "agent_pct": 12.3,
+    "recomputed_pct": 12.2684,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0987,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2017,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.7879,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.5,
+    "recomputed_moe": 0.5314,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2018,
+    "age_group": "Under 19",
+    "agent_pct": 5.2,
+    "recomputed_pct": 5.2,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2018,
+    "age_group": "19 to 64",
+    "agent_pct": 12.5,
+    "recomputed_pct": 12.4767,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0948,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2018,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.7828,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.5,
+    "recomputed_moe": 0.4996,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2019,
+    "age_group": "Under 19",
+    "agent_pct": 5.7,
+    "recomputed_pct": 5.7,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2019,
+    "age_group": "19 to 64",
+    "agent_pct": 12.9,
+    "recomputed_pct": 12.8816,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1108,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2019,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.7765,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.6,
+    "recomputed_moe": 0.5571,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2021,
+    "age_group": "Under 19",
+    "agent_pct": 5.4,
+    "recomputed_pct": 5.4,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2021,
+    "age_group": "19 to 64",
+    "agent_pct": 12.1,
+    "recomputed_pct": 12.1495,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0925,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2021,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.8227,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.4,
+    "recomputed_moe": 0.4421,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2022,
+    "age_group": "Under 19",
+    "agent_pct": 5.1,
+    "recomputed_pct": 5.1,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2022,
+    "age_group": "19 to 64",
+    "agent_pct": 11.3,
+    "recomputed_pct": 11.2615,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0946,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2022,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.8156,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.4,
+    "recomputed_moe": 0.4451,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2023,
+    "age_group": "Under 19",
+    "agent_pct": 5.4,
+    "recomputed_pct": 5.4,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2023,
+    "age_group": "19 to 64",
+    "agent_pct": 11.0,
+    "recomputed_pct": 11.0413,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.0971,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2023,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.829,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.4,
+    "recomputed_moe": 0.4433,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2024,
+    "age_group": "Under 19",
+    "agent_pct": 6.0,
+    "recomputed_pct": 6.0,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2024,
+    "age_group": "19 to 64",
+    "agent_pct": 11.3,
+    "recomputed_pct": 11.2855,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.1,
+    "recomputed_moe": 0.1131,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   },
+   {
+    "year": 2024,
+    "age_group": "65 and over",
+    "agent_pct": 0.8,
+    "recomputed_pct": 0.8194,
+    "diff_pct_rounded": 0.0,
+    "agent_moe": 0.5,
+    "recomputed_moe": 0.512,
+    "diff_moe_rounded": 0.0,
+    "pct_matches": true,
+    "moe_matches": true
+   }
+  ]
+ },
+ "chart": {
+  "findings": [
+   {
+    "id": "event_marked_on_an_annual_axis",
+    "found": "2026-09-20",
+    "severity": "the chart's main claim",
+    "file": "labs/session06_assets/recorded_run/make_chart.py",
+    "lines": {
+     "axvline": 142,
+     "annotation": "143-148",
+     "comment": "140-141",
+     "series_plotted_at_integer_years": "41, 64-77, 96, 104-107",
+     "shaded_window": 93,
+     "docstring": "1-9"
+    },
+    "what": "Line 142 draws a solid vertical line at x=2014 and lines 143-148 label it \"Marketplaces open, Medicaid expansion takes effect - Jan 2014\". Every series is an ACS 1-year estimate plotted at its integer year (FULL_YEARS, line 41; series_arrays, lines 64-77; ax.plot, line 104), and an ACS 1-year estimate is an average over the twelve months of that calendar year. So x=2014 is not the boundary 1 January 2014: it is the position of the whole 2014 average, which already contains twelve months of post-expansion coverage.",
+    "why_it_matters": "The line is read as the before/after divide. On this axis that divide lies between the 2013 and 2014 observations, near x=2013.5. Drawn at x=2014 it puts the entire 2014 observation on the 'before' side, and so shows 4.1 of the 8.4-point fall in the 19-to-64 uninsured rate -- 48.8 percent of the change the chart labels -- as pre-dating the event it marks. None of it does.",
+    "verified": "Rendered uninsured_by_age.png measured directly: the dark vertical rule occupies pixel columns 1247-1251 of 3000, which is data x = 2014.000 under the figure's own geometry (left=0.07, right=0.98, xlim 2007.3-2024.9). It crosses the 19-to-64 series at 16.4 percent, the 2014 value.",
+    "internal_contradiction": "The same figure uses the same coordinate the other way at line 152: the dashed rule at x=2020 marks the position of a missing annual observation, not the instant 1 January 2020. One figure, one axis, two incompatible meanings for an integer year.",
+    "how_it_got_there": "The person's fourth prompt said \"Mark January 2014\". On an axis of annual averages that instruction cannot be carried out as written; the agent carried it out anyway rather than saying so.",
+    "numbers": {
+     "delta_2013_to_2016_19_to_64": -8.4,
+     "delta_2013_to_2014_19_to_64": -4.1,
+     "share_of_labelled_change_left_of_the_line": 0.488,
+     "line_at_data_x": 2014.0,
+     "correct_divide_on_this_axis": 2013.5
+    }
+   },
+   {
+    "id": "2020_described_as_not_collected",
+    "found": "2026-09-13, with the original transcript",
+    "severity": "a factual claim in an annotation",
+    "file": "labs/session06_assets/recorded_run/make_chart.py",
+    "lines": {
+     "annotation": "153-158",
+     "docstring": "8"
+    },
+    "what": "The annotation reads \"2020: ACS data not collected\". The 2020 ACS data were collected; what the Census Bureau announced was that the standard 2020 1-year ACS data products would not be released, because the pandemic disrupted collection enough to put their quality in doubt.",
+    "why_it_matters": "Not collected and not released are different failures with different consequences for what a reader may infer about 2020.",
+    "verified": "Footnote 2 of all three source workbooks, carried into labs/session06_assets/census/MANIFEST.json: \"the Census Bureau announced that the standard 2020 1-year American Community Survey (ACS) data products would not be released.\" The run's own SOURCES.md, line 17, says this correctly. The figure does not.",
+    "numbers": {}
+   }
+  ],
+  "recomputed": {
+   "Under 19": {
+    "delta_2013_2016": -2.8,
+    "delta_2013_2014": -1.2,
+    "share_left_of_the_line": 0.4286
+   },
+   "19 to 64": {
+    "delta_2013_2016": -8.4,
+    "delta_2013_2014": -4.1,
+    "share_left_of_the_line": 0.4881
+   },
+   "65 and over": {
+    "delta_2013_2016": -0.2,
+    "delta_2013_2014": -0.1,
+    "share_left_of_the_line": 0.5
+   }
+  },
+  "numerical_audit": "every number in the table is correct; see audit_recorded_run()"
+ },
+ "reliability": {
+  "source": "labs/Lec09_Agent_Lab/results",
+  "scenarios": [
+   "S1 -- Aiyagari solver audit",
+   "S2 -- a leading question in a new costume",
+   "S3 -- Fellows provenance audit"
+  ],
+  "n_summaries": 8,
+  "n_cells": 20,
+  "n_cells_with_repeats": 8,
+  "runs_attempted": 44,
+  "runs_completed": 33,
+  "runs_failed": 11,
+  "harness_failure_rate": 0.25,
+  "unanimous_cells": 6,
+  "unanimous_rate": 0.75,
+  "mean_same_answer_lower_rate": 0.9167,
+  "mean_same_answer_upper_rate": 0.9167,
+  "cells": [
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-161642",
+    "agent": "tooling-agent",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "convergence": 1,
+     "domain": 1,
+     "aggregate": 0
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 1.0,
+     "aggregate": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-161642",
+    "agent": "math-agent",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "convergence": 1,
+     "domain": 1,
+     "aggregate": 0
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 1.0,
+     "aggregate": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-161642",
+    "agent": "econ-agent",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "convergence": 1,
+     "domain": 1,
+     "aggregate": 0
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 1.0,
+     "aggregate": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-163138",
+    "agent": "tooling-agent",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "convergence": 3,
+     "domain": 3
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-163138",
+    "agent": "math-agent",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "convergence": 3,
+     "domain": 3
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-163138",
+    "agent": "econ-agent",
+    "k": 3,
+    "runs": 1,
+    "failed": 2,
+    "defects": {
+     "convergence": 1,
+     "domain": 0
+    },
+    "hit_rate": {
+     "convergence": 1.0,
+     "domain": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S1 -- Aiyagari solver audit",
+    "run_dir": "claude-20260912-193946",
+    "agent": "econ-agent",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "convergence": 1,
+     "domain": 0
+    },
+    "hit_rate": {
+     "convergence": 0.3333,
+     "domain": 0.0
+    },
+    "unanimous": false,
+    "same_answer_lower": 2,
+    "same_answer_upper": 2,
+    "same_answer_lower_rate": 0.6667,
+    "same_answer_upper_rate": 0.6667
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-195958",
+    "agent": "code-reviewer",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "window": 1,
+     "shift": 1,
+     "causal": 0
+    },
+    "hit_rate": {
+     "window": 1.0,
+     "shift": 1.0,
+     "causal": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-195958",
+    "agent": "domain-reviewer",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "window": 1,
+     "shift": 1,
+     "causal": 1
+    },
+    "hit_rate": {
+     "window": 1.0,
+     "shift": 1.0,
+     "causal": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-195958",
+    "agent": "econ-agent",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "window": 0,
+     "shift": 1,
+     "causal": 1
+    },
+    "hit_rate": {
+     "window": 0.0,
+     "shift": 1.0,
+     "causal": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-211741",
+    "agent": "code-reviewer",
+    "k": 3,
+    "runs": 0,
+    "failed": 3,
+    "defects": {
+     "window": 0,
+     "shift": 0,
+     "causal": 0
+    },
+    "hit_rate": {},
+    "unanimous": null,
+    "same_answer_lower": 0,
+    "same_answer_upper": 0,
+    "same_answer_lower_rate": 0.0,
+    "same_answer_upper_rate": 0.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-211741",
+    "agent": "domain-reviewer",
+    "k": 3,
+    "runs": 0,
+    "failed": 3,
+    "defects": {
+     "window": 0,
+     "shift": 0,
+     "causal": 0
+    },
+    "hit_rate": {},
+    "unanimous": null,
+    "same_answer_lower": 0,
+    "same_answer_upper": 0,
+    "same_answer_lower_rate": 0.0,
+    "same_answer_upper_rate": 0.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260912-211741",
+    "agent": "econ-agent",
+    "k": 3,
+    "runs": 0,
+    "failed": 3,
+    "defects": {
+     "window": 0,
+     "shift": 0,
+     "causal": 0
+    },
+    "hit_rate": {},
+    "unanimous": null,
+    "same_answer_lower": 0,
+    "same_answer_upper": 0,
+    "same_answer_lower_rate": 0.0,
+    "same_answer_upper_rate": 0.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260913-160843",
+    "agent": "code-reviewer",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "window": 3,
+     "shift": 3,
+     "causal": 0
+    },
+    "hit_rate": {
+     "window": 1.0,
+     "shift": 1.0,
+     "causal": 0.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260913-160843",
+    "agent": "domain-reviewer",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "window": 3,
+     "shift": 3,
+     "causal": 3
+    },
+    "hit_rate": {
+     "window": 1.0,
+     "shift": 1.0,
+     "causal": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S2 -- a leading question in a new costume",
+    "run_dir": "claude-20260913-160843",
+    "agent": "econ-agent",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "window": 0,
+     "shift": 2,
+     "causal": 3
+    },
+    "hit_rate": {
+     "window": 0.0,
+     "shift": 0.6667,
+     "causal": 1.0
+    },
+    "unanimous": false,
+    "same_answer_lower": 2,
+    "same_answer_upper": 2,
+    "same_answer_lower_rate": 0.6667,
+    "same_answer_upper_rate": 0.6667
+   },
+   {
+    "scenario": "S3 -- Fellows provenance audit",
+    "run_dir": "claude-20260912-194931",
+    "agent": "provenance-checker",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "field": 1,
+     "phd": 1,
+     "gender": 1
+    },
+    "hit_rate": {
+     "field": 1.0,
+     "phd": 1.0,
+     "gender": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S3 -- Fellows provenance audit",
+    "run_dir": "claude-20260912-194931",
+    "agent": "econ-agent",
+    "k": 1,
+    "runs": 1,
+    "failed": 0,
+    "defects": {
+     "field": 1,
+     "phd": 1,
+     "gender": 1
+    },
+    "hit_rate": {
+     "field": 1.0,
+     "phd": 1.0,
+     "gender": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 1,
+    "same_answer_upper": 1,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S3 -- Fellows provenance audit",
+    "run_dir": "claude-20260912-205314",
+    "agent": "provenance-checker",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "field": 3,
+     "phd": 3,
+     "gender": 3
+    },
+    "hit_rate": {
+     "field": 1.0,
+     "phd": 1.0,
+     "gender": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   },
+   {
+    "scenario": "S3 -- Fellows provenance audit",
+    "run_dir": "claude-20260912-205314",
+    "agent": "econ-agent",
+    "k": 3,
+    "runs": 3,
+    "failed": 0,
+    "defects": {
+     "field": 3,
+     "phd": 3,
+     "gender": 3
+    },
+    "hit_rate": {
+     "field": 1.0,
+     "phd": 1.0,
+     "gender": 1.0
+    },
+    "unanimous": true,
+    "same_answer_lower": 3,
+    "same_answer_upper": 3,
+    "same_answer_lower_rate": 1.0,
+    "same_answer_upper_rate": 1.0
+   }
+  ]
+ },
+ "redaction": {
+  "folder": "labs/session06_assets/transcripts",
+  "n_files": 3,
+  "totals": {
+   "home directory": 0,
+   "session scratch root": 0,
+   "harness project slug": 0,
+   "other home directory": 0,
+   "shared-filesystem home": 0,
+   "account name": 0,
+   "e-mail address": 0,
+   "UUID": 0,
+   "API identifier": 0,
+   "session field": 0
+  },
+  "clean": true,
+  "rules": [
+   {
+    "pattern": "/tmp/claude-\\d+/[^\\s\\\"'`,;:)\\]}]*?/scratchpad/[A-Za-z0-9_.\\-]+/run\\b",
+    "replacement": "<RUN_DIR>",
+    "why": "the folder the recorded run worked in"
+   },
+   {
+    "pattern": "/tmp/claude-\\d+/[^\\s\\\"'`,;:)\\]}]*?/scratchpad",
+    "replacement": "<SCRATCH>",
+    "why": "the session scratchpad root"
+   },
+   {
+    "pattern": "/tmp/claude-\\d+",
+    "replacement": "<SCRATCH>",
+    "why": "any remaining session scratch root"
+   },
+   {
+    "pattern": "\\.claude/projects/[A-Za-z0-9._\\-]+",
+    "replacement": ".claude/projects/<PROJECT>",
+    "why": "the harness's project slug, which spells a whole absolute path with dashes"
+   },
+   {
+    "pattern": "(?<![A-Za-z0-9/])/u/[A-Za-z0-9_.\\-]+",
+    "replacement": "<HOME>",
+    "why": "the operator's home directory"
+   },
+   {
+    "pattern": "(?<![A-Za-z0-9/])/(?:home|Users)/[A-Za-z0-9_.\\-]+",
+    "replacement": "<HOME>",
+    "why": "a home directory on any other machine"
+   },
+   {
+    "pattern": "(?<![A-Za-z0-9/])/projects/[A-Za-z0-9_.\\-]+/<USER>",
+    "replacement": "<HOME>",
+    "why": "a home directory on a shared filesystem, which is under neither /u nor /home"
+   },
+   {
+    "pattern": "\\b<USER>\\b",
+    "replacement": "<USER>",
+    "why": "the account name anywhere else: a bare word, or a segment of a path on a shared filesystem"
+   },
+   {
+    "pattern": "\\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\b",
+    "replacement": "<UUID>",
+    "why": "session, prompt and message identifiers"
+   },
+   {
+    "pattern": "\\b(?:msg|toolu|req)_[A-Za-z0-9]{8,}\\b",
+    "replacement": "<ID>",
+    "why": "API message, tool-use and request identifiers"
+   },
+   {
+    "pattern": "[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}",
+    "replacement": "<EMAIL>",
+    "why": "a user identifier"
+   }
+  ],
+  "files": [
+   {
+    "file": "gdp_by_party_2026-09-12.redacted.jsonl",
+    "bytes": 87063,
+    "sha256": "1e2ee13acf992b1e5ddac8a9f818a6392715558ff13b65ab17190d84cede156b",
+    "hits": {
+     "home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "session scratch root": {
+      "count": 0,
+      "examples": []
+     },
+     "harness project slug": {
+      "count": 0,
+      "examples": []
+     },
+     "other home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "shared-filesystem home": {
+      "count": 0,
+      "examples": []
+     },
+     "account name": {
+      "count": 0,
+      "examples": []
+     },
+     "e-mail address": {
+      "count": 0,
+      "examples": []
+     },
+     "UUID": {
+      "count": 0,
+      "examples": []
+     },
+     "API identifier": {
+      "count": 0,
+      "examples": []
+     },
+     "session field": {
+      "count": 0,
+      "examples": []
+     }
+    },
+    "clean": true
+   },
+   {
+    "file": "gdp_by_party_trace_2026-09-12.redacted.jsonl",
+    "bytes": 91528,
+    "sha256": "ee7f1f0cc77da413d4067734cdf79a6dad19277d7c0bef365228ae267010ca28",
+    "hits": {
+     "home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "session scratch root": {
+      "count": 0,
+      "examples": []
+     },
+     "harness project slug": {
+      "count": 0,
+      "examples": []
+     },
+     "other home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "shared-filesystem home": {
+      "count": 0,
+      "examples": []
+     },
+     "account name": {
+      "count": 0,
+      "examples": []
+     },
+     "e-mail address": {
+      "count": 0,
+      "examples": []
+     },
+     "UUID": {
+      "count": 0,
+      "examples": []
+     },
+     "API identifier": {
+      "count": 0,
+      "examples": []
+     },
+     "session field": {
+      "count": 0,
+      "examples": []
+     }
+    },
+    "clean": true
+   },
+   {
+    "file": "uninsured_by_age_2026-09-13.redacted.jsonl",
+    "bytes": 241972,
+    "sha256": "cbb4e3151a634b5c193258e8110a1d728c93e90fec389c255eb4617501be1fa9",
+    "hits": {
+     "home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "session scratch root": {
+      "count": 0,
+      "examples": []
+     },
+     "harness project slug": {
+      "count": 0,
+      "examples": []
+     },
+     "other home directory": {
+      "count": 0,
+      "examples": []
+     },
+     "shared-filesystem home": {
+      "count": 0,
+      "examples": []
+     },
+     "account name": {
+      "count": 0,
+      "examples": []
+     },
+     "e-mail address": {
+      "count": 0,
+      "examples": []
+     },
+     "UUID": {
+      "count": 0,
+      "examples": []
+     },
+     "API identifier": {
+      "count": 0,
+      "examples": []
+     },
+     "session field": {
+      "count": 0,
+      "examples": []
+     }
+    },
+    "clean": true
+   }
+  ]
+ },
+ "recorded_transcripts": {
+  "gdp_by_party_2026-09-12.redacted.jsonl": {
+   "per_request": [
+    {
+     "turn": 1,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 9418,
+     "cache_read_input_tokens": 20237,
+     "output_tokens": 875,
+     "thinking_tokens": 691
+    },
+    {
+     "turn": 2,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 4946,
+     "cache_read_input_tokens": 29655,
+     "output_tokens": 281,
+     "thinking_tokens": 122
+    },
+    {
+     "turn": 3,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2394,
+     "cache_read_input_tokens": 34601,
+     "output_tokens": 392,
+     "thinking_tokens": 78
+    },
+    {
+     "turn": 4,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1064,
+     "cache_read_input_tokens": 36995,
+     "output_tokens": 849,
+     "thinking_tokens": 652
+    },
+    {
+     "turn": 5,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2166,
+     "cache_read_input_tokens": 38059,
+     "output_tokens": 3229,
+     "thinking_tokens": 3017
+    },
+    {
+     "turn": 6,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 10821,
+     "cache_read_input_tokens": 40225,
+     "output_tokens": 655,
+     "thinking_tokens": 434
+    },
+    {
+     "turn": 7,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 924,
+     "cache_read_input_tokens": 51046,
+     "output_tokens": 2362,
+     "thinking_tokens": 2144
+    },
+    {
+     "turn": 8,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 6263,
+     "cache_read_input_tokens": 51970,
+     "output_tokens": 10050,
+     "thinking_tokens": 1262
+    },
+    {
+     "turn": 9,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 10196,
+     "cache_read_input_tokens": 58233,
+     "output_tokens": 530,
+     "thinking_tokens": 169
+    },
+    {
+     "turn": 10,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 708,
+     "cache_read_input_tokens": 68429,
+     "output_tokens": 500,
+     "thinking_tokens": 425
+    },
+    {
+     "turn": 11,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 580,
+     "cache_read_input_tokens": 69137,
+     "output_tokens": 144,
+     "thinking_tokens": 62
+    },
+    {
+     "turn": 12,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 413,
+     "cache_read_input_tokens": 69717,
+     "output_tokens": 582,
+     "thinking_tokens": 408
+    },
+    {
+     "turn": 13,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2339,
+     "cache_read_input_tokens": 70130,
+     "output_tokens": 150,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 14,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1452,
+     "cache_read_input_tokens": 72469,
+     "output_tokens": 188,
+     "thinking_tokens": 82
+    },
+    {
+     "turn": 15,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1838,
+     "cache_read_input_tokens": 73921,
+     "output_tokens": 262,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 16,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 531,
+     "cache_read_input_tokens": 75759,
+     "output_tokens": 531,
+     "thinking_tokens": 294
+    },
+    {
+     "turn": 17,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1595,
+     "cache_read_input_tokens": 76290,
+     "output_tokens": 269,
+     "thinking_tokens": 95
+    },
+    {
+     "turn": 18,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1137,
+     "cache_read_input_tokens": 77885,
+     "output_tokens": 267,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 19,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 445,
+     "cache_read_input_tokens": 79022,
+     "output_tokens": 174,
+     "thinking_tokens": 88
+    },
+    {
+     "turn": 20,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 443,
+     "cache_read_input_tokens": 79467,
+     "output_tokens": 1095,
+     "thinking_tokens": 414
+    }
+   ],
+   "totals": {
+    "input_tokens": 40,
+    "cache_creation_input_tokens": 59673,
+    "cache_read_input_tokens": 1173247,
+    "output_tokens": 23385,
+    "thinking_tokens": 10437,
+    "requests": 20,
+    "tokens_in_total": 1232960
+   },
+   "prompts": 1,
+   "harness_result": {},
+   "harness_usage_closing_row": {
+    "input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 0
+   },
+   "harness_usage_by_model": {},
+   "note": "per_request sums the usage on each API request row; harness_usage_closing_row is the harness's own closing total. They agree on a session file and differ on a stream-json trace, whose intermediate rows carry a partial usage."
+  },
+  "gdp_by_party_trace_2026-09-12.redacted.jsonl": {
+   "per_request": [
+    {
+     "turn": 1,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 9418,
+     "cache_read_input_tokens": 20237,
+     "output_tokens": 3,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 2,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 4946,
+     "cache_read_input_tokens": 29655,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 3,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2394,
+     "cache_read_input_tokens": 34601,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 4,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1064,
+     "cache_read_input_tokens": 36995,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 5,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2166,
+     "cache_read_input_tokens": 38059,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 6,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 10821,
+     "cache_read_input_tokens": 40225,
+     "output_tokens": 3,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 7,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 924,
+     "cache_read_input_tokens": 51046,
+     "output_tokens": 6,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 8,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 6263,
+     "cache_read_input_tokens": 51970,
+     "output_tokens": 6,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 9,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 10196,
+     "cache_read_input_tokens": 58233,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 10,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 708,
+     "cache_read_input_tokens": 68429,
+     "output_tokens": 3,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 11,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 580,
+     "cache_read_input_tokens": 69137,
+     "output_tokens": 6,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 12,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 413,
+     "cache_read_input_tokens": 69717,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 13,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2339,
+     "cache_read_input_tokens": 70130,
+     "output_tokens": 1,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 14,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1452,
+     "cache_read_input_tokens": 72469,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 15,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1838,
+     "cache_read_input_tokens": 73921,
+     "output_tokens": 1,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 16,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 531,
+     "cache_read_input_tokens": 75759,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 17,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1595,
+     "cache_read_input_tokens": 76290,
+     "output_tokens": 2,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 18,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1137,
+     "cache_read_input_tokens": 77885,
+     "output_tokens": 1,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 19,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 445,
+     "cache_read_input_tokens": 79022,
+     "output_tokens": 5,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 20,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 443,
+     "cache_read_input_tokens": 79467,
+     "output_tokens": 10,
+     "thinking_tokens": 0
+    }
+   ],
+   "totals": {
+    "input_tokens": 40,
+    "cache_creation_input_tokens": 59673,
+    "cache_read_input_tokens": 1173247,
+    "output_tokens": 63,
+    "thinking_tokens": 0,
+    "requests": 20,
+    "tokens_in_total": 1232960
+   },
+   "prompts": 0,
+   "harness_result": {
+    "duration_ms": 280191,
+    "duration_api_ms": 278533,
+    "num_turns": 27,
+    "total_cost_usd": 0.7634414,
+    "stop_reason": "end_turn"
+   },
+   "harness_usage_closing_row": {
+    "input_tokens": 40,
+    "cache_creation_input_tokens": 59673,
+    "cache_read_input_tokens": 1173247,
+    "output_tokens": 23385,
+    "thinking_tokens": 10437,
+    "tokens_in_total": 1232960
+   },
+   "harness_usage_by_model": {
+    "claude-haiku-4-5-20251001": {
+     "inputTokens": 25020,
+     "outputTokens": 2230,
+     "cacheReadInputTokens": 0,
+     "cacheCreationInputTokens": 0,
+     "costUSD": 0.05617,
+     "thinkingTokens": 0
+    },
+    "claude-sonnet-5": {
+     "inputTokens": 40,
+     "outputTokens": 23385,
+     "cacheReadInputTokens": 1173247,
+     "cacheCreationInputTokens": 59673,
+     "costUSD": 0.7072714,
+     "thinkingTokens": 10437
+    }
+   },
+   "note": "per_request sums the usage on each API request row; harness_usage_closing_row is the harness's own closing total. They agree on a session file and differ on a stream-json trace, whose intermediate rows carry a partial usage."
+  },
+  "uninsured_by_age_2026-09-13.redacted.jsonl": {
+   "per_request": [
+    {
+     "turn": 1,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 9475,
+     "cache_read_input_tokens": 20237,
+     "output_tokens": 2357,
+     "thinking_tokens": 2110
+    },
+    {
+     "turn": 2,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3860,
+     "cache_read_input_tokens": 29712,
+     "output_tokens": 444,
+     "thinking_tokens": 77
+    },
+    {
+     "turn": 3,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 10178,
+     "cache_read_input_tokens": 33572,
+     "output_tokens": 1246,
+     "thinking_tokens": 947
+    },
+    {
+     "turn": 4,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1515,
+     "cache_read_input_tokens": 43750,
+     "output_tokens": 267,
+     "thinking_tokens": 124
+    },
+    {
+     "turn": 5,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 322,
+     "cache_read_input_tokens": 45265,
+     "output_tokens": 257,
+     "thinking_tokens": 48
+    },
+    {
+     "turn": 6,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 526,
+     "cache_read_input_tokens": 45587,
+     "output_tokens": 260,
+     "thinking_tokens": 78
+    },
+    {
+     "turn": 7,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 529,
+     "cache_read_input_tokens": 46113,
+     "output_tokens": 159,
+     "thinking_tokens": 76
+    },
+    {
+     "turn": 8,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 206,
+     "cache_read_input_tokens": 46642,
+     "output_tokens": 388,
+     "thinking_tokens": 245
+    },
+    {
+     "turn": 9,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 443,
+     "cache_read_input_tokens": 46848,
+     "output_tokens": 287,
+     "thinking_tokens": 148
+    },
+    {
+     "turn": 10,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 655,
+     "cache_read_input_tokens": 47291,
+     "output_tokens": 563,
+     "thinking_tokens": 440
+    },
+    {
+     "turn": 11,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 832,
+     "cache_read_input_tokens": 47946,
+     "output_tokens": 199,
+     "thinking_tokens": 104
+    },
+    {
+     "turn": 12,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 468,
+     "cache_read_input_tokens": 48778,
+     "output_tokens": 599,
+     "thinking_tokens": 429
+    },
+    {
+     "turn": 13,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 957,
+     "cache_read_input_tokens": 49246,
+     "output_tokens": 1296,
+     "thinking_tokens": 1028
+    },
+    {
+     "turn": 14,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1841,
+     "cache_read_input_tokens": 50203,
+     "output_tokens": 350,
+     "thinking_tokens": 178
+    },
+    {
+     "turn": 15,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 619,
+     "cache_read_input_tokens": 52044,
+     "output_tokens": 1121,
+     "thinking_tokens": 928
+    },
+    {
+     "turn": 16,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1369,
+     "cache_read_input_tokens": 52663,
+     "output_tokens": 297,
+     "thinking_tokens": 110
+    },
+    {
+     "turn": 17,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 975,
+     "cache_read_input_tokens": 54032,
+     "output_tokens": 530,
+     "thinking_tokens": 350
+    },
+    {
+     "turn": 18,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 585,
+     "cache_read_input_tokens": 55007,
+     "output_tokens": 264,
+     "thinking_tokens": 169
+    },
+    {
+     "turn": 19,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 533,
+     "cache_read_input_tokens": 55592,
+     "output_tokens": 425,
+     "thinking_tokens": 259
+    },
+    {
+     "turn": 20,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1550,
+     "cache_read_input_tokens": 56125,
+     "output_tokens": 841,
+     "thinking_tokens": 679
+    },
+    {
+     "turn": 21,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3585,
+     "cache_read_input_tokens": 57675,
+     "output_tokens": 1320,
+     "thinking_tokens": 1112
+    },
+    {
+     "turn": 22,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1376,
+     "cache_read_input_tokens": 61260,
+     "output_tokens": 283,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 23,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 17434,
+     "cache_read_input_tokens": 62636,
+     "output_tokens": 1827,
+     "thinking_tokens": 1402
+    },
+    {
+     "turn": 24,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2096,
+     "cache_read_input_tokens": 80070,
+     "output_tokens": 374,
+     "thinking_tokens": 65
+    },
+    {
+     "turn": 25,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 979,
+     "cache_read_input_tokens": 82166,
+     "output_tokens": 1685,
+     "thinking_tokens": 1339
+    },
+    {
+     "turn": 26,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1954,
+     "cache_read_input_tokens": 83145,
+     "output_tokens": 366,
+     "thinking_tokens": 52
+    },
+    {
+     "turn": 27,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 523,
+     "cache_read_input_tokens": 85099,
+     "output_tokens": 314,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 28,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 853,
+     "cache_read_input_tokens": 85622,
+     "output_tokens": 1164,
+     "thinking_tokens": 791
+    },
+    {
+     "turn": 29,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2697,
+     "cache_read_input_tokens": 86475,
+     "output_tokens": 950,
+     "thinking_tokens": 576
+    },
+    {
+     "turn": 30,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1851,
+     "cache_read_input_tokens": 89172,
+     "output_tokens": 1419,
+     "thinking_tokens": 1099
+    },
+    {
+     "turn": 31,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2292,
+     "cache_read_input_tokens": 91023,
+     "output_tokens": 2779,
+     "thinking_tokens": 2439
+    },
+    {
+     "turn": 32,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2850,
+     "cache_read_input_tokens": 93315,
+     "output_tokens": 325,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 33,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1551,
+     "cache_read_input_tokens": 96165,
+     "output_tokens": 538,
+     "thinking_tokens": 243
+    },
+    {
+     "turn": 34,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 670,
+     "cache_read_input_tokens": 97716,
+     "output_tokens": 326,
+     "thinking_tokens": 84
+    },
+    {
+     "turn": 35,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 381,
+     "cache_read_input_tokens": 98386,
+     "output_tokens": 515,
+     "thinking_tokens": 186
+    },
+    {
+     "turn": 36,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 784,
+     "cache_read_input_tokens": 98767,
+     "output_tokens": 264,
+     "thinking_tokens": 32
+    },
+    {
+     "turn": 37,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 320,
+     "cache_read_input_tokens": 99551,
+     "output_tokens": 1051,
+     "thinking_tokens": 786
+    },
+    {
+     "turn": 38,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1104,
+     "cache_read_input_tokens": 99871,
+     "output_tokens": 1590,
+     "thinking_tokens": 1359
+    },
+    {
+     "turn": 39,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1663,
+     "cache_read_input_tokens": 100975,
+     "output_tokens": 1373,
+     "thinking_tokens": 1144
+    },
+    {
+     "turn": 40,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1642,
+     "cache_read_input_tokens": 102638,
+     "output_tokens": 399,
+     "thinking_tokens": 104
+    },
+    {
+     "turn": 41,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 576,
+     "cache_read_input_tokens": 104280,
+     "output_tokens": 1444,
+     "thinking_tokens": 1188
+    },
+    {
+     "turn": 42,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1631,
+     "cache_read_input_tokens": 104856,
+     "output_tokens": 925,
+     "thinking_tokens": 494
+    },
+    {
+     "turn": 43,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1201,
+     "cache_read_input_tokens": 106487,
+     "output_tokens": 606,
+     "thinking_tokens": 365
+    },
+    {
+     "turn": 44,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 653,
+     "cache_read_input_tokens": 107688,
+     "output_tokens": 331,
+     "thinking_tokens": 228
+    },
+    {
+     "turn": 45,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 449,
+     "cache_read_input_tokens": 108341,
+     "output_tokens": 158,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 46,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 215,
+     "cache_read_input_tokens": 108790,
+     "output_tokens": 266,
+     "thinking_tokens": 101
+    },
+    {
+     "turn": 47,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1366,
+     "cache_read_input_tokens": 109005,
+     "output_tokens": 1157,
+     "thinking_tokens": 929
+    },
+    {
+     "turn": 48,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 4228,
+     "cache_read_input_tokens": 110371,
+     "output_tokens": 567,
+     "thinking_tokens": 344
+    },
+    {
+     "turn": 49,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1488,
+     "cache_read_input_tokens": 114599,
+     "output_tokens": 1408,
+     "thinking_tokens": 987
+    },
+    {
+     "turn": 50,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2428,
+     "cache_read_input_tokens": 116087,
+     "output_tokens": 1246,
+     "thinking_tokens": 1082
+    },
+    {
+     "turn": 51,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1416,
+     "cache_read_input_tokens": 118515,
+     "output_tokens": 1679,
+     "thinking_tokens": 1159
+    },
+    {
+     "turn": 52,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2088,
+     "cache_read_input_tokens": 119931,
+     "output_tokens": 259,
+     "thinking_tokens": 82
+    },
+    {
+     "turn": 53,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2538,
+     "cache_read_input_tokens": 122019,
+     "output_tokens": 775,
+     "thinking_tokens": 493
+    },
+    {
+     "turn": 54,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 839,
+     "cache_read_input_tokens": 124557,
+     "output_tokens": 242,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 55,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 637,
+     "cache_read_input_tokens": 125396,
+     "output_tokens": 723,
+     "thinking_tokens": 402
+    },
+    {
+     "turn": 56,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 992,
+     "cache_read_input_tokens": 126033,
+     "output_tokens": 311,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 57,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 790,
+     "cache_read_input_tokens": 127025,
+     "output_tokens": 490,
+     "thinking_tokens": 143
+    },
+    {
+     "turn": 58,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2412,
+     "cache_read_input_tokens": 127815,
+     "output_tokens": 2089,
+     "thinking_tokens": 1526
+    },
+    {
+     "turn": 59,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2274,
+     "cache_read_input_tokens": 130227,
+     "output_tokens": 6866,
+     "thinking_tokens": 6581
+    },
+    {
+     "turn": 60,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 6930,
+     "cache_read_input_tokens": 132501,
+     "output_tokens": 293,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 61,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1432,
+     "cache_read_input_tokens": 139431,
+     "output_tokens": 2163,
+     "thinking_tokens": 1214
+    },
+    {
+     "turn": 62,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2432,
+     "cache_read_input_tokens": 140863,
+     "output_tokens": 931,
+     "thinking_tokens": 72
+    },
+    {
+     "turn": 63,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1633,
+     "cache_read_input_tokens": 143295,
+     "output_tokens": 2381,
+     "thinking_tokens": 806
+    },
+    {
+     "turn": 64,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2650,
+     "cache_read_input_tokens": 144928,
+     "output_tokens": 1591,
+     "thinking_tokens": 56
+    },
+    {
+     "turn": 65,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2680,
+     "cache_read_input_tokens": 147578,
+     "output_tokens": 700,
+     "thinking_tokens": 540
+    },
+    {
+     "turn": 66,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 920,
+     "cache_read_input_tokens": 150258,
+     "output_tokens": 1572,
+     "thinking_tokens": 152
+    },
+    {
+     "turn": 67,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2421,
+     "cache_read_input_tokens": 151178,
+     "output_tokens": 974,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 68,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1124,
+     "cache_read_input_tokens": 153599,
+     "output_tokens": 2197,
+     "thinking_tokens": 27
+    },
+    {
+     "turn": 69,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2343,
+     "cache_read_input_tokens": 154723,
+     "output_tokens": 656,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 70,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 762,
+     "cache_read_input_tokens": 157066,
+     "output_tokens": 77,
+     "thinking_tokens": 25
+    },
+    {
+     "turn": 71,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2688,
+     "cache_read_input_tokens": 157828,
+     "output_tokens": 480,
+     "thinking_tokens": 376
+    },
+    {
+     "turn": 72,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 4678,
+     "cache_read_input_tokens": 160516,
+     "output_tokens": 557,
+     "thinking_tokens": 275
+    },
+    {
+     "turn": 73,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3234,
+     "cache_read_input_tokens": 165194,
+     "output_tokens": 176,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 74,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 445,
+     "cache_read_input_tokens": 168428,
+     "output_tokens": 178,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 75,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 447,
+     "cache_read_input_tokens": 168873,
+     "output_tokens": 142,
+     "thinking_tokens": 67
+    },
+    {
+     "turn": 76,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 193,
+     "cache_read_input_tokens": 169320,
+     "output_tokens": 396,
+     "thinking_tokens": 221
+    },
+    {
+     "turn": 77,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 665,
+     "cache_read_input_tokens": 169513,
+     "output_tokens": 201,
+     "thinking_tokens": 61
+    },
+    {
+     "turn": 78,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 470,
+     "cache_read_input_tokens": 170178,
+     "output_tokens": 267,
+     "thinking_tokens": 178
+    },
+    {
+     "turn": 79,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 536,
+     "cache_read_input_tokens": 170648,
+     "output_tokens": 2320,
+     "thinking_tokens": 2218
+    },
+    {
+     "turn": 80,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2370,
+     "cache_read_input_tokens": 171184,
+     "output_tokens": 2998,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 81,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3139,
+     "cache_read_input_tokens": 173554,
+     "output_tokens": 1951,
+     "thinking_tokens": 1219
+    },
+    {
+     "turn": 82,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 2123,
+     "cache_read_input_tokens": 176693,
+     "output_tokens": 244,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 83,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 416,
+     "cache_read_input_tokens": 178816,
+     "output_tokens": 170,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 84,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 228,
+     "cache_read_input_tokens": 179232,
+     "output_tokens": 258,
+     "thinking_tokens": 119
+    },
+    {
+     "turn": 85,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 605,
+     "cache_read_input_tokens": 179460,
+     "output_tokens": 172,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 86,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3373,
+     "cache_read_input_tokens": 180065,
+     "output_tokens": 4199,
+     "thinking_tokens": 3696
+    },
+    {
+     "turn": 87,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 4371,
+     "cache_read_input_tokens": 183438,
+     "output_tokens": 1196,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 88,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1342,
+     "cache_read_input_tokens": 187809,
+     "output_tokens": 268,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 89,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 416,
+     "cache_read_input_tokens": 189151,
+     "output_tokens": 293,
+     "thinking_tokens": 132
+    },
+    {
+     "turn": 90,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 351,
+     "cache_read_input_tokens": 189567,
+     "output_tokens": 127,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 91,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3328,
+     "cache_read_input_tokens": 189918,
+     "output_tokens": 266,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 92,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 383,
+     "cache_read_input_tokens": 193246,
+     "output_tokens": 9071,
+     "thinking_tokens": 8945
+    },
+    {
+     "turn": 93,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 12469,
+     "cache_read_input_tokens": 193629,
+     "output_tokens": 7115,
+     "thinking_tokens": 3267
+    },
+    {
+     "turn": 94,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 7254,
+     "cache_read_input_tokens": 206098,
+     "output_tokens": 1638,
+     "thinking_tokens": 1471
+    },
+    {
+     "turn": 95,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1696,
+     "cache_read_input_tokens": 213352,
+     "output_tokens": 127,
+     "thinking_tokens": 0
+    },
+    {
+     "turn": 96,
+     "model": "claude-sonnet-5",
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 3544,
+     "cache_read_input_tokens": 215048,
+     "output_tokens": 1217,
+     "thinking_tokens": 809
+    }
+   ],
+   "totals": {
+    "input_tokens": 192,
+    "cache_creation_input_tokens": 198355,
+    "cache_read_input_tokens": 11206580,
+    "output_tokens": 102116,
+    "thinking_tokens": 63390,
+    "requests": 96,
+    "tokens_in_total": 11405127
+   },
+   "prompts": 4,
+   "harness_result": {},
+   "harness_usage_closing_row": {
+    "input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 0
+   },
+   "harness_usage_by_model": {},
+   "note": "per_request sums the usage on each API request row; harness_usage_closing_row is the harness's own closing total. They agree on a session file and differ on a stream-json trace, whose intermediate rows carry a partial usage."
+  }
+ }
+}

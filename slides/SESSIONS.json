@@ -3,7 +3,7 @@
   "master": "source/Session01 (all decks, in order)",
   "pages": 163,
   "decks": 5,
-  "published": "2026-10-12"
+  "published": "2026-10-21"
  },
  "Session01_Deck1_AI_in_Science.pdf": {
   "master": "source/Session01/Session01_Deck1_AI_in_Science.pdf",
@@ -21,10 +21,10 @@
  },
  "Session01_Deck3_What_Is_AI_Foundations.pdf": {
   "master": "source/Session01/Session01_Deck3_What_Is_AI_Foundations.pdf",
-  "md5": "48dfe84bc042b6cb4c069906e670f801",
+  "md5": "0e01829a9d8e9f72c5bc2ffcabd77c88",
   "pages": 33,
   "title": "What Is AI? Foundations",
-  "published": "2026-10-12"
+  "published": "2026-10-21"
  },
  "Session01_Deck4_Workhorse_Macro_Models.pdf": {
   "master": "source/Session01/Session01_Deck4_Workhorse_Macro_Models.pdf",
@@ -192,43 +192,29 @@
  },
  "Session06_All_Decks.pdf": {
   "master": "source/Session06 (all decks, in order)",
-  "pages": 176,
-  "decks": 5,
-  "published": "2026-10-04"
+  "pages": 109,
+  "decks": 3,
+  "published": "2026-10-21"
  },
- "Session06_Deck1_From_Chat_Window_To_Research_Partner.pdf": {
-  "master": "source/Session06/Session06_Deck1_From_Chat_Window_To_Research_Partner.pdf",
-  "md5": "9086924594c94c95b3f02f644e3b301d",
+ "Session06_Deck1_Agentic_AI_How_I_Use_It.pdf": {
+  "master": "source/Session06/Session06_Deck1_Agentic_AI_How_I_Use_It.pdf",
+  "md5": "ead42e9b3c98dac5af22c332cfa3d851",
   "pages": 36,
-  "title": "From Chat Window to Agentic AI: What an Agent Is, and Where It Pays",
-  "published": "2026-10-04"
+  "title": "Agentic AI: How I Use It, What It Is, How It Works, and How to Use It Well",
+  "published": "2026-10-21"
  },
- "Session06_Deck2_How_Agentic_AI_Works.pdf": {
-  "master": "source/Session06/Session06_Deck2_How_Agentic_AI_Works.pdf",
-  "md5": "fc792c47a5c219bcdc02765b4beaaa08",
-  "pages": 35,
-  "title": "How Agentic AI Works: A Loop Built From Scratch, the Harness, the Session, and the Team",
-  "published": "2026-10-04"
- },
- "Session06_Deck3_How_To_Build_With_Agentic_AI.pdf": {
-  "master": "source/Session06/Session06_Deck3_How_To_Build_With_Agentic_AI.pdf",
-  "md5": "00662b078e29f17bc5177a01c17ec1c2",
-  "pages": 35,
-  "title": "How to Build With Agentic AI: The System, the Homotopy Method, a Research Case, and the Checks",
-  "published": "2026-10-04"
- },
- "Session06_Deck4_Build_Your_Own_RAG.pdf": {
-  "master": "source/Session06/Session06_Deck4_Build_Your_Own_RAG.pdf",
-  "md5": "c8fce9d34b6fd8bd2136442e218bf704",
-  "pages": 35,
+ "Session06_Deck2_Build_Your_Own_RAG.pdf": {
+  "master": "source/Session06/Session06_Deck2_Build_Your_Own_RAG.pdf",
+  "md5": "289952841e2751ae2fa86ecc8728a4ac",
+  "pages": 33,
   "title": "Build Your Own RAG: Give Your Agent a Library",
-  "published": "2026-10-04"
+  "published": "2026-10-21"
  },
- "Session06_Deck5_GRAM.pdf": {
-  "master": "source/Session06/Session06_Deck5_GRAM.pdf",
-  "md5": "9e6918e335b3f3db02838e0fb3b648a1",
-  "pages": 35,
-  "title": "GRAM: A Retrieval System Built for One Literature \u2013- and What Agents Do to Research",
-  "published": "2026-10-04"
+ "Session06_Deck3_GRAM.pdf": {
+  "master": "source/Session06/Session06_Deck3_GRAM.pdf",
+  "md5": "4a740492f4490b7cb2949a88d9405bd1",
+  "pages": 40,
+  "title": "GRAM: Generative Reasoning and Augmented Modeling for Quantitative Macroeconomics",
+  "published": "2026-10-21"
  }
 }

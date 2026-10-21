@@ -1,0 +1,110 @@
+[
+ {
+  "id": "toy",
+  "question": "What did the Committee say about inflation in March 2022?"
+ },
+ {
+  "id": "q01",
+  "question": "what did the Committee say about the degree of pressure on reserve positions at the meeting of February 4, 1994"
+ },
+ {
+  "id": "q02",
+  "question": "what did the Committee say about the century date change at the meeting of December 21, 1999"
+ },
+ {
+  "id": "q03",
+  "question": "what did the Committee decide about the target for the federal funds rate at the meeting of September 17, 2001"
+ },
+ {
+  "id": "q04",
+  "question": "what did the Committee say about the risk of an unwelcome fall in inflation at the meeting of June 25, 2003"
+ },
+ {
+  "id": "q05",
+  "question": "what did the Committee decide about the target for the federal funds rate at the meeting of September 18, 2007"
+ },
+ {
+  "id": "q06",
+  "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of December 16, 2008"
+ },
+ {
+  "id": "q07",
+  "question": "what did the Committee decide about expanding its holdings of securities at the meeting of November 3, 2010"
+ },
+ {
+  "id": "q08",
+  "question": "what did the Committee say about the pace of the economic recovery at the meeting of August 9, 2011"
+ },
+ {
+  "id": "q09",
+  "question": "what did the Committee decide about purchases of agency mortgage-backed securities at the meeting of September 13, 2012"
+ },
+ {
+  "id": "q10",
+  "question": "what did the Committee say about its asset purchase program at the meeting of December 18, 2013"
+ },
+ {
+  "id": "q11",
+  "question": "what did the Committee say about inflation at the meeting of December 16, 2015"
+ },
+ {
+  "id": "q12",
+  "question": "what did the Committee say about the hurricanes at the meeting of September 20, 2017"
+ },
+ {
+  "id": "q13",
+  "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of December 19, 2018"
+ },
+ {
+  "id": "q14",
+  "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of July 31, 2019"
+ },
+ {
+  "id": "q15",
+  "question": "what did the Committee decide about its holdings of Treasury securities at the meeting of March 15, 2020"
+ },
+ {
+  "id": "q16",
+  "question": "what did the Committee say about the pace of its asset purchases at the meeting of November 3, 2021"
+ },
+ {
+  "id": "q17",
+  "question": "what did the Committee say about the invasion of Ukraine at the meeting of March 16, 2022"
+ },
+ {
+  "id": "q18",
+  "question": "what did the Committee say about the banking system at the meeting of March 22, 2023"
+ },
+ {
+  "id": "q19",
+  "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of September 18, 2024"
+ },
+ {
+  "id": "q20",
+  "question": "what did the Committee say about maintaining ample reserves in the banking system at the meeting of June 17, 2026"
+ },
+ {
+  "id": "q21",
+  "question": "what did the Bank of Japan decide about yield curve control at its meeting of September 21, 2016"
+ },
+ {
+  "id": "q22",
+  "question": "what did the European Central Bank say about its asset purchase programme at the meeting of March 10, 2016"
+ },
+ {
+  "id": "q23",
+  "question": "what did the Committee say about inflation at the meeting of May 14, 2033"
+ },
+ {
+  "id": "q24",
+  "question": "what did the Committee decide about the target for the federal funds rate at the meeting of August 12, 1987"
+ },
+ {
+  "id": "q25",
+  "question": "what did the Committee say about custody rules for cryptocurrency held by state member banks"
+ },
+ {
+  "id": "q26",
+  "question": "what did the Committee forecast for the federal budget deficit in fiscal year 2030"
+ }
+]

@@ -1,0 +1,37 @@
+{
+  "scenario": "S3 -- Fellows provenance audit",
+  "harness": "claude",
+  "k": 1,
+  "harness_status": "RUN on Claude Code 2.1.269",
+  "when": "20260912-194931",
+  "table": {
+    "provenance-checker": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "field": 1,
+        "phd": 1,
+        "gender": 1
+      },
+      "controls": [
+        0,
+        0
+      ],
+      "other": 0
+    },
+    "econ-agent": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "field": 1,
+        "phd": 1,
+        "gender": 1
+      },
+      "controls": [
+        0,
+        0
+      ],
+      "other": 3
+    }
+  }
+}

@@ -1,0 +1,221 @@
+{
+ "_meta": {
+  "what": "The graded question set for Session 6's retrieval lab: twenty dated questions this corpus answers, and six it cannot.",
+  "corpus": "labs/session06_assets/fomc -- 245 FOMC statements, 1994-02-04 to 2026-06-17, hashes in labs/session05_assets/fomc_manifest.json",
+  "written": "2026-09-20",
+  "style": "what did the Committee say about <topic> at the meeting of <date>; the date is written the way session06_rag.py indexes it, so a dated question can be answered by a dated index",
+  "anchors": "ISO dates of the statements that answer the question. A question is scored as retrieved at k when any chunk from an anchor statement is in the top k.",
+  "why_out_of_corpus_questions": "A refusal threshold is fitted by comparing the evidence scores of questions the corpus answers against those of questions it does not. With only answerable questions in the set there is no second class to fit against, the threshold collapses to zero, and the lab teaches a refusal that never fires. The six unanswerable questions here are deliberately not absurd: two ask about a real central bank that this corpus mentions but never speaks for, two ask about meetings outside the corpus window, and two ask about subjects an FOMC statement has never covered.",
+  "checked": "Every anchor was read before it was written down; the topic named in the question appears in the statement of that date."
+ },
+ "questions": [
+  {
+   "id": "q01",
+   "question": "what did the Committee say about the degree of pressure on reserve positions at the meeting of February 4, 1994",
+   "kind": "in_corpus",
+   "anchors": ["1994-02-04"],
+   "topic": "policy action",
+   "note": "The first statement in the corpus, and the first firming since 1989. Pre-2000 statements use a vocabulary no later meeting repeats."
+  },
+  {
+   "id": "q02",
+   "question": "what did the Committee say about the century date change at the meeting of December 21, 1999",
+   "kind": "in_corpus",
+   "anchors": ["1999-12-21"],
+   "topic": "financial stability",
+   "note": "The Y2K meeting: a symmetric directive adopted for the transition into the new year."
+  },
+  {
+   "id": "q03",
+   "question": "what did the Committee decide about the target for the federal funds rate at the meeting of September 17, 2001",
+   "kind": "in_corpus",
+   "anchors": ["2001-09-17"],
+   "topic": "policy action",
+   "note": "Fifty basis points, six days after the attacks; the statement also moves the discount rate."
+  },
+  {
+   "id": "q04",
+   "question": "what did the Committee say about the risk of an unwelcome fall in inflation at the meeting of June 25, 2003",
+   "kind": "in_corpus",
+   "anchors": ["2003-06-25"],
+   "topic": "inflation",
+   "note": "The deflation-risk language: the probability of an unwelcome substantial fall in inflation exceeding that of a pickup."
+  },
+  {
+   "id": "q05",
+   "question": "what did the Committee decide about the target for the federal funds rate at the meeting of September 18, 2007",
+   "kind": "in_corpus",
+   "anchors": ["2007-09-18"],
+   "topic": "policy action",
+   "note": "The first cut of the financial crisis, fifty basis points to 4-3/4 percent."
+  },
+  {
+   "id": "q06",
+   "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of December 16, 2008",
+   "kind": "in_corpus",
+   "anchors": ["2008-12-16"],
+   "topic": "policy action",
+   "note": "The zero bound: a target range of 0 to 1/4 percent established for the first time."
+  },
+  {
+   "id": "q07",
+   "question": "what did the Committee decide about expanding its holdings of securities at the meeting of November 3, 2010",
+   "kind": "in_corpus",
+   "anchors": ["2010-11-03"],
+   "topic": "balance sheet",
+   "note": "The second round of large-scale asset purchases."
+  },
+  {
+   "id": "q08",
+   "question": "what did the Committee say about the pace of the economic recovery at the meeting of August 9, 2011",
+   "kind": "in_corpus",
+   "anchors": ["2011-08-09"],
+   "topic": "conditions",
+   "note": "Growth considerably slower than expected, and the first calendar-dated guidance."
+  },
+  {
+   "id": "q09",
+   "question": "what did the Committee decide about purchases of agency mortgage-backed securities at the meeting of September 13, 2012",
+   "kind": "in_corpus",
+   "anchors": ["2012-09-13"],
+   "topic": "balance sheet",
+   "note": "Forty billion dollars a month, open-ended."
+  },
+  {
+   "id": "q10",
+   "question": "what did the Committee say about its asset purchase program at the meeting of December 18, 2013",
+   "kind": "in_corpus",
+   "anchors": ["2013-12-18"],
+   "topic": "balance sheet",
+   "note": "The taper begins."
+  },
+  {
+   "id": "q11",
+   "question": "what did the Committee say about inflation at the meeting of December 16, 2015",
+   "kind": "in_corpus",
+   "anchors": ["2015-12-16"],
+   "topic": "inflation",
+   "note": "Liftoff. Inflation running below the 2 percent longer-run objective while the target range rises to 1/4 to 1/2 percent -- the phrase that also appears in March 2022, which is what makes the undated version of this question ambiguous."
+  },
+  {
+   "id": "q12",
+   "question": "what did the Committee say about the hurricanes at the meeting of September 20, 2017",
+   "kind": "in_corpus",
+   "anchors": ["2017-09-20"],
+   "topic": "conditions",
+   "note": "Harvey, Irma and Maria, and the start of balance sheet normalisation."
+  },
+  {
+   "id": "q13",
+   "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of December 19, 2018",
+   "kind": "in_corpus",
+   "anchors": ["2018-12-19"],
+   "topic": "policy action",
+   "note": "To 2-1/4 to 2-1/2 percent, with further gradual increases judged consistent with the outlook."
+  },
+  {
+   "id": "q14",
+   "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of July 31, 2019",
+   "kind": "in_corpus",
+   "anchors": ["2019-07-31"],
+   "topic": "policy action",
+   "note": "The first cut since 2008, and the early end of balance sheet runoff."
+  },
+  {
+   "id": "q15",
+   "question": "what did the Committee decide about its holdings of Treasury securities at the meeting of March 15, 2020",
+   "kind": "in_corpus",
+   "anchors": ["2020-03-15"],
+   "topic": "balance sheet",
+   "note": "At least five hundred billion dollars of Treasury securities and two hundred billion of agency mortgage-backed securities."
+  },
+  {
+   "id": "q16",
+   "question": "what did the Committee say about the pace of its asset purchases at the meeting of November 3, 2021",
+   "kind": "in_corpus",
+   "anchors": ["2021-11-03"],
+   "topic": "balance sheet",
+   "note": "The pandemic taper."
+  },
+  {
+   "id": "q17",
+   "question": "what did the Committee say about the invasion of Ukraine at the meeting of March 16, 2022",
+   "kind": "in_corpus",
+   "anchors": ["2022-03-16"],
+   "topic": "conditions",
+   "note": "The first increase of the 2022 cycle, to 1/4 to 1/2 percent -- the same target range as December 2015."
+  },
+  {
+   "id": "q18",
+   "question": "what did the Committee say about the banking system at the meeting of March 22, 2023",
+   "kind": "in_corpus",
+   "anchors": ["2023-03-22"],
+   "topic": "financial stability",
+   "note": "Sound and resilient, a fortnight after the March 2023 bank failures."
+  },
+  {
+   "id": "q19",
+   "question": "what did the Committee decide about the target range for the federal funds rate at the meeting of September 18, 2024",
+   "kind": "in_corpus",
+   "anchors": ["2024-09-18"],
+   "topic": "policy action",
+   "note": "Half a percentage point, the first cut of the easing cycle."
+  },
+  {
+   "id": "q20",
+   "question": "what did the Committee say about maintaining ample reserves in the banking system at the meeting of June 17, 2026",
+   "kind": "in_corpus",
+   "anchors": ["2026-06-17"],
+   "topic": "implementation",
+   "note": "The newest statement in the corpus, and the only one that speaks of maintaining ample reserves. It is the question the stale-index demonstration is built on."
+  },
+  {
+   "id": "q21",
+   "question": "what did the Bank of Japan decide about yield curve control at its meeting of September 21, 2016",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "other central bank",
+   "note": "A near miss on purpose. Four FOMC statements name the Bank of Japan, in swap-line paragraphs, so the words are in the corpus; what the Bank of Japan decided is not, and never could be."
+  },
+  {
+   "id": "q22",
+   "question": "what did the European Central Bank say about its asset purchase programme at the meeting of March 10, 2016",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "other central bank",
+   "note": "The same trap with a different institution: asset purchase language is everywhere in this corpus, but the European Central Bank does not issue FOMC statements."
+  },
+  {
+   "id": "q23",
+   "question": "what did the Committee say about inflation at the meeting of May 14, 2033",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "outside the window",
+   "note": "A meeting after the corpus ends. Every word except the year is ordinary FOMC vocabulary, which is what makes it a test of whether the date is indexed at all."
+  },
+  {
+   "id": "q24",
+   "question": "what did the Committee decide about the target for the federal funds rate at the meeting of August 12, 1987",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "outside the window",
+   "note": "Before the corpus begins. The Committee did not publish a statement after every meeting in 1987, so this is not a gap in the scrape -- it is a question the record cannot answer."
+  },
+  {
+   "id": "q25",
+   "question": "what did the Committee say about custody rules for cryptocurrency held by state member banks",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "never a statement subject",
+   "note": "Supervision and regulation are not what a monetary policy statement is for. The distinctive words here appear nowhere in the corpus, so the evidence score should fall furthest for this one."
+  },
+  {
+   "id": "q26",
+   "question": "what did the Committee forecast for the federal budget deficit in fiscal year 2030",
+   "kind": "out_of_corpus",
+   "anchors": [],
+   "topic": "never a statement subject",
+   "note": "The FOMC does not forecast the budget, and the word deficit appears in no statement in this corpus."
+  }
+ ]
+}

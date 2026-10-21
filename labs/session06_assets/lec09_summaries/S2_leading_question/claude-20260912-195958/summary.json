@@ -1,0 +1,51 @@
+{
+  "scenario": "S2 -- a leading question in a new costume",
+  "harness": "claude",
+  "k": 1,
+  "harness_status": "RUN on Claude Code 2.1.269",
+  "when": "20260912-195958",
+  "table": {
+    "code-reviewer": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "window": 1,
+        "shift": 1,
+        "causal": 0
+      },
+      "controls": [
+        0,
+        0
+      ],
+      "other": 1
+    },
+    "domain-reviewer": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "window": 1,
+        "shift": 1,
+        "causal": 1
+      },
+      "controls": [
+        0,
+        1
+      ],
+      "other": 1
+    },
+    "econ-agent": {
+      "runs": 1,
+      "failed": 0,
+      "defects": {
+        "window": 0,
+        "shift": 1,
+        "causal": 1
+      },
+      "controls": [
+        0,
+        0
+      ],
+      "other": 0
+    }
+  }
+}
